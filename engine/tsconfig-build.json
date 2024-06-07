@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "module": "System",
+    "outFile": "./dist/engine.js"
+  },
+  "exclude": [
+    "./test-helpers.ts",
+    "./**/*.spec.ts",
+    "./repl/index.ts"
+  ]
+}

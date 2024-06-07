@@ -1,0 +1,28 @@
+
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "rootDir": "./src",
+    "baseUrl": "./src",
+    "outDir": "./dist",
+    "paths": {
+      "@api": ["api/index"],
+      "@factory": ["api/factory"],
+      "@errors": ["errors/index"],
+      "@errors/*": ["errors/*"],
+      "@objects/*": ["objects/*"],
+      "@dictionaries": ["objects/dictionaries/index"],
+      "@dictionaries/*": ["objects/dictionaries/*"],
+      "@stacks": ["objects/stacks/index"],
+      "@operators": ["operators"],
+      "@operators/*": ["operators/*"],
+      "@state/*": ["state/*"],
+      "@sdk": ["sdk/index"],
+      "@test/*": ["test/*"],
+      "@ts": ["ts-helpers"]
+    }
+  },
+  "include": [
+    "src/**/*.ts"
+  ]
+}
