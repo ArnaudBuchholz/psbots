@@ -4,8 +4,6 @@ export enum ValueType {
   integer = 'integertype',
   string = 'stringtype',
   mark = 'marktype',
-  block = 'blocktype',
-  call = 'calltype',
   operator = 'operatortype',
   array = 'arraytype',
   dictionary = 'dictionarytype'

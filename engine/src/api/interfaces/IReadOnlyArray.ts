@@ -1,4 +1,4 @@
-import { Value } from '../values/Value.js'
+import { Value } from '@api/values/Value.js'
 
 /** A read-only collection of values indexed by a number */
 export interface IReadOnlyArray {

@@ -1,13 +1,12 @@
 import { ValueType } from '@api/values/ValueType.js'
 import { IAbstractValue } from '@api/interfaces/IAbstractValue.js'
 
-export interface IBooleanValue extends IAbstractValue {
+export interface IMarkValue extends IAbstractValue {
   readonly type: ValueType.boolean
   readonly isReadOnly: true
   readonly isExecutable: false
   readonly isShared: false
-  readonly isSet: boolean
 }
 
-/** A boolean */
-export type BooleanValue = IBooleanValue
+/** A mark */
+export type MarkValue = IMarkValue

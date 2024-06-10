@@ -1,19 +1,11 @@
 import { ValueType } from '@api/values/ValueType.js'
-import { IReadOnlyArray } from '@api/interfaces/IReadOnlyArray.js'
 import { IAbstractValue } from '@api/interfaces/IAbstractValue.js'
+import { IReadOnlyArray } from '@api/interfaces/IReadOnlyArray.js'
 import { IArray } from '@api/interfaces/IArray.js'
 
 interface IReadOnlyArrayValue extends IAbstractValue {
   readonly type: ValueType.array
   readonly isReadOnly: true
-  readonly isExecutable: false
-  readonly array: IReadOnlyArray
-}
-
-interface IBlockValue extends IAbstractValue {
-  readonly type: ValueType.array
-  readonly isReadOnly: true
-  readonly isExecutable: true
   readonly array: IReadOnlyArray
 }
 
@@ -24,4 +16,5 @@ interface IArrayValue extends IAbstractValue {
   readonly array: IArray
 }
 
-export type ArrayValue = IReadOnlyArrayValue | IBlockValue | IArrayValue
+/** A collection of values indexed by a number */
+export type ArrayValue = IReadOnlyArrayValue | IArrayValue

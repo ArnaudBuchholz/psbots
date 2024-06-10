@@ -1,22 +1,18 @@
-import { ValueType } from './ValueType.js'
-import { ArrayValue } from './ArrayValue.js'
-import { BlockValue } from './BlockValue.js'
-import { BooleanValue } from './BooleanValue.js'
-import { CallValue } from './CallValue.js'
-// import { DictionaryValue } from './dictionary.js'
-// import { IntegerValue } from './integer.js'
-// import { MarkValue } from './mark.js'
-// import { OperatorValue } from './operator.js'
-// import { StringValue } from './string.js'
+import { ValueType } from '@api/values/ValueType.js'
+import { BooleanValue } from '@api/values/BooleanValue.js'
+import { IntegerValue } from '@api/values/IntegerValue.js'
+import { StringValue } from '@api/values/StringValue.js'
+import { MarkValue } from '@api/values/MarkValue.js'
+import { OperatorValue } from '@api/values/OperatorValue.js'
+import { ArrayValue } from '@api/values/ArrayValue.js'
+import { DictionaryValue } from '@api/values/DictionaryValue.js'
 
 /** Generic Value */
 export type Value<T = any> = T extends ValueType.boolean ? BooleanValue
   : T extends ValueType.integer ? IntegerValue
     : T extends ValueType.string ? StringValue
       : T extends ValueType.mark ? MarkValue
-        : T extends ValueType.block ? BlockValue
-          : T extends ValueType.call ? CallValue
-            : T extends ValueType.operator ? OperatorValue
-              : T extends ValueType.array ? ArrayValue
-                : T extends ValueType.dictionary ? DictionaryValue
-                  : BooleanValue | IntegerValue | StringValue | MarkValue | BlockValue | CallValue | OperatorValue | ArrayValue | DictionaryValue
+        : T extends ValueType.operator ? OperatorValue
+          : T extends ValueType.array ? ArrayValue
+            : T extends ValueType.dictionary ? DictionaryValue
+              : BooleanValue | IntegerValue | StringValue | MarkValue | OperatorValue | ArrayValue | DictionaryValue
