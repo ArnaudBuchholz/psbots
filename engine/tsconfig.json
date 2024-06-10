@@ -6,19 +6,10 @@
     "baseUrl": "./src",
     "outDir": "./dist",
     "paths": {
-      "@api": ["api/index"],
-      "@factory": ["api/factory"],
-      "@errors": ["errors/index"],
-      "@errors/*": ["errors/*"],
-      "@objects/*": ["objects/*"],
-      "@dictionaries": ["objects/dictionaries/index"],
-      "@dictionaries/*": ["objects/dictionaries/*"],
-      "@stacks": ["objects/stacks/index"],
-      "@operators": ["operators"],
-      "@operators/*": ["operators/*"],
-      "@state/*": ["state/*"],
-      "@sdk": ["sdk/index"],
-      "@test/*": ["test/*"],
+      "@api/*": ["api/*"],
+      "@errors": ["api/errors/*"],
+      "@sdk/*": ["sdk/*"],
+      "@test/*": ["../test/*"],
       "@ts": ["ts-helpers"]
     }
   },
