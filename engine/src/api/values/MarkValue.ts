@@ -2,7 +2,7 @@ import { ValueType } from '@api/values/ValueType.js'
 import { IAbstractValue } from '@api/interfaces/IAbstractValue.js'
 
 export interface IMarkValue extends IAbstractValue {
-  readonly type: ValueType.boolean
+  readonly type: ValueType.mark
   readonly isReadOnly: true
   readonly isExecutable: false
   readonly isShared: false

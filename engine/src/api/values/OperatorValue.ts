@@ -4,7 +4,7 @@ import { IAbstractOperator } from '@api/interfaces/IAbstractOperator.js'
 
 /** A boolean */
 export interface IOperatorValue extends IAbstractValue {
-  readonly type: ValueType.boolean
+  readonly type: ValueType.operator
   readonly isReadOnly: true
   readonly isExecutable: true
   readonly operator: IAbstractOperator

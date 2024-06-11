@@ -3,11 +3,11 @@ import { IAbstractValue } from '@api/interfaces/IAbstractValue.js'
 
 /** A boolean */
 export interface IIntegerValue extends IAbstractValue {
-  readonly type: ValueType.boolean
+  readonly type: ValueType.integer
   readonly isReadOnly: true
   readonly isExecutable: false
   readonly isShared: false
-  readonly number: number
+  readonly integer: number
 }
 
 /** An integer */

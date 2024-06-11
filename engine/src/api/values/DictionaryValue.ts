@@ -4,14 +4,14 @@ import { IReadOnlyDictionary } from '@api/interfaces/IReadOnlyDictionary.js'
 import { IDictionary } from '@api/interfaces/IDictionary.js'
 
 interface IReadOnlyDictionaryValue extends IAbstractValue {
-  readonly type: ValueType.array
+  readonly type: ValueType.dictionary
   readonly isReadOnly: true
   readonly isExecutable: false
   readonly dictionary: IReadOnlyDictionary
 }
 
 interface IDictionaryValue extends IAbstractValue {
-  readonly type: ValueType.array
+  readonly type: ValueType.dictionary
   readonly isExecutable: false
   readonly dictionary: IDictionary
 }
