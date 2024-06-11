@@ -1,0 +1,23 @@
+{
+  "name": "@psbots/engine",
+  "version": "0.0.1",
+  "description": "A project about a PostScript based programming language for robots (the engine part)",
+  "scripts": {
+    "check": "tsc --noEmit && dpdm ./src/** --no-tree --no-warning && ts-standard --fix",
+    "test": "vitest"
+  },
+  "keywords": [
+    "postscript",
+    "robots",
+    "programming",
+    "engine"
+  ],
+  "author": "Arnaud Buchholz <arnaud.buchholz@free.fr>",
+  "license": "MIT",
+  "devDependencies": {
+    "dpdm": "^3.14.0",
+    "ts-standard": "^12.0.2",
+    "typescript": "^5.4.5",
+    "vitest": "^1.6.0"
+  }
+}
