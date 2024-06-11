@@ -9,8 +9,8 @@
       "@api/*": ["api/*"],
       "@errors": ["api/errors/*"],
       "@sdk/*": ["sdk/*"],
-      "@test/*": ["../test/*"],
-      "@ts": ["ts-helpers"]
+      "@test/*": ["../lib/test/*"],
+      "@ts": ["../lib/ts-helpers"]
     }
   },
   "include": [
