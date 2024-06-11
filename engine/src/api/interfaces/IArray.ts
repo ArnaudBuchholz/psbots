@@ -1,5 +1,5 @@
-import { Value } from '@api/values/Value.js'
-import { IReadOnlyArray } from '@api/interfaces/IReadOnlyArray.js'
+import type { Value } from '@api/values/Value.js'
+import type { IReadOnlyArray } from '@api/interfaces/IReadOnlyArray.js'
 
 /** A collection of values indexed by a number */
 export interface IArray extends IReadOnlyArray {

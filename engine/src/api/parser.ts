@@ -1,6 +1,6 @@
 import { ValueType } from '@api/values/ValueType.js'
-import { Value } from '@api/values/Value'
-import { IDebugSource } from '@api/interfaces/IDebugSource'
+import type { Value } from '@api/values/Value'
+import type { IDebugSource } from '@api/interfaces/IDebugSource'
 
 export function * parse (source: string, pos: number = 0, filename?: string): Generator<Value> {
   const matcher = /%[^\n]*|(?:"([^"]*)")|\s|((?:-|\+)?\d+)|(\[|\]|{|}|[^[\]{}}\s]+)/g

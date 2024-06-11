@@ -1,6 +1,6 @@
 import { it, expect } from 'vitest'
 import { parse } from '@api/parser.js'
-import { Value } from '@api/values/Value.js'
+import type { Value } from '@api/values/Value.js'
 import { ValueType } from '@api/values/ValueType.js'
 
 it('handles an empty string', () => {
@@ -33,6 +33,22 @@ it('extracts a callable string', () => {
     isReadOnly: true,
     isExecutable: true,
     isShared: false,
+    string: 'test'
+  }])
+})
+
+it('should include debugging information', () => {
+  expect([...parse('"test"', 0, 'file.ps')]).toStrictEqual<Value[]>([{
+    type: ValueType.string,
+    isReadOnly: true,
+    isExecutable: false,
+    isShared: false,
+    debugSource: {
+      filename: 'file.ps',
+      pos: 0,
+      length: 6,
+      source: '"test"'
+    },
     string: 'test'
   }])
 })

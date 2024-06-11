@@ -1,11 +1,11 @@
-import { ValueType } from '@api/values/ValueType.js'
-import { BooleanValue } from '@api/values/BooleanValue.js'
-import { IntegerValue } from '@api/values/IntegerValue.js'
-import { StringValue } from '@api/values/StringValue.js'
-import { MarkValue } from '@api/values/MarkValue.js'
-import { OperatorValue } from '@api/values/OperatorValue.js'
-import { ArrayValue } from '@api/values/ArrayValue.js'
-import { DictionaryValue } from '@api/values/DictionaryValue.js'
+import type { ValueType } from '@api/values/ValueType.js'
+import type { BooleanValue } from '@api/values/BooleanValue.js'
+import type { IntegerValue } from '@api/values/IntegerValue.js'
+import type { StringValue } from '@api/values/StringValue.js'
+import type { MarkValue } from '@api/values/MarkValue.js'
+import type { OperatorValue } from '@api/values/OperatorValue.js'
+import type { ArrayValue } from '@api/values/ArrayValue.js'
+import type { DictionaryValue } from '@api/values/DictionaryValue.js'
 
 /** Generic Value */
 export type Value<T = any> = T extends ValueType.boolean ? BooleanValue

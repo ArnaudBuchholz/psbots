@@ -1,4 +1,4 @@
-import { Value } from '@api/values/Value.js'
+import type { Value } from '@api/values/Value.js'
 
 /** A read-only collection of values indexed by a name */
 export interface IReadOnlyDictionary {

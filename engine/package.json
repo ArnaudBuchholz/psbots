@@ -3,8 +3,8 @@
   "version": "0.0.1",
   "description": "A project about a PostScript based programming language for robots (the engine part)",
   "scripts": {
-    "check": "tsc --noEmit && dpdm ./src/** --no-tree --no-warning && ts-standard --fix",
-    "test": "vitest"
+    "check": "tsc --noEmit && dpdm ./src/** -T --no-tree --no-warning && ts-standard --fix",
+    "test": "vitest --coverage"
   },
   "keywords": [
     "postscript",
@@ -15,6 +15,7 @@
   "author": "Arnaud Buchholz <arnaud.buchholz@free.fr>",
   "license": "MIT",
   "devDependencies": {
+    "@vitest/coverage-v8": "^1.6.0",
     "dpdm": "^3.14.0",
     "ts-standard": "^12.0.2",
     "typescript": "^5.4.5",

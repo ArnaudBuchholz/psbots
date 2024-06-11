@@ -1,5 +1,5 @@
-import { Value } from '@api/values/Value.js'
-import { IReadOnlyDictionary } from '@api/interfaces/IReadOnlyDictionary'
+import type { Value } from '@api/values/Value.js'
+import type { IReadOnlyDictionary } from '@api/interfaces/IReadOnlyDictionary'
 
 /** A collection of values indexed by a name */
 export interface IDictionary extends IReadOnlyDictionary {

@@ -1,7 +1,7 @@
-import { ValueType } from '@api/values/ValueType.js'
-import { IAbstractValue } from '@api/interfaces/IAbstractValue.js'
-import { IReadOnlyDictionary } from '@api/interfaces/IReadOnlyDictionary.js'
-import { IDictionary } from '@api/interfaces/IDictionary.js'
+import type { ValueType } from '@api/values/ValueType.js'
+import type { IAbstractValue } from '@api/interfaces/IAbstractValue.js'
+import type { IReadOnlyDictionary } from '@api/interfaces/IReadOnlyDictionary.js'
+import type { IDictionary } from '@api/interfaces/IDictionary.js'
 
 interface IReadOnlyDictionaryValue extends IAbstractValue {
   readonly type: ValueType.dictionary

@@ -10,6 +10,14 @@ export default defineConfig({
     }
   },
   test: {
-    exclude: [...configDefaults.exclude]
+    exclude: [...configDefaults.exclude],
+    coverage: {
+      exclude: [
+        'src/**/index.ts',
+        'src/api/interfaces/**',
+        '!src/api/interfaces/IReadOnlyArray.ts',
+        'src/api/values/**'
+      ]
+    }
   }
 })

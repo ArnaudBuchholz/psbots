@@ -1,5 +1,5 @@
-import { ValueType } from '@api/values/ValueType.js'
-import { IDebugSource } from '@api/interfaces/IDebugSource.js'
+import type { ValueType } from '@api/values/ValueType.js'
+import type { IDebugSource } from '@api/interfaces/IDebugSource.js'
 
 export interface IAbstractValue {
   readonly type: ValueType
