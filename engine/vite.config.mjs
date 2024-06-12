@@ -6,7 +6,8 @@ const path = (rel) => fileURLToPath(new URL(`./${rel}`, import.meta.url))
 export default defineConfig({
   resolve: {
     alias: {
-      '@api': path('src/api')
+      '@api': path('src/api'),
+      '@test': path('src/test')
     }
   },
   test: {
@@ -16,7 +17,9 @@ export default defineConfig({
         'src/**/index.ts',
         'src/api/interfaces/**',
         '!src/api/interfaces/IReadOnlyArray.ts',
-        'src/api/values/**'
+        '!src/api/interfaces/IReadOnlyDictionary.ts',
+        'src/api/values/**',
+        'src/test/**'
       ]
     }
   }

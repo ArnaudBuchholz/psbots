@@ -7,6 +7,7 @@ export interface IReadOnlyArray {
   at: (index: number) => Value | null
 }
 
+/** Enumerate IReadOnlyArray values */
 export function * enumIArrayValues (iArray: IReadOnlyArray): Generator<Value> {
   const { length } = iArray
   for (let index = 0; index < length; ++index) {

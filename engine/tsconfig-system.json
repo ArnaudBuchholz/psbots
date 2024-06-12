@@ -5,8 +5,7 @@
     "outFile": "./dist/engine.js"
   },
   "exclude": [
-    "./test-helpers.ts",
-    "./**/*.spec.ts",
-    "./repl/index.ts"
+    "./src/test/**",
+    "./src/**/*.spec.ts"
   ]
 }
