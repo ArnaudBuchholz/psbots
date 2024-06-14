@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "description": "A project about a PostScript based programming language for robots (the engine part)",
   "scripts": {
-    "check": "tsc --noEmit && dpdm ./src/** -T --no-tree --no-warning && ts-standard --fix",
+    "check": "tsc --noEmit && dpdm ./src/** -T --no-tree --no-warning && eslint src/**/*.ts",
     "test": "vitest --coverage"
   },
   "keywords": [
@@ -15,10 +15,16 @@
   "author": "Arnaud Buchholz <arnaud.buchholz@free.fr>",
   "license": "MIT",
   "devDependencies": {
+    "@stylistic/eslint-plugin-js": "^2.1.0",
     "@vitest/coverage-v8": "^1.6.0",
     "dpdm": "^3.14.0",
-    "ts-standard": "^12.0.2",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-prettier": "^5.1.3",
     "typescript": "^5.4.5",
     "vitest": "^1.6.0"
+  },
+  "dependencies": {
+    "typescript-eslint": "^7.13.0"
   }
 }

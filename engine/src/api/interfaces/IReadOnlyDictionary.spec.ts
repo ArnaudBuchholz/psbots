@@ -1,47 +1,51 @@
-import { describe, it, expect } from 'vitest'
-import type { Value } from '@api/index.js'
-import { ValueType, enumIDictionaryValues, convertIDictionaryToObject } from '@api/index.js'
-import { toIReadOnlyDictionary } from '@test/index.js'
+import { describe, it, expect } from 'vitest';
+import type { Value } from '@api/index.js';
+import { ValueType, enumIDictionaryValues, convertIDictionaryToObject } from '@api/index.js';
+import { toIReadOnlyDictionary } from '@test/index.js';
 
-const iReadOnlyDictionary = toIReadOnlyDictionary({ a: 1, b: 2, c: '3' })
+const iReadOnlyDictionary = toIReadOnlyDictionary({ a: 1, b: 2, c: '3' });
 
 describe('enumIDictionaryValues', () => {
   it('returns a generator', () => {
-    const generator = enumIDictionaryValues(iReadOnlyDictionary)
-    expect(generator.next).toBeInstanceOf(Function)
-  })
+    const generator = enumIDictionaryValues(iReadOnlyDictionary);
+    expect(generator.next).toBeInstanceOf(Function);
+  });
 
   it('returns all values of the dictionary', () => {
-    expect([...enumIDictionaryValues(iReadOnlyDictionary)]).toStrictEqual<Array<{ name: string, value: Value }>>([{
-      name: 'a',
-      value: {
-        type: ValueType.integer,
-        isReadOnly: true,
-        isExecutable: false,
-        isShared: false,
-        integer: 1
+    expect([...enumIDictionaryValues(iReadOnlyDictionary)]).toStrictEqual<Array<{ name: string; value: Value }>>([
+      {
+        name: 'a',
+        value: {
+          type: ValueType.integer,
+          isReadOnly: true,
+          isExecutable: false,
+          isShared: false,
+          integer: 1
+        }
+      },
+      {
+        name: 'b',
+        value: {
+          type: ValueType.integer,
+          isReadOnly: true,
+          isExecutable: false,
+          isShared: false,
+          integer: 2
+        }
+      },
+      {
+        name: 'c',
+        value: {
+          type: ValueType.string,
+          isReadOnly: true,
+          isExecutable: false,
+          isShared: false,
+          string: '3'
+        }
       }
-    }, {
-      name: 'b',
-      value: {
-        type: ValueType.integer,
-        isReadOnly: true,
-        isExecutable: false,
-        isShared: false,
-        integer: 2
-      }
-    }, {
-      name: 'c',
-      value: {
-        type: ValueType.string,
-        isReadOnly: true,
-        isExecutable: false,
-        isShared: false,
-        string: '3'
-      }
-    }])
-  })
-})
+    ]);
+  });
+});
 
 describe('convertIDictionaryToObject', () => {
   it('returns an object', () => {
@@ -67,6 +71,6 @@ describe('convertIDictionaryToObject', () => {
         isShared: false,
         string: '3'
       }
-    })
-  })
-})
+    });
+  });
+});

@@ -1,43 +1,43 @@
-import type { IException, Value } from '@api/index.js'
-import { ExceptionDictionaryName, ExceptionType, ValueType } from '@api/index.js'
+import type { IException, Value } from '@api/index.js';
+import { ExceptionDictionaryName, ExceptionType, ValueType } from '@api/index.js';
 
 export class BaseException extends Error implements IException {
-  private _stack: string = ''
-  
-  constructor (message: string, name?: string) {
-    super(message)
-    this.name = name ?? this.constructor.name
-    this._stack = super.stack ?? ''
+  private _stack: string = '';
+
+  constructor(message: string, name?: string) {
+    super(message);
+    this.name = name ?? this.constructor.name;
+    this._stack = super.stack ?? '';
   }
 
-  get type () {
-    return ExceptionType.system
+  get type(): ExceptionType {
+    return ExceptionType.system;
   }
 
-  override get stack (): string {
-    return this._stack
+  override get stack(): string {
+    return this._stack;
   }
 
-  override set stack (value: string) {
-    this._stack = value
+  override set stack(value: string) {
+    this._stack = value;
   }
-  
+
   // region IReadOnlyDictionary
-  
-  get names (): string[] {
-    return Object.keys(ExceptionDictionaryName)
+
+  get names(): string[] {
+    return Object.keys(ExceptionDictionaryName);
   }
-  
-  lookup (name: string): Value | null {
-    let string: string | undefined
+
+  lookup(name: string): Value | null {
+    let string: string | undefined;
     if (name === ExceptionDictionaryName.type) {
-      string = ExceptionType.system
+      string = ExceptionType.system;
     } else if (name === ExceptionDictionaryName.name) {
-      string = this.name
+      string = this.name;
     } else if (name === ExceptionDictionaryName.message) {
-      string = this.message
+      string = this.message;
     } else if (name === ExceptionDictionaryName.stack) {
-      string = this.stack
+      string = this.stack;
     }
     if (string !== undefined) {
       return {
@@ -46,10 +46,10 @@ export class BaseException extends Error implements IException {
         isExecutable: false,
         isShared: false,
         string
-      }
+      };
     }
-    return null
+    return null;
   }
-  
+
   // endregion IReadOnlyDictionary
 }

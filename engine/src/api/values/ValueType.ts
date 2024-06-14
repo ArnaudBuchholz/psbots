@@ -1,10 +1,10 @@
 /** Possible Value types */
 export enum ValueType {
-  boolean = 'booleantype',
-  integer = 'integertype',
-  string = 'stringtype',
-  mark = 'marktype',
-  operator = 'operatortype',
-  array = 'arraytype',
-  dictionary = 'dictionarytype'
+  boolean = 'boolean',
+  integer = 'integer',
+  string = 'string',
+  mark = 'mark',
+  operator = 'operator',
+  array = 'array',
+  dictionary = 'dictionary'
 }

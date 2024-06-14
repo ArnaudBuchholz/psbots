@@ -1,11 +1,11 @@
 /** Debug source (associated memory is *not* managed by the engine) */
 export interface IDebugSource {
   /** Source code */
-  source: string
+  source: string;
   /** Source file name */
-  filename: string
+  filename: string;
   /** Position of the corresponding token in the source code */
-  pos: number
+  pos: number;
   /** Length of the corresponding token in the code */
-  length: number
+  length: number;
 }

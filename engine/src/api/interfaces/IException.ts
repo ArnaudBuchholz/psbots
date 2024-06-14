@@ -1,4 +1,4 @@
-import { IReadOnlyDictionary } from '@api/interfaces/IReadOnlyDictionary.js'
+import type { IReadOnlyDictionary } from '@api/interfaces/IReadOnlyDictionary.js';
 
 export enum ExceptionDictionaryName {
   type = 'type',
@@ -27,5 +27,5 @@ export enum SystemExceptionName {
 }
 
 export interface IException extends Error, IReadOnlyDictionary {
-  readonly type: ExceptionType
+  readonly type: ExceptionType;
 }

@@ -7,6 +7,8 @@ export default defineConfig({
   resolve: {
     alias: {
       '@api': path('src/api'),
+      '@errors': path('src/api/errors'),
+      '@sdk': path('src/sdk'),
       '@test': path('src/test')
     }
   },
