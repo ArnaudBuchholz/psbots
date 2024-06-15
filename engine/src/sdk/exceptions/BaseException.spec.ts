@@ -69,17 +69,15 @@ describe('IReadOnlyDictionary behavior', () => {
   });
 });
 
-describe('stack handling', () => {
-  it('maps default stack', () => {
+describe('engine stack handling', () => {
+  it('is empty by default', () => {
     const exception = new BaseException('test');
-    const { stack } = exception;
-    expect(stack).toContain('BaseException: test');
-    expect(stack).toContain('BaseException.spec.ts');
+    expect(exception.engineStack).toStrictEqual([]);
   });
 
   it('offers a setter', () => {
     const exception = new BaseException('test');
-    exception.stack = 'abc';
-    expect(exception.stack).toStrictEqual('abc');
+    exception.engineStack = ['abc'];
+    expect(exception.engineStack).toStrictEqual(['abc']);
   });
 });

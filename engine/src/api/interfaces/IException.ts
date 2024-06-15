@@ -28,4 +28,5 @@ export enum SystemExceptionName {
 
 export interface IException extends Error, IReadOnlyDictionary {
   readonly type: ExceptionType;
+  readonly engineStack: string[];
 }

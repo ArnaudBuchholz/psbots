@@ -2,24 +2,23 @@ import type { IException, Value } from '@api/index.js';
 import { ExceptionDictionaryName, ExceptionType, ValueType } from '@api/index.js';
 
 export class BaseException extends Error implements IException {
-  private _stack: string = '';
+  private _engineStack: string[] = [];
 
   constructor(message: string, name?: string) {
     super(message);
     this.name = name ?? this.constructor.name;
-    this._stack = super.stack ?? '';
   }
 
   get type(): ExceptionType {
     return ExceptionType.system;
   }
 
-  override get stack(): string {
-    return this._stack;
+  get engineStack(): string[] {
+    return this._engineStack;
   }
 
-  override set stack(value: string) {
-    this._stack = value;
+  set engineStack(value: string[]) {
+    this._engineStack = [...value];
   }
 
   // region IReadOnlyDictionary
