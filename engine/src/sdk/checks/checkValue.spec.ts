@@ -24,6 +24,11 @@ describe('checkStringValue', () => {
   testCheckFunction<StringValue>({
     check: checkStringValue,
     valid: [stringValue, executableStringValue],
-    invalid: [...values.numbers, ...values.functions, ...enumVariantsOf(stringValue), ...enumVariantsOf(executableStringValue)]
+    invalid: [
+      ...values.numbers,
+      ...values.functions,
+      ...enumVariantsOf(stringValue),
+      ...enumVariantsOf(executableStringValue)
+    ]
   });
 });
