@@ -49,7 +49,7 @@ describe('IReadOnlyDictionary behavior', () => {
   it('exposes name', () => {
     const nameValue = exception.lookup('name');
     checkStringValue(nameValue, false);
-    expect(nameValue.string).toStrictEqual('BaseError');
+    expect(nameValue.string).toStrictEqual('BaseException');
   });
 
   it('exposes message', () => {
@@ -61,7 +61,7 @@ describe('IReadOnlyDictionary behavior', () => {
   it('exposes stack', () => {
     const stackValue = exception.lookup('stack');
     checkStringValue(stackValue, false);
-    expect(stackValue.string).toContain('BaseError.spec.ts');
+    expect(stackValue.string).toContain('BaseException.spec.ts');
   });
 
   it('returns null on any other property', () => {
@@ -73,8 +73,8 @@ describe('stack handling', () => {
   it('maps default stack', () => {
     const exception = new BaseException('test');
     const { stack } = exception;
-    expect(stack).not.toContain('BaseExeption:');
-    expect(stack).toContain('BaseExeption.spec.ts');
+    expect(stack).toContain('BaseException: test');
+    expect(stack).toContain('BaseException.spec.ts');
   });
 
   it('offers a setter', () => {

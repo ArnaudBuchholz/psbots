@@ -1,4 +1,4 @@
-import { testCheckFunction, numbers, functions } from '@test/index.js';
+import { testCheckFunction, values } from '@test/index.js';
 import { isObject } from '@sdk/checks/isObject.js';
 
 testCheckFunction<object>({
@@ -8,5 +8,5 @@ testCheckFunction<object>({
     }
   },
   valid: [{}, /test/, []],
-  invalid: [null, ...numbers, ...functions, '', 'Hello World !']
+  invalid: [null, ...values.numbers, ...values.functions, '', 'Hello World !']
 });

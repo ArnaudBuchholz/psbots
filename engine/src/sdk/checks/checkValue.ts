@@ -36,7 +36,7 @@ function check<T extends ValueType>(type: T, value: unknown, check: (value: Valu
 
 export function checkStringValue(value: unknown, executable?: boolean): asserts value is StringValue {
   check(ValueType.string, value, ({ isExecutable, string }) => {
-    if (typeof string === 'string') {
+    if (typeof string !== 'string') {
       return false;
     }
     if (executable !== undefined && isExecutable !== executable) {

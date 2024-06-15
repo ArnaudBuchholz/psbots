@@ -1,7 +1,7 @@
 import { describe } from 'vitest';
 import type { StringValue } from '@api/index.js';
 import { ValueType } from '@api/index.js';
-import { testCheckFunction, enumVariantsOf, numbers, functions } from '@test/index.js';
+import { testCheckFunction, enumVariantsOf, values } from '@test/index.js';
 import { checkStringValue } from '@sdk/checks/checkValue.js';
 
 describe('checkStringValue', () => {
@@ -24,6 +24,6 @@ describe('checkStringValue', () => {
   testCheckFunction<StringValue>({
     check: checkStringValue,
     valid: [stringValue, executableStringValue],
-    invalid: [...numbers, ...functions, ...enumVariantsOf(stringValue), ...enumVariantsOf(executableStringValue)]
+    invalid: [...values.numbers, ...values.functions, ...enumVariantsOf(stringValue), ...enumVariantsOf(executableStringValue)]
   });
 });
