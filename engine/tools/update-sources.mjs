@@ -1,8 +1,7 @@
-import { readFile, stat, writeFile } from 'node:fs/promises';
+import { readdir, readFile, stat, writeFile } from 'node:fs/promises';
+import { join } from 'node:path';
 
-async function main() {
-  const { atimeMs: scriptTimestamp } = await stat('tools/update-sources.mjs');
-
+async function generateExceptions(scriptTimestamp) {
   console.log('exceptions...');
   const { atimeMs: exceptionsTimestamp } = await stat('src/sdk/exceptions/exceptions.json');
   const exceptions = JSON.parse(await readFile('src/sdk/exceptions/exceptions.json', 'utf-8'));
@@ -23,9 +22,9 @@ async function main() {
     writeFile(
       fileName,
       `import { BaseException } from '@sdk/exceptions/BaseException.js';
-
+  
 const MESSAGE = '${message}';
-
+  
 export class ${uppercasedName}Exception extends BaseException {
   constructor() {
     super(MESSAGE);
@@ -34,6 +33,25 @@ export class ${uppercasedName}Exception extends BaseException {
 `
     );
   }
+}
+
+async function generateIndexes(scriptTimestamp, path, generate) {
+  const names = await readdir(path);
+  const files = {};
+  for (const name of names) {
+    files[name] = await stat(join(path, name));
+  }
+  if (files['index.ts']) {
+    generate = true;
+  }
+  if (generate) {
+  }
+}
+
+async function main() {
+  const { atimeMs: scriptTimestamp } = await stat('tools/update-sources.mjs');
+  generateIndexes(scriptTimestamp, 'src', false);
+  generateExceptions(scriptTimestamp);
 }
 
 main().catch((reason) => console.error(reason));
