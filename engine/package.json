@@ -3,10 +3,10 @@
   "version": "0.0.1",
   "description": "A project about a PostScript based programming language for robots (the engine part)",
   "scripts": {
-    "update-sources": "node tools/update-sources.mjs",
-    "pre:check": "npm run update-sources",
+    "make-sources": "node tools/make-sources.mjs",
+    "precheck": "npm run make-sources",
     "check": "tsc --noEmit && dpdm ./src/** -T --no-tree --no-warning && eslint src/**/*.ts",
-    "pre:test": "npm run update-sources",
+    "pretest": "npm run make-sources",
     "test": "vitest --coverage"
   },
   "keywords": [

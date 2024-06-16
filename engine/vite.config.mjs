@@ -1,7 +1,7 @@
-import { defineConfig, configDefaults } from 'vitest/config'
-import { fileURLToPath, URL } from 'node:url'
+import { defineConfig, configDefaults } from 'vitest/config';
+import { fileURLToPath, URL } from 'node:url';
 
-const path = (rel) => fileURLToPath(new URL(`./${rel}`, import.meta.url))
+const path = (rel) => fileURLToPath(new URL(`./${rel}`, import.meta.url));
 
 export default defineConfig({
   resolve: {
@@ -21,8 +21,11 @@ export default defineConfig({
         '!src/api/interfaces/IReadOnlyArray.ts',
         '!src/api/interfaces/IReadOnlyDictionary.ts',
         'src/api/values/**',
-        'src/test/**'
+        'src/sdk/exceptions/**',
+        '!src/sdk/exceptions/BaseException.ts',
+        'src/test/**',
+        'tools/**'
       ]
     }
   }
-})
+});
