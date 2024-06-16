@@ -48,5 +48,8 @@
       }
     ],
     "@typescript-eslint/no-import-type-side-effects": "error"
+  },
+  "env": {
+    "node": true
   }
 }
