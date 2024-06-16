@@ -1,4 +1,4 @@
-import { describe } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import type { StringValue } from '@api/index.js';
 import { ValueType } from '@api/index.js';
 import { testCheckFunction, enumVariantsOf, values } from '@test/index.js';
@@ -30,5 +30,27 @@ describe('checkStringValue', () => {
       ...enumVariantsOf(stringValue),
       ...enumVariantsOf(executableStringValue)
     ]
+  });
+
+  describe('executable flag', () => {
+    describe('non executable string', () => {
+      it('validates the string when executable flag is false', () => {
+        expect(() => checkStringValue(stringValue, false)).not.toThrowError();
+      });
+
+      it('rejects the string when executable flag is true', () => {
+        expect(() => checkStringValue(stringValue, true)).toThrowError();
+      });
+    });
+
+    describe('executable string', () => {
+      it('validates the executable string when executable flag is true', () => {
+        expect(() => checkStringValue(executableStringValue, true)).not.toThrowError();
+      });
+
+      it('rejects the executable string when executable flag is false', () => {
+        expect(() => checkStringValue(executableStringValue, false)).toThrowError();
+      });
+    });
   });
 });

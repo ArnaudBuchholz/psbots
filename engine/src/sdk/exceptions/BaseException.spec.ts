@@ -1,7 +1,12 @@
 import { describe, beforeAll, it, expect } from 'vitest';
-import { ExceptionDictionaryName } from '@api/index.js';
+import { ExceptionDictionaryName, ExceptionType } from '@api/index.js';
 import { BaseException } from '@sdk/exceptions/BaseException.js';
 import { checkStringValue } from '@sdk/checks/checkValue.js';
+
+it('exposes a type', () => {
+  const exception = new BaseException('test');
+  expect(exception.type).toStrictEqual(ExceptionType.system);
+});
 
 describe('error behavior', () => {
   let exception: BaseException;
