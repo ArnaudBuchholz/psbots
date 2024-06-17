@@ -8,6 +8,7 @@ const emptyArrow = (): void => {};
 const emptyGeneratorFunction = function* (): Generator<void> {};
 
 export const values = {
+  booleans: [false, true],
   positiveIntegers,
   negativeIntegers,
   positiveFloats,
@@ -20,6 +21,7 @@ export const values = {
     Number.POSITIVE_INFINITY,
     Number.NEGATIVE_INFINITY
   ],
+  strings: ['', 'Hello World !'],
   emptyFunction,
   emptyArrow,
   emptyGeneratorFunction,
