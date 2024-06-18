@@ -1,12 +1,13 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeAll } from 'vitest';
+import type { IDebugSource, Value } from '@api/index.js';
+import { ValueType } from '@api/index.js';
 import { toString } from '@sdk/toString.js';
 import { toValue, values, stringify, toIReadOnlyArray } from '@test/index.js';
-import { ValueType } from '@api/values';
 
 const stringValue = toValue('Hello World !');
 const executableStringValue = Object.assign(toValue('exec'), { isExecutable: true });
 
-describe('simple', () => {
+describe('basic conversion', () => {
   [...values.booleans, ...values.negativeIntegers, ...values.positiveIntegers].forEach((value) => {
     it(`converts a primitive value (${stringify(value)})`, () => {
       expect(toString(toValue(value))).toStrictEqual(value.toString());
@@ -63,5 +64,89 @@ describe('simple', () => {
 
   it('summarizes a dictionary', () => {
     expect(toString(toValue({ a: 1 }))).toStrictEqual('--dictionary(1)--');
+  });
+});
+
+describe('conversion with debug information', () => {
+  it('does not append debug information if no options is given', () => {
+    expect(
+      toString(
+        Object.assign(toValue.operator, {
+          debugSource: <IDebugSource>{
+            source: 'true { operator } if',
+            filename: 'test.ps',
+            length: 8,
+            pos: 7
+          }
+        })
+      )
+    ).toStrictEqual('-operator-');
+  });
+
+  it('appends debug information if requested', () => {
+    expect(
+      toString(
+        Object.assign(toValue.operator, {
+          debugSource: <IDebugSource>{
+            source: 'true { operator } if',
+            filename: 'test.ps',
+            length: 8,
+            pos: 7
+          }
+        }),
+        {
+          includeDebugSource: true
+        }
+      )
+    ).toStrictEqual('-operator-@test.ps:1:8');
+  });
+
+  it('appends debug information if requested (multiline source)', () => {
+    expect(
+      toString(
+        Object.assign(toValue.operator, {
+          debugSource: <IDebugSource>{
+            source: `true
+{
+  operator
+}
+if`,
+            filename: 'test.ps',
+            length: 8,
+            pos: 9
+          }
+        }),
+        {
+          includeDebugSource: true
+        }
+      )
+    ).toStrictEqual('-operator-@test.ps:3:3');
+  });
+});
+
+describe('conversion with a limited width', () => {
+  let operator: Value;
+
+  beforeAll(() => {
+    operator = Object.assign(toValue.operator, {
+      debugSource: <IDebugSource>{
+        source: `true
+{
+  operator
+}
+if`,
+        filename: 'folder/test.ps',
+        length: 8,
+        pos: 9
+      }
+    });
+  });
+
+  it('limits the width of the value (no debug information)', () => {
+    expect(toString(operator, { maxWidth: 5 })).toStrictEqual('-ope…');
+  });
+
+  it('limits the width of the value (debug information)', () => {
+    expect(toString(operator, { includeDebugSource: true, maxWidth: 20 })).toStrictEqual('-oper…@…/test.ps:3:3');
   });
 });

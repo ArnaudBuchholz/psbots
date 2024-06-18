@@ -7,7 +7,7 @@
     "precheck": "npm run make-sources",
     "check": "tsc --noEmit && dpdm ./src/** -T --no-tree --no-warning && eslint src/**/*.ts",
     "pretest": "npm run make-sources",
-    "test": "vitest --coverage"
+    "test": "vitest run --coverage"
   },
   "keywords": [
     "postscript",
