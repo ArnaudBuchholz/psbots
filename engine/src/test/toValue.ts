@@ -1,10 +1,45 @@
-import type { MarkValue, OperatorValue, Value } from '@api/index.js';
+import type { IReadOnlyArray, IReadOnlyDictionary, MarkValue, OperatorValue, Value } from '@api/index.js';
 import { ValueType } from '@api/index.js';
-import { toIReadOnlyArray } from './toIReadOnlyArray';
 import { isObject } from '@sdk/index.js';
 
 export type CompatiblePrimitiveValue = string | number | boolean | Value;
-export type CompatibleValue = CompatibleValue[] | { [key in string]: CompatibleValue }| CompatiblePrimitiveValue;
+export type CompatibleValue = CompatibleValue[] | { [key in string]: CompatibleValue } | CompatiblePrimitiveValue;
+
+function isValue(value: unknown): value is Value {
+  return isObject(value) && value.type in ValueType;
+}
+
+export function toIReadOnlyArray(values: CompatibleValue[]): IReadOnlyArray {
+  return {
+    get length() {
+      return values.length;
+    },
+
+    at(index): Value | null {
+      const value = values[index];
+      if (value === undefined) {
+        return null;
+      }
+      return toValue(value);
+    }
+  };
+}
+
+export function toIReadOnlyDictionary(mapping: { [key in string]: CompatibleValue }): IReadOnlyDictionary {
+  return {
+    get names() {
+      return Object.keys(mapping);
+    },
+
+    lookup(name: string): Value | null {
+      const value = mapping[name];
+      if (value === undefined) {
+        return null;
+      }
+      return toValue(value);
+    }
+  };
+}
 
 export function toValue(value: CompatibleValue): Value {
   const common: {
@@ -41,17 +76,20 @@ export function toValue(value: CompatibleValue): Value {
     };
   }
   if (Array.isArray(value)) {
-
     return {
       ...common,
       type: ValueType.array,
-      array: toIReadOnlyArray([])
+      array: toIReadOnlyArray(value.map(toValue))
     };
   }
-  // if (isObject(value) && value.type in ValueType) {
-  //   return value;
-  // }
-  return value;
+  if (isValue(value)) {
+    return value;
+  }
+  return {
+    ...common,
+    type: ValueType.dictionary,
+    dictionary: toIReadOnlyDictionary(value)
+  };
 }
 
 const mark: MarkValue = {
@@ -59,7 +97,7 @@ const mark: MarkValue = {
   isReadOnly: true,
   isExecutable: false,
   isShared: false
-}
+};
 
 toValue.mark = mark;
 
@@ -71,6 +109,6 @@ const operator: OperatorValue = {
   operator: {
     name: 'operator'
   }
-}
+};
 
 toValue.operator = operator;

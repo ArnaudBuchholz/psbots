@@ -1,7 +1,5 @@
 export * from './check-function.js';
 export * from './enumVariantsOf.js';
 export * from './stringify.js';
-export * from './toIReadOnlyArray.js';
-export * from './toIReadOnlyDictionary.js';
 export * from './toValue.js';
 export * from './values.js';
