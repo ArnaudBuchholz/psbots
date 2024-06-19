@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import type { IDebugSource, Value } from '@api/index.js';
 import { ValueType } from '@api/index.js';
 import { toString } from '@sdk/toString.js';
@@ -125,28 +125,45 @@ if`,
 });
 
 describe('conversion with a limited width', () => {
-  let operator: Value;
-
-  beforeAll(() => {
-    operator = Object.assign(toValue.operator, {
+  const operator = (filename = 'folder/test.ps'): Value =>
+    Object.assign(toValue.operator, {
       debugSource: <IDebugSource>{
         source: `true
 {
   operator
 }
 if`,
-        filename: 'folder/test.ps',
+        filename,
         length: 8,
         pos: 9
       }
     });
+
+  it('does not limit the width if wide enough', () => {
+    expect(toString(operator(), { maxWidth: 50 })).toStrictEqual('-operator-');
   });
 
-  it('limits the width of the value (no debug information)', () => {
-    expect(toString(operator, { maxWidth: 5 })).toStrictEqual('-ope…');
+  it('does not limit the width if wide enough (debug information included)', () => {
+    expect(toString(operator(), { includeDebugSource: true, maxWidth: 50 })).toStrictEqual(
+      '-operator-@folder/test.ps:3:3'
+    );
   });
 
-  it('limits the width of the value (debug information)', () => {
-    expect(toString(operator, { includeDebugSource: true, maxWidth: 20 })).toStrictEqual('-oper…@…/test.ps:3:3');
+  it('limits the width of the value when no debug information is needed', () => {
+    expect(toString(operator(), { maxWidth: 5 })).toStrictEqual('-ope…');
+  });
+
+  it('limits the width of the value and debug information', () => {
+    expect(toString(operator(), { includeDebugSource: true, maxWidth: 20 })).toStrictEqual('-oper…@…/test.ps:3:3');
+  });
+
+  it('limits the width of the debug information', () => {
+    expect(toString(operator(), { includeDebugSource: true, maxWidth: 25 })).toStrictEqual('-operator-@…/test.ps:3:3');
+  });
+
+  it('limits the width of the value when the debug information cannot be reduced', () => {
+    expect(toString(operator('test.ps'), { includeDebugSource: true, maxWidth: 20 })).toStrictEqual(
+      '-operat…@test.ps:3:3'
+    );
   });
 });

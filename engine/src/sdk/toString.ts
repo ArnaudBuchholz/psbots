@@ -20,6 +20,35 @@ function convertPosToLineAndCol(source: string, pos: number): { line: number; co
   return { line, col: pos + 1 };
 }
 
+function minimizeAt(at: string): string {
+  const atParts = at.split(/(\\|\/)/).filter((part) => part.trim());
+  if (atParts.length < 3) {
+    return at;
+  }
+  return '…' + atParts.splice(-2).join('');
+}
+
+function fitToMaxWidth(stringifiedValue: string, at: string | undefined, maxWidth: number): string {
+  let result: string;
+  if (at !== undefined) {
+    result = `${stringifiedValue}@${at}`;
+  } else {
+    result = stringifiedValue;
+  }
+  if (maxWidth < 1 || result.length < maxWidth) {
+    return result;
+  }
+  if (at !== undefined) {
+    const miminizedAt = minimizeAt(at);
+    const width = maxWidth - (miminizedAt.length + 1);
+    if (width < stringifiedValue.length) {
+      return stringifiedValue.substring(0, width - 1) + '…@' + miminizedAt;
+    }
+    return stringifiedValue + '@' + miminizedAt;
+  }
+  return stringifiedValue.substring(0, maxWidth - 1) + '…';
+}
+
 function decorate(
   stringifiedValue: string,
   debugSource: IDebugSource | undefined,
@@ -31,28 +60,7 @@ function decorate(
     const { line, col } = convertPosToLineAndCol(source, debugSource.pos);
     at = `${filename}:${line}:${col}`;
   }
-  if (maxWidth > 0) {
-    if (at && stringifiedValue.length + at.length + 1 > maxWidth) {
-      let reducedAt: string;
-      const splitAt = at.split(/\\|\//);
-      if (splitAt.length > 1) {
-        reducedAt = '…' + splitAt.splice(-2).join('');
-      } else {
-        reducedAt = at;
-      }
-      const width = maxWidth - (reducedAt.length + 1);
-      if (width > 1) {
-
-      }
-    }
-    if (stringifiedValue.length > maxWidth) {
-      return stringifiedValue.substring(0, maxWidth - 1) + '…';
-    }
-  }
-  if (at) {
-    return stringifiedValue + '@' + at;
-  }
-  return stringifiedValue;
+  return fitToMaxWidth(stringifiedValue, at, maxWidth);
 }
 
 const implementations: { [type in ValueType]: (container: Value<type>, options: ToStringOptions) => string } = {
