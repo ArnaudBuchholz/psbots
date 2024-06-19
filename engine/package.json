@@ -5,7 +5,7 @@
   "scripts": {
     "make-sources": "node tools/make-sources.mjs",
     "precheck": "npm run make-sources",
-    "check": "tsc --noEmit && dpdm ./src/** -T --no-tree --no-warning && eslint src/**/*.ts",
+    "check": "tsc --noEmit && dpdm ./src/** -T --no-tree --no-warning && eslint src/**/*.ts --fix",
     "pretest": "npm run make-sources",
     "test": "vitest run --coverage"
   },
