@@ -52,7 +52,6 @@ describe('basic conversion', () => {
         type: ValueType.array,
         isReadOnly: true,
         isExecutable: false,
-        isShared: false,
         array: iArray
       })
     ).toStrictEqual('[ 1 ␀ 3 ]');

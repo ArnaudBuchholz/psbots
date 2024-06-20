@@ -43,7 +43,6 @@ export class BaseException extends Error implements IException {
         type: ValueType.string,
         isReadOnly: true,
         isExecutable: false,
-        isShared: false,
         string
       };
     }

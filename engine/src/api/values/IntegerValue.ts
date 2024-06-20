@@ -6,7 +6,6 @@ export interface IIntegerValue extends IAbstractValue {
   readonly type: ValueType.integer;
   readonly isReadOnly: true;
   readonly isExecutable: false;
-  readonly isShared: false;
   readonly integer: number;
 }
 

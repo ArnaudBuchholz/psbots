@@ -13,7 +13,7 @@ it('extracts a string', () => {
       type: ValueType.string,
       isReadOnly: true,
       isExecutable: false,
-      isShared: false,
+
       string: 'test'
     }
   ]);
@@ -25,7 +25,7 @@ it('extracts an integer', () => {
       type: ValueType.integer,
       isReadOnly: true,
       isExecutable: false,
-      isShared: false,
+
       integer: 123
     }
   ]);
@@ -37,7 +37,7 @@ it('extracts a callable string', () => {
       type: ValueType.string,
       isReadOnly: true,
       isExecutable: true,
-      isShared: false,
+
       string: 'test'
     }
   ]);
@@ -49,7 +49,7 @@ it('should include debugging information', () => {
       type: ValueType.string,
       isReadOnly: true,
       isExecutable: false,
-      isShared: false,
+
       debugSource: {
         filename: 'file.ps',
         pos: 0,

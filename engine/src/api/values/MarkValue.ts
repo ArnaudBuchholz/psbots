@@ -5,7 +5,6 @@ export interface IMarkValue extends IAbstractValue {
   readonly type: ValueType.mark;
   readonly isReadOnly: true;
   readonly isExecutable: false;
-  readonly isShared: false;
 }
 
 /** A mark */

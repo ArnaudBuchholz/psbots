@@ -5,7 +5,6 @@ export interface IBooleanValue extends IAbstractValue {
   readonly type: ValueType.boolean;
   readonly isReadOnly: true;
   readonly isExecutable: false;
-  readonly isShared: false;
   readonly isSet: boolean;
 }
 

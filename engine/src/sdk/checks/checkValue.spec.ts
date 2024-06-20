@@ -9,7 +9,6 @@ describe('checkStringValue', () => {
     type: ValueType.string,
     isReadOnly: true,
     isExecutable: false,
-    isShared: false,
     string: 'test'
   };
 
@@ -17,7 +16,6 @@ describe('checkStringValue', () => {
     type: ValueType.string,
     isReadOnly: true,
     isExecutable: true,
-    isShared: false,
     string: 'test'
   };
 

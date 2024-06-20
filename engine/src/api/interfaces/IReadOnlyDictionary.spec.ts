@@ -19,7 +19,7 @@ describe('enumIDictionaryValues', () => {
           type: ValueType.integer,
           isReadOnly: true,
           isExecutable: false,
-          isShared: false,
+
           integer: 1
         }
       },
@@ -29,7 +29,7 @@ describe('enumIDictionaryValues', () => {
           type: ValueType.integer,
           isReadOnly: true,
           isExecutable: false,
-          isShared: false,
+
           integer: 2
         }
       },
@@ -39,7 +39,7 @@ describe('enumIDictionaryValues', () => {
           type: ValueType.string,
           isReadOnly: true,
           isExecutable: false,
-          isShared: false,
+
           string: '3'
         }
       }
@@ -54,21 +54,21 @@ describe('convertIDictionaryToObject', () => {
         type: ValueType.integer,
         isReadOnly: true,
         isExecutable: false,
-        isShared: false,
+
         integer: 1
       },
       b: {
         type: ValueType.integer,
         isReadOnly: true,
         isExecutable: false,
-        isShared: false,
+
         integer: 2
       },
       c: {
         type: ValueType.string,
         isReadOnly: true,
         isExecutable: false,
-        isShared: false,
+
         string: '3'
       }
     });

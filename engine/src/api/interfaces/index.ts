@@ -6,4 +6,3 @@ export * from './IDictionary.js';
 export * from './IException.js';
 export * from './IReadOnlyArray.js';
 export * from './IReadOnlyDictionary.js';
-export * from './ISharedReference.js';

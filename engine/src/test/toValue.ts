@@ -45,11 +45,9 @@ export function toValue(value: CompatibleValue): Value {
   const common: {
     isReadOnly: true;
     isExecutable: false;
-    isShared: false;
   } = {
     isReadOnly: true,
-    isExecutable: false,
-    isShared: false
+    isExecutable: false
   };
   if (typeof value === 'string') {
     return {
@@ -95,8 +93,7 @@ export function toValue(value: CompatibleValue): Value {
 const mark: MarkValue = {
   type: ValueType.mark,
   isReadOnly: true,
-  isExecutable: false,
-  isShared: false
+  isExecutable: false
 };
 
 toValue.mark = mark;
@@ -105,7 +102,6 @@ const operator: OperatorValue = {
   type: ValueType.operator,
   isReadOnly: true,
   isExecutable: true,
-  isShared: false,
   operator: {
     name: 'operator'
   }

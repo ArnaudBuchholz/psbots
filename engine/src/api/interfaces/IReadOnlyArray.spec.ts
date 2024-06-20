@@ -17,21 +17,18 @@ describe('enumIArrayValues', () => {
         type: ValueType.integer,
         isReadOnly: true,
         isExecutable: false,
-        isShared: false,
         integer: 1
       },
       {
         type: ValueType.integer,
         isReadOnly: true,
         isExecutable: false,
-        isShared: false,
         integer: 2
       },
       {
         type: ValueType.string,
         isReadOnly: true,
         isExecutable: false,
-        isShared: false,
         string: '3'
       }
     ]);

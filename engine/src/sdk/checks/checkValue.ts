@@ -5,15 +5,14 @@ import { isObject } from '@sdk/checks/isObject.js';
 
 const expectedFlags: { [key in ValueType]?: Partial<IAbstractValue> } = {
   [ValueType.string]: {
-    isReadOnly: true,
-    isShared: false
+    isReadOnly: true
   }
 };
 
 function hasInvalidFlag(value: Value): boolean {
   const flags = expectedFlags[value.type];
   if (flags !== undefined) {
-    const flagNames: Array<keyof IAbstractValue> = ['isReadOnly', 'isExecutable', 'isShared'];
+    const flagNames: Array<keyof IAbstractValue> = ['isReadOnly', 'isExecutable'];
     for (const flagName of flagNames) {
       const expected = flags[flagName];
       if (expected !== undefined) {

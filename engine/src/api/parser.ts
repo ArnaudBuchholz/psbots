@@ -10,11 +10,9 @@ export function* parse(source: string, pos: number = 0, filename?: string): Gene
     const [text, string, integer, call] = match;
     const common: {
       isReadOnly: true;
-      isShared: false;
       debugSource?: IDebugSource;
     } = {
-      isReadOnly: true,
-      isShared: false
+      isReadOnly: true
     };
     if (filename !== undefined) {
       common.debugSource = {
