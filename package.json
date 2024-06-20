@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "description": "A project about a PostScript based programming language for robots",
   "scripts": {
-    "pre:check": "ncu --packageFile ./**/package.json",
+    "precheck": "ncu --packageFile ./**/package.json",
     "check": "npm run check --workspaces",
     "test": "npm run test --workspaces"
   },
