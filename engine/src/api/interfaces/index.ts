@@ -4,5 +4,7 @@ export * from './IArray.js';
 export * from './IDebugSource.js';
 export * from './IDictionary.js';
 export * from './IException.js';
+export * from './IMemoryTracker.js';
 export * from './IReadOnlyArray.js';
 export * from './IReadOnlyDictionary.js';
+export * from './IValueTracker.js';

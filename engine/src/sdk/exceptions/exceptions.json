@@ -9,5 +9,5 @@
   "typeCheck": "Operand is of the wrong type",
   "undefined": "Name is not defined in the dictionary stack",
   "unmatchedMark": "Unmatched mark in the operand stack",
-  "vmError": "Virtual memory error"
+  "vmOverflow": "Virtual memory exceeded"
 }

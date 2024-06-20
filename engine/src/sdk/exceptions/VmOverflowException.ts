@@ -1,8 +1,8 @@
 import { BaseException } from '@sdk/exceptions/BaseException.js';
 
-const MESSAGE = 'Virtual memory error';
+const MESSAGE = 'Virtual memory exceeded';
 
-export class VmErrorException extends BaseException {
+export class VmOverflowException extends BaseException {
   constructor() {
     super(MESSAGE);
   }

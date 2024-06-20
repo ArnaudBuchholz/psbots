@@ -1,10 +1,6 @@
 import type { ValueType } from '@api/values/ValueType.js';
+import type { IValueTracker } from '@api/interfaces/IValueTracker';
 import type { IDebugSource } from '@api/interfaces/IDebugSource.js';
-
-export interface IValueTracker {
-  addValueRef: (value: IAbstractValue) => void;
-  releaseValue: (value: IAbstractValue) => void;
-}
 
 export interface IAbstractValue {
   readonly type: ValueType;
