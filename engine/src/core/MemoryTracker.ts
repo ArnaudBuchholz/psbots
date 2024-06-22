@@ -1,14 +1,14 @@
 import type { Value, IValueTracker, IMemoryTracker } from '@api/index.js';
 import { ValueType } from '@api/index.js';
 import { InternalException, VmOverflowException } from '@sdk/index.js';
-import { ShareableObject } from '@core/objects/ShareableObject.js';
+import type { ShareableObject } from '@core/objects/ShareableObject.js';
 
 export const MEMORY_INTEGER_SIZE = 4;
 
 const stringSizer = (data: string): number => {
   const encoder = new TextEncoder();
   const buffer = encoder.encode(data);
-  return buffer.length + 1 // terminal 0
+  return buffer.length + 1; // terminal 0
 };
 
 const getShareableObject = (value: Value): ShareableObject => {
@@ -19,16 +19,27 @@ const getShareableObject = (value: Value): ShareableObject => {
   } else if (value.type === ValueType.dictionary) {
     return value.dictionary as unknown as ShareableObject;
   }
-  throw new InternalException(`Unexpected tracked value type ${value.type}`)
-}
+  throw new InternalException(`Unexpected tracked value type ${value.type}`);
+};
 
 type MemoryTrackerOptions = {
   /** Maximum memory allowed */
   total?: number;
-  /** Pointer size (default: 4 bytes) */
-  pointerSize?: number;
   /** Minimum length for a string to be cached (default: 32) */
-  cachableStringLength?: number;
+  stringCacheThreshold?: number;
+};
+
+type MemorySize = {
+  bytes?: number;
+  integers?: number;
+  pointers?: number;
+};
+
+const toBytes = (size: number | MemorySize): number => {
+  if (typeof size === 'number') {
+    return size;
+  }
+  return (size.bytes ?? 0) + (size.integers ?? 0) * 4 + (size.pointers ?? 0) * 4;
 };
 
 export class MemoryTracker implements IValueTracker, IMemoryTracker {
@@ -36,82 +47,82 @@ export class MemoryTracker implements IValueTracker, IMemoryTracker {
   private _used: number = 0;
   private _peak: number = 0;
 
-  private readonly _pointerSize: number;
-
-  constructor (options: MemoryTrackerOptions = {}) {
-    const {
-      total = Infinity,
-      pointerSize = 4,
-      cachableStringLength = 32
-    } = options;
+  constructor(options: MemoryTrackerOptions = {}) {
+    const { total = Infinity, stringCacheThreshold = 32 } = options;
     this._total = total;
-    this._pointerSize = pointerSize;
-    this._cachableStringLength = cachableStringLength;
+    this._stringCacheThreshold = stringCacheThreshold;
   }
 
-  private readonly _cachableStringLength: number;
-  private readonly _strings: string[] = []
-  private readonly _stringsRefCount: number[] = []
+  private readonly _stringCacheThreshold: number;
+  private readonly _strings: string[] = [];
+  private readonly _stringsRefCount: number[] = [];
 
-  private _addStringRef (string: string): number {
+  private _addStringRef(string: string): void {
     const size = stringSizer(string);
-    if (string.length >= this._cachableStringLength) {
+    if (string.length >= this._stringCacheThreshold) {
       const pos = this._strings.indexOf(string);
       if (pos === -1) {
         this._strings.push(string);
         this._stringsRefCount.push(1);
-        return size + MEMORY_INTEGER_SIZE;
+        this.increment({
+          bytes: size,
+          integers: 1
+        });
+        return;
       }
       ++this._stringsRefCount[pos];
-      return 0;
+      return;
     }
-    return size;
+    this.increment(size);
   }
 
-  private _releaseString (string: string): number {
+  private _releaseString(string: string): void {
     const size = stringSizer(string);
-    if (string.length >= this._cachableStringLength) {
+    if (string.length >= this._stringCacheThreshold) {
       const pos = this._strings.indexOf(string);
       const refCount = --this._stringsRefCount[pos];
       if (refCount === 0) {
-        return size + MEMORY_INTEGER_SIZE;
+        this.decrement({
+          bytes: size,
+          integers: 1
+        });
       }
-      return 0;
+      return;
     }
-    return size;
+    this.decrement(size);
   }
 
-  increment (bytes: number): void {
-    this._used += bytes
+  increment(size: number | MemorySize): void {
+    this._used += toBytes(size);
     if (this._used > this._total) {
-      throw new VmOverflowException()
+      throw new VmOverflowException();
     }
-    this._peak = Math.max(this._used, this._peak)
+    this._peak = Math.max(this._used, this._peak);
   }
 
-  decrement (bytes: number): void {
-    this._used -= bytes
+  decrement(size: number | MemorySize): void {
+    this._used -= toBytes(size);
   }
 
   // region IMemoryTracker
 
-  get used (): number {
-    return this._used
+  get used(): number {
+    return this._used;
   }
 
-  get peak (): number {
-    return this._peak
+  get peak(): number {
+    return this._peak;
   }
 
-  get total (): number {
-    return this._total
+  get total(): number {
+    return this._total;
   }
 
   // endregion
 
   // region IValueTracker
 
-  addValueRef (value: Value): void {
+  addValueRef(value: Value): void {
     if (value.type === ValueType.string) {
       this._addStringRef(value.string);
     } else {
@@ -119,7 +130,7 @@ export class MemoryTracker implements IValueTracker, IMemoryTracker {
     }
   }
 
-  releaseValue (value: Value): void {
+  releaseValue(value: Value): void {
     if (value.type === ValueType.string) {
       this._releaseString(value.string);
     } else {
