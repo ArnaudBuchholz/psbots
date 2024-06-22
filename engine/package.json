@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "description": "A project about a PostScript based programming language for robots (the engine part)",
   "scripts": {
-    "make-sources": "node tools/make-sources.mjs",
+    "make-sources": "node ../tools/sync-aliases.mjs && node tools/make-sources.mjs",
     "precheck": "npm run make-sources",
     "check": "tsc --noEmit && dpdm ./src/** -T --no-tree --no-warning && eslint src/**/*.ts --fix",
     "pretest": "npm run make-sources",
