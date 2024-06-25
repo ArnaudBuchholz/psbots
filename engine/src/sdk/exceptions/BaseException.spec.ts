@@ -47,25 +47,25 @@ describe('IReadOnlyDictionary behavior', () => {
 
   it('exposes type', () => {
     const typeValue = exception.lookup('type');
-    checkStringValue(typeValue, false);
+    checkStringValue(typeValue, { isExecutable: false });
     expect(typeValue.string).toStrictEqual('system');
   });
 
   it('exposes name', () => {
     const nameValue = exception.lookup('name');
-    checkStringValue(nameValue, false);
+    checkStringValue(nameValue, { isExecutable: false });
     expect(nameValue.string).toStrictEqual('BaseException');
   });
 
   it('exposes message', () => {
     const messageValue = exception.lookup('message');
-    checkStringValue(messageValue, false);
+    checkStringValue(messageValue, { isExecutable: false });
     expect(messageValue.string).toStrictEqual('test');
   });
 
   it('exposes stack', () => {
     const stackValue = exception.lookup('stack');
-    checkStringValue(stackValue, false);
+    checkStringValue(stackValue, { isExecutable: false });
     expect(stackValue.string).toContain('BaseException.spec.ts');
   });
 

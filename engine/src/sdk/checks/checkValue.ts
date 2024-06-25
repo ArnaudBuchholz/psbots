@@ -1,4 +1,13 @@
-import type { Value, StringValue, IAbstractValue, OperatorValue, ArrayValue, DictionaryValue } from '@api/index.js';
+import type {
+  Value,
+  StringValue,
+  IAbstractValue,
+  OperatorValue,
+  ArrayValue,
+  DictionaryValue,
+  IArray,
+  IDictionary
+} from '@api/index.js';
 import { ValueType } from '@api/index.js';
 import { InternalException } from '@sdk/exceptions/InternalException.js';
 import { isObject } from '@sdk/checks/isObject.js';
@@ -36,19 +45,20 @@ function checkFlags(
   { isReadOnly, isExecutable }: Value,
   { isReadOnly: expectedReadOnly, isExecutable: expectedExecutable }: CheckableFlags = {},
   baseErrorMessage: string
-): void {
+): false {
   if (expectedReadOnly !== undefined && isReadOnly !== expectedReadOnly) {
     if (expectedReadOnly) {
-      throw new InternalException(`${baseErrorMessage} (read-only)`);
+      throw new InternalException(`${baseErrorMessage} (expected read-only)`);
     }
-    throw new InternalException(`${baseErrorMessage} (writable)`);
+    throw new InternalException(`${baseErrorMessage} (expected writable)`);
   }
   if (expectedExecutable !== undefined && isExecutable !== expectedExecutable) {
     if (expectedExecutable) {
-      throw new InternalException(`${baseErrorMessage} (executable)`);
+      throw new InternalException(`${baseErrorMessage} (expected executable)`);
     }
-    throw new InternalException(`${baseErrorMessage} (not executable)`);
+    throw new InternalException(`${baseErrorMessage} (expected not executable)`);
   }
+  return false;
 }
 
 function check<T extends ValueType>(
@@ -58,12 +68,18 @@ function check<T extends ValueType>(
   check: (value: Value<T>, baseErrorMessage: string) => boolean
 ): void {
   const baseErrorMessage = `Not a ${type.charAt(0).toUpperCase()}${type.substring(1)}Value`;
-  if (!isObject(value) || value.type !== type || hasInvalidFlag(value) || !check(value, baseErrorMessage)) {
+  if (
+    !isObject(value) ||
+    value.type !== type ||
+    hasInvalidFlag(value) ||
+    checkFlags(value, flags, baseErrorMessage) ||
+    !check(value, baseErrorMessage)
+  ) {
     throw new InternalException(baseErrorMessage);
   }
 }
 
-export function checkStringValue(value: unknown, flags?: CheckableFlags): asserts value is StringValue {
+export function checkStringValue(value: unknown, flags?: { isExecutable: boolean }): asserts value is StringValue {
   check(ValueType.string, value, flags, ({ string }) => {
     return typeof string === 'string';
   });
@@ -79,13 +95,33 @@ export function checkOperatorValue(value: unknown): asserts value is OperatorVal
 }
 
 export function checkArrayValue(value: unknown, flags?: CheckableFlags): asserts value is ArrayValue {
-  check(ValueType.operator, value, flags, ({ array }) => {
-    // TODO check array
+  check(ValueType.array, value, flags, ({ isReadOnly, array }) => {
+    if (!isObject(array)) {
+      return false;
+    }
+    const { length, at, set } = array as IArray;
+    return (
+      typeof length === 'number' &&
+      length >= 0 &&
+      typeof at === 'function' &&
+      at.length === 1 &&
+      (isReadOnly || (typeof set === 'function' && set.length === 2))
+    );
   });
 }
 
 export function checkDictionaryValue(value: unknown, flags?: CheckableFlags): asserts value is DictionaryValue {
-  check(ValueType.operator, value, flags, ({ dictionary }) => {
-    // TODO check dictionary
+  check(ValueType.dictionary, value, flags, ({ isReadOnly, dictionary }) => {
+    if (!isObject(dictionary)) {
+      return false;
+    }
+    const { names, lookup, def } = dictionary as IDictionary;
+    return (
+      Array.isArray(names) &&
+      names.every((name) => typeof name === 'string') &&
+      typeof lookup === 'function' &&
+      lookup.length === 1 &&
+      (isReadOnly || (typeof def === 'function' && def.length === 2))
+    );
   });
 }

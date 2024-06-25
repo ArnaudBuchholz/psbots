@@ -1,15 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { ShareableObject } from '@core/objects/ShareableObject.js';
 import { MemoryTracker } from './MemoryTracker.js';
 import { toValue } from '@test/index.js';
-
-class MyObject extends ShareableObject {
-  public disposeCalled: number = 0;
-
-  protected _dispose(): void {
-    ++this.disposeCalled;
-  }
-}
 
 describe('initial state', () => {
   it('starts with used being 0', () => {

@@ -33,21 +33,21 @@ describe('checkStringValue', () => {
   describe('executable flag', () => {
     describe('non executable string', () => {
       it('validates the string when executable flag is false', () => {
-        expect(() => checkStringValue(stringValue, false)).not.toThrowError();
+        expect(() => checkStringValue(stringValue, { isExecutable: false })).not.toThrowError();
       });
 
       it('rejects the string when executable flag is true', () => {
-        expect(() => checkStringValue(stringValue, true)).toThrowError();
+        expect(() => checkStringValue(stringValue, { isExecutable: true })).toThrowError();
       });
     });
 
     describe('executable string', () => {
       it('validates the executable string when executable flag is true', () => {
-        expect(() => checkStringValue(executableStringValue, true)).not.toThrowError();
+        expect(() => checkStringValue(executableStringValue, { isExecutable: true })).not.toThrowError();
       });
 
       it('rejects the executable string when executable flag is false', () => {
-        expect(() => checkStringValue(executableStringValue, false)).toThrowError();
+        expect(() => checkStringValue(executableStringValue, { isExecutable: false })).toThrowError();
       });
     });
   });

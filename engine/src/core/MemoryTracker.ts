@@ -1,6 +1,5 @@
 import type { Value, IValueTracker, IMemoryTracker, OperatorValue } from '@api/index.js';
-import { ValueType } from '@api/index.js';
-import { InternalException, VmOverflowException, checkStringValue } from '@sdk/index.js';
+import { VmOverflowException, checkStringValue } from '@sdk/index.js';
 import type { ShareableObject } from '@core/objects/ShareableObject.js';
 
 const stringSizer = (data: string): number => {
