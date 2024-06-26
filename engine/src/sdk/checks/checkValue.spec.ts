@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
-import type { StringValue } from '@api/index.js';
+import type { ArrayValue, OperatorValue, StringValue } from '@api/index.js';
 import { ValueType } from '@api/index.js';
-import { testCheckFunction, enumVariantsOf, values } from '@test/index.js';
-import { checkStringValue } from '@sdk/checks/checkValue.js';
+import { testCheckFunction, enumVariantsOf, values, toValue } from '@test/index.js';
+import { checkStringValue, checkOperatorValue, checkArrayValue } from '@sdk/checks/checkValue.js';
 
 describe('checkStringValue', () => {
   const stringValue: StringValue = {
@@ -50,5 +50,32 @@ describe('checkStringValue', () => {
         expect(() => checkStringValue(executableStringValue, { isExecutable: false })).toThrowError();
       });
     });
+  });
+});
+
+describe('checkOperatorValue', () => {
+  const operatorValue: OperatorValue = {
+    type: ValueType.operator,
+    isReadOnly: true,
+    isExecutable: true,
+    operator: {
+      name: 'test'
+    }
+  };
+
+  testCheckFunction<OperatorValue>({
+    check: checkOperatorValue,
+    valid: [operatorValue],
+    invalid: [...values.numbers, ...values.functions, ...enumVariantsOf(operatorValue)]
+  });
+});
+
+describe('checkArrayValue', () => {
+  const readOnlyArrayValue = toValue([1, 2, 3]) as ArrayValue;
+
+  testCheckFunction<ArrayValue>({
+    check: checkArrayValue,
+    valid: [readOnlyArrayValue],
+    invalid: [...values.numbers, ...values.functions, ...enumVariantsOf(readOnlyArrayValue)]
   });
 });
