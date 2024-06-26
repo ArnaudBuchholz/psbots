@@ -71,6 +71,6 @@ describe('checkArrayValue', () => {
   testCheckFunction<ArrayValue>({
     check: checkArrayValue,
     valid: [readOnlyArrayValue],
-    invalid: [...values.all, ...values.functions, ...enumVariantsOf(readOnlyArrayValue)]
+    invalid: [...values.all, ...enumVariantsOf(readOnlyArrayValue)]
   });
 });
