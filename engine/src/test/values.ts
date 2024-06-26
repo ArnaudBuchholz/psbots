@@ -28,6 +28,8 @@ export const values = {
 
   strings: ['', 'Hello World !'],
 
+  emptyObject: {},
+
   emptyFunction,
   emptyArrow,
   emptyGeneratorFunction,
