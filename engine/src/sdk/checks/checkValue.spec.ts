@@ -22,12 +22,7 @@ describe('checkStringValue', () => {
   testCheckFunction<StringValue>({
     check: checkStringValue,
     valid: [stringValue, executableStringValue],
-    invalid: [
-      ...values.numbers,
-      ...values.functions,
-      ...enumVariantsOf(stringValue),
-      ...enumVariantsOf(executableStringValue)
-    ]
+    invalid: [...values.all, ...enumVariantsOf(stringValue), ...enumVariantsOf(executableStringValue)]
   });
 
   describe('executable flag', () => {
@@ -66,7 +61,7 @@ describe('checkOperatorValue', () => {
   testCheckFunction<OperatorValue>({
     check: checkOperatorValue,
     valid: [operatorValue],
-    invalid: [...values.numbers, ...values.functions, ...enumVariantsOf(operatorValue)]
+    invalid: [...values.all, ...enumVariantsOf(operatorValue)]
   });
 });
 
@@ -76,6 +71,6 @@ describe('checkArrayValue', () => {
   testCheckFunction<ArrayValue>({
     check: checkArrayValue,
     valid: [readOnlyArrayValue],
-    invalid: [...values.numbers, ...values.functions, ...enumVariantsOf(readOnlyArrayValue)]
+    invalid: [...values.all, ...values.functions, ...enumVariantsOf(readOnlyArrayValue)]
   });
 });
