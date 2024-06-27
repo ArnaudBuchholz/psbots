@@ -1,8 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import type { IDebugSource, Value } from '@api/index.js';
-import { ValueType } from '@api/index.js';
 import { toString } from '@sdk/toString.js';
-import { toValue, values, stringify, toIReadOnlyArray } from '@test/index.js';
+import { toValue, values, stringify } from '@test/index.js';
 
 const stringValue = toValue('Hello World !');
 const executableStringValue = Object.assign(toValue('exec'), { isExecutable: true });
@@ -39,22 +38,15 @@ describe('basic conversion', () => {
   });
 
   it('converts a non executable array with null', () => {
-    const iArray = toIReadOnlyArray([1, 2, 3]);
-    const { at } = iArray;
-    iArray.at = (index) => {
+    const arrayValue = toValue([1, 2, 3]);
+    const { at } = arrayValue.array;
+    arrayValue.array.at = (index) => {
       if (index === 1) {
         return null;
       }
-      return at.call(iArray, index);
+      return at.call(arrayValue.array, index);
     };
-    expect(
-      toString({
-        type: ValueType.array,
-        isReadOnly: true,
-        isExecutable: false,
-        array: iArray
-      })
-    ).toStrictEqual('[ 1 ␀ 3 ]');
+    expect(toString(arrayValue)).toStrictEqual('[ 1 ␀ 3 ]');
   });
 
   it('converts an executable array', () => {

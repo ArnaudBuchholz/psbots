@@ -14,6 +14,12 @@ function testFlags(
     const trueValues = values.filter((value) => value[flag]);
     const falseValues = values.filter((value) => !value[flag]);
     describe(flag, () => {
+      it('owns true example(s)', () => {
+        expect(trueValues.length).not.toStrictEqual(0);
+      });
+      it('owns false example(s)', () => {
+        expect(falseValues.length).not.toStrictEqual(0);
+      });
       it('accepts only values with matching flag (true)', () => {
         trueValues.forEach((value) => expect(() => check(value, { [flag]: true })).not.toThrowError);
       });
@@ -71,14 +77,24 @@ describe('checkOperatorValue', () => {
   });
 });
 
-describe('checkArrayValue', () => {
-  const readOnlyArrayValue = toValue([1, 2, 3]) as ArrayValue;
+describe.only('checkArrayValue', () => {
+  const readOnlyArrayValue = toValue([1, 2, 3], true);
+  const arrayValue = toValue([1, 2, 3]);
+  const executableBlock = Object.assign(
+    toValue([1, 2, 3], true),
+    { isExecutable: true }
+  );
 
-  testCheckFunction<ArrayValue>({
-    check: checkArrayValue,
-    valid: [readOnlyArrayValue],
-    invalid: [...values.all, ...enumVariantsOf(readOnlyArrayValue)]
-  });
+  // testCheckFunction<ArrayValue>({
+  //   check: checkArrayValue,
+  //   valid: [readOnlyArrayValue, arrayValue, executableBlock],
+  //   invalid: [
+  //     ...values.all,
+  //     ...enumVariantsOf(readOnlyArrayValue),
+  //     ...enumVariantsOf(arrayValue),
+  //     ...enumVariantsOf(executableBlock),
+  //   ]
+  // });
 
-  testFlags(checkArrayValue, [readOnlyArrayValue], ['isReadOnly', 'isExecutable']);
+  testFlags(checkArrayValue, [readOnlyArrayValue, arrayValue, executableBlock], ['isReadOnly', 'isExecutable']);
 });

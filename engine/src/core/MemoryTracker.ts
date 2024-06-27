@@ -39,7 +39,7 @@ export const OperatorValueTracker: IValueTracker = {
 
   releaseValue(value: Value) {
     const { operator } = value as OperatorValue;
-    (operator as unknown as ShareableObject).release();
+    return (operator as unknown as ShareableObject).release();
   }
 };
 
@@ -86,7 +86,7 @@ export class MemoryTracker implements IValueTracker, IMemoryTracker {
     });
   }
 
-  private _releaseString(string: string): void {
+  private _releaseString(string: string): boolean {
     const size = stringSizer(string);
     if (string.length >= this._stringCacheThreshold) {
       const pos = this._strings.indexOf(string);
@@ -97,13 +97,15 @@ export class MemoryTracker implements IValueTracker, IMemoryTracker {
           bytes: -size,
           integers: -1
         });
+        return false;
       }
-      return;
+      return true;
     }
     this.register({
       type: 'string',
       bytes: -size
     });
+    return false;
   }
 
   register({ type, bytes = 0, integers = 0, pointers = 0, values = 0 }: MemoryRegistrationDetails) {
@@ -139,9 +141,9 @@ export class MemoryTracker implements IValueTracker, IMemoryTracker {
     this._addStringRef(value.string);
   }
 
-  releaseValue(value: Value): void {
+  releaseValue(value: Value): boolean {
     checkStringValue(value);
-    this._releaseString(value.string);
+    return this._releaseString(value.string);
   }
 
   // endregion IValueTracker (for string)

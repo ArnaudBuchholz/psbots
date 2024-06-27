@@ -1,10 +1,10 @@
 import { describe, it, expect } from 'vitest';
 import type { Value } from '@api/index.js';
 import { enumIArrayValues, ValueType } from '@api/index.js';
-import { toIReadOnlyArray } from '@test/index.js';
+import { toValue } from '@test/index.js';
 
 describe('enumIArrayValues', () => {
-  const iReadOnlyArray = toIReadOnlyArray([1, 2, '3']);
+  const iReadOnlyArray = toValue([1, 2, '3'], true).array;
 
   it('returns a generator', () => {
     const generator = enumIArrayValues(iReadOnlyArray);

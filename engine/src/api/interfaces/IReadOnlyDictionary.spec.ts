@@ -1,9 +1,9 @@
 import { describe, it, expect } from 'vitest';
 import type { Value } from '@api/index.js';
 import { ValueType, enumIDictionaryValues, convertIDictionaryToObject } from '@api/index.js';
-import { toIReadOnlyDictionary } from '@test/index.js';
+import { toValue } from '@test/index.js';
 
-const iReadOnlyDictionary = toIReadOnlyDictionary({ a: 1, b: 2, c: '3' });
+const iReadOnlyDictionary = toValue({ a: 1, b: 2, c: '3' }, true).dictionary;
 
 describe('enumIDictionaryValues', () => {
   it('returns a generator', () => {
