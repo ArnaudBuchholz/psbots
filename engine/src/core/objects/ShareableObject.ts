@@ -17,15 +17,17 @@ export abstract class ShareableObject {
     ++this._refCount;
   }
 
-  release(): void {
+  release(): boolean {
     const refCount = --this._refCount;
     if (refCount === 0) {
       this._dispose();
+      return false;
     }
     // Stryker disable next-line EqualityOperator
     else if (refCount < 0) {
       throw new InternalException(TOOMANY_RELEASE);
     }
+    return true;
   }
 
   protected abstract _dispose(): void;

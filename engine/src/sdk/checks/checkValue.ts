@@ -38,7 +38,7 @@ function hasInvalidFlag(value: Value): boolean {
   return false;
 }
 
-type CheckableFlags = {
+export type CheckableFlags = {
   isReadOnly?: boolean;
   isExecutable?: boolean;
 };
@@ -81,7 +81,7 @@ function check<T extends ValueType>(
   }
 }
 
-export function checkStringValue(value: unknown, flags?: { isExecutable: boolean }): asserts value is StringValue {
+export function checkStringValue(value: unknown, flags?: { isExecutable?: boolean }): asserts value is StringValue {
   check(ValueType.string, value, flags, ({ string }) => {
     return typeof string === 'string';
   });

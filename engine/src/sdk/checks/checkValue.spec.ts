@@ -1,8 +1,34 @@
 import { describe, it, expect } from 'vitest';
-import type { ArrayValue, OperatorValue, StringValue } from '@api/index.js';
+import type { ArrayValue, OperatorValue, StringValue, Value } from '@api/index.js';
 import { ValueType } from '@api/index.js';
 import { testCheckFunction, enumVariantsOf, values, toValue } from '@test/index.js';
+import type { CheckableFlags } from '@sdk/checks/checkValue.js';
 import { checkStringValue, checkOperatorValue, checkArrayValue } from '@sdk/checks/checkValue.js';
+
+function testFlags(
+  check: (value: unknown, flags?: CheckableFlags) => void,
+  values: Value[],
+  flags: (keyof CheckableFlags)[]
+): void {
+  flags.forEach((flag) => {
+    const trueValues = values.filter((value) => value[flag]);
+    const falseValues = values.filter((value) => !value[flag]);
+    describe(flag, () => {
+      it('accepts only values with matching flag (true)', () => {
+        trueValues.forEach((value) => expect(() => check(value, { [flag]: true })).not.toThrowError);
+      });
+      it('accepts only values with matching flag (false)', () => {
+        falseValues.forEach((value) => expect(() => check(value, { [flag]: false })).not.toThrowError);
+      });
+      it('rejects values with non matching flag (true)', () => {
+        falseValues.forEach((value) => expect(() => check(value, { [flag]: true })).toThrowError);
+      });
+      it('rejects only values with matching flag (false)', () => {
+        trueValues.forEach((value) => expect(() => check(value, { [flag]: false })).toThrowError);
+      });
+    });
+  });
+}
 
 describe('checkStringValue', () => {
   const stringValue: StringValue = {
@@ -25,27 +51,7 @@ describe('checkStringValue', () => {
     invalid: [...values.all, ...enumVariantsOf(stringValue), ...enumVariantsOf(executableStringValue)]
   });
 
-  describe('executable flag', () => {
-    describe('non executable string', () => {
-      it('validates the string when executable flag is false', () => {
-        expect(() => checkStringValue(stringValue, { isExecutable: false })).not.toThrowError();
-      });
-
-      it('rejects the string when executable flag is true', () => {
-        expect(() => checkStringValue(stringValue, { isExecutable: true })).toThrowError();
-      });
-    });
-
-    describe('executable string', () => {
-      it('validates the executable string when executable flag is true', () => {
-        expect(() => checkStringValue(executableStringValue, { isExecutable: true })).not.toThrowError();
-      });
-
-      it('rejects the executable string when executable flag is false', () => {
-        expect(() => checkStringValue(executableStringValue, { isExecutable: false })).toThrowError();
-      });
-    });
-  });
+  testFlags(checkStringValue, [stringValue, executableStringValue], ['isExecutable']);
 });
 
 describe('checkOperatorValue', () => {
@@ -73,4 +79,6 @@ describe('checkArrayValue', () => {
     valid: [readOnlyArrayValue],
     invalid: [...values.all, ...enumVariantsOf(readOnlyArrayValue)]
   });
+
+  testFlags(checkArrayValue, [readOnlyArrayValue], ['isReadOnly', 'isExecutable']);
 });
