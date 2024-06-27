@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import type { ArrayValue, OperatorValue, StringValue, Value } from '@api/index.js';
+import type { OperatorValue, StringValue, Value } from '@api/index.js';
 import { ValueType } from '@api/index.js';
 import { testCheckFunction, enumVariantsOf, values, toValue } from '@test/index.js';
 import type { CheckableFlags } from '@sdk/checks/checkValue.js';
@@ -77,7 +77,7 @@ describe('checkOperatorValue', () => {
   });
 });
 
-describe.only('checkArrayValue', () => {
+describe('checkArrayValue', () => {
   const readOnlyArrayValue = toValue([1, 2, 3], true);
   const arrayValue = toValue([1, 2, 3]);
   const executableBlock = Object.assign(
@@ -85,16 +85,16 @@ describe.only('checkArrayValue', () => {
     { isExecutable: true }
   );
 
-  // testCheckFunction<ArrayValue>({
-  //   check: checkArrayValue,
-  //   valid: [readOnlyArrayValue, arrayValue, executableBlock],
-  //   invalid: [
-  //     ...values.all,
-  //     ...enumVariantsOf(readOnlyArrayValue),
-  //     ...enumVariantsOf(arrayValue),
-  //     ...enumVariantsOf(executableBlock),
-  //   ]
-  // });
+  testCheckFunction({
+    check: checkArrayValue,
+    valid: [readOnlyArrayValue, arrayValue, executableBlock],
+    invalid: [
+      ...values.all,
+      ...enumVariantsOf(readOnlyArrayValue),
+      ...enumVariantsOf(arrayValue),
+      ...enumVariantsOf(executableBlock),
+    ]
+  });
 
   testFlags(checkArrayValue, [readOnlyArrayValue, arrayValue, executableBlock], ['isReadOnly', 'isExecutable']);
 });
