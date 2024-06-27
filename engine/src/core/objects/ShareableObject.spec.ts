@@ -17,10 +17,10 @@ it('calls _dispose on last reference count', () => {
   object.addRef();
   expect(object.refCount).toStrictEqual(2);
   expect(object.disposeCalled).toStrictEqual(0);
-  object.release();
+  expect(object.release()).toStrictEqual(true);
   expect(object.refCount).toStrictEqual(1);
   expect(object.disposeCalled).toStrictEqual(0);
-  object.release();
+  expect(object.release()).toStrictEqual(false);
   expect(object.refCount).toStrictEqual(0);
   expect(object.disposeCalled).toStrictEqual(1);
 });
