@@ -80,10 +80,7 @@ describe('checkOperatorValue', () => {
 describe('checkArrayValue', () => {
   const readOnlyArrayValue = toValue([1, 2, 3], true);
   const arrayValue = toValue([1, 2, 3]);
-  const executableBlock = Object.assign(
-    toValue([1, 2, 3], true),
-    { isExecutable: true }
-  );
+  const executableBlock = Object.assign(toValue([1, 2, 3], true), { isExecutable: true });
 
   testCheckFunction({
     check: checkArrayValue,
@@ -92,7 +89,7 @@ describe('checkArrayValue', () => {
       ...values.all,
       ...enumVariantsOf(readOnlyArrayValue),
       ...enumVariantsOf(arrayValue),
-      ...enumVariantsOf(executableBlock),
+      ...enumVariantsOf(executableBlock)
     ]
   });
 
