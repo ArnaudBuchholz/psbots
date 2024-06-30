@@ -3,7 +3,7 @@ import type { OperatorValue, StringValue, Value } from '@api/index.js';
 import { ValueType } from '@api/index.js';
 import { testCheckFunction, enumVariantsOf, values, toValue } from '@test/index.js';
 import type { CheckableFlags } from '@sdk/checks/checkValue.js';
-import { checkStringValue, checkOperatorValue, checkArrayValue } from '@sdk/checks/checkValue.js';
+import { checkStringValue, checkOperatorValue, checkArrayValue, checkDictionaryValue } from '@sdk/checks/checkValue.js';
 
 function testFlags(
   check: (value: unknown, flags?: CheckableFlags) => void,
@@ -21,16 +21,16 @@ function testFlags(
         expect(falseValues.length).not.toStrictEqual(0);
       });
       it('accepts only values with matching flag (true)', () => {
-        trueValues.forEach((value) => expect(() => check(value, { [flag]: true })).not.toThrowError);
+        trueValues.forEach((value) => expect(() => check(value, { [flag]: true })).not.toThrowError());
       });
       it('accepts only values with matching flag (false)', () => {
-        falseValues.forEach((value) => expect(() => check(value, { [flag]: false })).not.toThrowError);
+        falseValues.forEach((value) => expect(() => check(value, { [flag]: false })).not.toThrowError());
       });
       it('rejects values with non matching flag (true)', () => {
-        falseValues.forEach((value) => expect(() => check(value, { [flag]: true })).toThrowError);
+        falseValues.forEach((value) => expect(() => check(value, { [flag]: true })).toThrowError());
       });
       it('rejects only values with matching flag (false)', () => {
-        trueValues.forEach((value) => expect(() => check(value, { [flag]: false })).toThrowError);
+        trueValues.forEach((value) => expect(() => check(value, { [flag]: false })).toThrowError());
       });
     });
   });
@@ -73,7 +73,18 @@ describe('checkOperatorValue', () => {
   testCheckFunction<OperatorValue>({
     check: checkOperatorValue,
     valid: [operatorValue],
-    invalid: [...values.all, ...enumVariantsOf(operatorValue)]
+    invalid: [
+      ...values.all,
+      ...enumVariantsOf(operatorValue),
+      {
+        type: ValueType.operator,
+        isReadOnly: true,
+        isExecutable: true,
+        operator: {
+          name: 1
+        }
+      }
+    ]
   });
 });
 
@@ -94,4 +105,17 @@ describe('checkArrayValue', () => {
   });
 
   testFlags(checkArrayValue, [readOnlyArrayValue, arrayValue, executableBlock], ['isReadOnly', 'isExecutable']);
+});
+
+describe('checkDictionaryValue', () => {
+  const readOnlyDictionaryValue = toValue({ a: 1, b: 2, c: 3 }, true);
+  const dictionaryValue = toValue({ a: 1, b: 2, c: 3 });
+
+  testCheckFunction({
+    check: checkDictionaryValue,
+    valid: [readOnlyDictionaryValue, dictionaryValue],
+    invalid: [...values.all, ...enumVariantsOf(readOnlyDictionaryValue), ...enumVariantsOf(dictionaryValue)]
+  });
+
+  testFlags(checkDictionaryValue, [readOnlyDictionaryValue, dictionaryValue], ['isReadOnly']);
 });
