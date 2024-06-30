@@ -1,6 +1,5 @@
-import type { Value, IValueTracker, IMemoryTracker, OperatorValue } from '@api/index.js';
+import type { Value, IValueTracker, IMemoryTracker, MemoryType, IMemoryByType } from '@api/index.js';
 import { VmOverflowException, checkStringValue } from '@sdk/index.js';
-import type { ShareableObject } from '@core/objects/ShareableObject.js';
 
 const stringSizer = (data: string): number => {
   const encoder = new TextEncoder();
@@ -15,14 +14,6 @@ type MemoryTrackerOptions = {
   stringCacheThreshold?: number;
 };
 
-type MemoryByType = {
-  system: number;
-  user: number;
-  string: number;
-};
-
-type MemoryType = keyof MemoryByType;
-
 type MemoryRegistrationDetails = {
   type: MemoryType;
   bytes?: number;
@@ -31,23 +22,11 @@ type MemoryRegistrationDetails = {
   values?: number;
 };
 
-export const OperatorValueTracker: IValueTracker = {
-  addValueRef(value: Value) {
-    const { operator } = value as OperatorValue;
-    (operator as unknown as ShareableObject).addRef();
-  },
-
-  releaseValue(value: Value) {
-    const { operator } = value as OperatorValue;
-    return (operator as unknown as ShareableObject).release();
-  }
-};
-
 export class MemoryTracker implements IValueTracker, IMemoryTracker {
   private readonly _total: number = Infinity;
   private _used: number = 0;
   private _peak: number = 0;
-  private _byType: MemoryByType = {
+  private _byType: { [type in MemoryType]: number } = {
     system: 0,
     user: 0,
     string: 0
@@ -130,6 +109,10 @@ export class MemoryTracker implements IValueTracker, IMemoryTracker {
 
   get total(): number {
     return this._total;
+  }
+
+  get byType(): IMemoryByType {
+    return this._byType;
   }
 
   // endregion

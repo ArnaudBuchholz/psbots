@@ -1,11 +1,43 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { MemoryTracker } from './MemoryTracker.js';
 import { toValue } from '@test/index.js';
+import type { IMemoryByType } from '@api/index.js';
 
 describe('initial state', () => {
   it('starts with used being 0', () => {
     const tracker = new MemoryTracker();
     expect(tracker.used).toStrictEqual(0);
+  });
+});
+
+describe('tracking', () => {
+  const MAX_MEMORY = 100;
+  let tracker: MemoryTracker;
+
+  beforeEach(() => {
+    tracker = new MemoryTracker({
+      total: MAX_MEMORY
+    });
+  });
+
+  it('provides information about total memory', () => {
+    expect(tracker.total).toStrictEqual(MAX_MEMORY);
+  });
+
+  it('keeps track of memory used', () => {
+    tracker.register({ type: 'system', bytes: 50 });
+    tracker.register({ type: 'string', bytes: 20 });
+    tracker.register({ type: 'user', bytes: 10 });
+    expect(tracker.used).toStrictEqual(80);
+    expect(tracker.byType).toStrictEqual<IMemoryByType>({
+      system: 50,
+      string: 20,
+      user: 10
+    });
+  });
+
+  it('fails when allocating too much memory', () => {
+    expect(() => tracker.register({ type: 'system', bytes: MAX_MEMORY + 1 })).toThrowError();
   });
 });
 
@@ -35,7 +67,7 @@ describe('string management', () => {
     it('frees bytes', () => {
       const string = toValue('hello');
       tracker.addValueRef(string);
-      tracker.releaseValue(string);
+      expect(tracker.releaseValue(string)).toStrictEqual(false);
       expect(tracker.used).toStrictEqual(0);
       expect(tracker.peak).toStrictEqual(6);
     });
@@ -54,10 +86,17 @@ describe('string management', () => {
       expect(tracker.used).toStrictEqual(17);
     });
 
+    it('keeps the string valid until fully released', () => {
+      const string = toValue('hello world!');
+      tracker.addValueRef(string);
+      tracker.addValueRef(string);
+      expect(tracker.releaseValue(string)).toStrictEqual(true);
+    });
+
     it('frees bytes', () => {
       const string = toValue('hello world!');
       tracker.addValueRef(string);
-      tracker.releaseValue(string);
+      expect(tracker.releaseValue(string)).toStrictEqual(false);
       expect(tracker.used).toStrictEqual(0);
       expect(tracker.peak).toStrictEqual(17);
     });
