@@ -30,9 +30,9 @@ function releasePreviousValue(previousValue: Value | undefined): Value | null {
   return previousValue ?? null;
 }
 
-function toIArray(values: Value[], readOnly: true): IReadOnlyArray
-function toIArray(values: Value[], readOnly: false): IArray
-function toIArray(values: Value[], readOnly: boolean): IReadOnlyArray | IArray {
+function toIArray(values: Value[], readOnly: true): IReadOnlyArray;
+function toIArray(values: Value[], readOnly?: false): IArray;
+function toIArray(values: Value[], readOnly: boolean = false): IReadOnlyArray | IArray {
   const array = [...values];
   array.forEach((value) => {
     if (value.tracker) {
@@ -63,8 +63,8 @@ function toIArray(values: Value[], readOnly: boolean): IReadOnlyArray | IArray {
   return iArray;
 }
 
-function toIDictionary(mapping: { [key in string]: Value }, readOnly: true): IReadOnlyDictionary
-function toIDictionary(mapping: { [key in string]: Value }, readOnly: false): IDictionary
+function toIDictionary(mapping: { [key in string]: Value }, readOnly: true): IReadOnlyDictionary;
+function toIDictionary(mapping: { [key in string]: Value }, readOnly: false): IDictionary;
 function toIDictionary(mapping: { [key in string]: Value }, readOnly: boolean): IReadOnlyDictionary | IDictionary {
   const dictionary = { ...mapping };
   Object.values(dictionary).forEach((value) => {
@@ -135,23 +135,22 @@ export function toValue(value: CompatibleValue, readOnly: boolean = false): Valu
     if (readOnly) {
       return {
         ...common,
-        isReadOnly: readOnly,
         type: ValueType.array,
         array: toIArray(
-          value.map((item) => toValue(item, readOnly)),
-          readOnly
-        )
-      };
-    } else {
-      return {
-        ...common,
-        type: ValueType.array,
-        array: toIArray(
-          value.map((item) => toValue(item, readOnly)),
-          readOnly
+          value.map((item) => toValue(item, true)),
+          true
         )
       };
     }
+    return {
+      ...common,
+      isReadOnly: false,
+      type: ValueType.array,
+      array: toIArray(
+        value.map((item) => toValue(item, false)),
+        false
+      )
+    };
   }
   if (isValue(value)) {
     return value;
@@ -160,11 +159,18 @@ export function toValue(value: CompatibleValue, readOnly: boolean = false): Valu
   Object.entries(value).forEach(([name, item]) => {
     mapping[name] = toValue(item, readOnly);
   });
+  if (readOnly) {
+    return {
+      ...common,
+      type: ValueType.dictionary,
+      dictionary: toIDictionary(mapping, true)
+    };
+  }
   return {
     ...common,
-    isReadOnly: readOnly,
+    isReadOnly: false,
     type: ValueType.dictionary,
-    dictionary: toIDictionary(mapping, readOnly)
+    dictionary: toIDictionary(mapping, false)
   };
 }
 
