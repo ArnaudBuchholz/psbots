@@ -1,9 +1,32 @@
+import type { Value, IValueTracker } from '@api/index.js';
+import { ValueType } from '@api/index.js';
 import { InternalException } from '@sdk/index.js';
 
+const INVALID_VALUE_TYPE = 'Invalid value type';
 const TOOMANY_RELEASE = 'Superfluous release';
+
+const getShareableObject = (value: Value): ShareableObject => {
+  if (value.type === ValueType.array) {
+    return value.array as unknown as ShareableObject;
+  }
+  if (value.type === ValueType.dictionary) {
+    return value.dictionary as unknown as ShareableObject;
+  }
+  throw new InternalException(INVALID_VALUE_TYPE);
+};
 
 export abstract class ShareableObject {
   private _refCount: number;
+
+  static tracker: IValueTracker = {
+    addValueRef(value) {
+      getShareableObject(value).addRef();
+    },
+
+    releaseValue(value) {
+      return getShareableObject(value).release();
+    }
+  };
 
   constructor() {
     this._refCount = 1;
