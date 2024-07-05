@@ -33,7 +33,7 @@ export abstract class AbstractValueArray extends ShareableObject implements IRea
     return value;
   }
 
-  // endregion IArray
+  // endregion IReadOnlyArray
 
   protected get memoryTracker(): MemoryTracker {
     return this._memoryTracker;
@@ -52,9 +52,7 @@ export abstract class AbstractValueArray extends ShareableObject implements IRea
       pointers: 1,
       values: 1
     });
-    if (value.tracker) {
-      value.tracker.addValueRef(value);
-    }
+    value.tracker?.addValueRef(value);
     this.pushImpl(value);
   }
 
@@ -69,7 +67,7 @@ export abstract class AbstractValueArray extends ShareableObject implements IRea
         pointers: -1,
         values: -1
       });
-      if (value.tracker && !value.tracker.releaseValue(value)) {
+      if (value.tracker?.releaseValue(value) === false) {
         return null;
       }
       return value;
@@ -91,9 +89,7 @@ export abstract class AbstractValueArray extends ShareableObject implements IRea
 
   protected _clear(): void {
     for (const value of this._values) {
-      if (value.tracker) {
-        value.tracker.releaseValue(value);
-      }
+      value.tracker?.releaseValue(value);
     }
     this._memoryTracker.register({
       type: this._memoryType,
