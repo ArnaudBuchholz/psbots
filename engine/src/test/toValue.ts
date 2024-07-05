@@ -20,11 +20,7 @@ function isValue(value: unknown): value is Value {
 }
 
 function releasePreviousValue(previousValue: Value | undefined): Value | null {
-  if (
-    previousValue !== undefined &&
-    previousValue.tracker !== undefined &&
-    !previousValue.tracker.releaseValue(previousValue)
-  ) {
+  if (previousValue !== undefined && previousValue.tracker?.releaseValue(previousValue) === false) {
     return null;
   }
   return previousValue ?? null;
