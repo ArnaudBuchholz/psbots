@@ -46,14 +46,16 @@ export abstract class AbstractValueArray extends ShareableObject implements IRea
   /** puts the value in the right place */
   protected abstract pushImpl(value: Value): void;
 
-  push(value: Value): void {
+  push(...values: Value[]): void {
     this._memoryTracker.register({
       type: this._memoryType,
-      pointers: 1,
-      values: 1
+      pointers: values.length,
+      values: values.length
     });
-    value.tracker?.addValueRef(value);
-    this.pushImpl(value);
+    for (const value of values) {
+      value.tracker?.addValueRef(value);
+      this.pushImpl(value);
+    }
   }
 
   /** pops the value from the right place (or return null if none) */
