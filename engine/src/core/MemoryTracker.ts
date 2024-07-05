@@ -56,7 +56,7 @@ export class MemoryTracker implements IValueTracker, IMemoryTracker {
         });
         return;
       }
-      ++this._stringsRefCount[pos];
+      ++this._stringsRefCount[pos]!; // _strings & _stringsRefCount are in sync
       return;
     }
     this.register({
@@ -69,7 +69,7 @@ export class MemoryTracker implements IValueTracker, IMemoryTracker {
     const size = stringSizer(string);
     if (string.length >= this._stringCacheThreshold) {
       const pos = this._strings.indexOf(string);
-      const refCount = --this._stringsRefCount[pos];
+      const refCount = --this._stringsRefCount[pos]!; // _strings & _stringsRefCount are in sync
       if (refCount === 0) {
         this.register({
           type: 'string',
