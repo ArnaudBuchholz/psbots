@@ -77,7 +77,7 @@ export abstract class AbstractValueArray extends ShareableObject implements IRea
     return null;
   }
 
-  protected safeAt(index: number): Value {
+  protected atOrThrow(index: number): Value {
     const value = this._values.at(index);
     if (value === undefined) {
       throw new InternalException(NO_VALUE);
