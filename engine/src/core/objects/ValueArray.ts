@@ -1,7 +1,9 @@
-import type { IArray, Value } from '@api/index.js';
+import { ValueType } from '@api/index.js';
+import type { ArrayValue, IArray, IValuePermissions, Value } from '@api/index.js';
 import { InternalException, RangeCheckException } from '@sdk/exceptions/index.js';
 import { AbstractValueArray } from '@core/objects/AbstractValueArray.js';
 import { isObject } from '@sdk/checks';
+import { ShareableObject } from '@core/objects/ShareableObject.js';
 
 const EMPTY_ARRAY = 'Empty array';
 const NOT_A_VALUEARRAY = 'Not a ValueArray';
@@ -11,6 +13,19 @@ export class ValueArray extends AbstractValueArray implements IArray {
     if (!isObject(value) || !(value instanceof ValueArray)) {
       throw new InternalException(NOT_A_VALUEARRAY);
     }
+  }
+
+  toValue(permissions: IValuePermissions): ArrayValue {
+    if (!permissions.isReadOnly && permissions.isExecutable) {
+      throw new InternalException('Unsupported permissions');
+    }
+    this.addRef();
+    return {
+      type: ValueType.array,
+      ...permissions,
+      tracker: ShareableObject.tracker,
+      array: this
+    } as ArrayValue;
   }
 
   protected pushImpl(value: Value): void {
