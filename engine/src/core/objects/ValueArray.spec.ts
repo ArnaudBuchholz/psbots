@@ -66,3 +66,21 @@ it('offers some', () => {
   expect(array.some((value) => value.type === ValueType.integer && value.integer === 2)).toStrictEqual(true);
   expect(array.some((value) => value.type === ValueType.integer && value.integer === 3)).toStrictEqual(false);
 });
+
+describe('typeguard function', () => {
+  it('recognizes a ValueArray', () => {
+    expect(() => ValueArray.check(array)).not.toThrowError();
+  });
+
+  it('rejects non objects', () => {
+    expect(() => ValueArray.check(1)).toThrowError();
+  });
+
+  it('rejects null', () => {
+    expect(() => ValueArray.check(null)).toThrowError();
+  });
+
+  it('rejects other objects', () => {
+    expect(() => ValueArray.check(toValue(1))).toThrowError();
+  });
+});
