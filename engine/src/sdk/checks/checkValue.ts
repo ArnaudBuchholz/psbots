@@ -6,7 +6,8 @@ import type {
   ArrayValue,
   DictionaryValue,
   IArray,
-  IDictionary
+  IDictionary,
+  IValuePermissions
 } from '@api/index.js';
 import { ValueType } from '@api/index.js';
 import { InternalException } from '@sdk/exceptions/InternalException.js';
@@ -38,14 +39,9 @@ function hasInvalidFlag(value: Value): boolean {
   return false;
 }
 
-export type CheckableFlags = {
-  isReadOnly?: boolean;
-  isExecutable?: boolean;
-};
-
 function checkFlags(
   { isReadOnly, isExecutable }: Value,
-  { isReadOnly: expectedReadOnly, isExecutable: expectedExecutable }: CheckableFlags = {},
+  { isReadOnly: expectedReadOnly, isExecutable: expectedExecutable }: Partial<IValuePermissions> = {},
   baseErrorMessage: string
 ): false {
   if (expectedReadOnly !== undefined && isReadOnly !== expectedReadOnly) {
@@ -66,7 +62,7 @@ function checkFlags(
 function check<T extends ValueType>(
   type: T,
   value: unknown,
-  flags: CheckableFlags | undefined,
+  flags: Partial<IValuePermissions> | undefined,
   check: (value: Value<T>, baseErrorMessage: string) => boolean
 ): void {
   const baseErrorMessage = `Not a ${type.charAt(0).toUpperCase()}${type.substring(1)}Value`;
@@ -96,7 +92,7 @@ export function checkOperatorValue(value: unknown): asserts value is OperatorVal
   });
 }
 
-export function checkArrayValue(value: unknown, flags?: CheckableFlags): asserts value is ArrayValue {
+export function checkArrayValue(value: unknown, flags?: Partial<IValuePermissions>): asserts value is ArrayValue {
   check(ValueType.array, value, flags, ({ isReadOnly, array }) => {
     if (!isObject(array)) {
       return false;
@@ -112,7 +108,10 @@ export function checkArrayValue(value: unknown, flags?: CheckableFlags): asserts
   });
 }
 
-export function checkDictionaryValue(value: unknown, flags?: CheckableFlags): asserts value is DictionaryValue {
+export function checkDictionaryValue(
+  value: unknown,
+  flags?: Partial<IValuePermissions>
+): asserts value is DictionaryValue {
   check(ValueType.dictionary, value, flags, ({ isReadOnly, dictionary }) => {
     if (!isObject(dictionary)) {
       return false;

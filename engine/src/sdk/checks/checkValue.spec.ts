@@ -1,14 +1,13 @@
 import { describe, it, expect } from 'vitest';
-import type { OperatorValue, StringValue, Value } from '@api/index.js';
+import type { OperatorValue, StringValue, Value, IValuePermissions } from '@api/index.js';
 import { ValueType } from '@api/index.js';
 import { testCheckFunction, enumVariantsOf, values, toValue } from '@test/index.js';
-import type { CheckableFlags } from '@sdk/checks/checkValue.js';
 import { checkStringValue, checkOperatorValue, checkArrayValue, checkDictionaryValue } from '@sdk/checks/checkValue.js';
 
 function testFlags(
-  check: (value: unknown, flags?: CheckableFlags) => void,
+  check: (value: unknown, flags?: Partial<IValuePermissions>) => void,
   values: Value[],
-  flags: (keyof CheckableFlags)[]
+  flags: (keyof IValuePermissions)[]
 ): void {
   flags.forEach((flag) => {
     const trueValues = values.filter((value) => value[flag]);
