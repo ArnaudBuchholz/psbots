@@ -26,24 +26,32 @@ function releasePreviousValue(previousValue: Value | undefined): Value | null {
   return previousValue ?? null;
 }
 
-function toIArray(values: Value[], readOnly: true): IReadOnlyArray;
-function toIArray(values: Value[], readOnly?: false): IArray;
-function toIArray(values: Value[], readOnly: boolean = false): IReadOnlyArray | IArray {
+function _toIReadOnlyArray(values: Value[]): { array: Value[]; iArray: IReadOnlyArray } {
   const array = [...values];
   array.forEach((value) => {
     if (value.tracker) {
       value.tracker.addValueRef(value);
     }
   });
-  const iArray: IReadOnlyArray & Partial<IArray> = {
+  const iArray: IReadOnlyArray = {
     get length() {
       return array.length;
     },
 
     at(index: number): Value | null {
       return array[index] ?? null;
-    },
+    }
+  };
+  return { array, iArray };
+}
 
+function toIReadOnlyArray(values: Value[]): IReadOnlyArray {
+  return _toIReadOnlyArray(values).iArray;
+}
+
+function toIArray(values: Value[]): IArray {
+  const { array, iArray } = _toIReadOnlyArray(values);
+  return Object.assign(iArray, {
     set(index: number, value: Value): Value | null {
       const previousValue = releasePreviousValue(array[index]);
       array[index] = value;
@@ -52,16 +60,15 @@ function toIArray(values: Value[], readOnly: boolean = false): IReadOnlyArray | 
       }
       return previousValue;
     }
-  };
-  if (readOnly) {
-    delete iArray.set;
-  }
-  return iArray;
+  });
 }
 
-function toIDictionary(mapping: { [key in string]: Value }, readOnly: true): IReadOnlyDictionary;
-function toIDictionary(mapping: { [key in string]: Value }, readOnly: false): IDictionary;
-function toIDictionary(mapping: { [key in string]: Value }, readOnly: boolean): IReadOnlyDictionary | IDictionary {
+type ValueDictionary = { [key in string]: Value };
+
+function _toIReadOnlyDictionary(mapping: ValueDictionary): {
+  dictionary: ValueDictionary;
+  iDictionary: IReadOnlyDictionary;
+} {
   const dictionary = { ...mapping };
   Object.values(dictionary).forEach((value) => {
     if (value.tracker) {
@@ -75,8 +82,18 @@ function toIDictionary(mapping: { [key in string]: Value }, readOnly: boolean): 
 
     lookup(name: string): Value | null {
       return dictionary[name] ?? null;
-    },
+    }
+  };
+  return { dictionary, iDictionary };
+}
 
+function toIReadOnlyDictionary(mapping: ValueDictionary): IReadOnlyDictionary {
+  return _toIReadOnlyDictionary(mapping).iDictionary;
+}
+
+function toIDictionary(mapping: ValueDictionary): IDictionary {
+  const { dictionary, iDictionary } = _toIReadOnlyDictionary(mapping);
+  return Object.assign(iDictionary, {
     def(name: string, value: Value): Value | null {
       const previousValue = releasePreviousValue(dictionary[name]);
       dictionary[name] = value;
@@ -85,11 +102,7 @@ function toIDictionary(mapping: { [key in string]: Value }, readOnly: boolean): 
       }
       return previousValue;
     }
-  };
-  if (readOnly) {
-    delete iDictionary.def;
-  }
-  return iDictionary;
+  });
 }
 
 export function toValue(value: CompatibleValue[], readOnly?: boolean): ArrayValue;
@@ -132,20 +145,14 @@ export function toValue(value: CompatibleValue, readOnly: boolean = false): Valu
       return {
         ...common,
         type: ValueType.array,
-        array: toIArray(
-          value.map((item) => toValue(item, true)),
-          true
-        )
+        array: toIReadOnlyArray(value.map((item) => toValue(item, true)))
       };
     }
     return {
       ...common,
       isReadOnly: false,
       type: ValueType.array,
-      array: toIArray(
-        value.map((item) => toValue(item, false)),
-        false
-      )
+      array: toIArray(value.map((item) => toValue(item, false)))
     };
   }
   if (isValue(value)) {
@@ -159,14 +166,14 @@ export function toValue(value: CompatibleValue, readOnly: boolean = false): Valu
     return {
       ...common,
       type: ValueType.dictionary,
-      dictionary: toIDictionary(mapping, true)
+      dictionary: toIReadOnlyDictionary(mapping)
     };
   }
   return {
     ...common,
     isReadOnly: false,
     type: ValueType.dictionary,
-    dictionary: toIDictionary(mapping, false)
+    dictionary: toIDictionary(mapping)
   };
 }
 
