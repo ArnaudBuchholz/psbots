@@ -5,6 +5,7 @@ import { InternalException, RangeCheckException } from '@sdk/exceptions/index.js
 import { MemoryTracker } from '@core/MemoryTracker.js';
 import { ValueArray } from './ValueArray.js';
 import { toValue } from '@test/index.js';
+import { checkArrayValue } from '@sdk/index.js';
 
 let tracker: MemoryTracker;
 let array: ValueArray;
@@ -82,5 +83,37 @@ describe('typeguard function', () => {
 
   it('rejects other objects', () => {
     expect(() => ValueArray.check(toValue(1))).toThrowError();
+  });
+});
+
+describe('toValue', () => {
+  it('fails on invalid combinations', () => {
+    expect(() => array.toValue({ isReadOnly: false, isExecutable: true })).toThrowError();
+  });
+
+  it('returns a valid array value (default: isReadOnly & !isExecutable)', () => {
+    const value = array.toValue();
+    expect(() => checkArrayValue(value)).not.toThrowError();
+    expect(value.isReadOnly).toStrictEqual(true);
+    expect(value.isExecutable).toStrictEqual(false);
+  });
+
+  it('returns a valid array value (!isReadOnly & !isExecutable)', () => {
+    const value = array.toValue({ isReadOnly: false });
+    expect(() => checkArrayValue(value)).not.toThrowError();
+    expect(value.isReadOnly).toStrictEqual(false);
+    expect(value.isExecutable).toStrictEqual(false);
+  });
+
+  it('returns a valid array value (!isReadOnly & isExecutable)', () => {
+    const value = array.toValue({ isReadOnly: true, isExecutable: true });
+    expect(() => checkArrayValue(value)).not.toThrowError();
+    expect(value.isReadOnly).toStrictEqual(true);
+    expect(value.isExecutable).toStrictEqual(true);
+  });
+
+  it('adds a reference count', () => {
+    array.toValue();
+    expect(array.refCount).toStrictEqual(2);
   });
 });

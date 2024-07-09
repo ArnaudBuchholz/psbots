@@ -15,14 +15,15 @@ export class ValueArray extends AbstractValueArray implements IArray {
     }
   }
 
-  toValue(permissions: IValuePermissions): ArrayValue {
-    if (!permissions.isReadOnly && permissions.isExecutable) {
+  toValue({ isReadOnly = true, isExecutable = false }: Partial<IValuePermissions> = {}): ArrayValue {
+    if (!isReadOnly && isExecutable) {
       throw new InternalException('Unsupported permissions');
     }
     this.addRef();
     return {
       type: ValueType.array,
-      ...permissions,
+      isReadOnly,
+      isExecutable,
       tracker: ShareableObject.tracker,
       array: this
     } as ArrayValue;
