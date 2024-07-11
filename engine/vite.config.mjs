@@ -16,6 +16,8 @@ export default defineConfig({
     exclude: [...configDefaults.exclude],
     coverage: {
       exclude: [
+        'vite.config.mjs',
+        'src/**/*.spec.ts',
         'src/**/index.ts',
         'src/api/interfaces/**',
         '!src/api/interfaces/IReadOnlyArray.ts',
