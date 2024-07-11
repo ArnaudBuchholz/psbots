@@ -61,6 +61,36 @@ describe('set', () => {
   it('fails with RangeCheckException on invalid index', () => {
     expect(() => array.set(-1, toValue(0))).toThrowError(RangeCheckException);
   });
+
+  describe('handling tracked values', () => {
+    let trackedObject: ValueArray;
+    let trackedValue: Value;
+
+    beforeEach(() => {
+      trackedObject = new ValueArray(tracker, 'user');
+      trackedValue = trackedObject.toValue();
+      expect(trackedObject.release()).toStrictEqual(true);
+      expect(trackedObject.refCount).toStrictEqual(1);
+    });
+
+    it('increases value ref', () => {
+      expect(array.set(0, trackedValue)).toStrictEqual(toValue(1));
+      expect(trackedObject.refCount).toStrictEqual(2);
+    });
+
+    it('releases value ref', () => {
+      array.set(0, trackedValue);
+      expect(array.set(0, toValue(0))).toStrictEqual(trackedValue);
+      expect(trackedObject.refCount).toStrictEqual(1);
+    });
+
+    it('releases value ref (value is destroyed)', () => {
+      array.set(0, trackedValue);
+      trackedObject.release();
+      expect(array.set(0, toValue(0))).toStrictEqual(null);
+      expect(trackedObject.refCount).toStrictEqual(0);
+    });
+  });
 });
 
 it('offers some', () => {
