@@ -1,11 +1,34 @@
-import type { IReadOnlyArray, MemoryType, Value } from '@api/index.js';
-import { InternalException } from '@sdk/exceptions/index.js';
+import type { IReadOnlyArray, IValuePermissions, MemoryType, Value } from '@api/index.js';
+import { InternalException, RangeCheckException } from '@sdk/exceptions/index.js';
 import type { MemoryTracker } from '@core/index.js';
 import { ShareableObject } from '@core/objects/ShareableObject.js';
+import { isObject } from '@sdk/index.js';
 
 const NO_VALUE = 'No value';
+const EMPTY_ARRAY = 'Empty array';
+const NOT_AN_ABSTRACTVALUEARRAY = 'Not an AbstractValueArray';
 
 export abstract class AbstractValueArray extends ShareableObject implements IReadOnlyArray {
+  static check(value: unknown): asserts value is AbstractValueArray {
+    if (!isObject(value) || !(value instanceof AbstractValueArray)) {
+      throw new InternalException(NOT_AN_ABSTRACTVALUEARRAY);
+    }
+  }
+
+  toValue({ isReadOnly = true, isExecutable = false }: Partial<IValuePermissions> = {}): ArrayValue {
+    if (!isReadOnly && isExecutable) {
+      throw new InternalException('Unsupported permissions');
+    }
+    this.addRef();
+    return {
+      type: ValueType.array,
+      isReadOnly,
+      isExecutable,
+      tracker: ShareableObject.tracker,
+      array: this
+    } as ArrayValue;
+  }
+
   protected readonly _values: Value[] = [];
 
   constructor(
@@ -34,6 +57,19 @@ export abstract class AbstractValueArray extends ShareableObject implements IRea
   }
 
   // endregion IReadOnlyArray
+
+  protected _set(index: number, value: Value): Value | null {
+    if (index < 0) {
+      throw new RangeCheckException();
+    }
+    let previousValue: Value | null = this._values[index] ?? null;
+    if (previousValue !== null && previousValue.tracker?.releaseValue(previousValue) === false) {
+      previousValue = null;
+    }
+    value.tracker?.addValueRef(value);
+    this._values[index] = value;
+    return previousValue;
+  }
 
   protected get memoryTracker(): MemoryTracker {
     return this._memoryTracker;
@@ -110,6 +146,45 @@ export abstract class AbstractValueArray extends ShareableObject implements IRea
     this._memoryTracker.register({
       type: this._memoryType,
       pointers: -1
+    });
+  }
+
+  shift(): Value | null {
+    const value = this._values.shift();
+    if (value === undefined) {
+      throw new InternalException(EMPTY_ARRAY);
+    }
+    if (value.tracker?.releaseValue(value) === false) {
+      return null;
+    }
+    return value;
+  }
+
+  unshift(value: Value): void {
+    value.tracker?.addValueRef(value);
+    this._values.unshift(value);
+  }
+
+  some(predicate: (value: Value, index: number) => boolean): boolean {
+    return this._values.some(predicate);
+  }
+
+  splice(count: number, ...values: Value[]): (Value | null)[] {
+    const removedValues = this._values.splice(0, count);
+    if (values !== undefined) {
+      this.push(...values);
+    }
+    const diff = values.length - removedValues.length;
+    this._memoryTracker.register({
+      type: this._memoryType,
+      pointers: diff,
+      values: diff
+    });
+    return removedValues.map((value) => {
+      if (value.tracker?.releaseValue(value) === false) {
+        return null;
+      }
+      return value;
     });
   }
 }

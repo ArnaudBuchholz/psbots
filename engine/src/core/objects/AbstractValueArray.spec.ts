@@ -59,10 +59,12 @@ let tracker: MemoryTracker;
 let valueArray: MyValueArray;
 let arrayObject: MyArray;
 let arrayValue: Value;
+let initialUsedMemory: number;
 
 beforeEach(() => {
   tracker = new MemoryTracker();
   valueArray = new MyValueArray(tracker, 'user');
+  initialUsedMemory = tracker.used;
   arrayObject = new MyArray();
   arrayValue = {
     type: ValueType.array,
@@ -96,7 +98,7 @@ it('offers an valueArray reference', () => {
   expect(valueArray.ref).toStrictEqual<Value[]>([toValue(1), toValue('abc'), arrayValue]);
 });
 
-describe('IArray', () => {
+describe('IReadOnlyArray', () => {
   it('exposes length', () => {
     expect(valueArray.length).toStrictEqual(3);
   });
@@ -111,6 +113,54 @@ describe('IArray', () => {
 
   it('controls boundaries (0-based)', () => {
     expect(valueArray.at(valueArray.length)).toStrictEqual(null);
+  });
+});
+
+describe('_set', () => {
+  it('allows setting a new item', () => {
+    expect(array.set(2, toValue(3))).toStrictEqual(null);
+    expect(array.ref).toStrictEqual<Value[]>([toValue(1), toValue(2), toValue(3)]);
+  });
+
+  it('allows overriding an item', () => {
+    const initialMemory = tracker.used;
+    expect(array.set(0, toValue(-1))).toStrictEqual(toValue(1));
+    expect(array.ref).toStrictEqual<Value[]>([toValue(-1), toValue(2)]);
+    expect(tracker.used).toStrictEqual(initialMemory);
+  });
+
+  it('fails with RangeCheckException on invalid index', () => {
+    expect(() => array.set(-1, toValue(0))).toThrowError(RangeCheckException);
+  });
+
+  describe('handling tracked values', () => {
+    let trackedObject: ValueArray;
+    let trackedValue: Value;
+
+    beforeEach(() => {
+      trackedObject = new ValueArray(tracker, 'user');
+      trackedValue = trackedObject.toValue();
+      expect(trackedObject.release()).toStrictEqual(true);
+      expect(trackedObject.refCount).toStrictEqual(1);
+    });
+
+    it('increases value ref', () => {
+      expect(array.set(0, trackedValue)).toStrictEqual(toValue(1));
+      expect(trackedObject.refCount).toStrictEqual(2);
+    });
+
+    it('releases value ref', () => {
+      array.set(0, trackedValue);
+      expect(array.set(0, toValue(0))).toStrictEqual(trackedValue);
+      expect(trackedObject.refCount).toStrictEqual(1);
+    });
+
+    it('releases value ref (value is destroyed)', () => {
+      array.set(0, trackedValue);
+      trackedObject.release();
+      expect(array.set(0, toValue(0))).toStrictEqual(null);
+      expect(trackedObject.refCount).toStrictEqual(0);
+    });
   });
 });
 
@@ -150,4 +200,141 @@ it('releases memory once disposed', () => {
   expect(valueArray.release()).toStrictEqual(false);
   expect(arrayObject.refCount).toStrictEqual(0);
   expect(tracker.used).toStrictEqual(0);
+});
+
+it('offers some', () => {
+  expect(valueArray.some((value) => value.type === ValueType.integer && value.integer === 1)).toStrictEqual(true);
+  expect(valueArray.some((value) => value.type === ValueType.integer && value.integer === 2)).toStrictEqual(false);
+});
+
+describe('splice', () => {
+  it('removes values from the array', () => {
+    valueArray.splice(3);
+    expect(tracker.used).toStrictEqual(initialUsedMemory);
+  });
+
+  // it('removes and adds values to the stack (1)', () => {
+  //   stack.splice(1, {
+  //     type: ValueType.integer,
+  //     number: 456
+  //   });
+  //   expect(stack.ref).toStrictEqual<InternalValue[]>([
+  //     {
+  //       type: ValueType.integer,
+  //       number: 456
+  //     },
+  //     {
+  //       type: ValueType.string,
+  //       string: 'abc'
+  //     }
+  //   ]);
+  // });
+
+  // it('removes and adds values to the stack (2)', () => {
+  //   stack.splice(2, [
+  //     {
+  //       type: ValueType.integer,
+  //       number: 456
+  //     },
+  //     {
+  //       type: ValueType.string,
+  //       string: 'def'
+  //     }
+  //   ]);
+  //   expect(stack.ref).toStrictEqual<InternalValue[]>([
+  //     {
+  //       type: ValueType.string,
+  //       string: 'def'
+  //     },
+  //     {
+  //       type: ValueType.integer,
+  //       number: 456
+  //     }
+  //   ]);
+  // });
+
+  // it('fails with StackUnderflow if not enough values', () => {
+  //   expect(() => stack.splice(3)).toThrowError(StackUnderflow);
+  // });
+
+  // describe('handling of shared objects', () => {
+  //   let sharedObject: MyObject;
+
+  //   beforeEach(() => {
+  //     sharedObject = new MyObject();
+  //     stack.push({
+  //       type: ValueType.array,
+  //       array: sharedObject
+  //     });
+  //     sharedObject.release();
+  //     expect(sharedObject.refCount).toStrictEqual(1);
+  //   });
+
+  //   it('releases on splice', () => {
+  //     stack.splice(1);
+  //     expect(sharedObject.refCount).toStrictEqual(0);
+  //     expect(sharedObject.disposeCalled).toStrictEqual(1);
+  //   });
+
+  //   it('does not release if added again (1)', () => {
+  //     stack.splice(1, [
+  //       {
+  //         type: ValueType.array,
+  //         array: sharedObject
+  //       }
+  //     ]);
+  //     expect(sharedObject.refCount).toStrictEqual(1);
+  //     expect(sharedObject.disposeCalled).toStrictEqual(0);
+  //   });
+  // });
+});
+
+describe('typeguard function', () => {
+  it('recognizes a ValueArray', () => {
+    expect(() => ValueArray.check(array)).not.toThrowError();
+  });
+
+  it('rejects non objects', () => {
+    expect(() => ValueArray.check(1)).toThrowError();
+  });
+
+  it('rejects null', () => {
+    expect(() => ValueArray.check(null)).toThrowError();
+  });
+
+  it('rejects other objects', () => {
+    expect(() => ValueArray.check(toValue(1))).toThrowError();
+  });
+});
+
+describe('toValue', () => {
+  it('fails on invalid combinations', () => {
+    expect(() => array.toValue({ isReadOnly: false, isExecutable: true })).toThrowError();
+  });
+
+  it('returns a valid array value (default: isReadOnly & !isExecutable)', () => {
+    const value = array.toValue();
+    expect(() => checkArrayValue(value)).not.toThrowError();
+    expect(value.isReadOnly).toStrictEqual(true);
+    expect(value.isExecutable).toStrictEqual(false);
+  });
+
+  it('returns a valid array value (!isReadOnly & !isExecutable)', () => {
+    const value = array.toValue({ isReadOnly: false });
+    expect(() => checkArrayValue(value)).not.toThrowError();
+    expect(value.isReadOnly).toStrictEqual(false);
+    expect(value.isExecutable).toStrictEqual(false);
+  });
+
+  it('returns a valid array value (!isReadOnly & isExecutable)', () => {
+    const value = array.toValue({ isReadOnly: true, isExecutable: true });
+    expect(() => checkArrayValue(value)).not.toThrowError();
+    expect(value.isReadOnly).toStrictEqual(true);
+    expect(value.isExecutable).toStrictEqual(true);
+  });
+
+  it('adds a reference count', () => {
+    array.toValue();
+    expect(array.refCount).toStrictEqual(2);
+  });
 });
