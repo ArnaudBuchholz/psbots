@@ -29,20 +29,52 @@ it('implements a LIFO array (pop)', () => {
   expect(array.ref).toStrictEqual<Value[]>([toValue(1)]);
 });
 
-it('implements shift', () => {
-  const value = array.shift();
-  expect(array.ref).toStrictEqual<Value[]>([toValue(2)]);
-  expect(value).toStrictEqual<Value>(toValue(1));
-});
+describe('shift / unshift', () => {
+  it('implements shift', () => {
+    const value = array.shift();
+    expect(array.ref).toStrictEqual<Value[]>([toValue(2)]);
+    expect(value).toStrictEqual<Value>(toValue(1));
+  });
 
-it('fails shift on empty array', () => {
-  const emptyArray = new ValueArray(tracker, 'user');
-  expect(() => emptyArray.shift()).toThrowError(InternalException);
-});
+  it('fails shift on empty array', () => {
+    const emptyArray = new ValueArray(tracker, 'user');
+    expect(() => emptyArray.shift()).toThrowError(InternalException);
+  });
 
-it('implements unshift', () => {
-  array.unshift(toValue(3));
-  expect(array.ref).toStrictEqual<Value[]>([toValue(3), toValue(1), toValue(2)]);
+  it('implements unshift', () => {
+    array.unshift(toValue(3));
+    expect(array.ref).toStrictEqual<Value[]>([toValue(3), toValue(1), toValue(2)]);
+  });
+
+  describe('handling tracked values', () => {
+    let trackedObject: ValueArray;
+    let trackedValue: Value;
+
+    beforeEach(() => {
+      trackedObject = new ValueArray(tracker, 'user');
+      trackedValue = trackedObject.toValue();
+      expect(trackedObject.release()).toStrictEqual(true);
+      expect(trackedObject.refCount).toStrictEqual(1);
+    });
+
+    it('increases value ref', () => {
+      array.unshift(trackedValue);
+      expect(trackedObject.refCount).toStrictEqual(2);
+    });
+
+    it('releases value ref', () => {
+      array.unshift(trackedValue);
+      expect(array.shift()).toStrictEqual(trackedValue);
+      expect(trackedObject.refCount).toStrictEqual(1);
+    });
+
+    it('releases value ref (value is destroyed)', () => {
+      array.unshift(trackedValue);
+      trackedObject.release();
+      expect(array.shift()).toStrictEqual(null);
+      expect(trackedObject.refCount).toStrictEqual(0);
+    });
+  });
 });
 
 describe('set', () => {

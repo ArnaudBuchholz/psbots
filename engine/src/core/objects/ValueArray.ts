@@ -39,12 +39,14 @@ export class ValueArray extends AbstractValueArray implements IArray {
     return value;
   }
 
-  shift(): Value {
+  shift(): Value | null {
     const value = this._values.shift();
     if (value === undefined) {
       throw new InternalException(EMPTY_ARRAY);
     }
-    value.tracker?.releaseValue(value);
+    if (value.tracker?.releaseValue(value) === false) {
+      return null;
+    }
     return value;
   }
 
