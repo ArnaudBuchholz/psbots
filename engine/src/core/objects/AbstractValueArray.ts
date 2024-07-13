@@ -1,4 +1,5 @@
-import type { IReadOnlyArray, IValuePermissions, MemoryType, Value } from '@api/index.js';
+import type { ArrayValue, IArray, IValuePermissions, MemoryType, Value } from '@api/index.js';
+import { ValueType } from '@api/index.js';
 import { InternalException, RangeCheckException } from '@sdk/exceptions/index.js';
 import type { MemoryTracker } from '@core/index.js';
 import { ShareableObject } from '@core/objects/ShareableObject.js';
@@ -8,7 +9,7 @@ const NO_VALUE = 'No value';
 const EMPTY_ARRAY = 'Empty array';
 const NOT_AN_ABSTRACTVALUEARRAY = 'Not an AbstractValueArray';
 
-export abstract class AbstractValueArray extends ShareableObject implements IReadOnlyArray {
+export abstract class AbstractValueArray extends ShareableObject implements IArray {
   static check(value: unknown): asserts value is AbstractValueArray {
     if (!isObject(value) || !(value instanceof AbstractValueArray)) {
       throw new InternalException(NOT_AN_ABSTRACTVALUEARRAY);
@@ -42,7 +43,7 @@ export abstract class AbstractValueArray extends ShareableObject implements IRea
     });
   }
 
-  // region IReadOnlyArray
+  // region IArray
 
   get length(): number {
     return this._values.length;
@@ -56,9 +57,7 @@ export abstract class AbstractValueArray extends ShareableObject implements IRea
     return value;
   }
 
-  // endregion IReadOnlyArray
-
-  protected _set(index: number, value: Value): Value | null {
+  public set(index: number, value: Value): Value | null {
     if (index < 0) {
       throw new RangeCheckException();
     }
@@ -70,6 +69,8 @@ export abstract class AbstractValueArray extends ShareableObject implements IRea
     this._values[index] = value;
     return previousValue;
   }
+
+  // endregion IArray
 
   protected get memoryTracker(): MemoryTracker {
     return this._memoryTracker;
@@ -169,17 +170,17 @@ export abstract class AbstractValueArray extends ShareableObject implements IRea
     return this._values.some(predicate);
   }
 
-  splice(count: number, ...values: Value[]): (Value | null)[] {
-    const removedValues = this._values.splice(0, count);
-    if (values !== undefined) {
-      this.push(...values);
-    }
+  splice(start: number, deleteCount: number, ...values: Value[]): (Value | null)[] {
+    const removedValues = this._values.splice(start, deleteCount, ...values);
     const diff = values.length - removedValues.length;
     this._memoryTracker.register({
       type: this._memoryType,
       pointers: diff,
       values: diff
     });
+    for (const value of values) {
+      value.tracker?.addValueRef(value);
+    }
     return removedValues.map((value) => {
       if (value.tracker?.releaseValue(value) === false) {
         return null;

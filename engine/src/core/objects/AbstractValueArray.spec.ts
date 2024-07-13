@@ -2,11 +2,12 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import type { IReadOnlyArray, MemoryType, Value } from '@api/index.js';
 import { ValueType } from '@api/index.js';
 import { MemoryTracker, ShareableObject } from '@core/index.js';
-import { InternalException } from '@sdk/exceptions/index.js';
+import { InternalException, RangeCheckException, StackUnderflowException } from '@sdk/exceptions/index.js';
 import { AbstractValueArray } from './AbstractValueArray.js';
-import { toValue } from '@test/index.js';
+import { testCheckFunction, toValue, values } from '@test/index.js';
+import { checkArrayValue } from '@sdk/index.js';
 
-class MyValueArray extends AbstractValueArray {
+class TestValueArray extends AbstractValueArray {
   protected pushImpl(value: Value): void {
     this._values.push(value);
   }
@@ -39,47 +40,39 @@ class MyValueArray extends AbstractValueArray {
   }
 }
 
-class MyArray extends ShareableObject implements IReadOnlyArray {
+class TestShareableObject extends ShareableObject {
   public disposeCalled: number = 0;
 
   protected _dispose(): void {
     ++this.disposeCalled;
   }
-
-  get length(): number {
-    return 0;
-  }
-
-  at(): null {
-    return null;
-  }
 }
 
 let tracker: MemoryTracker;
-let valueArray: MyValueArray;
-let arrayObject: MyArray;
-let arrayValue: Value;
+let valueArray: TestValueArray;
+let sharedObject: TestShareableObject;
+let sharedValue: Value;
 let initialUsedMemory: number;
 
 beforeEach(() => {
   tracker = new MemoryTracker();
-  valueArray = new MyValueArray(tracker, 'user');
+  valueArray = new TestValueArray(tracker, 'user');
   initialUsedMemory = tracker.used;
-  arrayObject = new MyArray();
-  arrayValue = {
+  sharedObject = new TestShareableObject();
+  sharedValue = {
     type: ValueType.array,
     isReadOnly: true,
     isExecutable: false,
     tracker: ShareableObject.tracker,
-    array: arrayObject
+    array: sharedObject as unknown as IReadOnlyArray
   };
-  expect(arrayObject.refCount).toStrictEqual(1);
+  expect(sharedObject.refCount).toStrictEqual(1);
   valueArray.push(toValue(1));
   valueArray.push(toValue('abc'));
-  valueArray.push(arrayValue);
-  expect(arrayObject.refCount).toStrictEqual(2);
-  arrayObject.release();
-  expect(arrayObject.refCount).toStrictEqual(1);
+  valueArray.push(sharedValue);
+  expect(sharedObject.refCount).toStrictEqual(2);
+  sharedObject.release();
+  expect(sharedObject.refCount).toStrictEqual(1);
 });
 
 it('tracks memory used', () => {
@@ -94,11 +87,11 @@ it('exposes the memory type', () => {
   expect(valueArray.getMemoryType()).toStrictEqual('user');
 });
 
-it('offers an valueArray reference', () => {
-  expect(valueArray.ref).toStrictEqual<Value[]>([toValue(1), toValue('abc'), arrayValue]);
+it('offers a Value[] reference', () => {
+  expect(valueArray.ref).toStrictEqual<Value[]>([toValue(1), toValue('abc'), sharedValue]);
 });
 
-describe('IReadOnlyArray', () => {
+describe('IArray', () => {
   it('exposes length', () => {
     expect(valueArray.length).toStrictEqual(3);
   });
@@ -114,52 +107,40 @@ describe('IReadOnlyArray', () => {
   it('controls boundaries (0-based)', () => {
     expect(valueArray.at(valueArray.length)).toStrictEqual(null);
   });
-});
 
-describe('_set', () => {
-  it('allows setting a new item', () => {
-    expect(array.set(2, toValue(3))).toStrictEqual(null);
-    expect(array.ref).toStrictEqual<Value[]>([toValue(1), toValue(2), toValue(3)]);
-  });
-
-  it('allows overriding an item', () => {
-    const initialMemory = tracker.used;
-    expect(array.set(0, toValue(-1))).toStrictEqual(toValue(1));
-    expect(array.ref).toStrictEqual<Value[]>([toValue(-1), toValue(2)]);
-    expect(tracker.used).toStrictEqual(initialMemory);
-  });
-
-  it('fails with RangeCheckException on invalid index', () => {
-    expect(() => array.set(-1, toValue(0))).toThrowError(RangeCheckException);
-  });
-
-  describe('handling tracked values', () => {
-    let trackedObject: ValueArray;
-    let trackedValue: Value;
-
-    beforeEach(() => {
-      trackedObject = new ValueArray(tracker, 'user');
-      trackedValue = trackedObject.toValue();
-      expect(trackedObject.release()).toStrictEqual(true);
-      expect(trackedObject.refCount).toStrictEqual(1);
+  describe('set', () => {
+    it('allows setting a new item', () => {
+      expect(valueArray.set(3, toValue(3))).toStrictEqual(null);
+      expect(valueArray.ref).toStrictEqual<Value[]>([toValue(1), toValue('abc'), sharedValue, toValue(3)]);
     });
 
-    it('increases value ref', () => {
-      expect(array.set(0, trackedValue)).toStrictEqual(toValue(1));
-      expect(trackedObject.refCount).toStrictEqual(2);
+    it('allows overriding an item', () => {
+      const { used: memoryUsedBefore } = tracker;
+      expect(valueArray.set(0, toValue(-1))).toStrictEqual(toValue(1));
+      expect(valueArray.ref).toStrictEqual<Value[]>([toValue(-1), toValue('abc'), sharedValue]);
+      expect(tracker.used).toStrictEqual(memoryUsedBefore);
     });
 
-    it('releases value ref', () => {
-      array.set(0, trackedValue);
-      expect(array.set(0, toValue(0))).toStrictEqual(trackedValue);
-      expect(trackedObject.refCount).toStrictEqual(1);
+    it('fails with RangeCheckException on invalid index', () => {
+      expect(() => valueArray.set(-1, toValue(0))).toThrowError(RangeCheckException);
     });
 
-    it('releases value ref (value is destroyed)', () => {
-      array.set(0, trackedValue);
-      trackedObject.release();
-      expect(array.set(0, toValue(0))).toStrictEqual(null);
-      expect(trackedObject.refCount).toStrictEqual(0);
+    describe('handling tracked values', () => {
+      it('increases value ref', () => {
+        expect(valueArray.set(0, sharedValue)).toStrictEqual(toValue(1));
+        expect(sharedObject.refCount).toStrictEqual(2);
+      });
+
+      it('releases value ref', () => {
+        sharedObject.addRef();
+        expect(valueArray.set(2, toValue(0))).toStrictEqual(sharedValue);
+        expect(sharedObject.refCount).toStrictEqual(1);
+      });
+
+      it('releases value ref (value is destroyed)', () => {
+        expect(valueArray.set(2, toValue(0))).toStrictEqual(null);
+        expect(sharedObject.refCount).toStrictEqual(0);
+      });
     });
   });
 });
@@ -174,14 +155,14 @@ describe('removing items', () => {
   it('releases memory and tracked values when removing items', () => {
     expect(valueArray.pop()).toStrictEqual(null);
     expect(tracker.used).toBeLessThan(memoryUsedBefore);
-    expect(arrayObject.refCount).toStrictEqual(0);
+    expect(sharedObject.refCount).toStrictEqual(0);
   });
 
   it('releases memory when removing items', () => {
-    arrayValue.tracker?.addValueRef(arrayValue);
-    expect(valueArray.pop()).toStrictEqual(arrayValue);
+    sharedObject.addRef();
+    expect(valueArray.pop()).toStrictEqual(sharedValue);
     expect(tracker.used).toBeLessThan(memoryUsedBefore);
-    expect(arrayObject.refCount).toStrictEqual(1);
+    expect(sharedObject.refCount).toStrictEqual(1);
   });
 
   it('does not release memory if popImpl returns null', () => {
@@ -198,7 +179,7 @@ describe('removing items', () => {
 
 it('releases memory once disposed', () => {
   expect(valueArray.release()).toStrictEqual(false);
-  expect(arrayObject.refCount).toStrictEqual(0);
+  expect(sharedObject.refCount).toStrictEqual(0);
   expect(tracker.used).toStrictEqual(0);
 });
 
@@ -208,133 +189,70 @@ it('offers some', () => {
 });
 
 describe('splice', () => {
-  it('removes values from the array', () => {
-    valueArray.splice(3);
+  it('removes values from the array and return them', () => {
+    expect(valueArray.splice(0, 3)).toStrictEqual<(Value | null)[]>([toValue(1), toValue('abc'), null]);
     expect(tracker.used).toStrictEqual(initialUsedMemory);
+    expect(sharedObject.refCount).toStrictEqual(0);
   });
 
-  // it('removes and adds values to the stack (1)', () => {
-  //   stack.splice(1, {
-  //     type: ValueType.integer,
-  //     number: 456
-  //   });
-  //   expect(stack.ref).toStrictEqual<InternalValue[]>([
-  //     {
-  //       type: ValueType.integer,
-  //       number: 456
-  //     },
-  //     {
-  //       type: ValueType.string,
-  //       string: 'abc'
-  //     }
-  //   ]);
-  // });
+  it('removes and adds values to the array (1)', () => {
+    expect(valueArray.splice(1, 1, toValue(456))).toStrictEqual<Value[]>([toValue('abc')]);
+    expect(valueArray.ref).toStrictEqual<Value[]>([toValue(1), toValue(456), sharedValue]);
+  });
 
-  // it('removes and adds values to the stack (2)', () => {
-  //   stack.splice(2, [
-  //     {
-  //       type: ValueType.integer,
-  //       number: 456
-  //     },
-  //     {
-  //       type: ValueType.string,
-  //       string: 'def'
-  //     }
-  //   ]);
-  //   expect(stack.ref).toStrictEqual<InternalValue[]>([
-  //     {
-  //       type: ValueType.string,
-  //       string: 'def'
-  //     },
-  //     {
-  //       type: ValueType.integer,
-  //       number: 456
-  //     }
-  //   ]);
-  // });
+  it('removes and adds values to the array (2)', () => {
+    sharedObject.addRef();
+    expect(valueArray.splice(2, 1, toValue(456), toValue('def'))).toStrictEqual<Value[]>([sharedValue]);
+    expect(valueArray.ref).toStrictEqual<Value[]>([toValue(1), toValue('abc'), toValue(456), toValue('def')]);
+    expect(sharedObject.refCount).toStrictEqual(1);
+  });
 
-  // it('fails with StackUnderflow if not enough values', () => {
-  //   expect(() => stack.splice(3)).toThrowError(StackUnderflow);
-  // });
+  it('removes and adds values to the array (2)', () => {
+    sharedObject.addRef();
+    expect(valueArray.splice(2, 1, toValue(456), toValue('def'))).toStrictEqual<Value[]>([sharedValue]);
+    expect(valueArray.ref).toStrictEqual<Value[]>([toValue(1), toValue('abc'), toValue(456), toValue('def')]);
+    expect(sharedObject.refCount).toStrictEqual(1);
+  });
 
-  // describe('handling of shared objects', () => {
-  //   let sharedObject: MyObject;
-
-  //   beforeEach(() => {
-  //     sharedObject = new MyObject();
-  //     stack.push({
-  //       type: ValueType.array,
-  //       array: sharedObject
-  //     });
-  //     sharedObject.release();
-  //     expect(sharedObject.refCount).toStrictEqual(1);
-  //   });
-
-  //   it('releases on splice', () => {
-  //     stack.splice(1);
-  //     expect(sharedObject.refCount).toStrictEqual(0);
-  //     expect(sharedObject.disposeCalled).toStrictEqual(1);
-  //   });
-
-  //   it('does not release if added again (1)', () => {
-  //     stack.splice(1, [
-  //       {
-  //         type: ValueType.array,
-  //         array: sharedObject
-  //       }
-  //     ]);
-  //     expect(sharedObject.refCount).toStrictEqual(1);
-  //     expect(sharedObject.disposeCalled).toStrictEqual(0);
-  //   });
-  // });
+  // test edge cases (5, 72, [123])
 });
 
-describe('typeguard function', () => {
-  it('recognizes a ValueArray', () => {
-    expect(() => ValueArray.check(array)).not.toThrowError();
-  });
-
-  it('rejects non objects', () => {
-    expect(() => ValueArray.check(1)).toThrowError();
-  });
-
-  it('rejects null', () => {
-    expect(() => ValueArray.check(null)).toThrowError();
-  });
-
-  it('rejects other objects', () => {
-    expect(() => ValueArray.check(toValue(1))).toThrowError();
+describe('AbstractValueArray.check', () => {
+  testCheckFunction<AbstractValueArray>({
+    check: AbstractValueArray.check,
+    valid: [valueArray],
+    invalid: [...values.all]
   });
 });
 
 describe('toValue', () => {
   it('fails on invalid combinations', () => {
-    expect(() => array.toValue({ isReadOnly: false, isExecutable: true })).toThrowError();
+    expect(() => valueArray.toValue({ isReadOnly: false, isExecutable: true })).toThrowError();
   });
 
   it('returns a valid array value (default: isReadOnly & !isExecutable)', () => {
-    const value = array.toValue();
+    const value = valueArray.toValue();
     expect(() => checkArrayValue(value)).not.toThrowError();
     expect(value.isReadOnly).toStrictEqual(true);
     expect(value.isExecutable).toStrictEqual(false);
   });
 
   it('returns a valid array value (!isReadOnly & !isExecutable)', () => {
-    const value = array.toValue({ isReadOnly: false });
+    const value = valueArray.toValue({ isReadOnly: false });
     expect(() => checkArrayValue(value)).not.toThrowError();
     expect(value.isReadOnly).toStrictEqual(false);
     expect(value.isExecutable).toStrictEqual(false);
   });
 
   it('returns a valid array value (!isReadOnly & isExecutable)', () => {
-    const value = array.toValue({ isReadOnly: true, isExecutable: true });
+    const value = valueArray.toValue({ isReadOnly: true, isExecutable: true });
     expect(() => checkArrayValue(value)).not.toThrowError();
     expect(value.isReadOnly).toStrictEqual(true);
     expect(value.isExecutable).toStrictEqual(true);
   });
 
   it('adds a reference count', () => {
-    array.toValue();
-    expect(array.refCount).toStrictEqual(2);
+    valueArray.toValue();
+    expect(valueArray.refCount).toStrictEqual(2);
   });
 });
