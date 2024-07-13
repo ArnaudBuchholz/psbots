@@ -1,7 +1,7 @@
-import type { IArray, Value } from '@api/index.js';
+import type { Value } from '@api/index.js';
 import { AbstractValueArray } from '@core/objects/AbstractValueArray.js';
 
-export class ValueArray extends AbstractValueArray implements IArray {
+export class ValueArray extends AbstractValueArray {
   protected pushImpl(value: Value): void {
     this._values.push(value);
   }
@@ -11,12 +11,4 @@ export class ValueArray extends AbstractValueArray implements IArray {
     this._values.pop();
     return value;
   }
-
-  // region IArray
-
-  set(index: number, value: Value): Value | null {
-    return super._set(index, value);
-  }
-
-  // endregion IArray
 }
