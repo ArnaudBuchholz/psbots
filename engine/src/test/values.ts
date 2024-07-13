@@ -28,6 +28,7 @@ export const values = {
 
   strings: ['', 'Hello World !'],
 
+  null: null,
   emptyObject: {},
 
   emptyFunction,
