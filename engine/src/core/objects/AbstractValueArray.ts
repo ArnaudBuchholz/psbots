@@ -126,7 +126,7 @@ export abstract class AbstractValueArray extends ShareableObject implements IArr
     return value;
   }
 
-  protected _clear(): void {
+  clear(): void {
     for (const value of this._values) {
       value.tracker?.releaseValue(value);
     }
@@ -139,7 +139,7 @@ export abstract class AbstractValueArray extends ShareableObject implements IArr
   }
 
   protected _dispose(): void {
-    this._clear();
+    this.clear();
     this._memoryTracker.register({
       type: this._memoryType,
       values: -this._values.length

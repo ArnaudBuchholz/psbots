@@ -31,10 +31,6 @@ class TestValueArray extends AbstractValueArray {
     return this.memoryType;
   }
 
-  public clear(): void {
-    this._clear();
-  }
-
   public setPopNull(): void {
     this._popNull = true;
   }
