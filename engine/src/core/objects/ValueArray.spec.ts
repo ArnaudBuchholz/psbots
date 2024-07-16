@@ -1,4 +1,4 @@
-import { it, expect, beforeEach, vi } from 'vitest';
+import { it, expect, beforeEach } from 'vitest';
 import type { Value } from '@api/index.js';
 import { MemoryTracker } from '@core/MemoryTracker.js';
 import { ValueArray } from './ValueArray.js';
