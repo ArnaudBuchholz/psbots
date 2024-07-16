@@ -43,6 +43,18 @@ export abstract class AbstractValueArray extends ShareableObject implements IArr
     });
   }
 
+  protected get memoryTracker(): MemoryTracker {
+    return this._memoryTracker;
+  }
+
+  protected get memoryType(): MemoryType {
+    return this._memoryType;
+  }
+
+  get ref(): readonly Value[] {
+    return this._values;
+  }
+
   // region IArray
 
   get length(): number {
@@ -71,14 +83,6 @@ export abstract class AbstractValueArray extends ShareableObject implements IArr
   }
 
   // endregion IArray
-
-  protected get memoryTracker(): MemoryTracker {
-    return this._memoryTracker;
-  }
-
-  protected get memoryType(): MemoryType {
-    return this._memoryType;
-  }
 
   /** puts the value in the right place */
   protected abstract pushImpl(value: Value): void;
@@ -120,10 +124,6 @@ export abstract class AbstractValueArray extends ShareableObject implements IArr
       throw new InternalException(NO_VALUE);
     }
     return value;
-  }
-
-  get ref(): readonly Value[] {
-    return this._values;
   }
 
   protected _clear(): void {
