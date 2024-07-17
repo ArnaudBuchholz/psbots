@@ -1,9 +1,8 @@
 import type { ArrayValue, IArray, IValuePermissions, MemoryType, Value } from '@api/index.js';
 import { ValueType } from '@api/index.js';
-import { InternalException, RangeCheckException } from '@sdk/exceptions/index.js';
+import { isObject, InternalException, RangeCheckException } from '@sdk/index.js';
 import type { MemoryTracker } from '@core/index.js';
 import { ShareableObject } from '@core/objects/ShareableObject.js';
-import { isObject } from '@sdk/index.js';
 
 const NO_VALUE = 'No value';
 const EMPTY_ARRAY = 'Empty array';

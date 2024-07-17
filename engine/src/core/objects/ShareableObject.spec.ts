@@ -1,5 +1,5 @@
 import { it, expect } from 'vitest';
-import { InternalException } from '@sdk/exceptions/index.js';
+import { InternalException } from '@sdk/index.js';
 import { ShareableObject } from './ShareableObject.js';
 
 class TestObject extends ShareableObject {

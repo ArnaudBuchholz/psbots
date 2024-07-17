@@ -1,11 +1,10 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import type { IReadOnlyArray, MemoryType, Value } from '@api/index.js';
 import { ValueType } from '@api/index.js';
+import { InternalException, RangeCheckException, checkArrayValue } from '@sdk/index.js';
 import { MemoryTracker, ShareableObject } from '@core/index.js';
-import { InternalException, RangeCheckException } from '@sdk/exceptions/index.js';
 import { AbstractValueArray } from './AbstractValueArray.js';
 import { testCheckFunction, toValue, values } from '@test/index.js';
-import { checkArrayValue } from '@sdk/index.js';
 
 class TestValueArray extends AbstractValueArray {
   protected pushImpl(value: Value): void {
