@@ -1,6 +1,6 @@
 import { it, expect, beforeEach } from 'vitest';
 import type { Value } from '@api/index.js';
-import { StackUnderflowException } from '@sdk/exceptions/index.js';
+import { StackUnderflowException } from '@sdk/index.js';
 import { MemoryTracker } from '@core/MemoryTracker.js';
 import { ValueStack } from './ValueStack.js';
 import { toValue } from '@test/index.js';
