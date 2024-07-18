@@ -11,6 +11,7 @@ import type {
 } from '@api/index.js';
 import { ValueType } from '@api/index.js';
 import { isObject } from '@sdk/index.js';
+import { ShareableObject } from '@core/index.js';
 
 export type CompatiblePrimitiveValue = string | number | boolean | Value;
 export type CompatibleValue = CompatibleValue[] | { [key in string]: CompatibleValue } | CompatiblePrimitiveValue;
@@ -195,3 +196,26 @@ const operator: OperatorValue = {
 };
 
 toValue.operator = operator;
+
+export class TestShareableObject extends ShareableObject {
+  public disposeCalled: number = 0;
+
+  protected _dispose(): void {
+    ++this.disposeCalled;
+  }
+}
+
+toValue.createSharedObject = (): {
+  object: TestShareableObject;
+  value: Value;
+} => {
+  const object = new TestShareableObject();
+  const value: Value = {
+    type: ValueType.array,
+    isReadOnly: true,
+    isExecutable: false,
+    tracker: ShareableObject.tracker,
+    array: object as unknown as IReadOnlyArray
+  };
+  return { object, value };
+};

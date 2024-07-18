@@ -1,17 +1,9 @@
 import { it, expect } from 'vitest';
 import { InternalException } from '@sdk/index.js';
-import { ShareableObject } from './ShareableObject.js';
-
-class TestObject extends ShareableObject {
-  public disposeCalled: number = 0;
-
-  protected _dispose(): void {
-    ++this.disposeCalled;
-  }
-}
+import { toValue } from '@test/index.js';
 
 it('calls _dispose on last reference count', () => {
-  const object = new TestObject();
+  const { object } = toValue.createSharedObject();
   expect(object.refCount).toStrictEqual(1);
   expect(object.disposeCalled).toStrictEqual(0);
   object.addRef();
@@ -26,7 +18,7 @@ it('calls _dispose on last reference count', () => {
 });
 
 it('detects invalid use of release', () => {
-  const object = new TestObject();
+  const { object } = toValue.createSharedObject();
   expect(object.refCount).toStrictEqual(1);
   object.release();
   expect(() => object.release()).toThrow(InternalException);

@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import type { IReadOnlyArray, MemoryType, Value } from '@api/index.js';
+import type { MemoryType, Value } from '@api/index.js';
 import { ValueType } from '@api/index.js';
 import { InternalException, RangeCheckException, checkArrayValue } from '@sdk/index.js';
-import { MemoryTracker, ShareableObject } from '@core/index.js';
+import { MemoryTracker } from '@core/index.js';
 import { AbstractValueArray } from './AbstractValueArray.js';
 import { testCheckFunction, toValue, values } from '@test/index.js';
 
@@ -35,39 +35,23 @@ class TestValueArray extends AbstractValueArray {
   }
 }
 
-class TestShareableObject extends ShareableObject {
-  public disposeCalled: number = 0;
-
-  protected _dispose(): void {
-    ++this.disposeCalled;
-  }
-}
-
 let tracker: MemoryTracker;
 let valueArray: TestValueArray;
-let sharedObject: TestShareableObject;
-let sharedValue: Value;
+let shared: ReturnType<typeof toValue.createSharedObject>;
 let initialUsedMemory: number;
 
 beforeEach(() => {
   tracker = new MemoryTracker();
   valueArray = new TestValueArray(tracker, 'user');
   initialUsedMemory = tracker.used;
-  sharedObject = new TestShareableObject();
-  sharedValue = {
-    type: ValueType.array,
-    isReadOnly: true,
-    isExecutable: false,
-    tracker: ShareableObject.tracker,
-    array: sharedObject as unknown as IReadOnlyArray
-  };
-  expect(sharedObject.refCount).toStrictEqual(1);
+  shared = toValue.createSharedObject();
+  expect(shared.object.refCount).toStrictEqual(1);
   valueArray.push(toValue(123));
   valueArray.push(toValue('abc'));
-  valueArray.push(sharedValue);
-  expect(sharedObject.refCount).toStrictEqual(2);
-  sharedObject.release();
-  expect(sharedObject.refCount).toStrictEqual(1);
+  valueArray.push(shared.value);
+  expect(shared.object.refCount).toStrictEqual(2);
+  shared.object.release();
+  expect(shared.object.refCount).toStrictEqual(1);
 });
 
 describe('AbstractValueArray.check', () => {
@@ -138,14 +122,14 @@ describe('memory', () => {
     it('releases memory and tracked values when removing items', () => {
       expect(valueArray.pop()).toStrictEqual(null);
       expect(tracker.used).toBeLessThan(memoryUsedBefore);
-      expect(sharedObject.refCount).toStrictEqual(0);
+      expect(shared.object.refCount).toStrictEqual(0);
     });
 
     it('releases memory when removing items', () => {
-      sharedObject.addRef();
-      expect(valueArray.pop()).toStrictEqual(sharedValue);
+      shared.object.addRef();
+      expect(valueArray.pop()).toStrictEqual(shared.value);
       expect(tracker.used).toBeLessThan(memoryUsedBefore);
-      expect(sharedObject.refCount).toStrictEqual(1);
+      expect(shared.object.refCount).toStrictEqual(1);
     });
 
     it('does not release memory if popImpl returns null', () => {
@@ -162,13 +146,13 @@ describe('memory', () => {
 
   it('releases memory once disposed', () => {
     expect(valueArray.release()).toStrictEqual(false);
-    expect(sharedObject.refCount).toStrictEqual(0);
+    expect(shared.object.refCount).toStrictEqual(0);
     expect(tracker.used).toStrictEqual(0);
   });
 });
 
 it('offers a Value[] reference', () => {
-  expect(valueArray.ref).toStrictEqual<Value[]>([toValue(123), toValue('abc'), sharedValue]);
+  expect(valueArray.ref).toStrictEqual<Value[]>([toValue(123), toValue('abc'), shared.value]);
 });
 
 describe('IArray', () => {
@@ -191,13 +175,13 @@ describe('IArray', () => {
   describe('set', () => {
     it('allows setting a new item', () => {
       expect(valueArray.set(3, toValue(456))).toStrictEqual(null);
-      expect(valueArray.ref).toStrictEqual<Value[]>([toValue(123), toValue('abc'), sharedValue, toValue(456)]);
+      expect(valueArray.ref).toStrictEqual<Value[]>([toValue(123), toValue('abc'), shared.value, toValue(456)]);
     });
 
     it('allows overriding an item', () => {
       const { used: memoryUsedBefore } = tracker;
       expect(valueArray.set(0, toValue(-1))).toStrictEqual(toValue(123));
-      expect(valueArray.ref).toStrictEqual<Value[]>([toValue(-1), toValue('abc'), sharedValue]);
+      expect(valueArray.ref).toStrictEqual<Value[]>([toValue(-1), toValue('abc'), shared.value]);
       expect(tracker.used).toStrictEqual(memoryUsedBefore);
     });
 
@@ -207,19 +191,19 @@ describe('IArray', () => {
 
     describe('handling tracked values', () => {
       it('increases value ref', () => {
-        expect(valueArray.set(0, sharedValue)).toStrictEqual(toValue(123));
-        expect(sharedObject.refCount).toStrictEqual(2);
+        expect(valueArray.set(0, shared.value)).toStrictEqual(toValue(123));
+        expect(shared.object.refCount).toStrictEqual(2);
       });
 
       it('releases value ref', () => {
-        sharedObject.addRef();
-        expect(valueArray.set(2, toValue(0))).toStrictEqual(sharedValue);
-        expect(sharedObject.refCount).toStrictEqual(1);
+        shared.object.addRef();
+        expect(valueArray.set(2, toValue(0))).toStrictEqual(shared.value);
+        expect(shared.object.refCount).toStrictEqual(1);
       });
 
       it('releases value ref (value is destroyed)', () => {
         expect(valueArray.set(2, toValue(0))).toStrictEqual(null);
-        expect(sharedObject.refCount).toStrictEqual(0);
+        expect(shared.object.refCount).toStrictEqual(0);
       });
     });
   });
@@ -228,13 +212,13 @@ describe('IArray', () => {
 describe('shift / unshift', () => {
   it('injects a value at the beginning of the array', () => {
     valueArray.unshift(toValue(456));
-    expect(valueArray.ref).toStrictEqual<Value[]>([toValue(456), toValue(123), toValue('abc'), sharedValue]);
+    expect(valueArray.ref).toStrictEqual<Value[]>([toValue(456), toValue(123), toValue('abc'), shared.value]);
   });
 
   it('injects a tracked value at the beginning of the array', () => {
-    valueArray.unshift(sharedValue);
-    expect(valueArray.ref).toStrictEqual<Value[]>([sharedValue, toValue(123), toValue('abc'), sharedValue]);
-    expect(sharedObject.refCount).toStrictEqual(2);
+    valueArray.unshift(shared.value);
+    expect(valueArray.ref).toStrictEqual<Value[]>([shared.value, toValue(123), toValue('abc'), shared.value]);
+    expect(shared.object.refCount).toStrictEqual(2);
   });
 
   it('removes the first value of the array', () => {
@@ -242,13 +226,13 @@ describe('shift / unshift', () => {
   });
 
   it('removes the first tracked value of the array', () => {
-    valueArray.unshift(sharedValue);
-    expect(valueArray.shift()).toStrictEqual<Value>(sharedValue);
-    expect(sharedObject.refCount).toStrictEqual(1);
+    valueArray.unshift(shared.value);
+    expect(valueArray.shift()).toStrictEqual<Value>(shared.value);
+    expect(shared.object.refCount).toStrictEqual(1);
   });
 
   it('removes the first tracked value of the array (destroyed)', () => {
-    valueArray.unshift(sharedValue);
+    valueArray.unshift(shared.value);
     valueArray.pop();
     expect(valueArray.shift()).toStrictEqual<Value | null>(null);
   });
@@ -268,36 +252,36 @@ describe('splice', () => {
   it('removes values from the array and return them', () => {
     expect(valueArray.splice(0, 3)).toStrictEqual<(Value | null)[]>([toValue(123), toValue('abc'), null]);
     expect(tracker.used).toStrictEqual(initialUsedMemory);
-    expect(sharedObject.refCount).toStrictEqual(0);
+    expect(shared.object.refCount).toStrictEqual(0);
   });
 
   it('removes and adds values to the array (1)', () => {
     expect(valueArray.splice(1, 1, toValue(456))).toStrictEqual<Value[]>([toValue('abc')]);
-    expect(valueArray.ref).toStrictEqual<Value[]>([toValue(123), toValue(456), sharedValue]);
+    expect(valueArray.ref).toStrictEqual<Value[]>([toValue(123), toValue(456), shared.value]);
   });
 
   it('removes and adds values to the array (2)', () => {
-    sharedObject.addRef();
-    expect(valueArray.splice(2, 1, toValue(456), toValue('def'))).toStrictEqual<Value[]>([sharedValue]);
+    shared.object.addRef();
+    expect(valueArray.splice(2, 1, toValue(456), toValue('def'))).toStrictEqual<Value[]>([shared.value]);
     expect(valueArray.ref).toStrictEqual<Value[]>([toValue(123), toValue('abc'), toValue(456), toValue('def')]);
-    expect(sharedObject.refCount).toStrictEqual(1);
+    expect(shared.object.refCount).toStrictEqual(1);
   });
 
   it('inserts values in the array', () => {
     expect(valueArray.splice(2, 0, toValue(456))).toStrictEqual<Value[]>([]);
-    expect(valueArray.ref).toStrictEqual<Value[]>([toValue(123), toValue('abc'), toValue(456), sharedValue]);
+    expect(valueArray.ref).toStrictEqual<Value[]>([toValue(123), toValue('abc'), toValue(456), shared.value]);
   });
 
   it('handles tracked value (add)', () => {
-    valueArray.splice(1, 1, sharedValue);
-    expect(valueArray.ref).toStrictEqual<Value[]>([toValue(123), sharedValue, sharedValue]);
-    expect(sharedObject.refCount).toStrictEqual(2);
+    valueArray.splice(1, 1, shared.value);
+    expect(valueArray.ref).toStrictEqual<Value[]>([toValue(123), shared.value, shared.value]);
+    expect(shared.object.refCount).toStrictEqual(2);
   });
 
   it('handles tracked value (add / remove)', () => {
-    valueArray.splice(2, 1, sharedValue);
-    expect(valueArray.ref).toStrictEqual<Value[]>([toValue(123), toValue('abc'), sharedValue]);
-    expect(sharedObject.refCount).toStrictEqual(1);
-    expect(sharedObject.disposeCalled).toStrictEqual(0);
+    valueArray.splice(2, 1, shared.value);
+    expect(valueArray.ref).toStrictEqual<Value[]>([toValue(123), toValue('abc'), shared.value]);
+    expect(shared.object.refCount).toStrictEqual(1);
+    expect(shared.object.disposeCalled).toStrictEqual(0);
   });
 });
