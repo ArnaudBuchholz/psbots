@@ -71,6 +71,15 @@ describe('check', () => {
   it('fails with TypeCheck on unmatched type (2)', () => {
     expect(() => stack.check(ValueType.integer, ValueType.integer)).toThrowError(TypeCheckException);
   });
+
+  it('does not addValueRef tracked values', () => {
+    const { object, value } = toValue.createSharedObject();
+    stack.push(value);
+    expect(object.refCount).toStrictEqual(2);
+    const [checkedValue] = stack.check(null);
+    expect(checkedValue).toStrictEqual(value);
+    expect(object.refCount).toStrictEqual(2);
+  });
 });
 
 describe('findMarkPos', () => {
