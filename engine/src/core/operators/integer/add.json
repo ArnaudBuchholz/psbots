@@ -1,0 +1,16 @@
+{
+  "name": "add",
+  "description": "adds two integers",
+  "labels": ["integer", "math"],
+  "signature": {
+    "input": ["integer", "integer"],
+    "output": ["integer"],
+    "exceptions": []
+  },
+  "implementation": "basic",
+  "samples": [{
+    "description": "Simple addition",
+    "in": "1 2 add",
+    "out": "3"
+  }]
+}

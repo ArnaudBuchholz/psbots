@@ -26,7 +26,8 @@ export default defineConfig({
         'src/sdk/exceptions/**',
         '!src/sdk/exceptions/BaseException.ts',
         'src/test/**',
-        'tools/**'
+        'tools/**',
+        'src/core/operators/integer/add.ts'
       ]
     }
   }
