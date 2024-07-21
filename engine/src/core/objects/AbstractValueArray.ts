@@ -15,6 +15,7 @@ export abstract class AbstractValueArray extends ShareableObject implements IArr
     }
   }
 
+  // TODO: should not be addValueRef'ed since the current object is supposed to be valid
   toValue({ isReadOnly = true, isExecutable = false }: Partial<IValuePermissions> = {}): ArrayValue {
     if (!isReadOnly && isExecutable) {
       throw new InternalException('Unsupported permissions');
@@ -72,10 +73,11 @@ export abstract class AbstractValueArray extends ShareableObject implements IArr
     if (index < 0) {
       throw new RangeCheckException();
     }
-    let previousValue: Value | null = this._values[index] ?? null;
+    let previousValue = this._values[index] ?? null;
     if (previousValue !== null && previousValue.tracker?.releaseValue(previousValue) === false) {
       previousValue = null;
     }
+    // TODO: memory ?
     value.tracker?.addValueRef(value);
     this._values[index] = value;
     return previousValue;

@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import type { MemoryType, Value } from '@api/index.js';
-import { ValueType } from '@api/index.js';
+import { USER_MEMORY_TYPE, ValueType } from '@api/index.js';
 import { InternalException, RangeCheckException, checkArrayValue } from '@sdk/index.js';
 import { MemoryTracker } from '@core/index.js';
 import { AbstractValueArray } from './AbstractValueArray.js';
@@ -42,7 +42,7 @@ let initialUsedMemory: number;
 
 beforeEach(() => {
   tracker = new MemoryTracker();
-  valueArray = new TestValueArray(tracker, 'user');
+  valueArray = new TestValueArray(tracker, USER_MEMORY_TYPE);
   initialUsedMemory = tracker.used;
   shared = toValue.createSharedObject();
   expect(shared.object.refCount).toStrictEqual(1);
@@ -109,7 +109,7 @@ describe('memory', () => {
   });
 
   it('exposes the memory type', () => {
-    expect(valueArray.getMemoryType()).toStrictEqual('user');
+    expect(valueArray.getMemoryType()).toStrictEqual(USER_MEMORY_TYPE);
   });
 
   describe('removing items', () => {
