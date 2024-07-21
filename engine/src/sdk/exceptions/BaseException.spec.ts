@@ -1,5 +1,5 @@
 import { describe, beforeAll, it, expect } from 'vitest';
-import { ExceptionDictionaryName, ExceptionType } from '@api/index.js';
+import { ExceptionDictionaryName, ExceptionType, SYSTEM_MEMORY_TYPE } from '@api/index.js';
 import { BaseException } from '@sdk/exceptions/BaseException.js';
 import { checkStringValue } from '@sdk/checks/checkValue.js';
 
@@ -48,7 +48,7 @@ describe('IReadOnlyDictionary behavior', () => {
   it('exposes type', () => {
     const typeValue = exception.lookup('type');
     checkStringValue(typeValue, { isExecutable: false });
-    expect(typeValue.string).toStrictEqual('system');
+    expect(typeValue.string).toStrictEqual(SYSTEM_MEMORY_TYPE);
   });
 
   it('exposes name', () => {
