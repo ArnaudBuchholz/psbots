@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
+import { USER_MEMORY_TYPE } from '@api/index.js';
 import type { Value } from '@api/index.js';
 import { StackUnderflowException } from '@sdk/index.js';
 import { MemoryTracker } from '@core/MemoryTracker.js';
@@ -10,7 +11,7 @@ let stack: ValueStack;
 
 beforeEach(() => {
   tracker = new MemoryTracker();
-  stack = new ValueStack(tracker, 'user');
+  stack = new ValueStack(tracker, USER_MEMORY_TYPE);
   stack.push(toValue('abc'), toValue(123));
 });
 
