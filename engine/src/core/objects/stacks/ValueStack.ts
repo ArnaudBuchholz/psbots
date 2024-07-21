@@ -5,6 +5,14 @@ import type { IStack } from '@sdk/interfaces/IStack';
 
 /** Makes push & pop manipulate the beginning of the array */
 export class ValueStack extends AbstractValueArray implements IStack {
+  get top(): Value {
+    const value = this._values[0];
+    if (value === undefined) {
+      throw new StackUnderflowException();
+    }
+    return value;
+  }
+
   protected pushImpl(value: Value): void {
     this._values.unshift(value);
   }
