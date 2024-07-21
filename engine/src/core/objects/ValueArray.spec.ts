@@ -1,4 +1,5 @@
 import { it, expect, beforeEach } from 'vitest';
+import { USER_MEMORY_TYPE } from '@api/index.js';
 import type { Value } from '@api/index.js';
 import { MemoryTracker } from '@core/MemoryTracker.js';
 import { ValueArray } from './ValueArray.js';
@@ -9,7 +10,7 @@ let array: ValueArray;
 
 beforeEach(() => {
   tracker = new MemoryTracker();
-  array = new ValueArray(tracker, 'user');
+  array = new ValueArray(tracker, USER_MEMORY_TYPE);
   array.push(toValue(1), toValue(2));
 });
 
