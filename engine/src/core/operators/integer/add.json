@@ -7,7 +7,6 @@
     "output": ["integer"],
     "exceptions": []
   },
-  "implementation": "basic",
   "samples": [{
     "description": "Simple addition",
     "in": "1 2 add",
