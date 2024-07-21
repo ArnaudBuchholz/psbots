@@ -6,6 +6,9 @@ export interface IMemoryByType {
 
 export type MemoryType = keyof IMemoryByType;
 
+export const SYSTEM_MEMORY_TYPE: MemoryType = 'system';
+export const USER_MEMORY_TYPE: MemoryType = 'user';
+
 export interface IMemoryTracker {
   /** Current memory usage */
   readonly used: number;

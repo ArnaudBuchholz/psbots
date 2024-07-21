@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { MemoryTracker } from './MemoryTracker.js';
+import { STRING_MEMORY_TYPE, MemoryTracker } from './MemoryTracker.js';
 import { toValue } from '@test/index.js';
+import { SYSTEM_MEMORY_TYPE, USER_MEMORY_TYPE } from '@api/index.js';
 import type { IMemoryByType } from '@api/index.js';
 
 describe('initial state', () => {
@@ -25,9 +26,9 @@ describe('tracking', () => {
   });
 
   it('keeps track of memory used', () => {
-    tracker.register({ type: 'system', bytes: 50 });
-    tracker.register({ type: 'string', bytes: 20 });
-    tracker.register({ type: 'user', bytes: 10 });
+    tracker.register({ type: SYSTEM_MEMORY_TYPE, bytes: 50 });
+    tracker.register({ type: STRING_MEMORY_TYPE, bytes: 20 });
+    tracker.register({ type: USER_MEMORY_TYPE, bytes: 10 });
     expect(tracker.used).toStrictEqual(80);
     expect(tracker.byType).toStrictEqual<IMemoryByType>({
       system: 50,

@@ -1,6 +1,8 @@
 import type { Value, IValueTracker, IMemoryTracker, MemoryType, IMemoryByType } from '@api/index.js';
 import { VmOverflowException, checkStringValue } from '@sdk/index.js';
 
+export const STRING_MEMORY_TYPE: MemoryType = 'string';
+
 const stringSizer = (data: string): number => {
   const encoder = new TextEncoder();
   const buffer = encoder.encode(data);
@@ -50,7 +52,7 @@ export class MemoryTracker implements IValueTracker, IMemoryTracker {
         this._strings.push(string);
         this._stringsRefCount.push(1);
         this.register({
-          type: 'string',
+          type: STRING_MEMORY_TYPE,
           bytes: size,
           integers: 1
         });
@@ -60,7 +62,7 @@ export class MemoryTracker implements IValueTracker, IMemoryTracker {
       return;
     }
     this.register({
-      type: 'string',
+      type: STRING_MEMORY_TYPE,
       bytes: size
     });
   }
@@ -72,7 +74,7 @@ export class MemoryTracker implements IValueTracker, IMemoryTracker {
       const refCount = --this._stringsRefCount[pos]!; // _strings & _stringsRefCount are in sync
       if (refCount === 0) {
         this.register({
-          type: 'string',
+          type: STRING_MEMORY_TYPE,
           bytes: -size,
           integers: -1
         });
@@ -81,7 +83,7 @@ export class MemoryTracker implements IValueTracker, IMemoryTracker {
       return true;
     }
     this.register({
-      type: 'string',
+      type: STRING_MEMORY_TYPE,
       bytes: -size
     });
     return false;
