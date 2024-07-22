@@ -1,6 +1,8 @@
 import { it, expect } from 'vitest';
+import { ValueType } from '@api/index.js';
 import { InternalException } from '@sdk/index.js';
 import { toValue } from '@test/index.js';
+import { ShareableObject } from './ShareableObject';
 
 it('calls _dispose on last reference count', () => {
   const { object } = toValue.createSharedObject();
@@ -22,4 +24,8 @@ it('detects invalid use of release', () => {
   expect(object.refCount).toStrictEqual(1);
   object.release();
   expect(() => object.release()).toThrow(InternalException);
+});
+
+it('cannot be used to track any value', () => {
+  expect(() => ShareableObject.tracker.releaseValue(toValue(123))).toThrowError();
 });
