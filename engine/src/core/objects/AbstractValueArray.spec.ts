@@ -93,9 +93,9 @@ describe('toValue', () => {
     expect(value.isExecutable).toStrictEqual(true);
   });
 
-  it('adds a reference count', () => {
+  it('does *not* add a reference count', () => {
     valueArray.toValue();
-    expect(valueArray.refCount).toStrictEqual(2);
+    expect(valueArray.refCount).toStrictEqual(1);
   });
 });
 

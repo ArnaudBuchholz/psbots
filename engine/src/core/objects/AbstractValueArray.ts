@@ -15,12 +15,11 @@ export abstract class AbstractValueArray extends ShareableObject implements IArr
     }
   }
 
-  // TODO: should not be addValueRef'ed since the current object is supposed to be valid
+  /** returned value is not addValueRef'ed */
   toValue({ isReadOnly = true, isExecutable = false }: Partial<IValuePermissions> = {}): ArrayValue {
     if (!isReadOnly && isExecutable) {
       throw new InternalException('Unsupported permissions');
     }
-    this.addRef();
     return {
       type: ValueType.array,
       isReadOnly,
