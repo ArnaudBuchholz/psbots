@@ -1,5 +1,9 @@
 # TODO
 
+## Guidelines
+
+* Functions returning a value that may be tracked should not `addValueRef` : the result value might not be captured.
+
 ## Exceptions
 
 Exception handling must be done in custom `try`/`catch` blocks and triggers manual unstacking.
