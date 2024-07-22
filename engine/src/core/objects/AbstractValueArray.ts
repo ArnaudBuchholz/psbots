@@ -73,10 +73,17 @@ export abstract class AbstractValueArray extends ShareableObject implements IArr
       throw new RangeCheckException();
     }
     let previousValue = this._values[index] ?? null;
-    if (previousValue !== null && previousValue.tracker?.releaseValue(previousValue) === false) {
-      previousValue = null;
+    if (previousValue !== null) {
+      if (previousValue.tracker?.releaseValue(previousValue) === false) {
+        previousValue = null;
+      }
+    } else {
+      this._memoryTracker.register({
+        type: this._memoryType,
+        pointers: 1,
+        values: 1
+      });
     }
-    // TODO: memory ?
     value.tracker?.addValueRef(value);
     this._values[index] = value;
     return previousValue;

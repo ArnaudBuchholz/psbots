@@ -104,6 +104,18 @@ describe('memory', () => {
     expect(tracker.used).not.toStrictEqual(0);
   });
 
+  it('adds memory when setting new item', () => {
+    const initial = tracker.used;
+    valueArray.set(valueArray.length, toValue(123));
+    expect(tracker.used).toBeGreaterThan(initial);
+  });
+
+  it('does not change memory when replacing an item', () => {
+    const initial = tracker.used;
+    valueArray.set(valueArray.length - 1, toValue(123));
+    expect(tracker.used).toStrictEqual(initial);
+  });
+
   it('exposes the memory tracker', () => {
     expect(valueArray.getMemoryTracker()).toStrictEqual(tracker);
   });
