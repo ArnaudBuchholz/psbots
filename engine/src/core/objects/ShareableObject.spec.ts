@@ -1,8 +1,7 @@
 import { it, expect } from 'vitest';
-import { ValueType } from '@api/index.js';
 import { InternalException } from '@sdk/index.js';
 import { toValue } from '@test/index.js';
-import { ShareableObject } from './ShareableObject';
+import { ShareableObject } from './ShareableObject.js';
 
 it('calls _dispose on last reference count', () => {
   const { object } = toValue.createSharedObject();
