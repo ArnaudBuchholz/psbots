@@ -1,7 +1,7 @@
 import type { MockInstance } from 'vitest';
 import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest';
 import type { Value } from '@api/index.js';
-import { ValueType } from '@api/index.js';
+import { USER_MEMORY_TYPE, ValueType } from '@api/index.js';
 import { StackUnderflowException, TypeCheckException, UnmatchedMarkException } from '@sdk/index.js';
 import { MemoryTracker } from '@core/MemoryTracker.js';
 import { ValueStack } from './ValueStack.js';
@@ -22,7 +22,7 @@ afterAll(() => {
 
 beforeEach(() => {
   tracker = new MemoryTracker();
-  stack = new OperandStack(tracker, 'user');
+  stack = new OperandStack(tracker, USER_MEMORY_TYPE);
   stack.push(toValue('abc'), toValue(123));
 });
 
