@@ -1,6 +1,7 @@
 import type { ValueType, Value } from '@api/index.js';
 import type { IStack } from '@sdk/interfaces/IStack.js';
 
+/** Operand stack */
 export interface IOperandStack extends IStack {
   popAndPush: (count: number, ...values: readonly Value[]) => void;
   /** The returned values are not addValueRef'ed (if tracked) */

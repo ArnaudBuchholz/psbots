@@ -6,6 +6,7 @@ export type DictionaryStackWhereResult = {
   value: Value;
 } | null;
 
+/** Dictionary stack */
 export interface IDictionaryStack extends IStack {
   readonly host: IReadOnlyDictionary;
   readonly system: IReadOnlyDictionary;
