@@ -1,10 +1,10 @@
 import type { Value } from '@api/index.js';
 import { StackUnderflowException } from '@sdk/index.js';
-import { AbstractValueArray } from '@core/objects/AbstractValueArray.js';
+import { AbstractValueContainer } from '@core/objects/AbstractValueContainer.js';
 import type { IStack } from '@sdk/interfaces/IStack';
 
 /** Makes push & pop manipulate the beginning of the array */
-export class ValueStack extends AbstractValueArray implements IStack {
+export class ValueStack extends AbstractValueContainer implements IStack {
   get top(): Value {
     const value = this._values[0];
     if (value === undefined) {

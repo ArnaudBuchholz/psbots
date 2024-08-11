@@ -1,25 +1,20 @@
-import type { ArrayValue, IArray, IValuePermissions, MemoryType, Value } from '@api/index.js';
+import type { ArrayValue, IReadOnlyArray, IValuePermissions, MemoryType, Value } from '@api/index.js';
 import { ValueType } from '@api/index.js';
-import { isObject, InternalException, RangeCheckException } from '@sdk/index.js';
+import { isObject, InternalException } from '@sdk/index.js';
 import type { MemoryTracker } from '@core/index.js';
 import { ShareableObject } from '@core/objects/ShareableObject.js';
 
 const NO_VALUE = 'No value';
-const EMPTY_ARRAY = 'Empty array';
 const NOT_AN_ABSTRACTVALUEARRAY = 'Not an AbstractValueArray';
 
-export abstract class AbstractValueArray extends ShareableObject implements IArray {
-  static check(value: unknown): asserts value is AbstractValueArray {
-    if (!isObject(value) || !(value instanceof AbstractValueArray)) {
+export abstract class AbstractValueContainer extends ShareableObject implements IReadOnlyArray {
+  static check(value: unknown): asserts value is AbstractValueContainer {
+    if (!isObject(value) || !(value instanceof AbstractValueContainer)) {
       throw new InternalException(NOT_AN_ABSTRACTVALUEARRAY);
     }
   }
 
-  /** returned value is not addValueRef'ed */
-  toValue({ isReadOnly = true, isExecutable = false }: Partial<IValuePermissions> = {}): ArrayValue {
-    if (!isReadOnly && isExecutable) {
-      throw new InternalException('Unsupported permissions');
-    }
+  protected _toValue({ isReadOnly, isExecutable }: IValuePermissions): ArrayValue {
     return {
       type: ValueType.array,
       isReadOnly,
@@ -27,6 +22,14 @@ export abstract class AbstractValueArray extends ShareableObject implements IArr
       tracker: ShareableObject.tracker,
       array: this
     } as ArrayValue;
+  }
+
+  /** returned value is not addValueRef'ed */
+  toValue({ isReadOnly = true, isExecutable = false }: Partial<IValuePermissions> = {}): ArrayValue {
+    if (!isReadOnly || isExecutable) {
+      throw new InternalException('Unsupported permissions');
+    }
+    return this._toValue({ isReadOnly, isExecutable });
   }
 
   protected readonly _values: Value[] = [];
@@ -54,7 +57,7 @@ export abstract class AbstractValueArray extends ShareableObject implements IArr
     return this._values;
   }
 
-  // region IArray
+  // region IReadOnlyArray
 
   get length(): number {
     return this._values.length;
@@ -68,28 +71,7 @@ export abstract class AbstractValueArray extends ShareableObject implements IArr
     return value;
   }
 
-  public set(index: number, value: Value): Value | null {
-    if (index < 0) {
-      throw new RangeCheckException();
-    }
-    let previousValue = this._values[index] ?? null;
-    if (previousValue !== null) {
-      if (previousValue.tracker?.releaseValue(previousValue) === false) {
-        previousValue = null;
-      }
-    } else {
-      this._memoryTracker.register({
-        type: this._memoryType,
-        pointers: 1,
-        values: 1
-      });
-    }
-    value.tracker?.addValueRef(value);
-    this._values[index] = value;
-    return previousValue;
-  }
-
-  // endregion IArray
+  // endregion IReadOnlyArray
 
   /** puts the value in the right place */
   protected abstract pushImpl(value: Value): void;
@@ -157,27 +139,11 @@ export abstract class AbstractValueArray extends ShareableObject implements IArr
     });
   }
 
-  shift(): Value | null {
-    const value = this._values.shift();
-    if (value === undefined) {
-      throw new InternalException(EMPTY_ARRAY);
-    }
-    if (value.tracker?.releaseValue(value) === false) {
-      return null;
-    }
-    return value;
-  }
-
-  unshift(value: Value): void {
-    value.tracker?.addValueRef(value);
-    this._values.unshift(value);
-  }
-
   some(predicate: (value: Value, index: number) => boolean): boolean {
     return this._values.some(predicate);
   }
 
-  splice(start: number, deleteCount: number, ...values: Value[]): (Value | null)[] {
+  protected splice(start: number, deleteCount: number, ...values: Value[]): (Value | null)[] {
     const removedValues = this._values.splice(start, deleteCount, ...values);
     const diff = values.length - removedValues.length;
     this._memoryTracker.register({

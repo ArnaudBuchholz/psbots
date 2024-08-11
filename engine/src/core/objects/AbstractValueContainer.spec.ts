@@ -1,12 +1,12 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import type { MemoryType, Value } from '@api/index.js';
 import { USER_MEMORY_TYPE, ValueType } from '@api/index.js';
-import { InternalException, RangeCheckException, checkArrayValue } from '@sdk/index.js';
+import { InternalException, checkArrayValue } from '@sdk/index.js';
 import { MemoryTracker } from '@core/index.js';
-import { AbstractValueArray } from './AbstractValueArray.js';
+import { AbstractValueContainer } from './AbstractValueContainer.js';
 import { testCheckFunction, toValue, values } from '@test/index.js';
 
-class TestValueArray extends AbstractValueArray {
+class TestValueArray extends AbstractValueContainer {
   protected pushImpl(value: Value): void {
     this._values.push(value);
   }
@@ -33,6 +33,10 @@ class TestValueArray extends AbstractValueArray {
   public setPopNull(): void {
     this._popNull = true;
   }
+
+  public override splice(start: number, deleteCount: number, ...values: Value[]): (Value | null)[] {
+    return super.splice(start, deleteCount, ...values);
+  }
 }
 
 let tracker: MemoryTracker;
@@ -46,9 +50,7 @@ beforeEach(() => {
   initialUsedMemory = tracker.used;
   shared = toValue.createSharedObject();
   expect(shared.object.refCount).toStrictEqual(1);
-  valueArray.push(toValue(123));
-  valueArray.push(toValue('abc'));
-  valueArray.push(shared.value);
+  valueArray.push(toValue(123), toValue('abc'), shared.value);
   expect(shared.object.refCount).toStrictEqual(2);
   shared.object.release();
   expect(shared.object.refCount).toStrictEqual(1);
@@ -57,19 +59,27 @@ beforeEach(() => {
 describe('AbstractValueArray.check', () => {
   // valueArray being set in beforeEach, it can't be used in testCheckFunction
   it('validates an AbstractValueArray', () => {
-    expect(() => AbstractValueArray.check(valueArray)).not.toThrowError();
+    expect(() => AbstractValueContainer.check(valueArray)).not.toThrowError();
   });
 
-  testCheckFunction<AbstractValueArray>({
-    check: AbstractValueArray.check,
+  testCheckFunction<AbstractValueContainer>({
+    check: AbstractValueContainer.check,
     valid: [],
     invalid: [...values.all]
   });
 });
 
 describe('toValue', () => {
-  it('fails on invalid combinations', () => {
+  it('fails on invalid combinations (!isReadOnly/isExecutable)', () => {
     expect(() => valueArray.toValue({ isReadOnly: false, isExecutable: true })).toThrowError();
+  });
+
+  it('fails on invalid combinations (!isReadOnly/!isExecutable)', () => {
+    expect(() => valueArray.toValue({ isReadOnly: false, isExecutable: false })).toThrowError();
+  });
+
+  it('fails on invalid combinations (isReadOnly/isExecutable)', () => {
+    expect(() => valueArray.toValue({ isReadOnly: true, isExecutable: true })).toThrowError();
   });
 
   it('returns a valid array value (default: isReadOnly & !isExecutable)', () => {
@@ -77,20 +87,6 @@ describe('toValue', () => {
     expect(() => checkArrayValue(value)).not.toThrowError();
     expect(value.isReadOnly).toStrictEqual(true);
     expect(value.isExecutable).toStrictEqual(false);
-  });
-
-  it('returns a valid array value (!isReadOnly & !isExecutable)', () => {
-    const value = valueArray.toValue({ isReadOnly: false });
-    expect(() => checkArrayValue(value)).not.toThrowError();
-    expect(value.isReadOnly).toStrictEqual(false);
-    expect(value.isExecutable).toStrictEqual(false);
-  });
-
-  it('returns a valid array value (!isReadOnly & isExecutable)', () => {
-    const value = valueArray.toValue({ isReadOnly: true, isExecutable: true });
-    expect(() => checkArrayValue(value)).not.toThrowError();
-    expect(value.isReadOnly).toStrictEqual(true);
-    expect(value.isExecutable).toStrictEqual(true);
   });
 
   it('does *not* add a reference count', () => {
@@ -102,18 +98,6 @@ describe('toValue', () => {
 describe('memory', () => {
   it('tracks memory used', () => {
     expect(tracker.used).not.toStrictEqual(0);
-  });
-
-  it('adds memory when setting new item', () => {
-    const initial = tracker.used;
-    valueArray.set(valueArray.length, toValue(123));
-    expect(tracker.used).toBeGreaterThan(initial);
-  });
-
-  it('does not change memory when replacing an item', () => {
-    const initial = tracker.used;
-    valueArray.set(valueArray.length - 1, toValue(123));
-    expect(tracker.used).toStrictEqual(initial);
   });
 
   it('exposes the memory tracker', () => {
@@ -167,7 +151,7 @@ it('offers a Value[] reference', () => {
   expect(valueArray.ref).toStrictEqual<Value[]>([toValue(123), toValue('abc'), shared.value]);
 });
 
-describe('IArray', () => {
+describe('IReadOnlyArray', () => {
   it('exposes length', () => {
     expect(valueArray.length).toStrictEqual(3);
   });
@@ -182,76 +166,6 @@ describe('IArray', () => {
 
   it('controls boundaries (0-based)', () => {
     expect(valueArray.at(valueArray.length)).toStrictEqual(null);
-  });
-
-  describe('set', () => {
-    it('allows setting a new item', () => {
-      expect(valueArray.set(3, toValue(456))).toStrictEqual(null);
-      expect(valueArray.ref).toStrictEqual<Value[]>([toValue(123), toValue('abc'), shared.value, toValue(456)]);
-    });
-
-    it('allows overriding an item', () => {
-      const { used: memoryUsedBefore } = tracker;
-      expect(valueArray.set(0, toValue(-1))).toStrictEqual(toValue(123));
-      expect(valueArray.ref).toStrictEqual<Value[]>([toValue(-1), toValue('abc'), shared.value]);
-      expect(tracker.used).toStrictEqual(memoryUsedBefore);
-    });
-
-    it('fails with RangeCheckException on invalid index', () => {
-      expect(() => valueArray.set(-1, toValue(0))).toThrowError(RangeCheckException);
-    });
-
-    describe('handling tracked values', () => {
-      it('increases value ref', () => {
-        expect(valueArray.set(0, shared.value)).toStrictEqual(toValue(123));
-        expect(shared.object.refCount).toStrictEqual(2);
-      });
-
-      it('releases value ref', () => {
-        shared.object.addRef();
-        expect(valueArray.set(2, toValue(0))).toStrictEqual(shared.value);
-        expect(shared.object.refCount).toStrictEqual(1);
-      });
-
-      it('releases value ref (value is destroyed)', () => {
-        expect(valueArray.set(2, toValue(0))).toStrictEqual(null);
-        expect(shared.object.refCount).toStrictEqual(0);
-      });
-    });
-  });
-});
-
-describe('shift / unshift', () => {
-  it('injects a value at the beginning of the array', () => {
-    valueArray.unshift(toValue(456));
-    expect(valueArray.ref).toStrictEqual<Value[]>([toValue(456), toValue(123), toValue('abc'), shared.value]);
-  });
-
-  it('injects a tracked value at the beginning of the array', () => {
-    valueArray.unshift(shared.value);
-    expect(valueArray.ref).toStrictEqual<Value[]>([shared.value, toValue(123), toValue('abc'), shared.value]);
-    expect(shared.object.refCount).toStrictEqual(2);
-  });
-
-  it('removes the first value of the array', () => {
-    expect(valueArray.shift()).toStrictEqual<Value>(toValue(123));
-  });
-
-  it('removes the first tracked value of the array', () => {
-    valueArray.unshift(shared.value);
-    expect(valueArray.shift()).toStrictEqual<Value>(shared.value);
-    expect(shared.object.refCount).toStrictEqual(1);
-  });
-
-  it('removes the first tracked value of the array (destroyed)', () => {
-    valueArray.unshift(shared.value);
-    valueArray.pop();
-    expect(valueArray.shift()).toStrictEqual<Value | null>(null);
-  });
-
-  it('throws an error when no more items are available', () => {
-    valueArray.clear();
-    expect(() => valueArray.shift()).toThrowError(InternalException);
   });
 });
 
