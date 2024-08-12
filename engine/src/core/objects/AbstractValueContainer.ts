@@ -5,12 +5,12 @@ import type { MemoryTracker } from '@core/index.js';
 import { ShareableObject } from '@core/objects/ShareableObject.js';
 
 const NO_VALUE = 'No value';
-const NOT_AN_ABSTRACTVALUEARRAY = 'Not an AbstractValueArray';
+const NOT_AN_ABSTRACTVALUECONTAINER = 'Not an AbstractValueContainer';
 
 export abstract class AbstractValueContainer extends ShareableObject implements IReadOnlyArray {
   static check(value: unknown): asserts value is AbstractValueContainer {
     if (!isObject(value) || !(value instanceof AbstractValueContainer)) {
-      throw new InternalException(NOT_AN_ABSTRACTVALUEARRAY);
+      throw new InternalException(NOT_AN_ABSTRACTVALUECONTAINER);
     }
   }
 
@@ -116,49 +116,16 @@ export abstract class AbstractValueContainer extends ShareableObject implements 
   }
 
   clear(): void {
-    for (const value of this._values) {
-      value.tracker?.releaseValue(value);
+    while (this.length > 0) {
+      this.pop();
     }
-    this._memoryTracker.register({
-      type: this._memoryType,
-      pointers: -this._values.length,
-      values: -this._values.length
-    });
-    this._values.length = 0;
   }
 
   protected _dispose(): void {
     this.clear();
     this._memoryTracker.register({
       type: this._memoryType,
-      values: -this._values.length
-    });
-    this._memoryTracker.register({
-      type: this._memoryType,
       pointers: -1
-    });
-  }
-
-  some(predicate: (value: Value, index: number) => boolean): boolean {
-    return this._values.some(predicate);
-  }
-
-  protected splice(start: number, deleteCount: number, ...values: Value[]): (Value | null)[] {
-    const removedValues = this._values.splice(start, deleteCount, ...values);
-    const diff = values.length - removedValues.length;
-    this._memoryTracker.register({
-      type: this._memoryType,
-      pointers: diff,
-      values: diff
-    });
-    for (const value of values) {
-      value.tracker?.addValueRef(value);
-    }
-    return removedValues.map((value) => {
-      if (value.tracker?.releaseValue(value) === false) {
-        return null;
-      }
-      return value;
     });
   }
 }

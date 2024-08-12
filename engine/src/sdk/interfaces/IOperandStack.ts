@@ -3,7 +3,6 @@ import type { IStack } from '@sdk/interfaces/IStack.js';
 
 /** Operand stack */
 export interface IOperandStack extends IStack {
-  popAndPush: (count: number, ...values: readonly Value[]) => void;
   /** The returned values are not addValueRef'ed (if tracked) */
   check: (<T extends ValueType>(type: T | null) => readonly [Value<T>]) &
     (<T1 extends ValueType, T2 extends ValueType>(

@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import type { MemoryType, Value } from '@api/index.js';
-import { USER_MEMORY_TYPE, ValueType } from '@api/index.js';
+import { USER_MEMORY_TYPE } from '@api/index.js';
 import { InternalException, checkArrayValue } from '@sdk/index.js';
 import { MemoryTracker } from '@core/index.js';
 import { AbstractValueContainer } from './AbstractValueContainer.js';
@@ -33,21 +33,15 @@ class TestValueArray extends AbstractValueContainer {
   public setPopNull(): void {
     this._popNull = true;
   }
-
-  public override splice(start: number, deleteCount: number, ...values: Value[]): (Value | null)[] {
-    return super.splice(start, deleteCount, ...values);
-  }
 }
 
 let tracker: MemoryTracker;
 let valueArray: TestValueArray;
 let shared: ReturnType<typeof toValue.createSharedObject>;
-let initialUsedMemory: number;
 
 beforeEach(() => {
   tracker = new MemoryTracker();
   valueArray = new TestValueArray(tracker, USER_MEMORY_TYPE);
-  initialUsedMemory = tracker.used;
   shared = toValue.createSharedObject();
   expect(shared.object.refCount).toStrictEqual(1);
   valueArray.push(toValue(123), toValue('abc'), shared.value);
@@ -166,48 +160,5 @@ describe('IReadOnlyArray', () => {
 
   it('controls boundaries (0-based)', () => {
     expect(valueArray.at(valueArray.length)).toStrictEqual(null);
-  });
-});
-
-it('offers some', () => {
-  expect(valueArray.some((value) => value.type === ValueType.integer && value.integer === 123)).toStrictEqual(true);
-  expect(valueArray.some((value) => value.type === ValueType.integer && value.integer === 456)).toStrictEqual(false);
-});
-
-describe('splice', () => {
-  it('removes values from the array and return them', () => {
-    expect(valueArray.splice(0, 3)).toStrictEqual<(Value | null)[]>([toValue(123), toValue('abc'), null]);
-    expect(tracker.used).toStrictEqual(initialUsedMemory);
-    expect(shared.object.refCount).toStrictEqual(0);
-  });
-
-  it('removes and adds values to the array (1)', () => {
-    expect(valueArray.splice(1, 1, toValue(456))).toStrictEqual<Value[]>([toValue('abc')]);
-    expect(valueArray.ref).toStrictEqual<Value[]>([toValue(123), toValue(456), shared.value]);
-  });
-
-  it('removes and adds values to the array (2)', () => {
-    shared.object.addRef();
-    expect(valueArray.splice(2, 1, toValue(456), toValue('def'))).toStrictEqual<Value[]>([shared.value]);
-    expect(valueArray.ref).toStrictEqual<Value[]>([toValue(123), toValue('abc'), toValue(456), toValue('def')]);
-    expect(shared.object.refCount).toStrictEqual(1);
-  });
-
-  it('inserts values in the array', () => {
-    expect(valueArray.splice(2, 0, toValue(456))).toStrictEqual<Value[]>([]);
-    expect(valueArray.ref).toStrictEqual<Value[]>([toValue(123), toValue('abc'), toValue(456), shared.value]);
-  });
-
-  it('handles tracked value (add)', () => {
-    valueArray.splice(1, 1, shared.value);
-    expect(valueArray.ref).toStrictEqual<Value[]>([toValue(123), shared.value, shared.value]);
-    expect(shared.object.refCount).toStrictEqual(2);
-  });
-
-  it('handles tracked value (add / remove)', () => {
-    valueArray.splice(2, 1, shared.value);
-    expect(valueArray.ref).toStrictEqual<Value[]>([toValue(123), toValue('abc'), shared.value]);
-    expect(shared.object.refCount).toStrictEqual(1);
-    expect(shared.object.disposeCalled).toStrictEqual(0);
   });
 });

@@ -7,13 +7,6 @@ import { ValueStack } from './ValueStack.js';
 export class OperandStack extends ValueStack implements IOperandStack {
   // region IOperandStack
 
-  popAndPush(count: number, ...values: readonly Value[]): void {
-    if (count > this._values.length) {
-      throw new StackUnderflowException();
-    }
-    this.splice(0, count, ...values);
-  }
-
   check<T extends ValueType>(type: T | null): readonly [Value<T>];
   check<T1 extends ValueType, T2 extends ValueType>(
     type1: T1 | null,

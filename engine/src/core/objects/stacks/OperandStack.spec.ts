@@ -1,40 +1,18 @@
-import type { MockInstance } from 'vitest';
-import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import type { Value } from '@api/index.js';
 import { USER_MEMORY_TYPE, ValueType } from '@api/index.js';
 import { StackUnderflowException, TypeCheckException, UnmatchedMarkException } from '@sdk/index.js';
 import { MemoryTracker } from '@core/MemoryTracker.js';
-import { ValueStack } from './ValueStack.js';
 import { OperandStack } from './OperandStack.js';
 import { toValue } from '@test/index.js';
 
 let tracker: MemoryTracker;
 let stack: OperandStack;
-let mockSplice: MockInstance;
-
-beforeAll(() => {
-  mockSplice = vi.spyOn(ValueStack.prototype, 'splice');
-});
-
-afterAll(() => {
-  mockSplice.mockRestore();
-});
 
 beforeEach(() => {
   tracker = new MemoryTracker();
   stack = new OperandStack(tracker, USER_MEMORY_TYPE);
   stack.push(toValue('abc'), toValue(123));
-});
-
-describe('popAndPush', () => {
-  it('leverages ValueStack::splice for popAndPush', () => {
-    stack.popAndPush(1);
-    expect(mockSplice).toHaveBeenCalledWith(0, 1);
-  });
-
-  it('throws StackUnderflowException if trying to remove too many items', () => {
-    expect(() => stack.popAndPush(3)).toThrowError(StackUnderflowException);
-  });
 });
 
 describe('check', () => {
