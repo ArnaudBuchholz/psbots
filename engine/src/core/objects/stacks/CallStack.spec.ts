@@ -25,15 +25,17 @@ describe('IDictionary', () => {
 
   it('associates a dictionary on the current item', () => {
     callstack.push(toValue(123));
+    const { used: memoryBefore } = tracker;
     expect(callstack.def('test', toValue('abc'))).toStrictEqual(null);
+    expect(tracker.used).toBeGreaterThan(memoryBefore);
     expect(callstack.lookup('test')).toStrictEqual(toValue('abc'));
   });
 
   it('destroys the dictionary when popping the item', () => {
-    const { used } = tracker;
+    const { used: initialMemory } = tracker;
     callstack.push(toValue(123));
     expect(callstack.def('test', toValue('abc'))).toStrictEqual(null);
     callstack.pop();
-    expect(tracker.used).toStrictEqual(used);
+    expect(tracker.used).toStrictEqual(initialMemory);
   });
 });
