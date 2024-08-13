@@ -7,4 +7,5 @@ export * from './IException.js';
 export * from './IMemoryTracker.js';
 export * from './IReadOnlyArray.js';
 export * from './IReadOnlyDictionary.js';
+export * from './IState.js';
 export * from './IValueTracker.js';
