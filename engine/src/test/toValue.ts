@@ -106,6 +106,9 @@ function toIDictionary(mapping: ValueDictionary): IDictionary {
   });
 }
 
+export function toValue(value: boolean, readOnly?: boolean): Value<ValueType.boolean>;
+export function toValue(value: number, readOnly?: boolean): Value<ValueType.integer>;
+export function toValue(value: string, readOnly?: boolean): Value<ValueType.string>;
 export function toValue(value: CompatibleValue[], readOnly?: boolean): ArrayValue;
 export function toValue(value: { [key in string]: CompatibleValue }, readOnly?: boolean): DictionaryValue;
 export function toValue(value: CompatibleValue, readOnly?: boolean): Value;
