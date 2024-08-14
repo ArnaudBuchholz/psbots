@@ -10,10 +10,10 @@ import type {
   Value
 } from '@api/index.js';
 import { ValueType } from '@api/index.js';
-import { isObject } from '@sdk/index.js';
+import { IOperator, isObject } from '@sdk/index.js';
 import { ShareableObject } from '@core/index.js';
 
-export type CompatiblePrimitiveValue = string | number | boolean | Value;
+export type CompatiblePrimitiveValue = string | number | boolean | Value | Function;
 export type CompatibleValue = CompatibleValue[] | { [key in string]: CompatibleValue } | CompatiblePrimitiveValue;
 
 function isValue(value: unknown): value is Value {
@@ -109,6 +109,7 @@ function toIDictionary(mapping: ValueDictionary): IDictionary {
 export function toValue(value: boolean, readOnly?: boolean): Value<ValueType.boolean>;
 export function toValue(value: number, readOnly?: boolean): Value<ValueType.integer>;
 export function toValue(value: string, readOnly?: boolean): Value<ValueType.string>;
+export function toValue(value: Function, readOnly?: boolean): Value<ValueType.operator>;
 export function toValue(value: CompatibleValue[], readOnly?: boolean): ArrayValue;
 export function toValue(value: { [key in string]: CompatibleValue }, readOnly?: boolean): DictionaryValue;
 export function toValue(value: CompatibleValue, readOnly?: boolean): Value;
@@ -143,6 +144,17 @@ export function toValue(value: CompatibleValue, readOnly: boolean = false): Valu
       type: ValueType.integer,
       integer: value
     };
+  }
+  if (typeof value === 'function') {
+    return {
+      ...common,
+      isExecutable: true,
+      type: ValueType.operator,
+      operator: {
+        name: value.name,
+        implementation: value
+      } as IOperator
+    }
   }
   if (Array.isArray(value)) {
     if (readOnly) {
