@@ -1,4 +1,4 @@
-import type { StateFactorySettings /*, Value */ } from '@api/index.js';
+import type { StateFactorySettings, Value } from '@api/index.js';
 import { SYSTEM_MEMORY_TYPE } from '@api/index.js';
 import type { IInternalState } from '@sdk/interfaces/IInternalState.js';
 import { MemoryTracker } from '@core/MemoryTracker.js';
@@ -45,7 +45,7 @@ export class State implements IInternalState {
     return this._dictionaries;
   }
 
-  *process(/*values: Iterator<Value>*/): Generator {
+  *process(values: Value[] | Generator<Value>): Generator {
     this._idle = false;
     // Add to call stack the fact that a source has been injected
     // process values

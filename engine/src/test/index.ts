@@ -4,3 +4,4 @@ export * from './operator.js';
 export * from './stringify.js';
 export * from './toValue.js';
 export * from './values.js';
+export * from './wait-for-generator.js';

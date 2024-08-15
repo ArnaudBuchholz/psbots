@@ -8,5 +8,5 @@ export interface IState {
   readonly memoryTracker: IMemoryTracker;
   readonly operands: IReadOnlyArray;
   readonly dictionaries: IReadOnlyArray;
-  process: (values: Iterator<Value>) => Generator;
+  process: (values: Value[] | Generator<Value>) => Generator;
 }
