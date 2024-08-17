@@ -1,13 +1,8 @@
-import type { IReadOnlyDictionary } from '@api/interfaces/IReadOnlyDictionary.js';
 import type { IState } from '@api/interfaces/IState.js';
+import type { StateFactorySettings } from '@core/state/State.js';
 import { State } from '@core/state/State.js';
 
-export interface StateFactorySettings {
-  /** Augment the list of known names */
-  hostDictionary?: IReadOnlyDictionary;
-  /** Limit the maximum of memory allowed for the state */
-  maxMemoryBytes?: number;
-}
+export { StateFactorySettings } from '@core/state/State.js';
 
 /** State factory */
 export function createState(settings?: StateFactorySettings): IState {
