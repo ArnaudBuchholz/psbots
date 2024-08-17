@@ -1,4 +1,4 @@
-import type { Value, IReadOnlyDictionary } from '@api/index.js';
+import type { Value, IReadOnlyDictionary, ValueStream } from '@api/index.js';
 import { SYSTEM_MEMORY_TYPE } from '@api/index.js';
 import type { IInternalState } from '@sdk/interfaces/IInternalState.js';
 import { MemoryTracker } from '@core/MemoryTracker.js';
@@ -50,13 +50,16 @@ export class State implements IInternalState {
     return this._dictionaries;
   }
 
-  *process(/*values: Value[] | Generator<Value>*/): Generator {
-    // Add to call stack the fact that a source has been injected
-    // process values
-    // for (const value of values) {
-    yield;
-    // }
-    // Remove from the stack
+  *process(values: ValueStream): Generator {
+    // TODO: State is not set upon call
+    for (const value of values) {
+      this.calls.push(value);
+      yield;
+      while (this.calls.length !== 0) {
+        this.cycle();
+        yield;
+      }
+    }
   }
 
   // endregion IState
@@ -71,4 +74,9 @@ export class State implements IInternalState {
   preventCall() {}
 
   // endregion IInternalState
+
+  cycle() {
+    // const { type } = this._calls.top;
+    this._calls.pop();
+  }
 }

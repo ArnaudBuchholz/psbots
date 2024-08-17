@@ -1,5 +1,6 @@
 import { it, expect, beforeEach } from 'vitest';
-import { parse, type Value } from '@api/index.js';
+import { parse } from '@api/index.js';
+import type { Value } from '@api/index.js';
 import { State } from './State.js';
 import { waitForGenerator, toValue } from '@test/index.js';
 
@@ -25,4 +26,4 @@ it('processes a generator stream', () => {
   waitForGenerator(generator);
   expect(state.idle).toStrictEqual(true);
   expect(state.operands.ref).toStrictEqual<Value[]>([toValue(123)]);
-})
+});
