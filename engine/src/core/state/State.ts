@@ -1,11 +1,13 @@
 import type { Value, IReadOnlyDictionary, ValueStream } from '@api/index.js';
-import { SYSTEM_MEMORY_TYPE } from '@api/index.js';
+import { SYSTEM_MEMORY_TYPE, ValueType } from '@api/index.js';
 import type { IInternalState } from '@sdk/interfaces/IInternalState.js';
 import { MemoryTracker } from '@core/MemoryTracker.js';
 import { DictionaryStack } from '@core/objects/stacks/DictionaryStack.js';
 import { SystemDictionary } from '@core/objects/dictionaries/System.js';
 import { ValueStack } from '@core/objects/stacks/ValueStack.js';
 import { CallStack } from '@core/objects/stacks/CallStack.js';
+import { BusyException } from '@sdk/exceptions';
+import type { IOperator } from '@sdk/interfaces';
 
 export interface StateFactorySettings {
   /** Augment the list of known names */
@@ -50,16 +52,33 @@ export class State implements IInternalState {
     return this._dictionaries;
   }
 
-  *process(values: ValueStream): Generator {
-    // TODO: State is not set upon call
-    for (const value of values) {
-      this.calls.push(value);
-      yield;
-      while (this.calls.length !== 0) {
-        this.cycle();
-        yield;
-      }
+  process(values: ValueStream): Generator {
+    if (!this.idle) {
+      throw new BusyException();
     }
+    let generator: Iterator<Value>;
+    if (Array.isArray(values)) {
+      generator = values[Symbol.iterator]();
+    } else {
+      generator = values;
+    }
+    this.calls.push({
+      type: ValueType.operator,
+      isExecutable: true,
+      isReadOnly: true,
+      operator: <IOperator>{
+        name: 'Processable source',
+        implementation: (state) => {
+          const { value, done } = generator.next();
+          if (done) {
+            state.calls.pop();
+          } else {
+            state.calls.push(value);
+          }
+        }
+      }
+    });
+    return this.run();
   }
 
   // endregion IState
@@ -74,6 +93,13 @@ export class State implements IInternalState {
   preventCall() {}
 
   // endregion IInternalState
+
+  *run() {
+    while (this.calls.length !== 0) {
+      this.cycle();
+      yield;
+    }
+  }
 
   cycle() {
     // const { type } = this._calls.top;
