@@ -1,5 +1,6 @@
 import type { IReadOnlyArray } from '@api/interfaces/IReadOnlyArray.js';
 import type { IMemoryTracker } from '@api/interfaces/IMemoryTracker.js';
+import type { IException } from '@api/interfaces/IException.js';
 import type { Value } from '@api/values/Value.js';
 
 export type ValueStream = string | Value[] | Iterator<Value>;
@@ -10,5 +11,10 @@ export interface IState {
   readonly memoryTracker: IMemoryTracker;
   readonly operands: IReadOnlyArray;
   readonly dictionaries: IReadOnlyArray;
+  /** Set when an exception stops the current processing */
+  readonly exception: IException | undefined;
+  /** Reset any exception */
   process: (values: ValueStream) => Generator;
+  /** Release associated memory, using the state *after* may fail */
+  destroy: () => void;
 }

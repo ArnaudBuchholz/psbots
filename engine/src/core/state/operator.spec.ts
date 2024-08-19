@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import type { Value } from '@api/index.js';
 import { ValueType } from '@api/index.js';
 import type { IInternalState, IOperator } from '@sdk/index.js';
@@ -10,6 +10,10 @@ let state: State;
 
 beforeEach(() => {
   state = new State();
+});
+
+afterEach(() => {
+  state.destroy();
 });
 
 describe('Constant operator', () => {

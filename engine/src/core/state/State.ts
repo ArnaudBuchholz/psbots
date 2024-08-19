@@ -1,4 +1,4 @@
-import type { Value, IReadOnlyDictionary, ValueStream } from '@api/index.js';
+import type { Value, IReadOnlyDictionary, ValueStream, IException } from '@api/index.js';
 import { parse, SYSTEM_MEMORY_TYPE, ValueType } from '@api/index.js';
 import type { IInternalState } from '@sdk/interfaces/IInternalState.js';
 import { MemoryTracker } from '@core/MemoryTracker.js';
@@ -6,7 +6,8 @@ import { DictionaryStack } from '@core/objects/stacks/DictionaryStack.js';
 import { SystemDictionary } from '@core/objects/dictionaries/System.js';
 import { ValueStack } from '@core/objects/stacks/ValueStack.js';
 import { CallStack } from '@core/objects/stacks/CallStack.js';
-import { BusyException } from '@sdk/exceptions';
+import { BusyException } from '@sdk/exceptions/BusyException.js';
+import { InternalException } from '@sdk/exceptions/InternalException.js';
 import { OperatorType } from '@sdk/interfaces';
 import type { IOperator } from '@sdk/interfaces';
 import { operatorHandler } from './operator.js';
@@ -42,6 +43,8 @@ export class State implements IInternalState {
   private readonly _dictionaries: DictionaryStack;
   private readonly _operands: ValueStack;
   private readonly _calls: CallStack;
+  private _exception: IException | undefined;
+  private _destroyed = false;
 
   constructor(settings: StateFactorySettings = {}) {
     this._memoryTracker = new MemoryTracker({
@@ -55,28 +58,52 @@ export class State implements IInternalState {
     this._calls = new CallStack(this._memoryTracker);
   }
 
+  protected _checkIfDestroyed() {
+    if (this._destroyed) {
+      throw new InternalException('State instance destroyed');
+    }
+  }
+
+  protected _resetException() {
+    if (this._exception !== undefined) {
+      // TODO: release exception
+      this._exception = undefined;
+    }
+  }
+
   // region IState
 
   get idle() {
+    this._checkIfDestroyed();
     return this._calls.length === 0;
   }
 
   get memoryTracker() {
+    this._checkIfDestroyed();
     return this._memoryTracker;
   }
 
   get operands() {
+    this._checkIfDestroyed();
     return this._operands;
   }
 
   get dictionaries() {
+    this._checkIfDestroyed();
     return this._dictionaries;
   }
 
+  get exception() {
+    this._checkIfDestroyed();
+    return this._exception;
+  }
+
   process(values: ValueStream): Generator {
+    this._checkIfDestroyed();
     if (!this.idle) {
       throw new BusyException();
     }
+    this._resetException();
     let generator: Iterator<Value>;
     if (typeof values === 'string') {
       generator = parse(values);
@@ -103,6 +130,18 @@ export class State implements IInternalState {
       }
     });
     return this.run();
+  }
+
+  destroy() {
+    this._checkIfDestroyed();
+    this._resetException();
+    this._calls.release();
+    this._operands.release();
+    this._dictionaries.release();
+    this._destroyed = true;
+    if (this._memoryTracker.used !== 0) {
+      throw new InternalException('Memory leak detected');
+    }
   }
 
   // endregion IState

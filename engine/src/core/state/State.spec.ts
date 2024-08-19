@@ -1,4 +1,4 @@
-import { it, expect, beforeEach } from 'vitest';
+import { it, expect, beforeEach, afterEach } from 'vitest';
 import { parse } from '@api/index.js';
 import type { Value } from '@api/index.js';
 import { State } from './State.js';
@@ -8,6 +8,10 @@ let state: State;
 
 beforeEach(() => {
   state = new State();
+});
+
+afterEach(() => {
+  state.destroy();
 });
 
 it('processes a string', () => {
