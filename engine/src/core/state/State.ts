@@ -1,5 +1,5 @@
 import type { Value, IReadOnlyDictionary, ValueStream } from '@api/index.js';
-import { SYSTEM_MEMORY_TYPE, ValueType } from '@api/index.js';
+import { parse, SYSTEM_MEMORY_TYPE, ValueType } from '@api/index.js';
 import type { IInternalState } from '@sdk/interfaces/IInternalState.js';
 import { MemoryTracker } from '@core/MemoryTracker.js';
 import { DictionaryStack } from '@core/objects/stacks/DictionaryStack.js';
@@ -7,7 +7,9 @@ import { SystemDictionary } from '@core/objects/dictionaries/System.js';
 import { ValueStack } from '@core/objects/stacks/ValueStack.js';
 import { CallStack } from '@core/objects/stacks/CallStack.js';
 import { BusyException } from '@sdk/exceptions';
+import { OperatorType } from '@sdk/interfaces';
 import type { IOperator } from '@sdk/interfaces';
+import { operatorHandler } from './operator.js';
 
 export interface StateFactorySettings {
   /** Augment the list of known names */
@@ -15,6 +17,25 @@ export interface StateFactorySettings {
   /** Limit the maximum of memory allowed for the state */
   maxMemoryBytes?: number;
 }
+
+function simpleHandler({ calls, operands }: IInternalState, value: Value): void {
+  operands.push(value);
+  calls.pop();
+}
+
+function fakeHandler({ calls }: IInternalState): void {
+  calls.pop();
+}
+
+const handlers: { [type in ValueType]: (state: IInternalState, value: Value<type>) => void } = {
+  [ValueType.boolean]: simpleHandler,
+  [ValueType.integer]: simpleHandler,
+  [ValueType.string]: simpleHandler,
+  [ValueType.mark]: simpleHandler,
+  [ValueType.operator]: operatorHandler,
+  [ValueType.array]: fakeHandler,
+  [ValueType.dictionary]: fakeHandler
+};
 
 export class State implements IInternalState {
   private readonly _memoryTracker: MemoryTracker;
@@ -57,7 +78,9 @@ export class State implements IInternalState {
       throw new BusyException();
     }
     let generator: Iterator<Value>;
-    if (Array.isArray(values)) {
+    if (typeof values === 'string') {
+      generator = parse(values);
+    } else if (Array.isArray(values)) {
       generator = values[Symbol.iterator]();
     } else {
       generator = values;
@@ -67,6 +90,7 @@ export class State implements IInternalState {
       isExecutable: true,
       isReadOnly: true,
       operator: <IOperator>{
+        type: OperatorType.implementation,
         name: 'Processable source',
         implementation: (state) => {
           const { value, done } = generator.next();
@@ -102,7 +126,7 @@ export class State implements IInternalState {
   }
 
   cycle() {
-    // const { type } = this._calls.top;
-    this._calls.pop();
+    const { top } = this._calls;
+    handlers[top.type](this, top as never);
   }
 }
