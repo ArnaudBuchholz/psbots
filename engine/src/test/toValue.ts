@@ -11,7 +11,7 @@ import type {
 } from '@api/index.js';
 import { ValueType } from '@api/index.js';
 import type { IOperator } from '@sdk/index.js';
-import { isObject } from '@sdk/index.js';
+import { isObject, OperatorType } from '@sdk/index.js';
 import { ShareableObject } from '@core/index.js';
 
 export type CompatiblePrimitiveValue = string | number | boolean | Value | (() => void);
@@ -151,10 +151,11 @@ export function toValue(value: CompatibleValue, readOnly: boolean = false): Valu
       ...common,
       isExecutable: true,
       type: ValueType.operator,
-      operator: {
+      operator: <IOperator>{
+        type: OperatorType.implementation,
         name: value.name,
         implementation: value
-      } as IOperator
+      }
     };
   }
   if (Array.isArray(value)) {
