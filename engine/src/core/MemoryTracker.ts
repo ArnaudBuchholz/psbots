@@ -15,14 +15,14 @@ type MemoryTrackerOptions = {
   /** Minimum length for a string to be cached (default: 32) */
   stringCacheThreshold?: number;
   /** Keep track of register */
-  recordRegisters?: boolean;
+  debug?: boolean;
 };
 
 type ContainerRegisters = {
   container: WeakRef<object>;
   type: MemoryType;
   total: number;
-  calls: Partial<MemoryRegistrationDetails>[];
+  calls: (Omit<MemoryRegistrationDetails, 'container'> & { stack: string })[];
 };
 
 type MemoryRegistrationDetails = {
@@ -49,7 +49,7 @@ export class MemoryTracker implements IValueTracker, IMemoryTracker {
     const { total = Infinity, stringCacheThreshold = 32 } = options;
     this._total = total;
     this._stringCacheThreshold = stringCacheThreshold;
-    if (options.recordRegisters) {
+    if (options.debug) {
       this._byContainers = new WeakMap();
     }
   }
@@ -132,8 +132,17 @@ export class MemoryTracker implements IValueTracker, IMemoryTracker {
         throw new InternalException('Unexpected memory type change');
       }
       containerRegisters.total += step;
+      if (containerRegisters.total < 0) {
+        throw new InternalException('Invalid Memory handling');
+      }
       if (containerRegisters.total !== 0) {
-        containerRegisters.calls.push(other);
+        let stack: string = '';
+        try {
+          throw new Error();
+        } catch (e) {
+          stack = (e as Error).stack ?? '';
+        }
+        containerRegisters.calls.push({ ...other, stack });
       } else {
         this._byContainers.delete(container);
       }

@@ -51,7 +51,7 @@ export class State implements IInternalState {
   constructor(settings: StateFactorySettings = {}) {
     this._memoryTracker = new MemoryTracker({
       total: settings.maxMemoryBytes,
-      recordRegisters: settings.debugMemory
+      debug: settings.debugMemory
     });
     this._dictionaries = new DictionaryStack(this._memoryTracker, {
       host: settings.hostDictionary,
