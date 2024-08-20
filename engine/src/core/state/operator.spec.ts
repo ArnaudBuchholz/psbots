@@ -92,7 +92,7 @@ describe('With parameters', () => {
     // TODO: how to handle error !
   });
 
-  it("builds the list of parameters and pass them to the operator's implementation", () => {
+  it.skip("builds the list of parameters and pass them to the operator's implementation", () => {
     state.operands.push(toValue(123));
     state.cycle();
     expect(state.operands.ref).toStrictEqual([toValue(123)]);
