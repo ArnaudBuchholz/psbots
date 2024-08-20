@@ -22,7 +22,7 @@ type ContainerRegisters = {
   container: WeakRef<object>;
   type: MemoryType;
   total: number;
-  calls: (Omit<MemoryRegistrationDetails, 'container'> & { stack: string })[];
+  calls: (Omit<MemoryRegistrationDetails, 'container'> & { stack?: string })[];
 };
 
 type MemoryRegistrationDetails = {
@@ -133,20 +133,24 @@ export class MemoryTracker implements IValueTracker, IMemoryTracker {
       }
       containerRegisters.total += step;
       if (containerRegisters.total < 0) {
-        throw new InternalException('Invalid Memory handling');
+        throw new InternalException('Invalid memory registration');
       }
       if (containerRegisters.total !== 0) {
-        let stack: string = '';
+        let stack: string | undefined;
         try {
           throw new Error();
         } catch (e) {
-          stack = (e as Error).stack ?? '';
+          stack = (e as Error).stack;
         }
         containerRegisters.calls.push({ ...other, stack });
       } else {
         this._byContainers.delete(container);
       }
     }
+  }
+
+  get byContainers() {
+    return this._byContainers;
   }
 
   // region IMemoryTracker

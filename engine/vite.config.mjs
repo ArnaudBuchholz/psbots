@@ -19,6 +19,7 @@ export default defineConfig({
         'vite.config.mjs',
         'src/**/*.spec.ts',
         'src/**/index.ts',
+        'src/engine.ts',
         'src/api/interfaces/**',
         '!src/api/interfaces/IReadOnlyArray.ts',
         '!src/api/interfaces/IReadOnlyDictionary.ts',

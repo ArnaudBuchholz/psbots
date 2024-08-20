@@ -42,6 +42,36 @@ describe('tracking', () => {
   });
 });
 
+describe('debug', () => {
+  const container = {};
+  let tracker: MemoryTracker;
+
+  beforeEach(() => {
+    tracker = new MemoryTracker({ debug: true });
+  })
+
+  it('keeps track of allocation containers', () => {
+    tracker.register({ container, type: SYSTEM_MEMORY_TYPE, bytes: 1 });
+    expect(tracker.byContainers?.has(container)).toStrictEqual(true);
+  });
+
+  it('removes fully freed references', () => {
+    tracker.register({ container, type: SYSTEM_MEMORY_TYPE, bytes: 1 });
+    tracker.register({ container, type: SYSTEM_MEMORY_TYPE, bytes: -1 });
+    expect(tracker.byContainers?.has(container)).toStrictEqual(false);
+  });
+
+  it('detects and prevents memory type change for a given container', () => {
+    tracker.register({ container, type: SYSTEM_MEMORY_TYPE, bytes: 1 });
+    expect(() => tracker.register({ container, type: USER_MEMORY_TYPE, bytes: 1 })).toThrowError('Unexpected memory type change');
+  });
+
+  it('detects invalid memory registration leading to negative totals', () => {
+    tracker.register({ container, type: SYSTEM_MEMORY_TYPE, bytes: 1 });
+    expect(() => tracker.register({ container, type: SYSTEM_MEMORY_TYPE, bytes: -2 })).toThrowError('Invalid memory registration');
+  });
+});
+
 describe('string management', () => {
   const STRING_CACHE_THRESHOLD = 10;
   let tracker: MemoryTracker;
