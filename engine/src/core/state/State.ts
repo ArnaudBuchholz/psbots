@@ -17,6 +17,8 @@ export interface StateFactorySettings {
   hostDictionary?: IReadOnlyDictionary;
   /** Limit the maximum of memory allowed for the state */
   maxMemoryBytes?: number;
+  /** Instruct memoryTracker to retain calls */
+  debugMemory?: boolean;
 }
 
 function simpleHandler({ calls, operands }: IInternalState, value: Value): void {
@@ -48,7 +50,8 @@ export class State implements IInternalState {
 
   constructor(settings: StateFactorySettings = {}) {
     this._memoryTracker = new MemoryTracker({
-      total: settings.maxMemoryBytes
+      total: settings.maxMemoryBytes,
+      recordRegisters: settings.debugMemory
     });
     this._dictionaries = new DictionaryStack(this._memoryTracker, {
       host: settings.hostDictionary,

@@ -27,6 +27,7 @@ export class Dictionary extends ShareableObject implements IDictionary {
   ) {
     super();
     this._memoryTracker.register({
+      container: this,
       pointers: 1,
       type: this._memoryType
     });
@@ -60,6 +61,7 @@ export class Dictionary extends ShareableObject implements IDictionary {
         string: name
       });
       this._memoryTracker.register({
+        container: this,
         values: 1,
         pointers: 3,
         type: this._memoryType
@@ -85,6 +87,7 @@ export class Dictionary extends ShareableObject implements IDictionary {
       value?.tracker?.releaseValue(value);
     }
     this._memoryTracker.register({
+      container: this,
       values: -names.length,
       pointers: -3 * names.length - 1,
       type: this._memoryType

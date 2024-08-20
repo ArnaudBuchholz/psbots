@@ -40,6 +40,7 @@ export abstract class AbstractValueContainer extends ShareableObject implements 
   ) {
     super();
     this._memoryTracker.register({
+      container: this,
       type: this._memoryType,
       pointers: 1
     });
@@ -78,6 +79,7 @@ export abstract class AbstractValueContainer extends ShareableObject implements 
 
   push(...values: Value[]): void {
     this._memoryTracker.register({
+      container: this,
       type: this._memoryType,
       pointers: values.length,
       values: values.length
@@ -95,6 +97,7 @@ export abstract class AbstractValueContainer extends ShareableObject implements 
     const value = this.popImpl();
     if (value !== null) {
       this._memoryTracker.register({
+        container: this,
         type: this._memoryType,
         pointers: -1,
         values: -1
@@ -124,6 +127,7 @@ export abstract class AbstractValueContainer extends ShareableObject implements 
   protected _dispose(): void {
     this.clear();
     this._memoryTracker.register({
+      container: this,
       type: this._memoryType,
       pointers: -1
     });

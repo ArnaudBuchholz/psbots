@@ -1,4 +1,4 @@
-import { it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { parse } from '@api/index.js';
 import type { Value } from '@api/index.js';
 import { State } from './State.js';
@@ -7,11 +7,19 @@ import { waitForGenerator, toValue } from '@test/index.js';
 let state: State;
 
 beforeEach(() => {
-  state = new State();
+  state = new State({
+    debugMemory: true
+  });
 });
 
 afterEach(() => {
   state.destroy();
+});
+
+describe('IState', () => {
+  it('exposes idle', () => {
+    expect(state.idle).toStrictEqual(true);
+  });
 });
 
 it('processes a string', () => {

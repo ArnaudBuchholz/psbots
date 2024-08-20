@@ -43,6 +43,7 @@ export class ValueArray extends AbstractValueContainer implements IArray {
       }
     } else {
       this.memoryTracker.register({
+        container: this,
         type: this.memoryType,
         pointers: 1,
         values: 1

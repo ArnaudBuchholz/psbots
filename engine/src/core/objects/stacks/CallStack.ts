@@ -18,6 +18,7 @@ export class CallStack extends ValueStack implements ICallStack {
   protected override pushImpl(value: Value): void {
     super.pushImpl(value);
     this.memoryTracker.register({
+      container: this,
       type: SYSTEM_MEMORY_TYPE,
       pointers: 1
     });
@@ -27,6 +28,7 @@ export class CallStack extends ValueStack implements ICallStack {
   protected override popImpl(): Value | null {
     const result = super.popImpl();
     this.memoryTracker.register({
+      container: this,
       type: SYSTEM_MEMORY_TYPE,
       pointers: -1
     });

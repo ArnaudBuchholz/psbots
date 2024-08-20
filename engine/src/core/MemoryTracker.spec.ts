@@ -26,9 +26,9 @@ describe('tracking', () => {
   });
 
   it('keeps track of memory used', () => {
-    tracker.register({ type: SYSTEM_MEMORY_TYPE, bytes: 50 });
-    tracker.register({ type: STRING_MEMORY_TYPE, bytes: 20 });
-    tracker.register({ type: USER_MEMORY_TYPE, bytes: 10 });
+    tracker.register({ container: {}, type: SYSTEM_MEMORY_TYPE, bytes: 50 });
+    tracker.register({ container: {}, type: STRING_MEMORY_TYPE, bytes: 20 });
+    tracker.register({ container: {}, type: USER_MEMORY_TYPE, bytes: 10 });
     expect(tracker.used).toStrictEqual(80);
     expect(tracker.byType).toStrictEqual<IMemoryByType>({
       system: 50,
@@ -38,7 +38,7 @@ describe('tracking', () => {
   });
 
   it('fails when allocating too much memory', () => {
-    expect(() => tracker.register({ type: 'system', bytes: MAX_MEMORY + 1 })).toThrowError();
+    expect(() => tracker.register({ container: {}, type: 'system', bytes: MAX_MEMORY + 1 })).toThrowError();
   });
 });
 
