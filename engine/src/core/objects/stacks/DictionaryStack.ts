@@ -5,13 +5,14 @@ import { DictStackUnderflowException, UndefinedException } from '@sdk/index.js';
 import type { MemoryTracker } from '@core/MemoryTracker.js';
 import { ValueStack } from '@core/objects/stacks/ValueStack.js';
 import { Dictionary } from '@core/objects/dictionaries/Dictionary.js';
+import { EmptyDictionary } from '@core/objects/dictionaries/Empty.js';
 
 const MIN_SIZE = 3;
 
 export class DictionaryStack extends ValueStack implements IDictionaryStack {
   private readonly _host: IReadOnlyDictionary;
   private readonly _system: IReadOnlyDictionary;
-  private readonly _global: IDictionary;
+  private readonly _global: Dictionary;
 
   constructor(
     tracker: MemoryTracker,
@@ -21,7 +22,7 @@ export class DictionaryStack extends ValueStack implements IDictionaryStack {
     }
   ) {
     super(tracker, SYSTEM_MEMORY_TYPE);
-    this._host = dictionaries.host ?? new Dictionary(tracker, SYSTEM_MEMORY_TYPE);
+    this._host = dictionaries.host ?? EmptyDictionary.instance;
     this._system = dictionaries.system;
     const global = new Dictionary(tracker, SYSTEM_MEMORY_TYPE);
     this._global = global;
@@ -38,6 +39,11 @@ export class DictionaryStack extends ValueStack implements IDictionaryStack {
       dictionary: this._system
     });
     this.begin(global.toValue({ isReadOnly: false }));
+  }
+
+  protected override _dispose(): void {
+    super._dispose();
+    this._global.release();
   }
 
   override get top(): DictionaryValue {

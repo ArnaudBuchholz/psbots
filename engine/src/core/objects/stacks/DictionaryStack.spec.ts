@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import type { IReadOnlyDictionary, Value } from '@api/index.js';
 import { USER_MEMORY_TYPE } from '@api/index.js';
 import type { DictionaryStackWhereResult } from '@sdk/index.js';
@@ -40,6 +40,11 @@ beforeEach(() => {
   stack = new DictionaryStack(tracker, { system, host });
 });
 
+afterEach(() => {
+  expect(stack.release()).toStrictEqual(false);
+  expect(tracker.used).toStrictEqual(0);
+});
+
 it('starts with three dictionaries', () => {
   expect(stack.ref.length).toStrictEqual(3);
 });
@@ -69,6 +74,7 @@ it('creates an empty dictionary if host is not specified', () => {
   expect(stackWithoutHost.ref.length).toStrictEqual(3);
   const { host: iHostRODictionary } = stackWithoutHost;
   expect(iHostRODictionary.names).toStrictEqual<string[]>([]);
+  expect(stackWithoutHost.release()).toStrictEqual(false);
 });
 
 describe('where', () => {
@@ -125,6 +131,10 @@ describe('begin', () => {
     dict = new Dictionary(tracker, USER_MEMORY_TYPE);
     dict.def('test', toValue('overridden'));
     stack.begin(dict.toValue());
+  });
+
+  afterEach(() => {
+    dict.release();
   });
 
   it('adds a new dictionary to the stack', () => {
