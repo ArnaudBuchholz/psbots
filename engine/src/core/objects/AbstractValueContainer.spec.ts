@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import type { MemoryType, Value } from '@api/index.js';
 import { USER_MEMORY_TYPE } from '@api/index.js';
 import { InternalException, checkArrayValue } from '@sdk/index.js';
@@ -30,8 +30,8 @@ class TestValueArray extends AbstractValueContainer {
     return this.memoryType;
   }
 
-  public setPopNull(): void {
-    this._popNull = true;
+  public setPopNull(value = true): void {
+    this._popNull = value;
   }
 }
 
@@ -120,12 +120,14 @@ describe('memory', () => {
       expect(valueArray.pop()).toStrictEqual(shared.value);
       expect(tracker.used).toBeLessThan(memoryUsedBefore);
       expect(shared.object.refCount).toStrictEqual(1);
+      shared.object.release(); // to fit afterEach checks
     });
 
     it('does not release memory if popImpl returns null', () => {
       valueArray.setPopNull();
       expect(valueArray.pop()).toStrictEqual(null);
       expect(tracker.used).toStrictEqual(memoryUsedBefore);
+      valueArray.setPopNull(false);
     });
 
     it('fails after all items were removed', () => {
@@ -134,7 +136,7 @@ describe('memory', () => {
     });
   });
 
-  it('releases memory once disposed', () => {
+  afterEach(() => {
     expect(valueArray.release()).toStrictEqual(false);
     expect(shared.object.refCount).toStrictEqual(0);
     expect(tracker.used).toStrictEqual(0);
