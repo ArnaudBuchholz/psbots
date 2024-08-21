@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import type { Value } from '@api/index.js';
 import { USER_MEMORY_TYPE } from '@api/index.js';
 import { InternalException, RangeCheckException, checkArrayValue } from '@sdk/index.js';
@@ -16,6 +16,12 @@ beforeEach(() => {
   shared = toValue.createSharedObject();
   valueArray.push(toValue(123), toValue('abc'), shared.value);
   shared.object.release();
+});
+
+afterEach(() => {
+  expect(valueArray.release()).toStrictEqual(false);
+  expect(shared.object.refCount).toStrictEqual(0);
+  expect(tracker.used).toStrictEqual(0);
 });
 
 describe('ValueArray.check', () => {
@@ -100,6 +106,7 @@ describe('IArray', () => {
       shared.object.addRef();
       expect(valueArray.set(2, toValue(0))).toStrictEqual(shared.value);
       expect(shared.object.refCount).toStrictEqual(1);
+      shared.object.release(); // to fit afterEach checks
     });
 
     it('releases value ref (value is destroyed)', () => {

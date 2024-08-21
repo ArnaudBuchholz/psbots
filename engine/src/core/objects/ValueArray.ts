@@ -61,6 +61,12 @@ export class ValueArray extends AbstractValueContainer implements IArray {
     if (value === undefined) {
       throw new InternalException(EMPTY_ARRAY);
     }
+    this.memoryTracker.register({
+      container: this,
+      type: this.memoryType,
+      pointers: -1,
+      values: -1
+    });
     if (value.tracker?.releaseValue(value) === false) {
       return null;
     }
@@ -68,6 +74,12 @@ export class ValueArray extends AbstractValueContainer implements IArray {
   }
 
   unshift(value: Value): void {
+    this.memoryTracker.register({
+      container: this,
+      type: this.memoryType,
+      pointers: 1,
+      values: 1
+    });
     value.tracker?.addValueRef(value);
     this._values.unshift(value);
   }
