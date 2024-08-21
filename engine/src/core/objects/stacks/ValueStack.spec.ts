@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { USER_MEMORY_TYPE } from '@api/index.js';
 import type { Value } from '@api/index.js';
 import { StackUnderflowException } from '@sdk/index.js';
@@ -13,6 +13,11 @@ beforeEach(() => {
   tracker = new MemoryTracker();
   stack = new ValueStack(tracker, USER_MEMORY_TYPE);
   stack.push(toValue('abc'), toValue(123));
+});
+
+afterEach(() => {
+  expect(stack.release()).toStrictEqual(false);
+  expect(tracker.used).toStrictEqual(0);
 });
 
 describe('top', () => {

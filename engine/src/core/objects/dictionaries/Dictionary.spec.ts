@@ -1,4 +1,4 @@
-import { it, expect, beforeEach } from 'vitest';
+import { it, expect, beforeEach, afterEach } from 'vitest';
 import type { Value } from '@api/index.js';
 import { USER_MEMORY_TYPE, ValueType } from '@api/index.js';
 import { InternalException } from '@sdk/index.js';
@@ -22,6 +22,12 @@ beforeEach(() => {
   expect(shared.object.refCount).toStrictEqual(2);
   shared.object.release();
   initiallyUsed = tracker.used;
+});
+
+afterEach(() => {
+  expect(dictionary.release()).toStrictEqual(false);
+  expect(shared.object.disposeCalled).toStrictEqual(1);
+  expect(tracker.used).toStrictEqual(0);
 });
 
 it('converts to a Value (read-only)', () => {
@@ -79,6 +85,7 @@ it('allows the override of a named value (shareable, not released)', () => {
   shared.object.addRef();
   expect(dictionary.def('shared', toValue(0))).toStrictEqual<Value>(shared.value);
   expect(shared.object.refCount).toStrictEqual(1);
+  shared.object.release(); // to fit afterEach checks
 });
 
 it('allows the override of a named value (shareable, released)', () => {
@@ -90,10 +97,4 @@ it('allows new values', () => {
   expect(dictionary.def('new_value', toValue(3))).toStrictEqual<Value | null>(null);
   expect(dictionary.lookup('new_value')).toStrictEqual<Value>(toValue(3));
   expect(tracker.used).toBeGreaterThan(initiallyUsed);
-});
-
-it('releases memory once disposed', () => {
-  dictionary.release();
-  expect(tracker.used).toStrictEqual(0);
-  expect(shared.object.disposeCalled).toStrictEqual(1);
 });

@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { InternalException } from '@sdk/index.js';
 import { CallStack } from './CallStack.js';
 import { MemoryTracker } from '@core/index.js';
@@ -10,6 +10,11 @@ let callstack: CallStack;
 beforeEach(() => {
   tracker = new MemoryTracker();
   callstack = new CallStack(tracker);
+});
+
+afterEach(() => {
+  expect(callstack.release()).toStrictEqual(false);
+  expect(tracker.used).toStrictEqual(0);
 });
 
 describe('IDictionary', () => {
