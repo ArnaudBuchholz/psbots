@@ -3,7 +3,6 @@ import { parse, SYSTEM_MEMORY_TYPE, ValueType } from '@api/index.js';
 import type { IInternalState } from '@sdk/interfaces/IInternalState.js';
 import { MemoryTracker } from '@core/MemoryTracker.js';
 import { DictionaryStack } from '@core/objects/stacks/DictionaryStack.js';
-import { SystemDictionary } from '@core/objects/dictionaries/System.js';
 import { ValueStack } from '@core/objects/stacks/ValueStack.js';
 import { CallStack } from '@core/objects/stacks/CallStack.js';
 import { BusyException } from '@sdk/exceptions/BusyException.js';
@@ -53,10 +52,7 @@ export class State implements IInternalState {
       total: settings.maxMemoryBytes,
       debug: settings.debugMemory
     });
-    this._dictionaries = new DictionaryStack(this._memoryTracker, {
-      host: settings.hostDictionary,
-      system: new SystemDictionary()
-    });
+    this._dictionaries = new DictionaryStack(this._memoryTracker, settings.hostDictionary);
     this._operands = new ValueStack(this._memoryTracker, SYSTEM_MEMORY_TYPE);
     this._calls = new CallStack(this._memoryTracker);
   }

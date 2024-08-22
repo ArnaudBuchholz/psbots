@@ -5,23 +5,12 @@ import type { DictionaryStackWhereResult } from '@sdk/index.js';
 import { DictStackUnderflowException, UndefinedException } from '@sdk/index.js';
 import { MemoryTracker } from '@core/MemoryTracker.js';
 import { Dictionary } from '@core/objects/dictionaries/Dictionary.js';
+import { SystemDictionary } from '@core/objects/dictionaries/System.js';
 import { DictionaryStack } from './DictionaryStack.js';
 import { toValue } from '@test/index.js';
 
 let tracker: MemoryTracker;
 let stack: DictionaryStack;
-
-const system: IReadOnlyDictionary = {
-  get names() {
-    return ['test'];
-  },
-  lookup(name: string): Value | null {
-    if (name === 'test') {
-      return toValue('test');
-    }
-    return null;
-  }
-};
 
 const host: IReadOnlyDictionary = {
   get names() {
@@ -37,7 +26,7 @@ const host: IReadOnlyDictionary = {
 
 beforeEach(() => {
   tracker = new MemoryTracker();
-  stack = new DictionaryStack(tracker, { system, host });
+  stack = new DictionaryStack(tracker, host);
 });
 
 afterEach(() => {
@@ -56,7 +45,7 @@ it('exposes the host dictionary', () => {
 
 it('exposes the system dictionary', () => {
   const { system: iSystemRODictionary } = stack;
-  expect(iSystemRODictionary).toStrictEqual(system);
+  expect(iSystemRODictionary).toStrictEqual(SystemDictionary.instance);
 });
 
 it('exposes an empty global dictionary', () => {
@@ -70,7 +59,7 @@ it('exposes first dictionary as top', () => {
 });
 
 it('creates an empty dictionary if host is not specified', () => {
-  const stackWithoutHost = new DictionaryStack(tracker, { system });
+  const stackWithoutHost = new DictionaryStack(tracker);
   expect(stackWithoutHost.ref.length).toStrictEqual(3);
   const { host: iHostRODictionary } = stackWithoutHost;
   expect(iHostRODictionary.names).toStrictEqual<string[]>([]);
@@ -86,9 +75,9 @@ describe('where', () => {
   });
 
   it('searches for a known name (from system dictionary)', () => {
-    expect(stack.where('test')).toStrictEqual<DictionaryStackWhereResult>({
+    expect(stack.where('mark')).toStrictEqual<DictionaryStackWhereResult>({
       dictionary: stack.system,
-      value: toValue('test')
+      value: toValue.mark
     });
   });
 
@@ -111,7 +100,7 @@ describe('lookup', () => {
   });
 
   it('searches for a known name (from system dictionary)', () => {
-    expect(stack.lookup('test')).toStrictEqual<Value>(toValue('test'));
+    expect(stack.lookup('mark')).toStrictEqual<Value>(toValue.mark);
   });
 
   it('searches for a known name (from global dictionary)', () => {
@@ -129,7 +118,7 @@ describe('begin', () => {
 
   beforeEach(() => {
     dict = new Dictionary(tracker, USER_MEMORY_TYPE);
-    dict.def('test', toValue('overridden'));
+    dict.def('mark', toValue('overridden'));
     stack.begin(dict.toValue());
   });
 
@@ -138,14 +127,14 @@ describe('begin', () => {
   });
 
   it('adds a new dictionary to the stack', () => {
-    expect(stack.lookup('test')).toStrictEqual<Value>(toValue('overridden'));
+    expect(stack.lookup('mark')).toStrictEqual<Value>(toValue('overridden'));
   });
 
   describe('end', () => {
     beforeEach(() => stack.end());
 
     it('removes the top dictionary from the stack', () => {
-      expect(stack.lookup('test')).toStrictEqual<Value>(toValue('test'));
+      expect(stack.lookup('mark')).toStrictEqual<Value>(toValue.mark);
     });
 
     it('fails when attempting to remove pre-installed dictionaries', () => {

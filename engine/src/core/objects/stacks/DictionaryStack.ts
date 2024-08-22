@@ -4,6 +4,7 @@ import type { DictionaryStackWhereResult, IDictionaryStack } from '@sdk/index.js
 import { DictStackUnderflowException, UndefinedException } from '@sdk/index.js';
 import type { MemoryTracker } from '@core/MemoryTracker.js';
 import { ValueStack } from '@core/objects/stacks/ValueStack.js';
+import { SystemDictionary } from '@core/objects/dictionaries/System.js';
 import { Dictionary } from '@core/objects/dictionaries/Dictionary.js';
 import { EmptyDictionary } from '@core/objects/dictionaries/Empty.js';
 
@@ -14,16 +15,10 @@ export class DictionaryStack extends ValueStack implements IDictionaryStack {
   private readonly _system: IReadOnlyDictionary;
   private readonly _global: Dictionary;
 
-  constructor(
-    tracker: MemoryTracker,
-    dictionaries: {
-      host?: IReadOnlyDictionary;
-      system: IReadOnlyDictionary;
-    }
-  ) {
+  constructor(tracker: MemoryTracker, host?: IReadOnlyDictionary) {
     super(tracker, SYSTEM_MEMORY_TYPE);
-    this._host = dictionaries.host ?? EmptyDictionary.instance;
-    this._system = dictionaries.system;
+    this._host = host ?? EmptyDictionary.instance;
+    this._system = SystemDictionary.instance;
     const global = new Dictionary(tracker, SYSTEM_MEMORY_TYPE);
     this._global = global;
     this.begin({
