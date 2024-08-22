@@ -10,6 +10,7 @@ import { InternalException } from '@sdk/exceptions/InternalException.js';
 import { OperatorType } from '@sdk/interfaces';
 import type { IOperator } from '@sdk/interfaces';
 import { operatorHandler } from './operator.js';
+import { BaseException } from '@sdk/exceptions/BaseException.js';
 
 export interface StateFactorySettings {
   /** Augment the list of known names */
@@ -165,6 +166,16 @@ export class State implements IInternalState {
 
   cycle() {
     const { top } = this._calls;
-    handlers[top.type](this, top as never);
+    try {
+      handlers[top.type](this, top as never);
+    } catch (e) {
+      let exception: IException;
+      if (!(e instanceof BaseException)) {
+        exception = new InternalException('An unexpected error occurred');
+      } else {
+        exception = e;
+      }
+      this._exception = exception;
+    }
   }
 }

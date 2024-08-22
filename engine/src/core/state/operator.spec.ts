@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import type { Value } from '@api/index.js';
 import { ValueType } from '@api/index.js';
 import type { IInternalState, IOperator } from '@sdk/index.js';
-import { OperatorType } from '@sdk/index.js';
+import { OperatorType, StackUnderflowException, TypeCheckException } from '@sdk/index.js';
 import { toValue } from '@test/index.js';
 import { State } from './State.js';
 
@@ -83,19 +83,17 @@ describe('With parameters', () => {
 
   it('fails with StackUnderflow if the operand stack does not contain enough values', () => {
     state.cycle();
-    // TODO: how to handle error !
+    expect(state.exception).toBeInstanceOf(StackUnderflowException);
   });
 
   it('fails with TypeCheck if the operand stack does not contain the right values', () => {
     state.operands.push(toValue(false));
     state.cycle();
-    // TODO: how to handle error !
+    expect(state.exception).toBeInstanceOf(TypeCheckException);
   });
 
   it.skip("builds the list of parameters and pass them to the operator's implementation", () => {
     state.operands.push(toValue(123));
-    state.cycle();
-    expect(state.operands.ref).toStrictEqual([toValue(123)]);
     state.cycle();
     expect(state.operands.ref).toStrictEqual([toValue(true), toValue(123)]);
   });
