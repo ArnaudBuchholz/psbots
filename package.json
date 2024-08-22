@@ -19,6 +19,6 @@
   "author": "Arnaud Buchholz <arnaud.buchholz@free.fr>",
   "license": "MIT",
   "devDependencies": {
-    "npm-check-updates": "^17.0.6"
+    "npm-check-updates": "^17.1.0"
   }
 }
