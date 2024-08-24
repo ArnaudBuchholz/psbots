@@ -6,25 +6,31 @@ import { OperatorType } from '@sdk/interfaces/IOperator.js';
 import type { IOperator } from '@sdk/interfaces/IOperator.js';
 
 export function operatorHandler(state: IInternalState, value: Value<ValueType.operator>): void {
+  const { operands, calls } = state;
   const operator = value.operator as IOperator;
   if (operator.type === OperatorType.constant) {
-    state.operands.push(operator.constant);
-    state.calls.pop();
+    operands.push(operator.constant);
+    calls.pop();
   } else {
     const parameters: Value[] = [];
-    if (operator.typeCheck !== undefined) {
-      if (state.operands.length < operator.typeCheck.length) {
+    if (operator.typeCheck !== undefined && calls.step === undefined) {
+      if (operands.length < operator.typeCheck.length) {
         throw new StackUnderflowException();
       }
       operator.typeCheck.forEach((valueType, index) => {
-        const value = state.operands.ref[index]!; // length has been verified before
-        if (valueType === null) {
+        const value = operands.ref[index]!; // length has been verified before
+        if (valueType === null || valueType === value.type) {
           parameters.push(value);
-        } else if (valueType !== value.type) {
+        } else {
           throw new TypeCheckException();
         }
       });
+      parameters.forEach((value) => value.tracker?.addValueRef(value));
     }
-    operator.implementation(state, parameters);
+    try {
+      operator.implementation(state, parameters);
+    } finally {
+      parameters.forEach((value) => value.tracker?.releaseValue(value));
+    }
   }
 }
