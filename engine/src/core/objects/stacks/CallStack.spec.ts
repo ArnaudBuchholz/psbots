@@ -44,3 +44,32 @@ describe('IDictionary', () => {
     expect(tracker.used).toStrictEqual(initialMemory);
   });
 });
+
+describe('step', () => {
+  it('fails if no item exists in the stack', () => {
+    expect(() => {
+      callstack.step = 0;
+    }).toThrowError(InternalException);
+  });
+
+  it('allocates a step on the current item', () => {
+    callstack.push(toValue(123));
+    expect(callstack.step).toStrictEqual(undefined);
+  });
+
+  it('associates a step on the current item', () => {
+    callstack.push(toValue(123));
+    callstack.step = 1;
+    expect(callstack.step).toStrictEqual(1);
+  });
+
+  it('removes the step when popping the item', () => {
+    callstack.push(toValue(123));
+    callstack.step = 1;
+    callstack.push(toValue(456));
+    callstack.step = 2;
+    expect(callstack.step).toStrictEqual(2);
+    callstack.pop();
+    expect(callstack.step).toStrictEqual(1);
+  });
+});

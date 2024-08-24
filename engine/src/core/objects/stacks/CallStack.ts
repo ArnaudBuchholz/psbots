@@ -14,15 +14,18 @@ export class CallStack extends ValueStack implements ICallStack {
   }
 
   private _dictionaries: (Dictionary | undefined)[] = [];
+  private _steps: (number | undefined)[] = [];
 
   protected override pushImpl(value: Value): void {
     super.pushImpl(value);
     this.memoryTracker.register({
       container: this,
       type: SYSTEM_MEMORY_TYPE,
-      pointers: 1
+      pointers: 1,
+      integers: 1
     });
     this._dictionaries.unshift(undefined);
+    this._steps.unshift(undefined);
   }
 
   protected override popImpl(): Value | null {
@@ -30,13 +33,15 @@ export class CallStack extends ValueStack implements ICallStack {
     this.memoryTracker.register({
       container: this,
       type: SYSTEM_MEMORY_TYPE,
-      pointers: -1
+      pointers: -1,
+      integers: -1
     });
     const dictionary = this._dictionaries[0];
     if (dictionary !== undefined) {
       dictionary.release();
     }
     this._dictionaries.shift();
+    this._steps.shift();
     return result;
   }
 
@@ -55,7 +60,7 @@ export class CallStack extends ValueStack implements ICallStack {
   }
 
   def(name: string, value: Value): Value | null {
-    if (this._dictionaries.length === 0) {
+    if (this.length === 0) {
       throw new InternalException(EMPTY_STACK);
     }
     let dictionary = this._dictionaries[0];
@@ -67,4 +72,19 @@ export class CallStack extends ValueStack implements ICallStack {
   }
 
   // endregion IDictionary
+
+  // region ICallStack
+
+  get step(): number | undefined {
+    return this._steps[0];
+  }
+
+  set step(value: number) {
+    if (this.length === 0) {
+      throw new InternalException(EMPTY_STACK);
+    }
+    this._steps[0] = value;
+  }
+
+  // endregion
 }
