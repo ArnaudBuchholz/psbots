@@ -1,6 +1,8 @@
 import type { IDictionary } from '@api/index.js';
 import type { IStack } from '@sdk/interfaces/IStack.js';
 
+export const STEP_DONE = Number.POSITIVE_INFINITY;
+
 /** Call stack, top parameters exposed through IDictionary */
 export interface ICallStack extends IStack, IDictionary {
   /**
