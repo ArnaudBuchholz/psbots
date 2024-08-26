@@ -7,10 +7,10 @@ import { ValueStack } from '@core/objects/stacks/ValueStack.js';
 import { CallStack } from '@core/objects/stacks/CallStack.js';
 import { BusyException } from '@sdk/exceptions/BusyException.js';
 import { InternalException } from '@sdk/exceptions/InternalException.js';
-import { OperatorType } from '@sdk/interfaces';
+import { OperatorType, STEP_DONE } from '@sdk/interfaces';
 import type { IOperator } from '@sdk/interfaces';
-import { operatorHandler } from './operator.js';
 import { BaseException } from '@sdk/exceptions/BaseException.js';
+import { operatorPop, operatorCycle } from './operator.js';
 
 export interface StateFactorySettings {
   /** Augment the list of known names */
@@ -20,25 +20,6 @@ export interface StateFactorySettings {
   /** Instruct memoryTracker to retain calls */
   debugMemory?: boolean;
 }
-
-function simpleHandler({ calls, operands }: IInternalState, value: Value): void {
-  operands.push(value);
-  calls.pop();
-}
-
-function fakeHandler({ calls }: IInternalState): void {
-  calls.pop();
-}
-
-const handlers: { [type in ValueType]: (state: IInternalState, value: Value<type>) => void } = {
-  [ValueType.boolean]: simpleHandler,
-  [ValueType.integer]: simpleHandler,
-  [ValueType.string]: simpleHandler,
-  [ValueType.mark]: simpleHandler,
-  [ValueType.operator]: operatorHandler,
-  [ValueType.array]: fakeHandler,
-  [ValueType.dictionary]: fakeHandler
-};
 
 export class State implements IInternalState {
   private readonly _memoryTracker: MemoryTracker;
@@ -165,17 +146,41 @@ export class State implements IInternalState {
   }
 
   cycle() {
-    const { top } = this._calls;
-    try {
-      handlers[top.type](this, top as never);
-    } catch (e) {
-      let exception: IException;
-      if (!(e instanceof BaseException)) {
-        exception = new InternalException('An unexpected error occurred');
+    const calls = this._calls;
+    const { top, length: numberOfCalls } = calls;
+    if (this._exception) {
+      if (top.type === ValueType.operator) {
+        operatorPop(this, top);
       } else {
-        exception = e;
+        calls.pop();
       }
-      this._exception = exception;
+    } else if (top.isExecutable) {
+      // TODO: && (top.type !== ValueType.string || isCallAllowed)
+      try {
+        if (top.type === ValueType.operator) {
+          operatorCycle(this, top);
+          if (calls.step === undefined) {
+            calls.step = STEP_DONE;
+            if (calls.length === numberOfCalls) {
+              calls.pop();
+            }
+          }
+        } else {
+          throw new InternalException('Unsupported executable value');
+        }
+      } catch (e) {
+        calls.step = STEP_DONE;
+        let exception: IException;
+        if (!(e instanceof BaseException)) {
+          exception = new InternalException('An unexpected error occurred');
+        } else {
+          exception = e;
+        }
+        this._exception = exception;
+      }
+    } else {
+      this._operands.push(top);
+      calls.pop();
     }
   }
 }

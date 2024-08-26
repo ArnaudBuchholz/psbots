@@ -1,12 +1,43 @@
 import type { Value, ValueType } from '@api/index.js';
-import { TypeCheckException } from '@sdk/exceptions';
+import { InternalException, TypeCheckException } from '@sdk/exceptions';
 import { StackUnderflowException } from '@sdk/exceptions/StackUnderflowException.js';
+import { STEP_DONE } from '@sdk/interfaces/ICallStack.js';
 import type { IInternalState } from '@sdk/interfaces/IInternalState.js';
 import { OperatorType } from '@sdk/interfaces/IOperator.js';
 import type { IOperator } from '@sdk/interfaces/IOperator.js';
 
-export function operatorHandler(state: IInternalState, value: Value<ValueType.operator>): void {
+export function operatorPop({ calls, exception }: IInternalState, value: Value<ValueType.operator>): void {
+  const operator = value.operator as IOperator;
+  if (operator.type === OperatorType.constant) {
+    throw new InternalException('Unexpected constant operator')
+  }
+  if (calls.step === STEP_DONE) {
+
+  }
+
+  if (this._checkForCatch) {
+    if (operator.catch) {
+      const exception = this._exception;
+      this._exception = undefined;
+      operator.catch(this, ))
+    }
+    this._checkForCatch = false;
+  }
+  if (operator.finally) {
+    operator.finally
+  }
+  // if operator has catch => exception is removed from state and transmitted to catch, expect only one cycle
+  // if operator has finally => call it, expect only one cycle
+  // TODO: How do we know in which step we are ?
+
+};
+
+export function operatorCycle(state: IInternalState, value: Value<ValueType.operator>): void {
   const { operands, calls } = state;
+  if (calls.step === STEP_DONE) {
+    // call operatorPop but only for finally ?
+    return;
+  }
   const operator = value.operator as IOperator;
   if (operator.type === OperatorType.constant) {
     operands.push(operator.constant);
