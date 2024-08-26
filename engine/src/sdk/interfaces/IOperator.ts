@@ -20,9 +20,9 @@ export interface IFunctionOperator extends IAbstractOperator {
   /** Operator implementation */
   readonly implementation: (state: IInternalState, parameters: readonly Value[]) => void;
   /** Any BaseException is transmitted to it */
-  readonly catch?: (state: IInternalState, parameters: readonly Value[], e: IException) => void;
+  readonly catch?: (state: IInternalState, e: IException) => void;
   /** Triggered before unstacking the operator from the call stack */
-  readonly finally?: (state: IInternalState, parameters: readonly Value[]) => void;
+  readonly finally?: (state: IInternalState) => void;
 }
 
 /** Operator */
