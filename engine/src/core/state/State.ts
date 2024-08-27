@@ -150,9 +150,9 @@ export class State implements IInternalState {
     const { top, length: numberOfCalls } = calls;
     if (this._exception) {
       if (top.type === ValueType.operator) {
-        operatorPop(this, top);
+        operatorPop(this, top); // TODO: how to handle exception ?
       } else {
-        calls.pop();
+        calls.pop(); 
       }
     } else if (top.isExecutable) {
       // TODO: && (top.type !== ValueType.string || isCallAllowed)
