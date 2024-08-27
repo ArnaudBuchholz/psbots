@@ -12,7 +12,7 @@ describe('enumIDictionaryValues', () => {
   });
 
   it('returns all values of the dictionary', () => {
-    expect([...enumIDictionaryValues(iReadOnlyDictionary)]).toStrictEqual<Array<{ name: string; value: Value }>>([
+    expect([...enumIDictionaryValues(iReadOnlyDictionary)]).toStrictEqual<{ name: string; value: Value }[]>([
       {
         name: 'a',
         value: {
