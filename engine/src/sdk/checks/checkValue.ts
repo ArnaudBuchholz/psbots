@@ -24,7 +24,7 @@ const expectedFlags: { [key in ValueType]?: Partial<IAbstractValue> } = {
 };
 
 function hasInvalidFlag(value: Value): boolean {
-  const flagNames: Array<keyof IAbstractValue> = ['isReadOnly', 'isExecutable'];
+  const flagNames: (keyof IAbstractValue)[] = ['isReadOnly', 'isExecutable'];
   const flags = expectedFlags[value.type];
   for (const flagName of flagNames) {
     const expected = flags && flags[flagName];
