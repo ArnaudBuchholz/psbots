@@ -1,6 +1,6 @@
 import { it, expect } from 'vitest';
 import type { ValueType } from '@api/index.js';
-import { valueOf } from '@sdk/valueOf.js';
+import { valueOf } from './valueOf.js';
 import type { IFunctionOperator } from '@sdk/interfaces/IOperator.js';
 import { toValue, values } from '@test/index.js';
 
