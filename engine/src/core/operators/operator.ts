@@ -1,4 +1,5 @@
-import { Value, ValueType } from '@api/index.js';
+import type { Value } from '@api/index.js';
+import { ValueType } from '@api/index.js';
 import { valueOf } from '@sdk/index.js';
 import type { IInternalState } from '@sdk/interfaces/IInternalState.js';
 import type { IOperator } from '@sdk/interfaces/IOperator.js';
@@ -7,14 +8,16 @@ import { OperatorType } from '@sdk/interfaces/IOperator.js';
 type OperatorDefinition = {
   name: string;
   signature: {
-    input?: string[];
+    input: string[];
   };
 };
 
-export const registry: { [key in string]: {
-  definition: OperatorDefinition,
-  value: Value<ValueType.operator>
-}} = {};
+export const registry: {
+  [key in string]: {
+    definition: OperatorDefinition;
+    value: Value<ValueType.operator>;
+  };
+} = {};
 
 export function buildFunctionOperator(
   definition: OperatorDefinition,
@@ -50,6 +53,23 @@ export function buildFunctionOperator(
       implementation
     };
   }
+  registry[definition.name] = {
+    definition,
+    value: {
+      type: ValueType.operator,
+      isExecutable: true,
+      isReadOnly: true,
+      operator
+    }
+  };
+}
+
+export function buildConstantOperator(definition: OperatorDefinition, value: Value): void {
+  const operator = {
+    type: OperatorType.constant,
+    name: definition.name,
+    constant: value
+  };
   registry[definition.name] = {
     definition,
     value: {

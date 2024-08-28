@@ -1,0 +1,19 @@
+{
+    "name": "mark",
+    "description": "pushes a mark in the operand stack",
+    "labels": ["value", ",mark"],
+    "signature": {
+      "input": [],
+      "output": ["mark"]
+    },
+    "samples": [{
+      "description": "Adding a mark to the stack",
+      "in": "1 2 mark",
+      "out": "1 2 mark"
+    }, {
+      "description": "Used to mark part of the stack (cleartomark)",
+      "in": "1 2 mark 3 4 5 cleartomark",
+      "out": "1 2"
+    }]
+  }
+  
