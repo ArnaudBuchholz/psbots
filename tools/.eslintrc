@@ -47,7 +47,8 @@
         "ts": "never"
       }
     ],
-    "@typescript-eslint/no-import-type-side-effects": "error"
+    "@typescript-eslint/no-import-type-side-effects": "error",
+    "@typescript-eslint/no-explicit-any": "error"
   },
   "env": {
     "node": true
