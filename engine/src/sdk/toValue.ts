@@ -21,12 +21,20 @@ export function toIntegerValue(integer: number): Value<ValueType.integer> {
 }
 
 export function toStringValue(string: string, memoryTracker?: MemoryTracker): Value<ValueType.string> {
+  if (memoryTracker !== undefined) {
+    return {
+      type: ValueType.string,
+      isExecutable: false,
+      isReadOnly: true,
+      string,
+      tracker: memoryTracker
+    };
+  }
   return {
     type: ValueType.string,
     isExecutable: false,
     isReadOnly: true,
-    string,
-    tracker: memoryTracker
+    string
   };
 }
 

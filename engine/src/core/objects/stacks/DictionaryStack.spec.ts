@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, beforeAll } from 'vitest';
 import type { IReadOnlyDictionary, Value } from '@api/index.js';
 import { USER_MEMORY_TYPE } from '@api/index.js';
 import type { DictionaryStackWhereResult } from '@sdk/index.js';
@@ -11,6 +11,7 @@ import { toValue } from '@test/index.js';
 
 let tracker: MemoryTracker;
 let stack: DictionaryStack;
+let markOp: Value;
 
 const host: IReadOnlyDictionary = {
   get names() {
@@ -23,6 +24,14 @@ const host: IReadOnlyDictionary = {
     return null;
   }
 };
+
+beforeAll(() => {
+  const lookUpResult = SystemDictionary.instance.lookup('mark');
+  if (lookUpResult === null) {
+    throw new Error('mark is not part of System dictionary');
+  }
+  markOp = lookUpResult;
+});
 
 beforeEach(() => {
   tracker = new MemoryTracker();
@@ -77,7 +86,7 @@ describe('where', () => {
   it('searches for a known name (from system dictionary)', () => {
     expect(stack.where('mark')).toStrictEqual<DictionaryStackWhereResult>({
       dictionary: stack.system,
-      value: toValue.mark
+      value: markOp
     });
   });
 
@@ -100,7 +109,7 @@ describe('lookup', () => {
   });
 
   it('searches for a known name (from system dictionary)', () => {
-    expect(stack.lookup('mark')).toStrictEqual<Value>(toValue.mark);
+    expect(stack.lookup('mark')).toStrictEqual<Value>(markOp);
   });
 
   it('searches for a known name (from global dictionary)', () => {
@@ -134,7 +143,7 @@ describe('begin', () => {
     beforeEach(() => stack.end());
 
     it('removes the top dictionary from the stack', () => {
-      expect(stack.lookup('mark')).toStrictEqual<Value>(toValue.mark);
+      expect(stack.lookup('mark')).toStrictEqual<Value>(markOp);
     });
 
     it('fails when attempting to remove pre-installed dictionaries', () => {

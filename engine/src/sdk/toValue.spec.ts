@@ -5,7 +5,7 @@ import { toBooleanValue, toIntegerValue } from './toValue.js';
 it('converts a boolean', () => {
   const value = toBooleanValue(true);
   expect(value).toStrictEqual({
-    type: ValueType.integer,
+    type: ValueType.boolean,
     isExecutable: false,
     isReadOnly: true,
     isSet: true
