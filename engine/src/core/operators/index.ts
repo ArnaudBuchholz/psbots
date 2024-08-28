@@ -1,3 +1,3 @@
-export * from './build-operator.js';
-export * from './flow/index.js';
-export * from './integer/index.js';
+export * from './operator.js';
+import './flow/index.js';
+import './integer/index.js';

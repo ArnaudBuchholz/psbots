@@ -1,2 +1,2 @@
-export * from './catch.js';
-export * from './finally.js';
+import './catch.js';
+import './finally.js';

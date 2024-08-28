@@ -1,15 +1,10 @@
-import { ValueType } from '@api/index.js';
-import { buildOperator } from '../build-operator';
+import { toIntegerValue } from '@sdk/index.js';
+import { buildFunctionOperator } from '../operator.js';
 
 import add from './add.json';
 
-buildOperator(add, function({ operands }, value1: number, value2: number) {
+buildFunctionOperator(add, function ({ operands }, value1: number, value2: number) {
   operands.pop();
   operands.pop();
-  operands.push({
-    type: ValueType.integer,
-    isExecutable: false,
-    isReadOnly: true,
-    integer: value1 + value2
-  });
+  operands.push(toIntegerValue(value1 + value2));
 });

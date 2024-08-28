@@ -1,1 +1,1 @@
-export * from './add.js';
+import './add.js';
