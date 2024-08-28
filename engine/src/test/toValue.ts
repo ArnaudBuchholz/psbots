@@ -5,13 +5,12 @@ import type {
   IDictionary,
   IReadOnlyArray,
   IReadOnlyDictionary,
-  MarkValue,
   OperatorValue,
   Value
 } from '@api/index.js';
 import { ValueType } from '@api/index.js';
 import type { IOperator } from '@sdk/index.js';
-import { isObject, OperatorType } from '@sdk/index.js';
+import { isObject, OperatorType, toBooleanValue, toIntegerValue, toStringValue, toMarkValue } from '@sdk/index.js';
 import { ShareableObject } from '@core/index.js';
 
 export type CompatiblePrimitiveValue = string | number | boolean | Value | (() => void);
@@ -123,28 +122,16 @@ export function toValue(value: CompatibleValue, readOnly: boolean = false): Valu
     isExecutable: false
   };
   if (typeof value === 'string') {
-    return {
-      ...common,
-      type: ValueType.string,
-      string: value
-    };
+    return toStringValue(value);
   }
   if (typeof value === 'boolean') {
-    return {
-      ...common,
-      type: ValueType.boolean,
-      isSet: value
-    };
+    return toBooleanValue(value);
   }
   if (typeof value === 'number') {
     if (value % 1 !== 0) {
       throw new Error('Only integers are supported');
     }
-    return {
-      ...common,
-      type: ValueType.integer,
-      integer: value
-    };
+    return toIntegerValue(value);
   }
   if (typeof value === 'function') {
     return {
@@ -195,13 +182,7 @@ export function toValue(value: CompatibleValue, readOnly: boolean = false): Valu
   };
 }
 
-const mark: MarkValue = {
-  type: ValueType.mark,
-  isReadOnly: true,
-  isExecutable: false
-};
-
-toValue.mark = mark;
+toValue.mark = toMarkValue();
 
 const operator: OperatorValue = {
   type: ValueType.operator,
