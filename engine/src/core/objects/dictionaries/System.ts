@@ -1,5 +1,5 @@
-import { ValueType } from '@api/index.js';
 import type { IReadOnlyDictionary, Value } from '@api/index.js';
+import { registry } from '@core/operators/index.js';
 
 export class SystemDictionary implements IReadOnlyDictionary {
   protected constructor() {}
@@ -14,16 +14,13 @@ export class SystemDictionary implements IReadOnlyDictionary {
   // region IReadOnlyDictionary
 
   get names(): string[] {
-    return ['mark'];
+    return Object.keys(registry);
   }
 
   lookup(name: string): Value | null {
-    if (name === 'mark') {
-      return {
-        type: ValueType.mark,
-        isExecutable: false,
-        isReadOnly: true
-      };
+    const operator = registry[name];
+    if (operator !== undefined) {
+      return operator.value;
     }
     return null;
   }
