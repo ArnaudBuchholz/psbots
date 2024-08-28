@@ -152,7 +152,7 @@ export class State implements IInternalState {
       if (top.type === ValueType.operator) {
         operatorPop(this, top); // TODO: how to handle exception ?
       } else {
-        calls.pop(); 
+        calls.pop();
       }
     } else if (top.isExecutable) {
       // TODO: && (top.type !== ValueType.string || isCallAllowed)
