@@ -9,14 +9,14 @@ import type { IOperator } from '@sdk/interfaces/IOperator.js';
 export function operatorPop(state: IInternalState, value: Value<ValueType.operator>): void {
   const operator = value.operator as IOperator;
   if (operator.type === OperatorType.constant) {
-    throw new InternalException('Unexpected constant operator')
+    throw new InternalException('Unexpected constant operator');
   }
   if (operator.callOnPop) {
     operator.implementation(state, []);
   } else {
     state.calls.pop();
   }
-};
+}
 
 export function operatorCycle(state: IInternalState, value: Value<ValueType.operator>): void {
   const { operands, calls } = state;
