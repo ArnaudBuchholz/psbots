@@ -24,6 +24,8 @@ export function operatorCycle(state: IInternalState, value: Value<ValueType.oper
     operatorPop(state, value);
     return;
   }
+  calls.step ??= STEP_DONE;
+  const { top } = calls;
   const operator = value.operator as IOperator;
   if (operator.type === OperatorType.constant) {
     operands.push(operator.constant);
@@ -48,6 +50,9 @@ export function operatorCycle(state: IInternalState, value: Value<ValueType.oper
       operator.implementation(state, parameters);
     } finally {
       parameters.forEach((value) => value.tracker?.releaseValue(value));
+    }
+    if (calls.top === top && calls.step === STEP_DONE) {
+      calls.pop();
     }
   }
 }

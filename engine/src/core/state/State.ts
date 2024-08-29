@@ -148,7 +148,7 @@ export class State implements IInternalState {
 
   cycle() {
     const calls = this._calls;
-    const { top, length: numberOfCalls } = calls;
+    const { top } = calls;
     if (this._exception) {
       if (top.type === ValueType.operator) {
         operatorPop(this, top); // TODO: how to handle exception ?
@@ -160,9 +160,6 @@ export class State implements IInternalState {
       try {
         if (top.type === ValueType.operator) {
           operatorCycle(this, top);
-          if (calls.top === top && [undefined, STEP_DONE].includes(calls.step)) {
-            calls.pop();
-          }
         } else {
           throw new InternalException('Unsupported executable value');
         }

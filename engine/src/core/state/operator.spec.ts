@@ -157,7 +157,7 @@ describe('With parameters', () => {
             calls.step = 0;
           } else {
             operands.push(toValue(parameters.length === 0));
-            calls.pop();
+            calls.step = STEP_DONE;
           }
         },
         typeCheck: [null]
