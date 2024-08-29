@@ -18,7 +18,7 @@
   "author": "Arnaud Buchholz <arnaud.buchholz@free.fr>",
   "license": "MIT",
   "devDependencies": {
-    "@stylistic/eslint-plugin-js": "^2.6.4",
+    "@stylistic/eslint-plugin-js": "^2.6.5",
     "@vitest/coverage-v8": "^2.0.5",
     "dpdm": "^3.14.0",
     "eslint-config-prettier": "^9.1.0",
