@@ -151,9 +151,8 @@ describe('With parameters', () => {
     beforeEach(() => {
       pushFunctionOperatorToCallStack({
         implementation({ calls, operands }: IInternalState, parameters: readonly Value[]) {
-          const step = calls.step;
-          if (step === undefined) {
-            operands.pop(); // remove from the stack
+          if (calls.step === STEP_DONE) {
+            operands.pop(); // remove 123 from the stack
             calls.step = 0;
           } else {
             operands.push(toValue(parameters.length === 0));
@@ -191,7 +190,7 @@ describe('operator lifecycle', () => {
   it('is not removed from call stack when step is used until set to STEP_DONE', () => {
     pushFunctionOperatorToCallStack({
       implementation({ calls, operands }: IInternalState /*, parameters: readonly Value[]*/) {
-        if (calls.step === undefined) {
+        if (calls.step === STEP_DONE) {
           calls.step = 1;
           operands.push(toValue(1));
         } else {
@@ -233,7 +232,7 @@ describe('operator lifecycle', () => {
   it('continues to execute the operator after subsequent call until step is STEP_DONE', () => {
     pushFunctionOperatorToCallStack({
       implementation({ calls, operands }: IInternalState /*, parameters: readonly Value[]*/) {
-        if (calls.step === undefined) {
+        if (calls.step === STEP_DONE) {
           calls.step = 1;
           operands.push(toValue(1));
           pushFunctionOperatorToCallStack({

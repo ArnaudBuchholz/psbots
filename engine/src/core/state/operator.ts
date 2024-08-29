@@ -24,15 +24,18 @@ export function operatorCycle(state: IInternalState, value: Value<ValueType.oper
     operatorPop(state, value);
     return;
   }
-  calls.step ??= STEP_DONE;
   const { top } = calls;
+  const isFirstCall = calls.step === undefined;
+  if (isFirstCall) {
+    calls.step = STEP_DONE;
+  }
   const operator = value.operator as IOperator;
   if (operator.type === OperatorType.constant) {
     operands.push(operator.constant);
     calls.pop();
   } else {
     const parameters: Value[] = [];
-    if (operator.typeCheck !== undefined && calls.step === undefined) {
+    if (operator.typeCheck !== undefined && isFirstCall) {
       if (operands.length < operator.typeCheck.length) {
         throw new StackUnderflowException();
       }
