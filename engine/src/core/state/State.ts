@@ -100,12 +100,13 @@ export class State implements IInternalState {
       operator: <IOperator>{
         type: OperatorType.implementation,
         name: 'Processable source',
-        implementation: (state) => {
+        implementation: ({ calls }) => {
           const { value, done } = generator.next();
           if (done) {
-            state.calls.pop();
+            calls.step = STEP_DONE;
           } else {
-            state.calls.push(value);
+            calls.step = 0;
+            calls.push(value);
           }
         }
       }
@@ -159,11 +160,8 @@ export class State implements IInternalState {
       try {
         if (top.type === ValueType.operator) {
           operatorCycle(this, top);
-          if (calls.step === undefined) {
-            calls.step = STEP_DONE;
-            if (calls.length === numberOfCalls) {
-              calls.pop();
-            }
+          if (calls.top === top && [undefined, STEP_DONE].includes(calls.step)) {
+            calls.pop();
           }
         } else {
           throw new InternalException('Unsupported executable value');
