@@ -114,7 +114,7 @@ export function toValue(
   { isReadOnly = false, isExecutable = false }: Partial<IValuePermissions> = {}
 ): Value {
   if (typeof value === 'string') {
-    return toStringValue(value);
+    return toStringValue(value, { isExecutable });
   }
   if (typeof value === 'boolean') {
     return toBooleanValue(value);
