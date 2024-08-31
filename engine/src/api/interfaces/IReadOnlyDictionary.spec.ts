@@ -3,7 +3,7 @@ import type { Value } from '@api/index.js';
 import { ValueType, enumIDictionaryValues, convertIDictionaryToObject } from '@api/index.js';
 import { toValue } from '@test/index.js';
 
-const iReadOnlyDictionary = toValue({ a: 1, b: 2, c: '3' }, true).dictionary;
+const iReadOnlyDictionary = toValue({ a: 1, b: 2, c: '3' }, { isReadOnly: true }).dictionary;
 
 describe('enumIDictionaryValues', () => {
   it('returns a generator', () => {

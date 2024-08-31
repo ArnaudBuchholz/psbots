@@ -4,7 +4,7 @@ import { enumIArrayValues, ValueType } from '@api/index.js';
 import { toValue } from '@test/index.js';
 
 describe('enumIArrayValues', () => {
-  const iReadOnlyArray = toValue([1, 2, '3'], true).array;
+  const iReadOnlyArray = toValue([1, 2, '3'], { isReadOnly: true }).array;
 
   it('returns a generator', () => {
     const generator = enumIArrayValues(iReadOnlyArray);

@@ -88,9 +88,9 @@ describe('checkOperatorValue', () => {
 });
 
 describe('checkArrayValue', () => {
-  const readOnlyArrayValue = toValue([1, 2, 3], true);
+  const readOnlyArrayValue = toValue([1, 2, 3], { isReadOnly: true });
   const arrayValue = toValue([1, 2, 3]);
-  const executableBlock = Object.assign(toValue([1, 2, 3], true), { isExecutable: true });
+  const executableBlock = toValue([1, 2, 3], { isReadOnly: true, isExecutable: true });
 
   testCheckFunction({
     check: checkArrayValue,
@@ -107,7 +107,7 @@ describe('checkArrayValue', () => {
 });
 
 describe('checkDictionaryValue', () => {
-  const readOnlyDictionaryValue = toValue({ a: 1, b: 2, c: 3 }, true);
+  const readOnlyDictionaryValue = toValue({ a: 1, b: 2, c: 3 }, { isReadOnly: true });
   const dictionaryValue = toValue({ a: 1, b: 2, c: 3 });
 
   testCheckFunction({

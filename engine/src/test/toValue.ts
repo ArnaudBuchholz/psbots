@@ -5,6 +5,7 @@ import type {
   IDictionary,
   IReadOnlyArray,
   IReadOnlyDictionary,
+  IValuePermissions,
   OperatorValue,
   Value
 } from '@api/index.js';
@@ -46,10 +47,6 @@ function _toIReadOnlyArray(values: Value[]): { array: Value[]; iArray: IReadOnly
   return { array, iArray };
 }
 
-function toIReadOnlyArray(values: Value[]): IReadOnlyArray {
-  return _toIReadOnlyArray(values).iArray;
-}
-
 function toIArray(values: Value[]): IArray {
   const { array, iArray } = _toIReadOnlyArray(values);
   return Object.assign(iArray, {
@@ -88,10 +85,6 @@ function _toIReadOnlyDictionary(mapping: ValueDictionary): {
   return { dictionary, iDictionary };
 }
 
-function toIReadOnlyDictionary(mapping: ValueDictionary): IReadOnlyDictionary {
-  return _toIReadOnlyDictionary(mapping).iDictionary;
-}
-
 function toIDictionary(mapping: ValueDictionary): IDictionary {
   const { dictionary, iDictionary } = _toIReadOnlyDictionary(mapping);
   return Object.assign(iDictionary, {
@@ -106,21 +99,20 @@ function toIDictionary(mapping: ValueDictionary): IDictionary {
   });
 }
 
-export function toValue(value: boolean, readOnly?: boolean): Value<ValueType.boolean>;
-export function toValue(value: number, readOnly?: boolean): Value<ValueType.integer>;
-export function toValue(value: string, readOnly?: boolean): Value<ValueType.string>;
-export function toValue(value: () => void, readOnly?: boolean): Value<ValueType.operator>;
-export function toValue(value: CompatibleValue[], readOnly?: boolean): ArrayValue;
-export function toValue(value: { [key in string]: CompatibleValue }, readOnly?: boolean): DictionaryValue;
-export function toValue(value: CompatibleValue, readOnly?: boolean): Value;
-export function toValue(value: CompatibleValue, readOnly: boolean = false): Value {
-  const common: {
-    isReadOnly: true;
-    isExecutable: false;
-  } = {
-    isReadOnly: true,
-    isExecutable: false
-  };
+export function toValue(value: boolean, permissions?: Partial<IValuePermissions>): Value<ValueType.boolean>;
+export function toValue(value: number, permissions?: Partial<IValuePermissions>): Value<ValueType.integer>;
+export function toValue(value: string, permissions?: Partial<IValuePermissions>): Value<ValueType.string>;
+export function toValue(value: () => void, permissions?: Partial<IValuePermissions>): Value<ValueType.operator>;
+export function toValue(value: CompatibleValue[], permissions?: Partial<IValuePermissions>): ArrayValue;
+export function toValue(
+  value: { [key in string]: CompatibleValue },
+  permissions?: Partial<IValuePermissions>
+): DictionaryValue;
+export function toValue(value: CompatibleValue, permissions?: Partial<IValuePermissions>): Value;
+export function toValue(
+  value: CompatibleValue,
+  { isReadOnly = false, isExecutable = false }: Partial<IValuePermissions> = {}
+): Value {
   if (typeof value === 'string') {
     return toStringValue(value);
   }
@@ -135,7 +127,7 @@ export function toValue(value: CompatibleValue, readOnly: boolean = false): Valu
   }
   if (typeof value === 'function') {
     return {
-      ...common,
+      isReadOnly: true,
       isExecutable: true,
       type: ValueType.operator,
       operator: <IOperator>{
@@ -146,18 +138,19 @@ export function toValue(value: CompatibleValue, readOnly: boolean = false): Valu
     };
   }
   if (Array.isArray(value)) {
-    if (readOnly) {
+    if (isExecutable) {
       return {
-        ...common,
         type: ValueType.array,
-        array: toIReadOnlyArray(value.map((item) => toValue(item, true)))
+        isExecutable,
+        isReadOnly: true,
+        array: toIArray(value.map((item) => toValue(item, { isReadOnly, isExecutable })))
       };
     }
     return {
-      ...common,
-      isReadOnly: false,
       type: ValueType.array,
-      array: toIArray(value.map((item) => toValue(item, false)))
+      isExecutable,
+      isReadOnly,
+      array: toIArray(value.map((item) => toValue(item, { isReadOnly, isExecutable })))
     };
   }
   if (isValue(value)) {
@@ -165,19 +158,12 @@ export function toValue(value: CompatibleValue, readOnly: boolean = false): Valu
   }
   const mapping: { [key in string]: Value } = {};
   Object.entries(value).forEach(([name, item]) => {
-    mapping[name] = toValue(item, readOnly);
+    mapping[name] = toValue(item, { isReadOnly, isExecutable });
   });
-  if (readOnly) {
-    return {
-      ...common,
-      type: ValueType.dictionary,
-      dictionary: toIReadOnlyDictionary(mapping)
-    };
-  }
   return {
-    ...common,
-    isReadOnly: false,
     type: ValueType.dictionary,
+    isExecutable: false,
+    isReadOnly,
     dictionary: toIDictionary(mapping)
   };
 }
