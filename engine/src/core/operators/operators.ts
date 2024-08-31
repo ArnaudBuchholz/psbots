@@ -1,6 +1,6 @@
 import type { Value } from '@api/index.js';
 import { ValueType } from '@api/index.js';
-import { valueOf } from '@sdk/index.js';
+import { valuesOf } from '@sdk/index.js';
 import type { IInternalState } from '@sdk/interfaces/IInternalState.js';
 import type { IOperator } from '@sdk/interfaces/IOperator.js';
 import { OperatorType } from '@sdk/interfaces/IOperator.js';
@@ -46,7 +46,7 @@ export function buildFunctionOperator(
           if (typeCheck[index] === null) {
             return value;
           }
-          return valueOf(value);
+          return valuesOf(value)[0];
         });
         implementation(state, ...values);
       }

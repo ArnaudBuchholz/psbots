@@ -15,19 +15,19 @@ function getValueOf(value: Value): unknown {
   return values[value.type](value as never);
 }
 
-export function valueOf<T1>(value1: Value<T1>): [ValueOf<T1>];
-export function valueOf<T1, T2>(value1: Value<T1>, value2: Value<T2>): [ValueOf<T1>, ValueOf<T2>];
-export function valueOf<T1, T2, T3>(
+export function valuesOf<T1>(value1: Value<T1>): [ValueOf<T1>];
+export function valuesOf<T1, T2>(value1: Value<T1>, value2: Value<T2>): [ValueOf<T1>, ValueOf<T2>];
+export function valuesOf<T1, T2, T3>(
   value1: Value<T1>,
   value2: Value<T2>,
   value3: Value<T3>
 ): [ValueOf<T1>, ValueOf<T2>, ValueOf<T3>];
-export function valueOf<T1, T2, T3, T4>(
+export function valuesOf<T1, T2, T3, T4>(
   value1: Value<T1>,
   value2: Value<T2>,
   value3: Value<T3>,
   value4: Value<T4>
 ): [ValueOf<T1>, ValueOf<T2>, ValueOf<T3>, ValueOf<T4>];
-export function valueOf(...values: Value[]): unknown[] {
+export function valuesOf(...values: Value[]): unknown[] {
   return values.map((value) => getValueOf(value));
 }
