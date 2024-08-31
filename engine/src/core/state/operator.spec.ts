@@ -17,7 +17,7 @@ import type { ShareableObject } from '@core/objects/ShareableObject.js';
 let state: State;
 
 beforeEach(() => {
-  state = new State();
+  state = new State({ debugMemory: true });
 });
 
 afterEach(() => {
@@ -316,7 +316,7 @@ describe('operator lifecycle', () => {
     expect(state.calls.length).toStrictEqual(0);
   });
 
-  it.only('calls on pop if an exception occurred (even while looping), popping can be called several times', () => {
+  it('calls on pop if an exception occurred (even while looping), popping can be called several times', () => {
     pushFunctionOperatorToCallStack({
       implementation({ calls, operands }: IInternalState /*, parameters: readonly Value[]*/) {
         if (calls.step === STEP_DONE) {
