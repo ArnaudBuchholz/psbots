@@ -11,7 +11,7 @@
       "in": "1 2 mark",
       "out": "1 2 mark"
     }, {
-      "description": "Used to mark part of the stack (cleartomark)",
+      "description": "Used to mark part of the stack",
       "in": "1 2 mark 3 4 5 cleartomark",
       "out": "1 2"
     }]

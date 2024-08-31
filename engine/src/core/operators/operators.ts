@@ -5,11 +5,16 @@ import type { IInternalState } from '@sdk/interfaces/IInternalState.js';
 import type { IOperator } from '@sdk/interfaces/IOperator.js';
 import { OperatorType } from '@sdk/interfaces/IOperator.js';
 
-type OperatorDefinition = {
+export type OperatorDefinition = {
   name: string;
   signature: {
     input: string[];
   };
+  samples: {
+    description: string;
+    in: string;
+    out: string;
+  }[];
 };
 
 export const registry: {
