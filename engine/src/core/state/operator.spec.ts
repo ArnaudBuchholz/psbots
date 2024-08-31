@@ -316,7 +316,7 @@ describe('operator lifecycle', () => {
     expect(state.calls.length).toStrictEqual(0);
   });
 
-  it.only('calls on pop if an exception occurred (even if looping)', () => {
+  it.only('calls on pop if an exception occurred (even while looping), popping can be called several times', () => {
     pushFunctionOperatorToCallStack({
       implementation({ calls, operands }: IInternalState /*, parameters: readonly Value[]*/) {
         if (calls.step === STEP_DONE) {
@@ -333,11 +333,13 @@ describe('operator lifecycle', () => {
             }
           });
         } else if (calls.step === STEP_POP) {
-          operands.pop();
-          operands.push(toValue(4));
-          calls.step = 0;
-        } else if (calls.step === 0) {
-          calls.pop();
+          if (calls.lookup('already_called') === null) {
+            operands.pop();
+            operands.push(toValue(4));
+            calls.def('already_called', toValue(true));
+          } else {
+            calls.pop();
+          }
         }
       },
       callOnPop: true
