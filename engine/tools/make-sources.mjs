@@ -21,7 +21,7 @@ async function generateIndexes(path, generate) {
           if (stat.isDirectory()) {
             name += '/index.js';
           }
-          if (path.includes('operators') && name !== 'operator.ts') {
+          if (path.includes('operators') && name !== 'operators.ts') {
             return `import './${name.replace('.ts', '.js')}';`;
           }
           return `export * from './${name.replace('.ts', '.js')}';`;
