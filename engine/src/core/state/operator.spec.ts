@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import type { Value } from '@api/index.js';
 import { ValueType } from '@api/index.js';
 import type { IFunctionOperator, IInternalState, IOperator } from '@sdk/index.js';
-import { OperatorType, StackUnderflowException, STEP_DONE, TypeCheckException } from '@sdk/index.js';
+import { OperatorType, StackUnderflowException, STEP_DONE, STEP_POP, TypeCheckException } from '@sdk/index.js';
 import { toValue } from '@test/index.js';
 import { State } from './State.js';
 import type { ShareableObject } from '@core/objects/ShareableObject.js';
@@ -267,22 +267,23 @@ describe('operator lifecycle', () => {
     expect(state.calls.length).toStrictEqual(0);
   });
 
-  // it('does not trigger catch if the exception is raised within implementation', () => {
-  //   pushFunctionOperatorToCallStack({
-  //     implementation({ operands }: IInternalState /*, parameters: readonly Value[]*/) {
-  //       operands.push(toValue(1));
-  //       throw new InternalException('KO');
-  //     },
-  //     catch({ operands }: IInternalState /*, e: IException*/) {
-  //       operands.push(toValue('Not supposed to be called'));
-  //     }
-  //   });
-  //   state.cycle();
-  //   expect(state.calls.length).toStrictEqual(1);
-  //   expect(state.operands.ref).toStrictEqual([toValue(1)]);
-  //   state.cycle();
-  //   expect(state.calls.length).toStrictEqual(0);
-  // });
+  it('is called with step = STEP_POP if callOnPop is set', () => {
+    pushFunctionOperatorToCallStack({
+      implementation({ calls, operands }: IInternalState /*, parameters: readonly Value[]*/) {
+        if (calls.step === STEP_DONE) {
+          operands.push(toValue(1));
+        } else if (calls.step === STEP_POP) {
+          calls.pop();
+        }
+      },
+      callOnPop: true
+    });
+    state.cycle();
+    expect(state.calls.length).toStrictEqual(1);
+    expect(state.operands.ref).toStrictEqual([toValue(1)]);
+    state.cycle();
+    expect(state.calls.length).toStrictEqual(0);
+  });
 
   // it('does not trigger finally if the exception is raised within implementation', () => {
   //   pushFunctionOperatorToCallStack({

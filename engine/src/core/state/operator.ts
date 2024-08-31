@@ -1,20 +1,22 @@
 import type { Value, ValueType } from '@api/index.js';
 import { InternalException, TypeCheckException } from '@sdk/exceptions';
 import { StackUnderflowException } from '@sdk/exceptions/StackUnderflowException.js';
-import { STEP_DONE } from '@sdk/interfaces/ICallStack.js';
+import { STEP_DONE, STEP_POP } from '@sdk/interfaces/ICallStack.js';
 import type { IInternalState } from '@sdk/interfaces/IInternalState.js';
 import { OperatorType } from '@sdk/interfaces/IOperator.js';
 import type { IOperator } from '@sdk/interfaces/IOperator.js';
 
 export function operatorPop(state: IInternalState, value: Value<ValueType.operator>): void {
+  const { calls } = state;
   const operator = value.operator as IOperator;
   if (operator.type === OperatorType.constant) {
     throw new InternalException('Unexpected constant operator');
   }
   if (operator.callOnPop) {
+    calls.step = STEP_POP;
     operator.implementation(state, []);
   } else {
-    state.calls.pop();
+    calls.pop();
   }
 }
 
@@ -54,7 +56,7 @@ export function operatorCycle(state: IInternalState, value: Value<ValueType.oper
     } finally {
       parameters.forEach((value) => value.tracker?.releaseValue(value));
     }
-    if (calls.top === top && calls.step === STEP_DONE) {
+    if (calls.top === top && operator.callOnPop !== true && calls.step === STEP_DONE) {
       calls.pop();
     }
   }
