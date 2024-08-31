@@ -2,7 +2,14 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import type { Value } from '@api/index.js';
 import { ValueType } from '@api/index.js';
 import type { IFunctionOperator, IInternalState, IOperator } from '@sdk/index.js';
-import { OperatorType, StackUnderflowException, STEP_DONE, STEP_POP, TypeCheckException } from '@sdk/index.js';
+import {
+  InternalException,
+  OperatorType,
+  StackUnderflowException,
+  STEP_DONE,
+  STEP_POP,
+  TypeCheckException
+} from '@sdk/index.js';
 import { toValue } from '@test/index.js';
 import { State } from './State.js';
 import type { ShareableObject } from '@core/objects/ShareableObject.js';
@@ -285,56 +292,72 @@ describe('operator lifecycle', () => {
     expect(state.calls.length).toStrictEqual(0);
   });
 
-  // it('does not trigger finally if the exception is raised within implementation', () => {
-  //   pushFunctionOperatorToCallStack({
-  //     implementation({ operands }: IInternalState /*, parameters: readonly Value[]*/) {
-  //       operands.push(toValue(1));
-  //       throw new InternalException('KO');
-  //     },
-  //     finally({ operands }: IInternalState) {
-  //       operands.push(toValue('Not supposed to be called'));
-  //     }
-  //   });
-  //   state.cycle();
-  //   expect(state.calls.length).toStrictEqual(1);
-  //   expect(state.operands.ref).toStrictEqual([toValue(1)]);
-  //   state.cycle();
-  //   expect(state.calls.length).toStrictEqual(0);
-  // });
-
-  // it('triggers catch when an exception is raised', () => {
-  //   pushFunctionOperatorToCallStack({
-  //     implementation({ operands }: IInternalState /*, parameters: readonly Value[]*/) {
-  //       operands.push(toValue(1));
-  //       pushFunctionOperatorToCallStack({
-  //         implementation({ operands }: IInternalState /*, parameters: readonly Value[]*/) {
-  //           operands.push(toValue(2));
-  //           throw new InternalException('KO');
-  //         }
-  //       });
-  //     },
-  //     catch({ operands }: IInternalState /*, e: IException*/) {
-  //       operands.push(toValue(3));
-  //     }
-  //   });
-  //   state.cycle();
-  //   expect(state.calls.length).toStrictEqual(2);
-  //   expect(state.operands.ref).toStrictEqual([toValue(1)]);
-  //   state.cycle();
-  //   expect(state.calls.length).toStrictEqual(2);
-  //   expect(state.operands.ref).toStrictEqual([toValue(2), toValue(1)]);
-  //   state.cycle();
-  //   expect(state.calls.length).toStrictEqual(1);
-  //   expect(state.operands.ref).toStrictEqual([toValue(3), toValue(2), toValue(1)]);
-  //   state.cycle();
-  //   expect(state.calls.length).toStrictEqual(0);
-  // });
-
-  it.skip('triggers finally before unstacking the operator (no exception)', () => {
-    // from a callstack point of view, we need to know that the stack is coming from catch
+  it('may stack new calls during the pop (but requires step override for popping)', () => {
+    pushFunctionOperatorToCallStack({
+      implementation({ calls, operands }: IInternalState /*, parameters: readonly Value[]*/) {
+        if (calls.step === STEP_DONE) {
+          operands.push(toValue(1));
+        } else if (calls.step === STEP_POP) {
+          operands.push(toValue(2));
+          calls.step = 0;
+        } else if (calls.step === 0) {
+          calls.pop();
+        }
+      },
+      callOnPop: true
+    });
+    state.cycle();
+    expect(state.calls.length).toStrictEqual(1);
+    expect(state.operands.ref).toStrictEqual([toValue(1)]);
+    state.cycle();
+    expect(state.calls.length).toStrictEqual(1);
+    expect(state.operands.ref).toStrictEqual([toValue(2), toValue(1)]);
+    state.cycle();
+    expect(state.calls.length).toStrictEqual(0);
   });
 
-  it.skip('triggers finally before unstacking the operator (exception)', () => {});
-
-  it.skip('triggers catch and then finally', () => {});
+  it.only('calls on pop if an exception occurred (even if looping)', () => {
+    pushFunctionOperatorToCallStack({
+      implementation({ calls, operands }: IInternalState /*, parameters: readonly Value[]*/) {
+        if (calls.step === STEP_DONE) {
+          operands.push(toValue(1));
+          calls.step = 1;
+        } else if (calls.step === 1) {
+          operands.pop();
+          operands.push(toValue(2));
+          pushFunctionOperatorToCallStack({
+            implementation(/* state: IInternalState, parameters: readonly Value[]*/) {
+              operands.pop();
+              operands.push(toValue(3));
+              throw new InternalException('STOP');
+            }
+          });
+        } else if (calls.step === STEP_POP) {
+          operands.pop();
+          operands.push(toValue(4));
+          calls.step = 0;
+        } else if (calls.step === 0) {
+          calls.pop();
+        }
+      },
+      callOnPop: true
+    });
+    state.cycle();
+    expect(state.calls.length).toStrictEqual(1);
+    expect(state.operands.ref).toStrictEqual([toValue(1)]);
+    state.cycle();
+    expect(state.calls.length).toStrictEqual(2);
+    expect(state.operands.ref).toStrictEqual([toValue(2)]);
+    state.cycle();
+    expect(state.calls.length).toStrictEqual(2);
+    expect(state.operands.ref).toStrictEqual([toValue(3)]);
+    state.cycle();
+    expect(state.calls.length).toStrictEqual(1);
+    expect(state.operands.ref).toStrictEqual([toValue(3)]);
+    state.cycle();
+    expect(state.calls.length).toStrictEqual(1);
+    expect(state.operands.ref).toStrictEqual([toValue(4)]);
+    state.cycle();
+    expect(state.calls.length).toStrictEqual(0);
+  });
 });

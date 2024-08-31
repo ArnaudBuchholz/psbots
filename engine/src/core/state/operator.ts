@@ -22,7 +22,7 @@ export function operatorPop(state: IInternalState, value: Value<ValueType.operat
 
 export function operatorCycle(state: IInternalState, value: Value<ValueType.operator>): void {
   const { operands, calls } = state;
-  if (calls.step === STEP_DONE) {
+  if (calls.step === STEP_DONE || calls.step === STEP_POP) {
     operatorPop(state, value);
     return;
   }
@@ -56,7 +56,7 @@ export function operatorCycle(state: IInternalState, value: Value<ValueType.oper
     } finally {
       parameters.forEach((value) => value.tracker?.releaseValue(value));
     }
-    if (calls.top === top && operator.callOnPop !== true && calls.step === STEP_DONE) {
+    if (calls.length && calls.top === top && operator.callOnPop !== true && calls.step === STEP_DONE) {
       calls.pop();
     }
   }
