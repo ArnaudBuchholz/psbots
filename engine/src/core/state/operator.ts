@@ -1,10 +1,13 @@
 import type { Value, ValueType } from '@api/index.js';
-import { InternalException, TypeCheckException } from '@sdk/exceptions';
-import { StackUnderflowException } from '@sdk/exceptions/StackUnderflowException.js';
-import { STEP_DONE, STEP_POP } from '@sdk/interfaces/ICallStack.js';
-import type { IInternalState } from '@sdk/interfaces/IInternalState.js';
-import { OperatorType } from '@sdk/interfaces/IOperator.js';
-import type { IOperator } from '@sdk/interfaces/IOperator.js';
+import {
+  InternalException,
+  OperatorType,
+  StackUnderflowException,
+  STEP_DONE,
+  STEP_POP,
+  TypeCheckException
+} from '@sdk/index.js';
+import type { IInternalState, IOperator } from '@sdk/index.js';
 
 export function operatorPop(state: IInternalState, value: Value<ValueType.operator>): void {
   const { calls } = state;
