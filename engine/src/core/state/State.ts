@@ -11,6 +11,7 @@ import { OperatorType, STEP_DONE } from '@sdk/interfaces';
 import type { IOperator } from '@sdk/interfaces';
 import { BaseException } from '@sdk/exceptions/BaseException.js';
 import { operatorPop, operatorCycle } from './operator.js';
+import { callCycle } from './call.js';
 
 export interface StateFactorySettings {
   /** Augment the list of known names */
@@ -160,6 +161,8 @@ export class State implements IInternalState {
       try {
         if (top.type === ValueType.operator) {
           operatorCycle(this, top);
+        } else if (top.type === ValueType.string) {
+          callCycle(this, top);
         } else {
           throw new InternalException('Unsupported executable value');
         }
