@@ -48,3 +48,12 @@ it("throws an exception if the value can't be found", () => {
   expect(state.exception).not.toBeUndefined();
   expect(state.exception?.lookup(ExceptionDictionaryName.name)).toStrictEqual(toValue('UndefinedException'));
 });
+
+it('puts the call in the operand stack when calls are prevented', () => {
+  state.preventCall();
+  const markCall = toValue('mark', { isExecutable: true });
+  state.calls.push(markCall);
+  state.cycle();
+  expect(state.calls.length).toStrictEqual(0);
+  expect(state.operands.ref).toStrictEqual([markCall]);
+});
