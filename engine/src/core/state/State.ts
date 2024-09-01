@@ -111,6 +111,9 @@ export class State implements IInternalState {
             calls.step = STEP_DONE;
           } else {
             calls.step = 0;
+            if (value.type === ValueType.string) {
+              Object.assign(value, { tracker: this.memoryTracker });
+            }
             calls.push(value);
           }
         }

@@ -1,9 +1,10 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { parse } from '@api/index.js';
+import { parse, ValueType } from '@api/index.js';
 import type { Value } from '@api/index.js';
 import { State } from './State.js';
 import { waitForGenerator, toValue } from '@test/index.js';
 import { BusyException } from '@sdk/index.js';
+import { STRING_MEMORY_TYPE } from '@core/MemoryTracker.js';
 
 let state: State;
 
@@ -117,5 +118,32 @@ describe('IInternalState', () => {
     expect(state.callEnabled).toStrictEqual(false);
     state.allowCall();
     expect(state.callEnabled).toStrictEqual(true);
+  });
+});
+
+describe('memory', () => {
+  it('ensures memory is handled for strings', () => {
+    expect(state.memoryTracker.byType[STRING_MEMORY_TYPE]).toStrictEqual(0);
+    const generator = state.process('"123"');
+    waitForGenerator(generator);
+    const value = state.operands.ref[0];
+    expect(value?.type).toStrictEqual(ValueType.string);
+    expect(value?.tracker).not.toBeUndefined();
+    expect(state.memoryTracker.byType[STRING_MEMORY_TYPE]).not.toStrictEqual(0);
+  });
+
+  it('releases memory when the string is popped', () => {
+    const generator = state.process('"123"');
+    waitForGenerator(generator);
+    state.operands.pop();
+    expect(state.memoryTracker.byType[STRING_MEMORY_TYPE]).toStrictEqual(0);
+  });
+
+  it('detects memory leaks', () => {
+    const generator = state.process('"123"');
+    waitForGenerator(generator);
+    // NEVER do that !
+    Object.assign(state.operands.ref[0]!, { tracker: undefined });
+    expect(() => state.destroy()).toThrowError();
   });
 });

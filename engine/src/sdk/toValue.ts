@@ -1,6 +1,5 @@
 import type { Value } from '@api/index.js';
 import { ValueType } from '@api/index.js';
-import type { MemoryTracker } from '@core/MemoryTracker';
 
 export function toBooleanValue(isSet: boolean): Value<ValueType.boolean> {
   return {
@@ -22,23 +21,8 @@ export function toIntegerValue(integer: number): Value<ValueType.integer> {
 
 export function toStringValue(
   string: string,
-  {
-    isExecutable = false,
-    memoryTracker = undefined
-  }: {
-    isExecutable?: boolean;
-    memoryTracker?: MemoryTracker;
-  } = {}
+  { isExecutable = false }: { isExecutable?: boolean } = {}
 ): Value<ValueType.string> {
-  if (memoryTracker !== undefined) {
-    return {
-      type: ValueType.string,
-      isExecutable,
-      isReadOnly: true,
-      string,
-      tracker: memoryTracker
-    };
-  }
   return {
     type: ValueType.string,
     isExecutable,
