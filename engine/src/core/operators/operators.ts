@@ -30,7 +30,7 @@ export function buildFunctionOperator(
   implementation: (state: IInternalState, ...values: any[]) => void
 ): void {
   let operator: IOperator;
-  if (definition.signature.input) {
+  if (definition.signature.input.length > 0) {
     const typeCheck = definition.signature.input.map((type) => {
       if (type === 'any') {
         return null;

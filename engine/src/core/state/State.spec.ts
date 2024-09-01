@@ -13,12 +13,58 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  state.destroy();
+  if (!state.destroyed) {
+    state.destroy();
+  }
 });
 
 describe('IState', () => {
-  it('exposes idle', () => {
-    expect(state.idle).toStrictEqual(true);
+  describe('when active', () => {
+    it('exposes idle', () => {
+      expect(state.idle).toStrictEqual(true);
+    });
+
+    it('exposes memoryTracker', () => {
+      expect(state.memoryTracker).toBeDefined();
+    });
+
+    it('exposes operands', () => {
+      expect(state.operands).toBeDefined();
+    });
+
+    it('exposes dictionaries', () => {
+      expect(state.dictionaries).toBeDefined();
+    });
+
+    it('exposes exception', () => {
+      expect(() => state.exception).not.toThrowError();
+    });
+  });
+
+  describe('when destroyed', () => {
+    beforeEach(() => {
+      state.destroy();
+    });
+
+    it('fails on idle', () => {
+      expect(() => state.idle).toThrowError();
+    });
+
+    it('fails on memoryTracker', () => {
+      expect(() => state.memoryTracker).toThrowError();
+    });
+
+    it('fails on operands', () => {
+      expect(() => state.operands).toThrowError();
+    });
+
+    it('fails on dictionaries', () => {
+      expect(() => state.dictionaries).toThrowError();
+    });
+
+    it('fails on exception', () => {
+      expect(() => state.exception).toThrowError();
+    });
   });
 });
 

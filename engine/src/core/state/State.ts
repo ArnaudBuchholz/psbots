@@ -40,6 +40,10 @@ export class State implements IInternalState {
     this._calls = new CallStack(this._memoryTracker);
   }
 
+  get destroyed() {
+    return this._destroyed;
+  }
+
   protected _checkIfDestroyed() {
     if (this._destroyed) {
       throw new InternalException('State instance destroyed');
