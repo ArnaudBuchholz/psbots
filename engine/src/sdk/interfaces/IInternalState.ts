@@ -8,6 +8,7 @@ export interface IInternalState extends IState {
   readonly operands: IStack;
   readonly dictionaries: IDictionaryStack;
   readonly calls: ICallStack;
+  readonly callEnabled: boolean;
   allowCall: () => void;
   preventCall: () => void;
 }
