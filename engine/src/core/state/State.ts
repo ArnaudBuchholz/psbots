@@ -139,8 +139,19 @@ export class State implements IInternalState {
     return this._calls;
   }
 
-  allowCall() {}
-  preventCall() {}
+  private _callDisablingCount = 0;
+
+  get callEnabled() {
+    return this._callDisablingCount === 0;
+  }
+
+  allowCall() {
+    ++this._callDisablingCount;
+  }
+
+  preventCall() {
+    --this._callDisablingCount;
+  }
 
   // endregion IInternalState
 
@@ -156,12 +167,11 @@ export class State implements IInternalState {
     const { top } = calls;
     if (this._exception) {
       if (top.type === ValueType.operator) {
-        operatorPop(this, top); // TODO: how to handle exception ?
+        operatorPop(this, top);
       } else {
         calls.pop();
       }
     } else if (top.isExecutable) {
-      // TODO: && (top.type !== ValueType.string || isCallAllowed)
       try {
         if (top.type === ValueType.operator) {
           operatorCycle(this, top);

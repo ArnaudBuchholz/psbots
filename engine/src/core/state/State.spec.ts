@@ -3,6 +3,7 @@ import { parse } from '@api/index.js';
 import type { Value } from '@api/index.js';
 import { State } from './State.js';
 import { waitForGenerator, toValue } from '@test/index.js';
+import { BusyException } from '@sdk/index.js';
 
 let state: State;
 
@@ -68,34 +69,53 @@ describe('IState', () => {
   });
 });
 
-it('processes a string', () => {
-  expect(state.idle).toStrictEqual(true);
-  const generator = state.process('123');
-  expect(state.idle).toStrictEqual(false);
-  waitForGenerator(generator);
-  expect(state.idle).toStrictEqual(true);
-  expect(state.operands.ref).toStrictEqual<Value[]>([toValue(123)]);
+describe('processing', () => {
+  it('processes a string', () => {
+    expect(state.idle).toStrictEqual(true);
+    const generator = state.process('123');
+    expect(state.idle).toStrictEqual(false);
+    waitForGenerator(generator);
+    expect(state.idle).toStrictEqual(true);
+    expect(state.operands.ref).toStrictEqual<Value[]>([toValue(123)]);
+  });
+
+  it('processes an array', () => {
+    expect(state.idle).toStrictEqual(true);
+    const generator = state.process([toValue(123)]);
+    expect(state.idle).toStrictEqual(false);
+    waitForGenerator(generator);
+    expect(state.idle).toStrictEqual(true);
+    expect(state.operands.ref).toStrictEqual<Value[]>([toValue(123)]);
+  });
+
+  it('processes a generator', () => {
+    expect(state.idle).toStrictEqual(true);
+    const generator = state.process(parse('123'));
+    expect(state.idle).toStrictEqual(false);
+    waitForGenerator(generator);
+    expect(state.idle).toStrictEqual(true);
+    expect(state.operands.ref).toStrictEqual<Value[]>([toValue(123)]);
+  });
+
+  it('fails if already busy', () => {
+    state.process(parse('123'));
+    expect(() => state.process(parse('456'))).toThrowError(BusyException);
+  });
 });
 
-it('processes an array', () => {
-  expect(state.idle).toStrictEqual(true);
-  const generator = state.process([toValue(123)]);
-  expect(state.idle).toStrictEqual(false);
-  waitForGenerator(generator);
-  expect(state.idle).toStrictEqual(true);
-  expect(state.operands.ref).toStrictEqual<Value[]>([toValue(123)]);
-});
+describe('IInternalState', () => {
+  it('enables calls by default', () => {
+    expect(state.callEnabled).toStrictEqual(true);
+  });
 
-it('processes a generator', () => {
-  expect(state.idle).toStrictEqual(true);
-  const generator = state.process(parse('123'));
-  expect(state.idle).toStrictEqual(false);
-  waitForGenerator(generator);
-  expect(state.idle).toStrictEqual(true);
-  expect(state.operands.ref).toStrictEqual<Value[]>([toValue(123)]);
-});
-
-it('fails if already busy', () => {
-  expect(state.idle).toStrictEqual(true);
-  state.process(parse('123'));
+  it('uses a counter for callEnabled', () => {
+    state.preventCall();
+    expect(state.callEnabled).toStrictEqual(false);
+    state.preventCall();
+    expect(state.callEnabled).toStrictEqual(false);
+    state.allowCall();
+    expect(state.callEnabled).toStrictEqual(false);
+    state.allowCall();
+    expect(state.callEnabled).toStrictEqual(true);
+  });
 });
