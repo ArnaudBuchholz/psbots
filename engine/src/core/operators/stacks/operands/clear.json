@@ -1,0 +1,15 @@
+{
+  "name": "clear",
+  "description": "clear the operand stack",
+  "labels": ["operand"],
+  "signature": {
+    "input": [],
+    "output": [],
+    "exceptions": []
+  },
+  "samples": [{
+    "description": "Clearing the whole stack",
+    "in": "1 2 3 clear",
+    "out": ""
+  }]
+}

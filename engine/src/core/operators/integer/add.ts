@@ -1,5 +1,5 @@
 import { toIntegerValue } from '@sdk/index.js';
-import { buildFunctionOperator } from '../operators.js';
+import { buildFunctionOperator } from '@core/operators/operators.js';
 
 import add from './add.json';
 
