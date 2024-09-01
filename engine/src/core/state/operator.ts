@@ -1,20 +1,10 @@
 import type { Value, ValueType } from '@api/index.js';
-import {
-  InternalException,
-  OperatorType,
-  StackUnderflowException,
-  STEP_DONE,
-  STEP_POP,
-  TypeCheckException
-} from '@sdk/index.js';
-import type { IInternalState, IOperator } from '@sdk/index.js';
+import { OperatorType, StackUnderflowException, STEP_DONE, STEP_POP, TypeCheckException } from '@sdk/index.js';
+import type { IFunctionOperator, IInternalState, IOperator } from '@sdk/index.js';
 
 export function operatorPop(state: IInternalState, value: Value<ValueType.operator>): void {
   const { calls } = state;
-  const operator = value.operator as IOperator;
-  if (operator.type === OperatorType.constant) {
-    throw new InternalException('Unexpected constant operator');
-  }
+  const operator = value.operator as IFunctionOperator;
   if (operator.callOnPop) {
     calls.step = STEP_POP;
     operator.implementation(state, []);
