@@ -1,0 +1,11 @@
+{
+  "name": "typeCheck",
+  "description": "throws the typeCheck exception",
+  "labels": ["exception"],
+  "signature": {
+    "input": [],
+    "output": [],
+    "exceptions": []
+  },
+  "samples": []
+}

@@ -1,0 +1,11 @@
+{
+  "name": "rangeCheck",
+  "description": "throws the rangeCheck exception",
+  "labels": ["exception"],
+  "signature": {
+    "input": [],
+    "output": [],
+    "exceptions": []
+  },
+  "samples": []
+}

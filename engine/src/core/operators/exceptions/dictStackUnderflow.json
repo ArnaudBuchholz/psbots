@@ -1,0 +1,11 @@
+{
+  "name": "dictStackUnderflow",
+  "description": "throws the dictStackUnderflow exception",
+  "labels": ["exception"],
+  "signature": {
+    "input": [],
+    "output": [],
+    "exceptions": []
+  },
+  "samples": []
+}

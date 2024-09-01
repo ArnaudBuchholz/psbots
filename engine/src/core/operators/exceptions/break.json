@@ -1,0 +1,11 @@
+{
+  "name": "break",
+  "description": "throws the break exception",
+  "labels": ["exception"],
+  "signature": {
+    "input": [],
+    "output": [],
+    "exceptions": []
+  },
+  "samples": []
+}

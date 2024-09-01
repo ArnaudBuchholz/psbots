@@ -1,0 +1,11 @@
+{
+  "name": "vmOverflow",
+  "description": "throws the vmOverflow exception",
+  "labels": ["exception"],
+  "signature": {
+    "input": [],
+    "output": [],
+    "exceptions": []
+  },
+  "samples": []
+}

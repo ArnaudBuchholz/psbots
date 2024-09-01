@@ -1,0 +1,11 @@
+{
+  "name": "busy",
+  "description": "throws the busy exception",
+  "labels": ["exception"],
+  "signature": {
+    "input": [],
+    "output": [],
+    "exceptions": []
+  },
+  "samples": []
+}

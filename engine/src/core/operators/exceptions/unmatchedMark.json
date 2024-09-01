@@ -1,0 +1,11 @@
+{
+  "name": "unmatchedMark",
+  "description": "throws the unmatchedMark exception",
+  "labels": ["exception"],
+  "signature": {
+    "input": [],
+    "output": [],
+    "exceptions": []
+  },
+  "samples": []
+}

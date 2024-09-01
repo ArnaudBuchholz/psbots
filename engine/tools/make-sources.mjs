@@ -41,9 +41,9 @@ async function generateExceptions() {
   const exceptions = JSON.parse(await readFile('src/sdk/exceptions/exceptions.json', 'utf-8'));
   for (const [name, message] of Object.entries(exceptions)) {
     const uppercasedName = name.charAt(0).toUpperCase() + name.substring(1);
-    const fileName = `src/sdk/exceptions/${uppercasedName}Exception.ts`;
+
     writeFile(
-      fileName,
+      `src/sdk/exceptions/${uppercasedName}Exception.ts`,
       `import { BaseException } from '@sdk/exceptions/BaseException.js';
 
 const MESSAGE = '${message}';
@@ -55,12 +55,48 @@ export class ${uppercasedName}Exception extends BaseException {
 }
 `
     );
+
+    writeFile(
+      `src/core/operators/exceptions/${name}.json`,
+      `{
+  "name": "${name}",
+  "description": "throws the ${name} exception",
+  "labels": ["exception"],
+  "signature": {
+    "input": [],
+    "output": [],
+    "exceptions": []
+  },
+  "samples": []
+}
+`
+    );
+
+    let safeName;
+    if (['break', 'undefined'].includes(name)) {
+      safeName = name + 'Def';
+    } else {
+      safeName = name;
+    }
+
+    writeFile(
+      `src/core/operators/exceptions/${name}.ts`,
+      `import { buildFunctionOperator } from '@core/operators/operators.js';
+import { ${uppercasedName}Exception } from '@sdk/exceptions/${uppercasedName}Exception.js';
+
+import ${safeName} from './${name}.json';
+
+buildFunctionOperator(${safeName}, function () {
+  throw new ${uppercasedName}Exception();
+});
+`
+    );
   }
 }
 
 async function main() {
-  generateIndexes('src', false);
   generateExceptions();
+  generateIndexes('src', false);
 }
 
 main().catch((reason) => console.error(reason));

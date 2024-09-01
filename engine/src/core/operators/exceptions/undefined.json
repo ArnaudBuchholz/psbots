@@ -1,0 +1,11 @@
+{
+  "name": "undefined",
+  "description": "throws the undefined exception",
+  "labels": ["exception"],
+  "signature": {
+    "input": [],
+    "output": [],
+    "exceptions": []
+  },
+  "samples": []
+}

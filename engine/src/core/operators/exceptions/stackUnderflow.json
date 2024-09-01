@@ -1,0 +1,11 @@
+{
+  "name": "stackUnderflow",
+  "description": "throws the stackUnderflow exception",
+  "labels": ["exception"],
+  "signature": {
+    "input": [],
+    "output": [],
+    "exceptions": []
+  },
+  "samples": []
+}

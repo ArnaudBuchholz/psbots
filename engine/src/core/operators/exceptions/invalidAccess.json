@@ -1,0 +1,11 @@
+{
+  "name": "invalidAccess",
+  "description": "throws the invalidAccess exception",
+  "labels": ["exception"],
+  "signature": {
+    "input": [],
+    "output": [],
+    "exceptions": []
+  },
+  "samples": []
+}
