@@ -27,7 +27,7 @@ export class State implements IInternalState {
   private readonly _dictionaries: DictionaryStack;
   private readonly _operands: ValueStack;
   private readonly _calls: CallStack;
-  private _exception: IException | undefined;
+  private _exception: BaseException | undefined;
   private _destroyed = false;
 
   constructor(settings: StateFactorySettings = {}) {
@@ -77,11 +77,6 @@ export class State implements IInternalState {
   get dictionaries() {
     this._checkIfDestroyed();
     return this._dictionaries;
-  }
-
-  get exception() {
-    this._checkIfDestroyed();
-    return this._exception;
   }
 
   process(values: ValueStream): Generator {
@@ -138,6 +133,16 @@ export class State implements IInternalState {
 
   // region IInternalState
 
+  get exception() {
+    this._checkIfDestroyed();
+    return this._exception;
+  }
+
+  set exception(value: BaseException | undefined) {
+    // TODO check if exception must be released for memory
+    this._exception = value;
+  }
+
   get calls() {
     return this._calls;
   }
@@ -185,13 +190,13 @@ export class State implements IInternalState {
         }
       } catch (e) {
         calls.step = STEP_DONE;
-        let exception: IException;
+        let exception: BaseException;
         if (!(e instanceof BaseException)) {
           exception = new InternalException('An unexpected error occurred');
         } else {
           exception = e;
         }
-        this._exception = exception;
+        this.exception = exception;
       }
     } else {
       this._operands.push(top);
