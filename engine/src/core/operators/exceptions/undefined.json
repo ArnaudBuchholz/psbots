@@ -1,11 +1,11 @@
 {
   "name": "undefined",
-  "description": "throws the undefined exception",
+  "description": "throws the exception : Name is not defined in the dictionary stack",
   "labels": ["exception"],
   "signature": {
     "input": [],
     "output": [],
-    "exceptions": []
+    "exceptions": ["undefined"]
   },
   "samples": []
 }

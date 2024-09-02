@@ -56,16 +56,18 @@ export class ${uppercasedName}Exception extends BaseException {
 `
     );
 
+    const lowercasedName = name.toLowerCase();
+
     writeFile(
-      `src/core/operators/exceptions/${name}.json`,
+      `src/core/operators/exceptions/${lowercasedName}.json`,
       `{
-  "name": "${name}",
-  "description": "throws the ${name} exception",
+  "name": "${lowercasedName}",
+  "description": "throws the exception : ${message}",
   "labels": ["exception"],
   "signature": {
     "input": [],
     "output": [],
-    "exceptions": []
+    "exceptions": ["${lowercasedName}"]
   },
   "samples": []
 }

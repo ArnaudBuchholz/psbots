@@ -1,11 +1,11 @@
 {
-  "name": "invalidAccess",
-  "description": "throws the invalidAccess exception",
+  "name": "invalidaccess",
+  "description": "throws the exception : Object is read-only",
   "labels": ["exception"],
   "signature": {
     "input": [],
     "output": [],
-    "exceptions": []
+    "exceptions": ["invalidaccess"]
   },
   "samples": []
 }

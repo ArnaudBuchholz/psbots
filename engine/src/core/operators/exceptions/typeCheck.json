@@ -1,11 +1,11 @@
 {
-  "name": "typeCheck",
-  "description": "throws the typeCheck exception",
+  "name": "typecheck",
+  "description": "throws the exception : Operand is of the wrong type",
   "labels": ["exception"],
   "signature": {
     "input": [],
     "output": [],
-    "exceptions": []
+    "exceptions": ["typecheck"]
   },
   "samples": []
 }

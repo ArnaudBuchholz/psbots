@@ -1,11 +1,11 @@
 {
-  "name": "vmOverflow",
-  "description": "throws the vmOverflow exception",
+  "name": "vmoverflow",
+  "description": "throws the exception : Virtual memory exceeded",
   "labels": ["exception"],
   "signature": {
     "input": [],
     "output": [],
-    "exceptions": []
+    "exceptions": ["vmoverflow"]
   },
   "samples": []
 }

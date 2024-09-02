@@ -1,11 +1,11 @@
 {
-  "name": "rangeCheck",
-  "description": "throws the rangeCheck exception",
+  "name": "rangecheck",
+  "description": "throws the exception : Operand is too big or too small",
   "labels": ["exception"],
   "signature": {
     "input": [],
     "output": [],
-    "exceptions": []
+    "exceptions": ["rangecheck"]
   },
   "samples": []
 }

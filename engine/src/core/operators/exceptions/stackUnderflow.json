@@ -1,11 +1,11 @@
 {
-  "name": "stackUnderflow",
-  "description": "throws the stackUnderflow exception",
+  "name": "stackunderflow",
+  "description": "throws the exception : Not enough operands on the stack to perform the operation",
   "labels": ["exception"],
   "signature": {
     "input": [],
     "output": [],
-    "exceptions": []
+    "exceptions": ["stackunderflow"]
   },
   "samples": []
 }

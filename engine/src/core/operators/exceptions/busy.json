@@ -1,11 +1,11 @@
 {
   "name": "busy",
-  "description": "throws the busy exception",
+  "description": "throws the exception : Engine is already busy",
   "labels": ["exception"],
   "signature": {
     "input": [],
     "output": [],
-    "exceptions": []
+    "exceptions": ["busy"]
   },
   "samples": []
 }
