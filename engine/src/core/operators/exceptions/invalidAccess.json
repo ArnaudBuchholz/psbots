@@ -7,5 +7,9 @@
     "output": [],
     "exceptions": ["invalidaccess"]
   },
-  "samples": []
+  "samples": [{
+    "description": "Throwing the exception",
+    "in": "invalidaccess",
+    "out": "invalidaccess"
+  }]
 }

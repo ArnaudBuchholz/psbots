@@ -7,5 +7,9 @@
     "output": [],
     "exceptions": ["undefined"]
   },
-  "samples": []
+  "samples": [{
+    "description": "Throwing the exception",
+    "in": "undefined",
+    "out": "undefined"
+  }]
 }

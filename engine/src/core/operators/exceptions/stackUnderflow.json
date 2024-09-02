@@ -7,5 +7,9 @@
     "output": [],
     "exceptions": ["stackunderflow"]
   },
-  "samples": []
+  "samples": [{
+    "description": "Throwing the exception",
+    "in": "stackunderflow",
+    "out": "stackunderflow"
+  }]
 }

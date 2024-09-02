@@ -7,5 +7,9 @@
     "output": [],
     "exceptions": ["dictstackunderflow"]
   },
-  "samples": []
+  "samples": [{
+    "description": "Throwing the exception",
+    "in": "dictstackunderflow",
+    "out": "dictstackunderflow"
+  }]
 }

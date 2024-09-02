@@ -48,6 +48,12 @@ Object.keys(registry)
             waitForGenerator(state.process(sample.in));
             waitForGenerator(expectedState.process(sample.out));
             expect(state.operands.ref).toStrictEqual(expectedState.operands.ref);
+            if (expectedState.exception) {
+              expect(state.exception).not.toBeUndefined();
+              expect(state.exception).toBeInstanceOf(expectedState.exception.constructor);
+            } else {
+              expect(state.exception).toBeUndefined();
+            }
           });
         }
       });

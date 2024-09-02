@@ -7,5 +7,9 @@
     "output": [],
     "exceptions": ["vmoverflow"]
   },
-  "samples": []
+  "samples": [{
+    "description": "Throwing the exception",
+    "in": "vmoverflow",
+    "out": "vmoverflow"
+  }]
 }

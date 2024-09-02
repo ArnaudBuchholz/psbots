@@ -7,5 +7,9 @@
     "output": [],
     "exceptions": ["break"]
   },
-  "samples": []
+  "samples": [{
+    "description": "Throwing the exception",
+    "in": "break",
+    "out": "break"
+  }]
 }

@@ -69,7 +69,11 @@ export class ${uppercasedName}Exception extends BaseException {
     "output": [],
     "exceptions": ["${lowercasedName}"]
   },
-  "samples": []
+  "samples": [{
+    "description": "Throwing the exception",
+    "in": "${lowercasedName}",
+    "out": "${lowercasedName}"
+  }]
 }
 `
     );
