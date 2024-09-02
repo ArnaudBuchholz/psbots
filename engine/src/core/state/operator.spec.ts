@@ -50,7 +50,7 @@ function pushFunctionOperatorToCallStack(operator: Partial<IFunctionOperator>) {
     type: ValueType.operator,
     isExecutable: true,
     isReadOnly: true,
-    operator: <IOperator>{
+    operator: {
       name: 'test',
       type: OperatorType.implementation,
       ...operator
