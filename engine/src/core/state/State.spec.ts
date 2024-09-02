@@ -3,7 +3,8 @@ import { parse, ValueType } from '@api/index.js';
 import type { Value } from '@api/index.js';
 import { State } from './State.js';
 import { waitForGenerator, toValue } from '@test/index.js';
-import { BusyException } from '@sdk/index.js';
+import type { IFunctionOperator } from '@sdk/index.js';
+import { BusyException, InternalException, InvalidAccessException, OperatorType } from '@sdk/index.js';
 import { STRING_MEMORY_TYPE } from '@core/MemoryTracker.js';
 
 let state: State;
@@ -145,5 +146,60 @@ describe('memory', () => {
     // NEVER do that !
     Object.assign(state.operands.ref[0]!, { tracker: undefined });
     expect(() => state.destroy()).toThrowError();
+  });
+});
+
+describe('exeption handling', () => {
+  it('converts any error into a BaseException', () => {
+    const error = new Error('KO');
+    state.calls.push({
+      type: ValueType.operator,
+      isExecutable: true,
+      isReadOnly: true,
+      operator: <IFunctionOperator>{
+        name: 'test',
+        type: OperatorType.implementation,
+        implementation: () => {
+          throw error;
+        }
+      }
+    });
+    state.cycle();
+    expect(state.exception).not.toBeUndefined();
+    expect(state.exception).toBeInstanceOf(InternalException);
+    expect((state.exception as InternalException).reason).toStrictEqual(error);
+  });
+
+  it('adds call stack information', () => {
+    state.calls.push({
+      type: ValueType.string,
+      isExecutable: true,
+      isReadOnly: true,
+      string: 'step1'
+    });
+    state.calls.push({
+      type: ValueType.string,
+      isExecutable: true,
+      isReadOnly: true,
+      string: 'step2'
+    });
+    state.calls.step = 5;
+    state.calls.push({
+      type: ValueType.operator,
+      isExecutable: true,
+      isReadOnly: true,
+      operator: <IFunctionOperator>{
+        name: 'invalidaccess',
+        type: OperatorType.implementation,
+        implementation: () => {
+          throw new InvalidAccessException();
+        }
+      }
+    });
+    state.cycle();
+    expect(state.exception).toBeInstanceOf(InvalidAccessException);
+    expect(state.exception?.engineStack).toStrictEqual(`--invalidaccess--
+-step2-
+-step1-`);
   });
 });

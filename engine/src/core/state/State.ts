@@ -1,4 +1,4 @@
-import type { Value, IReadOnlyDictionary, ValueStream, IException } from '@api/index.js';
+import type { Value, IReadOnlyDictionary, ValueStream } from '@api/index.js';
 import { parse, SYSTEM_MEMORY_TYPE, ValueType } from '@api/index.js';
 import type { IInternalState } from '@sdk/interfaces/IInternalState.js';
 import { MemoryTracker } from '@core/MemoryTracker.js';
@@ -192,10 +192,11 @@ export class State implements IInternalState {
         calls.step = STEP_DONE;
         let exception: BaseException;
         if (!(e instanceof BaseException)) {
-          exception = new InternalException('An unexpected error occurred');
+          exception = new InternalException('An unexpected error occurred', e);
         } else {
           exception = e;
         }
+        // TODO: add stack information
         this.exception = exception;
       }
     } else {
