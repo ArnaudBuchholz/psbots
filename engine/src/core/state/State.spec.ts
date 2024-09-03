@@ -149,7 +149,20 @@ describe('memory', () => {
   });
 });
 
-describe('exeption handling', () => {
+describe('exception handling', () => {
+  it('detects invalid executable value', () => {
+    const invalidValue = {
+      type: ValueType.boolean,
+      isExecutable: true,
+      isReadOnly: true,
+      isSet: true
+    } as unknown as Value;
+    state.calls.push(invalidValue);
+    state.cycle();
+    expect(state.exception).toBeInstanceOf(InternalException);
+    expect((state.exception as InternalException).reason).toStrictEqual(invalidValue);
+  });
+
   it('converts any error into a BaseException', () => {
     const error = new Error('KO');
     state.calls.push({

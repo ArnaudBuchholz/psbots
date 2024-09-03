@@ -182,7 +182,7 @@ export class State implements IInternalState {
         } else if (top.type === ValueType.string) {
           callCycle(this, top);
         } else {
-          throw new InternalException('Unsupported executable value');
+          throw new InternalException('Unsupported executable value', top);
         }
       } catch (e) {
         calls.step = STEP_DONE;
