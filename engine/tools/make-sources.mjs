@@ -7,7 +7,7 @@ async function generateIndexes(path, generate) {
   for (const name of names) {
     files[name] = await stat(join(path, name));
   }
-  if (files['index.ts']) {
+  if (files['index.ts'] && path !== 'src') {
     generate = true;
   }
   if (generate) {
