@@ -1,15 +1,11 @@
 import type { Value, IReadOnlyDictionary, ValueStream } from '@api/index.js';
 import { parse, SYSTEM_MEMORY_TYPE, ValueType } from '@api/index.js';
-import type { IInternalState } from '@sdk/interfaces/IInternalState.js';
+import type { IInternalState, IOperator } from '@sdk/index.js';
+import { BaseException, BusyException, InternalException, OperatorType, STEP_DONE, toString } from '@sdk/index.js';
 import { MemoryTracker } from '@core/MemoryTracker.js';
 import { DictionaryStack } from '@core/objects/stacks/DictionaryStack.js';
 import { ValueStack } from '@core/objects/stacks/ValueStack.js';
 import { CallStack } from '@core/objects/stacks/CallStack.js';
-import { BusyException } from '@sdk/exceptions/BusyException.js';
-import { InternalException } from '@sdk/exceptions/InternalException.js';
-import { OperatorType, STEP_DONE } from '@sdk/interfaces';
-import type { IOperator } from '@sdk/interfaces';
-import { BaseException } from '@sdk/exceptions/BaseException.js';
 import { operatorPop, operatorCycle } from './operator.js';
 import { callCycle } from './call.js';
 
@@ -198,6 +194,7 @@ export class State implements IInternalState {
         }
         // TODO: add stack information
         this.exception = exception;
+        exception.engineStack = this.calls.ref.map((value) => toString(value, { includeDebugSource: true }));
       }
     } else {
       this._operands.push(top);

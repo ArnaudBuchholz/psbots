@@ -198,8 +198,6 @@ describe('exeption handling', () => {
     });
     state.cycle();
     expect(state.exception).toBeInstanceOf(InvalidAccessException);
-    expect(state.exception?.engineStack).toStrictEqual(`--invalidaccess--
--step2-
--step1-`);
+    expect(state.exception?.engineStack).toStrictEqual(['-invalidaccess-', 'step2', 'step1']);
   });
 });
