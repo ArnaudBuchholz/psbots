@@ -16,6 +16,7 @@ export default defineConfig({
     exclude: [...configDefaults.exclude],
     coverage: {
       exclude: [
+        'dist/**',
         'vite.config.mjs',
         'src/**/*.spec.ts',
         'src/**/index.ts',
