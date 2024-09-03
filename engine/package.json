@@ -2,12 +2,31 @@
   "name": "@psbots/engine",
   "version": "0.0.1",
   "description": "A project about a PostScript based programming language for robots (the engine part)",
+  "files": [
+    "dist/**"
+  ],
+  "types": "./dist/index.d.ts",
+  "main": "./dist/index.js",
+  "typesVersions": {
+    "*": {
+      "*": ["dist/*"],
+      "sdk": ["dist/sdk/index.d.ts"]
+    }
+  },
+  "exports": {
+    ".": "./dist/index.js",
+    "./sdk": {
+      "types": "./dist/sdk/index.d.ts",
+      "import": "./dist/sdk/index.js"
+    }
+  },  
   "scripts": {
     "make-sources": "node ../tools/sync-aliases.mjs && node tools/make-sources.mjs",
     "precheck": "npm run make-sources",
     "check": "tsc --noEmit && dpdm ./src/** -T --no-tree --no-warning && eslint src/**/*.ts --fix",
     "pretest": "npm run make-sources",
-    "test": "vitest run --coverage"
+    "test": "vitest run --coverage",
+    "build": "tsc --project tsconfig.build.json"
   },
   "keywords": [
     "postscript",

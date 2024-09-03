@@ -5,7 +5,8 @@
   "scripts": {
     "precheck": "ncu --packageFile ./**/package.json",
     "check": "npm run check --workspaces",
-    "test": "npm run test --workspaces"
+    "test": "npm run test --workspaces",
+    "build": "npm run build --workspaces"
   },
   "workspaces": [
     "./engine",
