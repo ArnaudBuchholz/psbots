@@ -9,7 +9,8 @@
   },
   "workspaces": [
     "./engine",
-    "./repl"
+    "./repl",
+    "./cli"
   ],
   "keywords": [
     "postscript",
