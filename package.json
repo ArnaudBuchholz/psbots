@@ -4,7 +4,7 @@
   "description": "A project about a PostScript based programming language for robots",
   "scripts": {
     "precheck": "ncu --packageFile ./**/package.json",
-    "check": "npm run check --workspaces",
+    "check": "eslint ./tools/*.mjs --fix && npm run check --workspaces",
     "test": "npm run test --workspaces",
     "build": "npm run build --workspaces"
   },
@@ -21,6 +21,11 @@
   "author": "Arnaud Buchholz <arnaud.buchholz@free.fr>",
   "license": "MIT",
   "devDependencies": {
-    "npm-check-updates": "^17.1.1"
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-import": "^2.30.0",
+    "eslint-plugin-prettier": "^5.2.1",
+    "npm-check-updates": "^17.1.1",
+    "typescript": "^5.5.4",
+    "typescript-eslint": "^7.16.1"
   }
 }
