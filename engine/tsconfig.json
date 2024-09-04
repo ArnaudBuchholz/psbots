@@ -6,10 +6,10 @@
     "baseUrl": "./src",
     "outDir": "./dist",
     "paths": {
-      "@api/*": ["api/*"],
-      "@sdk/*": ["sdk/*"],
-      "@core/*": ["core/*"],
-      "@test/*": ["test/*"]
+      "@api/*": ["./api/*"],
+      "@sdk/*": ["./sdk/*"],
+      "@core/*": ["./core/*"],
+      "@test/*": ["./test/*"]
     }
   },
   "include": [
