@@ -3,7 +3,6 @@
   "version": "0.0.1",
   "description": "Read Evaluate Print Loop generic host",
   "scripts": {
-    "precheck": "npm run make-sources",
     "check": "tsc --noEmit && dpdm ./** -T --no-tree --no-warning && eslint ./**/*.ts --fix",
     "build": "tsc --project tsconfig.json"
   },
