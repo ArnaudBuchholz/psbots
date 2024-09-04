@@ -10,7 +10,10 @@ const main = async () => {
       /alias: \{[^}]*}/,
       () => `alias: {
       ${Object.entries(aliases)
-        .map(([alias, path]) => `'${alias.split('/*')[0]}': path('src/${path[0].split('/*')[0]}')`)
+        .map(([alias, [path]]) => {
+          const [, relativePath] = path.match(/\.\/(.*)\/\*/);
+          return `'${alias.split('/*')[0]}': path('src/${relativePath}')`;
+        })
         .join(',\n      ')}
     }`
     )
