@@ -26,7 +26,8 @@
     "check": "tsc --noEmit && dpdm ./src/** -T --no-tree --no-warning && eslint src/**/*.ts --fix",
     "pretest": "npm run make-sources",
     "test": "vitest run --coverage",
-    "build": "tsc --project tsconfig.build.json"
+    "build": "tsc --project tsconfig.build.json",
+    "postbuild": "node ../tools/post-build.mjs dist"
   },
   "keywords": [
     "postscript",
