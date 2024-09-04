@@ -1,24 +1,20 @@
 import { createState } from '@psbots/engine';
 import { IReplIO } from './IReplIO.js';
 import { blue, cyan, green, red, white, yellow } from './colors.js';
-import { hostDictionary } from './host/index.js'
-import { ExitError } from './host/exit.js'
-import { memory, status } from './status'
-import { renderCallStack } from '../state/callstack'
-import { forEach } from './forEach'
-import { formatters } from '../src/formatters'
-import { checkInternalValue, checkStringValue } from '../state/types'
+import { hostDictionary } from './host/index.js';
+import { ExitError } from './host/exit.js';
+import { memory, status } from './status.js';
 
-export async function main (replHost: IReplHost, debug: boolean): Promise<void> {
-  if (debug) {
-    replHost.output(`${green}DEBUG mode enabled`)
+export async function main (replIO: IReplIO, debug?: boolean): Promise<void> {
+  if (debug === true) {
+    replIO.output(`${green}DEBUG mode enabled`);
   }
   replHost.output(`${cyan}Use '${yellow}exit${cyan}' to quit`)
   replHost.output(`${cyan}Use '${yellow}state${cyan}' to print a state summary`)
 
   const state = createState({
     hostDictionary,
-    keepDebugInfo: debug
+    debug
   })
   let replIndex = 0
 
