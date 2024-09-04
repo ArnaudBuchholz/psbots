@@ -17,4 +17,7 @@ const main = async () => {
   );
 };
 
-main().catch((reason) => console.error(reason));
+main().catch((reason) => {
+  console.error(reason);
+  process.exitCode = -1;
+});

@@ -105,4 +105,7 @@ async function main() {
   generateIndexes('src', false);
 }
 
-main().catch((reason) => console.error(reason));
+main().catch((reason) => {
+  console.error(reason);
+  process.exitCode = -1;
+});
