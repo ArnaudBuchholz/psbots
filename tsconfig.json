@@ -1,7 +1,5 @@
 {
   "compilerOptions": {
-    "target": "es2022",
-    "module": "commonjs",
     "declaration": true,
     "removeComments": true,
     "esModuleInterop": true,
@@ -24,6 +22,9 @@
     "allowUnusedLabels": false,
     "allowUnreachableCode": false,
     "skipLibCheck": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "moduleResolution": "Bundler",
+    "target": "ES2023",
+    "module": "ES2022"
   }
 }

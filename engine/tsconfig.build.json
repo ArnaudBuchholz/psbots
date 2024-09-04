@@ -1,9 +1,6 @@
 {
   "extends": "./tsconfig",
   "compilerOptions": {
-    "target": "ES2023",
-    "module": "ES2022",
-    "moduleResolution": "Bundler",
     "outDir": "./dist",
     "declaration": true,
     "removeComments": false
