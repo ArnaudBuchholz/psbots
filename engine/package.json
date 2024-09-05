@@ -5,6 +5,7 @@
   "files": [
     "dist/**"
   ],
+  "type": "module",
   "types": "./dist/index.d.ts",
   "main": "./dist/index.js",
   "typesVersions": {
@@ -26,6 +27,7 @@
     "check": "tsc --noEmit && dpdm ./src/** -T --no-tree --no-warning && eslint src/**/*.ts --fix",
     "pretest": "npm run make-sources",
     "test": "vitest run --coverage",
+    "prebuild": "npm run make-sources",
     "build": "tsc --project tsconfig.build.json",
     "postbuild": "node ../tools/post-build.mjs dist"
   },

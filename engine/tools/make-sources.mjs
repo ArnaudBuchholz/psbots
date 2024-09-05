@@ -90,7 +90,7 @@ export class ${uppercasedName}Exception extends BaseException {
       `import { buildFunctionOperator } from '@core/operators/operators.js';
 import { ${uppercasedName}Exception } from '@sdk/exceptions/${uppercasedName}Exception.js';
 
-import ${safeName} from './${name}.json';
+import ${safeName} from './${name}.json' with { type: 'json' };
 
 buildFunctionOperator(${safeName}, function () {
   throw new ${uppercasedName}Exception();
