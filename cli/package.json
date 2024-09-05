@@ -2,9 +2,10 @@
   "name": "@psbots/cli",
   "version": "0.0.1",
   "description": "Command line interface for the engine",
+  "type": "module",
   "scripts": {
-    "check": "tsc --noEmit && dpdm ./** -T --no-tree --no-warning && eslint ./**/*.ts --fix",
-    "build": "tsc --project tsconfig.json"
+    "check": "eslint ./index.js --fix",
+    "build": ""
   },
   "keywords": [
     "postscript",

@@ -6,7 +6,8 @@
     "precheck": "ncu --packageFile ./**/package.json",
     "check": "eslint ./tools/*.mjs --fix && npm run check --workspaces",
     "test": "npm run test --workspaces",
-    "build": "npm run build --workspaces"
+    "build": "npm run build --workspaces",
+    "cli": "node ./cli/index.js"
   },
   "workspaces": [
     "./engine",
