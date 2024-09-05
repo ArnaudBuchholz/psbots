@@ -1,5 +1,5 @@
 import { createState, parse } from '@psbots/engine';
-import { BaseException } from '@psbots/engine/sdk';
+import { BaseException, InternalException } from '@psbots/engine/sdk';
 import type { IReplIO } from './IReplIO.js';
 import { /* blue, */ cyan, green, red, /* white, */ yellow } from './colors.js';
 import { createHostDictionary } from './host/index.js';
@@ -81,6 +81,14 @@ export async function repl(replIO: IReplIO, debug?: boolean): Promise<void> {
         done = next.done;
         // value = next.value;
       }
+      const { exception } = state;
+      if (exception instanceof InternalException && exception.reason instanceof ExitError) {
+        break;
+      }
+      if (exception !== undefined) {
+        replIO.output(`${red}/!\\ ${exception.message}`);
+        exception.engineStack.forEach((line) => replIO.output(`${red}${line}`));
+      }
       replIO.output(
         status(state, {
           cycle,
@@ -90,13 +98,10 @@ export async function repl(replIO: IReplIO, debug?: boolean): Promise<void> {
         })
       );
     } catch (e) {
-      if (e instanceof ExitError) {
-        break;
-      } else if (!(e instanceof BaseException)) {
+      if (!(e instanceof BaseException)) {
         replIO.output(`${red}(X) Unknown error`);
       } else {
-        const firstLine = e.toString();
-        replIO.output(`${red}/!\\ ${firstLine}`);
+        replIO.output(`${red}/!\\ ${e.message}`);
         e.engineStack.forEach((line) => replIO.output(`${red}${line}`));
       }
     }
