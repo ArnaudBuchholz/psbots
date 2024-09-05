@@ -2,6 +2,8 @@
   "name": "@psbots/repl",
   "version": "0.0.1",
   "description": "Read Evaluate Print Loop generic host",
+  "types": "./dist/index.d.ts",
+  "main": "./dist/index.js",
   "scripts": {
     "check": "tsc --noEmit && dpdm ./** -T --no-tree --no-warning && eslint ./**/*.ts --fix",
     "build": "tsc --project tsconfig.json"

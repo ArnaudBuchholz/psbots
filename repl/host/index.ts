@@ -1,16 +1,21 @@
 import type { Value, IReadOnlyDictionary } from '@psbots/engine';
+import type { IReplIO } from '../IReplIO.js';
 import { exit } from './exit.js';
+import { createStateOperator } from './state.js';
 
-const hostMappings: Record<string, Value> = {
-  exit,
-}
+export function createHostDictionary(replIO: IReplIO): IReadOnlyDictionary {
+  const hostMappings: Record<string, Value> = {
+    exit,
+    state: createStateOperator(replIO)
+  };
 
-export const hostDictionary: IReadOnlyDictionary = {
-  get names () {
-    return Object.keys(hostMappings)
-  },
+  return {
+    get names() {
+      return Object.keys(hostMappings);
+    },
 
-  lookup (name: string): Value | null {
-    return hostMappings[name] ?? null;
-  }
+    lookup(name: string): Value | null {
+      return hostMappings[name] ?? null;
+    }
+  };
 }
