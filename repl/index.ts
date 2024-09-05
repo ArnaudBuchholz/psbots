@@ -6,6 +6,8 @@ import { createHostDictionary } from './host/index.js';
 import { ExitError } from './host/exit.js';
 import { status } from './status.js';
 
+export * from './IReplIO.js';
+
 export async function repl(replIO: IReplIO, debug?: boolean): Promise<void> {
   if (debug === true) {
     replIO.output(`${green}DEBUG mode enabled`);
