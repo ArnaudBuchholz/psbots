@@ -4,7 +4,7 @@ import { stdin as input, stdout as output } from 'node:process';
 
 const rl = readline.createInterface({ input, output });
 
-repl({
+await repl({
   width: process.stdout.columns,
   height: process.stdout.rows,
   output(text) {
@@ -17,3 +17,5 @@ repl({
   console.error(reason);
   process.exitCode = -1;
 });
+
+rl.close();
