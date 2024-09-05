@@ -1,0 +1,32 @@
+{
+  "name": "@psbots/cli",
+  "version": "0.0.1",
+  "description": "Command line interface for the engine",
+  "scripts": {
+    "check": "tsc --noEmit && dpdm ./** -T --no-tree --no-warning && eslint ./**/*.ts --fix",
+    "build": "tsc --project tsconfig.json"
+  },
+  "keywords": [
+    "postscript",
+    "robots",
+    "programming",
+    "repl",
+    "cli"
+  ],
+  "author": "Arnaud Buchholz <arnaud.buchholz@free.fr>",
+  "license": "MIT",
+  "dependencies": {
+    "@psbots/repl": "0.0.1"
+  },
+  "devDependencies": {
+    "@stylistic/eslint-plugin-js": "^2.7.2",
+    "@types/node": "^22.5.4",
+    "@vitest/coverage-v8": "^2.0.5",
+    "dpdm": "^3.14.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-import": "^2.30.0",
+    "eslint-plugin-prettier": "^5.2.1",
+    "typescript": "^5.5.4",
+    "typescript-eslint": "^7.16.1"
+  }
+}
