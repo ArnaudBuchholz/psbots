@@ -1,9 +1,9 @@
 import { enumIArrayValues } from '@psbots/engine';
 import type { IReadOnlyArray, IState } from '@psbots/engine';
 import { toString } from '@psbots/engine/sdk';
-import type { IReplIO } from 'IReplIO';
+import type { IReplIO } from './IReplIO.js';
 import { blue, cyan, /* green, red, white, */ yellow } from './colors.js';
-import { memory } from 'status.js';
+import { memory } from './status.js';
 
 function enumAndDisplay(replIO: IReplIO, values: IReadOnlyArray): void {
   let index = 0;
