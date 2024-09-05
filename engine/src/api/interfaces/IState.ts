@@ -11,6 +11,7 @@ export interface IState {
   readonly memoryTracker: IMemoryTracker;
   readonly operands: IReadOnlyArray;
   readonly dictionaries: IReadOnlyArray;
+  readonly callEnabled: boolean;
   /** Set when an exception stops the current processing */
   readonly exception: IException | undefined;
   /** Reset any exception */
