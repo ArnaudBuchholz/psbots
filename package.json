@@ -12,7 +12,8 @@
   "workspaces": [
     "./engine",
     "./repl",
-    "./cli"
+    "./cli",
+    "./wi"
   ],
   "keywords": [
     "postscript",
