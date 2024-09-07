@@ -1,5 +1,5 @@
+import { BreakException } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
-import { BreakException } from '@sdk/exceptions/BreakException.js';
 
 import breakDef from './break.json' with { type: 'json' };
 

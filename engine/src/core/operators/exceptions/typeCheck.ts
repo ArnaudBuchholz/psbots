@@ -1,5 +1,5 @@
+import { TypeCheckException } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
-import { TypeCheckException } from '@sdk/exceptions/TypeCheckException.js';
 
 import typeCheck from './typeCheck.json' with { type: 'json' };
 

@@ -1,5 +1,5 @@
+import { RangeCheckException } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
-import { RangeCheckException } from '@sdk/exceptions/RangeCheckException.js';
 
 import rangeCheck from './rangeCheck.json' with { type: 'json' };
 

@@ -87,8 +87,8 @@ export class ${uppercasedName}Exception extends BaseException {
 
     writeFile(
       `src/core/operators/exceptions/${name}.ts`,
-      `import { buildFunctionOperator } from '@core/operators/operators.js';
-import { ${uppercasedName}Exception } from '@sdk/exceptions/${uppercasedName}Exception.js';
+      `import { ${uppercasedName}Exception } from '@sdk/index.js';
+import { buildFunctionOperator } from '@core/operators/operators.js';
 
 import ${safeName} from './${name}.json' with { type: 'json' };
 
