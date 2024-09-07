@@ -9,6 +9,9 @@
     "build": "npm run build --workspaces",
     "cli": "node ./cli/index.js"
   },
+  "engines": {
+    "node": ">=20.17.0"
+  },
   "workspaces": [
     "./engine",
     "./repl",
