@@ -4,17 +4,27 @@ import { Terminal } from '@xterm/xterm';
 import { FitAddon } from '@xterm/addon-fit';
 import { repl } from '@psbots/repl';
 
+let terminated = false;
+
 async function main() {
   const term = new Terminal({
     cursorBlink: true
   });
-  term.loadAddon(new FitAddon());
+  const fitAddon = new FitAddon();
+  term.loadAddon(fitAddon);
   term.open(document.getElementById('terminal')!);
+  fitAddon.fit();
+
+  window.addEventListener('resize', () => fitAddon.fit());
 
   const input: string[] = [];
   let resolveInput = (input: string) => console.log(input);
 
   term.onData((e) => {
+    if (terminated) {
+      return;
+    }
+
     if (e === '\r') {
       // Enter
       term.write('\r\n');
@@ -53,4 +63,6 @@ async function main() {
   });
 }
 
-main();
+main().finally(() => {
+  terminated = true;
+});

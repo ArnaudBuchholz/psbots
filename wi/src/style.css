@@ -1,12 +1,21 @@
+html {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
 body {
   font-family: Verdana, Geneva, Tahoma, sans-serif;
   white-space: pre;
   background-color: black;
   color: white;
+  margin: 0;
   padding: 0;
-  margin: 1rem;
+  height: 100%;
+  overflow: hidden;
 }
 
-#xterm-container {
-  height: calc(100% - 2em);
+#terminal {
+  padding: 1em;
+  height: calc(100% - 3em);
 }
