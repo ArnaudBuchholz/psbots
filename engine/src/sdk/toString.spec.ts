@@ -114,7 +114,7 @@ if`,
     ).toStrictEqual('-operator-@test.ps:3:3');
   });
 
-  it.only('puts debug information only for the array itself', () => {
+  it('puts debug information only for the array itself', () => {
     expect(
       toString(
         Object.assign(
