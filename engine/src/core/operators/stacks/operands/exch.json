@@ -1,5 +1,5 @@
 {
-  "name": "swap",
+  "name": "exch",
   "description": "swaps the first two items of the operand stack",
   "labels": ["operand"],
   "signature": {
@@ -8,7 +8,7 @@
     "exceptions": []
   },
   "samples": [{
-    "in": "1 2 3 swap",
+    "in": "1 2 3 exch",
     "out": "1 3 2"
   }]
 }
