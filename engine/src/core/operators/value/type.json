@@ -1,0 +1,19 @@
+{
+  "name": "type",
+  "description": "pushes the type of the value in the operand stack",
+  "labels": ["value"],
+  "signature": {
+    "input": ["any"],
+    "output": ["string"]
+  },
+  "samples": [{
+    "in": "false type",
+    "out": "\"boolean\""
+  }, {
+    "in": "[ 1 2 3 ] type",
+    "out": "\"array\""
+  }, {
+    "in": "\"\" type",
+    "out": "\"string\""
+  }]
+}

@@ -1,0 +1,18 @@
+{
+  "name": "xcheck",
+  "description": "checks if value is executable",
+  "labels": ["value", "permission"],
+  "signature": {
+    "input": ["any"],
+    "output": ["boolean"]
+  },
+  "samples": [{
+    "description": "returns true for blocks",
+    "in": "{ 1 2 } xcheck",
+    "out": "true"
+  }, {
+    "description": "returns false for arrays",
+    "in": "[ 1 2 ] xcheck",
+    "out": "false"
+  }]
+}

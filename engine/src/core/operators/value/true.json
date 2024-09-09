@@ -1,0 +1,13 @@
+{
+  "name": "true",
+  "description": "pushes true in the operand stack",
+  "labels": ["value"],
+  "signature": {
+    "input": [],
+    "output": ["boolean"]
+  },
+  "samples": [{
+    "in": "true type",
+    "out": "\"boolean\""
+  }]
+}

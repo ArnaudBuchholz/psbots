@@ -1,0 +1,18 @@
+{
+  "name": "wcheck",
+  "description": "checks if value is writable",
+  "labels": ["value", "permission"],
+  "signature": {
+    "input": ["any"],
+    "output": ["boolean"]
+  },
+  "samples": [{
+    "description": "returns false for blocks",
+    "in": "{ 1 2 } wcheck",
+    "out": "false"
+  }, {
+    "description": "returns true for arrays",
+    "in": "[ 1 2 ] wcheck",
+    "out": "true"
+  }]
+}
