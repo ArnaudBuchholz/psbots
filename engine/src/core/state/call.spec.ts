@@ -1,6 +1,6 @@
 import { it, expect, beforeEach, afterEach, beforeAll } from 'vitest';
 import { ExceptionDictionaryName } from '@api/index.js';
-import type { Value } from '@api/index.js';
+import type { IDebugSource, IDictionary, Value } from '@api/index.js';
 import { toValue } from '@test/index.js';
 import { State } from './State.js';
 import { SystemDictionary } from '@core/objects/dictionaries/System.js';
@@ -56,4 +56,42 @@ it('puts the call in the operand stack when calls are prevented', () => {
   state.cycle();
   expect(state.calls.length).toStrictEqual(0);
   expect(state.operands.ref).toStrictEqual([markCall]);
+});
+
+it.only('forwards debug info to the resolved value (if none)', () => {
+  const call = toValue('mark', { isExecutable: true });
+  const debugSource: IDebugSource = {
+    filename: 'filename',
+    length: 2,
+    pos: 1,
+    source: 'source'
+  };
+  state.calls.push(Object.assign(call, { debugSource }));
+  state.cycle();
+  expect(state.calls.length).toStrictEqual(2);
+  expect(state.calls.top.debugSource).toStrictEqual(debugSource);
+});
+
+it.only('does not forward debug info to the resolved value if it already contains some', () => {
+  const debugSourceOfValue: IDebugSource = {
+    filename: 'test',
+    length: 4,
+    pos: 2,
+    source: 'test'
+  };
+  const value = Object.assign(toValue('test'), {
+    debugSource: debugSourceOfValue
+  });
+  (state.dictionaries.top.dictionary as IDictionary).def('test', value);
+  const call = toValue('test', { isExecutable: true });
+  const debugSource: IDebugSource = {
+    filename: 'filename',
+    length: 2,
+    pos: 1,
+    source: 'source'
+  };
+  state.calls.push(Object.assign(call, { debugSource }));
+  state.cycle();
+  expect(state.calls.length).toStrictEqual(2);
+  expect(state.calls.top.debugSource).toStrictEqual(debugSourceOfValue);
 });
