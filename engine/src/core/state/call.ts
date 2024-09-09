@@ -11,14 +11,18 @@ export function callCycle(
   } else if (callEnabled) {
     calls.step = STEP_DONE;
     const entry = dictionaries.lookup(value.string);
-    calls.push(
-      Object.assign(
-        {
-          debugSource: value.debugSource
-        },
-        entry
-      )
-    );
+    if (value.debugSource) {
+      calls.push(
+        Object.assign(
+          {
+            debugSource: value.debugSource
+          },
+          entry
+        )
+      );
+    } else {
+      calls.push(entry);
+    }
   } else {
     operands.push(value);
     calls.pop();

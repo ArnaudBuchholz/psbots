@@ -58,7 +58,7 @@ it('puts the call in the operand stack when calls are prevented', () => {
   expect(state.operands.ref).toStrictEqual([markCall]);
 });
 
-it.only('forwards debug info to the resolved value (if none)', () => {
+it('forwards debug info to the resolved value (if none)', () => {
   const call = toValue('mark', { isExecutable: true });
   const debugSource: IDebugSource = {
     filename: 'filename',
@@ -72,7 +72,7 @@ it.only('forwards debug info to the resolved value (if none)', () => {
   expect(state.calls.top.debugSource).toStrictEqual(debugSource);
 });
 
-it.only('does not forward debug info to the resolved value if it already contains some', () => {
+it('does not forward debug info to the resolved value if it already contains some', () => {
   const debugSourceOfValue: IDebugSource = {
     filename: 'test',
     length: 4,
