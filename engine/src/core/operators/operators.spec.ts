@@ -7,6 +7,7 @@ import { waitForGenerator } from '@test/wait-for-generator.js';
 
 const nullDefinition: OperatorDefinition = {
   name: 'null',
+  description: '',
   signature: {
     input: []
   },
@@ -41,10 +42,11 @@ Object.keys(registry)
           .map((value) => (value.type === 'string' ? value.string : ''))
           .filter((name) => !Object.prototype.hasOwnProperty.call(registry, name));
         const sampleId = `${operatorName}#${index}`;
+        const description = sample.description ?? definition.description;
         if (missingOperators.length > 0) {
-          it.skip(`[${sampleId}] ${sample.description} (⚠️ ${missingOperators})`);
+          it.skip(`[${sampleId}] ${description} (⚠️ ${missingOperators})`);
         } else {
-          it(`[${sampleId}] ${sample.description}`, () => {
+          it(`[${sampleId}] ${description}`, () => {
             waitForGenerator(state.process(sample.in));
             waitForGenerator(expectedState.process(sample.out));
             expect(state.operands.ref).toStrictEqual(expectedState.operands.ref);

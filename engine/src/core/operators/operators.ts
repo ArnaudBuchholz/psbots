@@ -7,6 +7,7 @@ import { OperatorType } from '@sdk/interfaces/IOperator.js';
 
 export type OperatorDefinition = {
   name: string;
+  description: string;
   signature: {
     input: string[];
   };
