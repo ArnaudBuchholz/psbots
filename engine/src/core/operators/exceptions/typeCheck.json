@@ -8,7 +8,6 @@
     "exceptions": ["typecheck"]
   },
   "samples": [{
-    "description": "Throwing the exception",
     "in": "typecheck",
     "out": "typecheck"
   }]

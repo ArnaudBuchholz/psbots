@@ -7,11 +7,10 @@
       "output": ["mark"]
     },
     "samples": [{
-      "description": "Adding a mark to the stack",
       "in": "1 2 mark",
       "out": "1 2 mark"
     }, {
-      "description": "Used to mark part of the stack",
+      "description": "marks part of the stack for operations",
       "in": "1 2 mark 3 4 5 cleartomark",
       "out": "1 2"
     }]

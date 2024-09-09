@@ -8,7 +8,6 @@
     "exceptions": []
   },
   "samples": [{
-    "description": "Simple addition",
     "in": "1 2 add",
     "out": "3"
   }]

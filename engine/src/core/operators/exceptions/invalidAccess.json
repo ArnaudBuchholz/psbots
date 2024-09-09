@@ -8,7 +8,6 @@
     "exceptions": ["invalidaccess"]
   },
   "samples": [{
-    "description": "Throwing the exception",
     "in": "invalidaccess",
     "out": "invalidaccess"
   }]

@@ -8,7 +8,6 @@
     "exceptions": ["stackunderflow"]
   },
   "samples": [{
-    "description": "Throwing the exception",
     "in": "stackunderflow",
     "out": "stackunderflow"
   }]

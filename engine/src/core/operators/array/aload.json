@@ -1,16 +1,15 @@
 {
-    "name": "aload",
-    "description": "loads all items of the array in the operand stack",
-    "labels": ["array"],
-    "signature": {
-      "input": ["array"],
-      "output": [],
-      "exceptions": []
-    },
-    "samples": [{
-      "description": "Load an array",
-      "in": "[ 1 2 3 ] aload",
-      "out": "1 2 3"
-    }]
-  }
+  "name": "aload",
+  "description": "loads all items of the array in the operand stack",
+  "labels": ["array"],
+  "signature": {
+    "input": ["array"],
+    "output": [],
+    "exceptions": []
+  },
+  "samples": [{
+    "in": "[ 1 2 3 ] aload",
+    "out": "1 2 3"
+  }]
+}
     

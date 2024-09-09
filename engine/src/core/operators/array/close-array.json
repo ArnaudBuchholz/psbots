@@ -1,6 +1,6 @@
 {
   "name": "]",
-  "description": "marks the end of an array",
+  "description": "finalizes an array",
   "labels": ["array"],
   "signature": {
     "input": [],
@@ -8,9 +8,8 @@
     "exceptions": []
   },
   "samples": [{
-    "description": "Building an array",
+    "description": "builds an array and check length and type",
     "in": "[ 1 2 3 ] dup length swap type",
     "out": "3 \"array\""
   }]
 }
-  

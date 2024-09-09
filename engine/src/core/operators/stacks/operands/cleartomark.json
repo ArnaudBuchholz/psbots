@@ -1,6 +1,6 @@
 {
   "name": "cleartomark",
-  "description": "clear the operand stack up to the first mark",
+  "description": "clears the operand stack up to the first mark",
   "labels": ["operand"],
   "signature": {
     "input": [],
@@ -8,12 +8,12 @@
     "exceptions": []
   },
   "samples": [{
-    "description": "Clearing the operand stack",
     "in": "1 mark 2 3 cleartomark",
     "out": "1"
   }, {
-    "description": "Fails if no mark is found",
+    "description": "fails if no mark is found",
     "in": "1 2 3 cleartomark",
     "out": "1 2 3 unmatchedmark"
   }]
 }
+

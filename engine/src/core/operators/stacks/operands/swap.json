@@ -1,6 +1,6 @@
 {
   "name": "swap",
-  "description": "swap the first two items of the operand stack",
+  "description": "swaps the first two items of the operand stack",
   "labels": ["operand"],
   "signature": {
     "input": ["any", "any"],
@@ -8,7 +8,6 @@
     "exceptions": []
   },
   "samples": [{
-    "description": "Swap first two items",
     "in": "1 2 3 swap",
     "out": "1 3 2"
   }]

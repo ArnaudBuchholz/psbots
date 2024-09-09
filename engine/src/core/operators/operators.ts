@@ -11,7 +11,7 @@ export type OperatorDefinition = {
     input: string[];
   };
   samples: {
-    description: string;
+    description?: string;
     in: string;
     out: string;
   }[];

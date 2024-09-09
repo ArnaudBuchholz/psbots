@@ -8,7 +8,6 @@
     "exceptions": ["break"]
   },
   "samples": [{
-    "description": "Throwing the exception",
     "in": "break",
     "out": "break"
   }]
