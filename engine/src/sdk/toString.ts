@@ -94,7 +94,7 @@ const implementations: { [type in ValueType]: (container: Value<type>, options: 
           implementations[item.type](
             item as never,
             Object.assign({}, options, {
-              debugSource: false,
+              includeDebugSource: false,
               maxWidth: 0
             })
           )

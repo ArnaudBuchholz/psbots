@@ -113,6 +113,38 @@ if`,
       )
     ).toStrictEqual('-operator-@test.ps:3:3');
   });
+
+  it.only('puts debug information only for the array itself', () => {
+    expect(
+      toString(
+        Object.assign(
+          toValue([
+            Object.assign(toValue(1), {
+              debugSource: <IDebugSource>{
+                source: 'whatever',
+                filename: 'test.ps',
+                length: 1,
+                pos: 7
+              }
+            }),
+            2,
+            3
+          ]),
+          {
+            debugSource: <IDebugSource>{
+              source: 'whatever',
+              filename: 'test.ps',
+              length: 1,
+              pos: 7
+            }
+          }
+        ),
+        {
+          includeDebugSource: true
+        }
+      )
+    ).toStrictEqual('[ 1 2 3 ]@test.ps:1:8');
+  });
 });
 
 describe('conversion with a limited width', () => {
