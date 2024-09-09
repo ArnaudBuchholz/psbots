@@ -4,8 +4,8 @@ import { buildFunctionOperator } from '@core/operators/operators.js';
 import cleartomark from './cleartomark.json' with { type: 'json' };
 
 buildFunctionOperator(cleartomark, function ({ operands }) {
-  const markPos = findMarkPos(operands);
-  while (markPos > 0) {
+  let markPos = findMarkPos(operands);
+  while (markPos-- > 0) {
     operands.pop();
   }
   operands.pop();

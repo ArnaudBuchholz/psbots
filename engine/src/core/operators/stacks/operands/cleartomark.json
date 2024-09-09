@@ -8,12 +8,12 @@
     "exceptions": []
   },
   "samples": [{
-    "description": "Clearing the whole operand stack",
+    "description": "Clearing the operand stack",
     "in": "1 mark 2 3 cleartomark",
     "out": "1"
   }, {
     "description": "Fails if no mark is found",
     "in": "1 2 3 cleartomark",
-    "out": "unmatchedmark"
+    "out": "1 2 3 unmatchedmark"
   }]
 }
