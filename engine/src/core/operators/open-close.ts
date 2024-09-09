@@ -4,9 +4,15 @@ import type { IInternalState } from '@sdk/index.js';
 import { ValueArray } from '@core/objects/ValueArray.js';
 import type { MemoryTracker } from '@core/MemoryTracker.js';
 
-export function openWithMark({ operands }: IInternalState): void {
-  // TODO: extract debug info from the call IF not bound
-  operands.push(toMarkValue());
+export function openWithMark({ operands, calls }: IInternalState): void {
+  operands.push(
+    Object.assign(
+      {
+        debugSource: calls.top.debugSource
+      },
+      toMarkValue()
+    )
+  );
 }
 
 export function closeToMark(
@@ -22,8 +28,16 @@ export function closeToMark(
       array.unshift(operands.top);
       operands.pop();
     }
+    const { top: mark } = operands;
     operands.pop();
-    operands.push(array.toValue({ isReadOnly: isExecutable, isExecutable }));
+    operands.push(
+      Object.assign(
+        {
+          debugSource: mark.debugSource
+        },
+        array.toValue({ isReadOnly: isExecutable, isExecutable })
+      )
+    );
   } finally {
     array.release();
   }
