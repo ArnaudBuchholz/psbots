@@ -5,22 +5,26 @@ import { ValueArray } from '@core/objects/ValueArray.js';
 import type { MemoryTracker } from '@core/MemoryTracker.js';
 
 export function openWithMark({ operands, calls }: IInternalState): void {
-  operands.push(
-    Object.assign(
-      {
-        debugSource: calls.top.debugSource
-      },
-      toMarkValue()
-    )
-  );
+  if (calls.top.debugSource) {
+    operands.push(
+      Object.assign(
+        {
+          debugSource: calls.top.debugSource
+        },
+        toMarkValue()
+      )
+    );
+  } else {
+    operands.push(toMarkValue());
+  }
 }
 
 export function closeToMark(
-  { operands, memoryTracker }: IInternalState,
+  { operands, memoryTracker, calls }: IInternalState,
   { isExecutable }: { isExecutable: boolean }
 ): void {
+  const { top: closeOp } = calls;
   const markPos = findMarkPos(operands);
-  // TODO: extract debug info from mark and attach it to the resulting array
   const array = new ValueArray(memoryTracker as MemoryTracker, USER_MEMORY_TYPE);
   try {
     let index: number;
@@ -30,14 +34,22 @@ export function closeToMark(
     }
     const { top: mark } = operands;
     operands.pop();
-    operands.push(
-      Object.assign(
-        {
-          debugSource: mark.debugSource
-        },
-        array.toValue({ isReadOnly: isExecutable, isExecutable })
-      )
-    );
+    const arrayValue = array.toValue({ isReadOnly: isExecutable, isExecutable });
+    if (mark.debugSource && closeOp.debugSource) {
+      operands.push(
+        Object.assign(
+          {
+            debugSource: {
+              ...mark.debugSource,
+              length: closeOp.debugSource.pos - mark.debugSource.pos + closeOp.debugSource.length
+            }
+          },
+          arrayValue
+        )
+      );
+    } else {
+      operands.push(arrayValue);
+    }
   } finally {
     array.release();
   }
