@@ -1,0 +1,14 @@
+{
+  "name": "dup",
+  "description": "duplicates the top item of the operand stack",
+  "labels": ["operand"],
+  "signature": {
+    "input": ["any"],
+    "output": ["any"],
+    "exceptions": []
+  },
+  "samples": [{
+    "in": "1 2 3 dup",
+    "out": "1 2 3 3"
+  }]
+}
