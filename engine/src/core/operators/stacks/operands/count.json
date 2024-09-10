@@ -1,0 +1,14 @@
+{
+  "name": "count",
+  "description": "gives back the size of the operand stack",
+  "labels": ["operand"],
+  "signature": {
+    "input": [],
+    "output": ["integer"],
+    "exceptions": []
+  },
+  "samples": [{
+    "in": "1 2 3 count",
+    "out": "1 2 3 3"
+  }]
+}
