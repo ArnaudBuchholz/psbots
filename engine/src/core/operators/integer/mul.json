@@ -1,0 +1,14 @@
+{
+  "name": "mul",
+  "description": "multiplies two integers",
+  "labels": ["integer", "math"],
+  "signature": {
+    "input": ["integer", "integer"],
+    "output": ["integer"],
+    "exceptions": []
+  },
+  "samples": [{
+    "in": "3 4 mul",
+    "out": "12"
+  }]
+}

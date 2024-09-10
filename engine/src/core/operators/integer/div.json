@@ -1,0 +1,14 @@
+{
+  "name": "div",
+  "description": "realizes an euclidean division with two integers",
+  "labels": ["integer", "math"],
+  "signature": {
+    "input": ["integer", "integer"],
+    "output": ["integer", "integer"],
+    "exceptions": []
+  },
+  "samples": [{
+    "in": "5 3 div",
+    "out": "1 2"
+  }]
+}
