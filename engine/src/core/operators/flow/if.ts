@@ -1,4 +1,4 @@
-import { Value } from '@api/index.js';
+import type { Value } from '@api/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 
 import ifDef from './if.json' with { type: 'json' };

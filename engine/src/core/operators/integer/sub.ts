@@ -6,5 +6,5 @@ import sub from './sub.json' with { type: 'json' };
 buildFunctionOperator(sub, function ({ operands }, value1: number, value2: number) {
   operands.pop();
   operands.pop();
-  operands.push(toIntegerValue(value2 - value1));
+  operands.push(toIntegerValue(value1 - value2));
 });

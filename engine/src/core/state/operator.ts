@@ -31,11 +31,12 @@ export function operatorCycle(state: IInternalState, value: Value<ValueType.oper
   } else {
     const parameters: Value[] = [];
     if (operator.typeCheck !== undefined && isFirstCall) {
-      if (operands.length < operator.typeCheck.length) {
+      let { length } = operator.typeCheck;
+      if (operands.length < length) {
         throw new StackUnderflowException();
       }
-      operator.typeCheck.forEach((valueType, index) => {
-        const value = operands.ref[index]!; // length has been verified before
+      operator.typeCheck.forEach((valueType) => {
+        const value = operands.ref[--length]!; // length has been verified before
         if (valueType === null || valueType === value.type) {
           parameters.push(value);
         } else {

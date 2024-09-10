@@ -127,6 +127,44 @@ describe('With parameters', () => {
     it('supports dictionary', () => state.operands.push(toValue({})));
   });
 
+  describe('using several parameters', () => {
+    beforeEach(() => {
+      pushFunctionOperatorToCallStack({
+        implementation({ operands }: IInternalState, parameters: readonly Value[]) {
+          operands.push(
+            toValue(
+              parameters.length === 2 &&
+                parameters[0]?.type === ValueType.integer &&
+                parameters[0]?.integer === 123 &&
+                parameters[1]?.type === ValueType.boolean &&
+                parameters[1]?.isSet === true
+            )
+          );
+        },
+        typeCheck: [ValueType.integer, ValueType.boolean]
+      });
+    });
+
+    it('fails with StackUnderflow if the operand stack does not contain enough values', () => {
+      state.cycle();
+      expect(state.exception).toBeInstanceOf(StackUnderflowException);
+    });
+
+    it('fails with StackUnderflow if the operand stack does not contain enough values (only one passed)', () => {
+      state.operands.push(toValue('abc'));
+      state.cycle();
+      expect(state.exception).toBeInstanceOf(StackUnderflowException);
+    });
+
+    it("builds the list of parameters and pass them to the operator's implementation", () => {
+      state.operands.push(toValue(123));
+      state.operands.push(toValue(true));
+      state.cycle();
+      expect(state.exception).toBeUndefined();
+      expect(state.operands.ref).toStrictEqual([toValue(true), toValue(true), toValue(123)]);
+    });
+  });
+
   describe('memory management', () => {
     let sharedObject: ShareableObject;
 

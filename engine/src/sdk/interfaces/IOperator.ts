@@ -15,9 +15,16 @@ export interface IConstantOperator extends IAbstractOperator {
 /** Other operators are implemented with functions */
 export interface IFunctionOperator extends IAbstractOperator {
   readonly type: OperatorType.implementation;
-  /** When specified, the collected values are kept valid during the operator lifetime (including catch & finally) */
+  /**
+   * When specified, the collected values are kept valid during the operator lifetime
+   * Order is significant, for instance :
+   * [ValueType.boolean, null] means top of the stack can be anything but next item must be a boolean
+   */
   readonly typeCheck?: (ValueType | null)[];
-  /** Operator implementation */
+  /**
+   * Operator implementation
+   * parameters are given in the order indicated by typeCheck
+   */
   readonly implementation: (state: IInternalState, parameters: readonly Value[]) => void;
   /** Offers the possibility to handle operator popping (step === STEP_DONE) */
   readonly callOnPop?: true;
