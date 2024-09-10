@@ -4,7 +4,7 @@ import { buildFunctionOperator } from '@core/operators/operators.js';
 
 import typeDef from './type.json' with { type: 'json' };
 
-buildFunctionOperator(typeDef, ({ operands }, value: Value) => {
+buildFunctionOperator(typeDef, ({ operands, memoryTracker }, value: Value) => {
   operands.pop();
-  operands.push(toStringValue(value.type));
+  operands.push(Object.assign(toStringValue(value.type), { tracker: memoryTracker }));
 });
