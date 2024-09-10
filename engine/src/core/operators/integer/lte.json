@@ -1,0 +1,21 @@
+{
+  "name": "lte",
+  "description": "compares two integers to see if lower than or equal",
+  "labels": ["integer", "math"],
+  "signature": {
+    "input": ["integer", "integer"],
+    "output": ["boolean"],
+    "exceptions": []
+  },
+  "samples": [{
+    "in": "1 2 lte",
+    "out": "true"
+  }, {
+    "in": "2 1 lte",
+    "out": "false"
+  }, {
+    "in": "1 1 lte",
+    "out": "true"
+  }]
+}
+  
