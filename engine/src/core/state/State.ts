@@ -8,6 +8,7 @@ import { ValueStack } from '@core/objects/stacks/ValueStack.js';
 import { CallStack } from '@core/objects/stacks/CallStack.js';
 import { operatorPop, operatorCycle } from './operator.js';
 import { callCycle } from './call.js';
+import { blockCycle } from './block.js';
 
 export interface StateFactorySettings {
   /** Augment the list of known names */
@@ -181,6 +182,8 @@ export class State implements IInternalState {
           operatorCycle(this, top);
         } else if (top.type === ValueType.string) {
           callCycle(this, top);
+        } else if (top.type === ValueType.array) {
+          blockCycle(this, top);
         } else {
           throw new InternalException('Unsupported executable value', top);
         }
@@ -192,7 +195,6 @@ export class State implements IInternalState {
         } else {
           exception = e;
         }
-        // TODO: add stack information
         this.exception = exception;
         exception.engineStack = this.calls.ref.map((value) => toString(value, { includeDebugSource: true }));
       }
