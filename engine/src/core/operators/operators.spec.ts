@@ -49,11 +49,11 @@ Object.keys(registry)
           it(`[${sampleId}] ${description}`, () => {
             waitForGenerator(state.process(sample.in));
             waitForGenerator(expectedState.process(sample.out));
-            expect(state.memoryTracker.byType).toStrictEqual(expectedState.memoryTracker.byType);
             // flatten differences between the two memory trackers
             Object.assign(state.memoryTracker, { _peak: 0 });
             Object.assign(expectedState.memoryTracker, { _peak: 0 });
             expect(state.operands.ref).toStrictEqual(expectedState.operands.ref);
+            expect(state.memoryTracker.byType).toStrictEqual(expectedState.memoryTracker.byType);
             if (expectedState.exception) {
               expect(state.exception).not.toBeUndefined();
               expect(state.exception).toBeInstanceOf(expectedState.exception.constructor);
