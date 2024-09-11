@@ -1,0 +1,27 @@
+{
+  "name": "eq",
+  "description": "compares two values and return true if they are strictly equal",
+  "labels": ["generic", "comparison"],
+  "signature": {
+    "input": ["any", "any"],
+    "output": ["boolean"],
+    "exceptions": []
+  },
+  "samples": [{
+    "in": "1 1 eq",
+    "out": "true"
+  }, {
+    "in": "1 2 eq",
+    "out": "false"
+  }, {
+    "in": "1 \"1\" eq",
+    "out": "false"
+  }, {
+    "in": "[ ] [ ] eq",
+    "out": "false"
+  }, {
+    "in": "[ ] dup eq",
+    "out": "true"
+  }]
+}
+  

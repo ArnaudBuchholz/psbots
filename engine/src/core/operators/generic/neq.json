@@ -1,0 +1,27 @@
+{
+  "name": "neq",
+  "description": "compares two values and return true if they are strictly different",
+  "labels": ["generic", "comparison"],
+  "signature": {
+    "input": ["any", "any"],
+    "output": ["boolean"],
+    "exceptions": []
+  },
+  "samples": [{
+    "in": "1 1 neq",
+    "out": "false"
+  }, {
+    "in": "1 2 neq",
+    "out": "true"
+  }, {
+    "in": "1 \"1\" neq",
+    "out": "true"
+  }, {
+    "in": "[ ] [ ] neq",
+    "out": "true"
+  }, {
+    "in": "[ ] dup neq",
+    "out": "false"
+  }]
+}
+  
