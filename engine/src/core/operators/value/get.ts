@@ -44,12 +44,12 @@ const implementations: { [type in ValueType]?: (container: Value<type>, index: V
   }
 };
 
-buildFunctionOperator(get, function ({ operands }, value: Value, index: Value) {
-  const implementation = implementations[value.type];
+buildFunctionOperator(get, function ({ operands }, container: Value, index: Value) {
+  const implementation = implementations[container.type];
   if (implementation === undefined) {
     throw new TypeCheckException();
   }
-  const output = implementation(value as never, index);
+  const output = implementation(container as never, index);
   operands.pop();
   operands.pop();
   operands.push(output);
