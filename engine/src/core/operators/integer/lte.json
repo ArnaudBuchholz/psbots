@@ -1,7 +1,7 @@
 {
   "name": "lte",
   "description": "compares two integers to see if lower than or equal",
-  "labels": ["integer", "math"],
+  "labels": ["integer", "math", "comparison"],
   "signature": {
     "input": ["integer", "integer"],
     "output": ["boolean"],

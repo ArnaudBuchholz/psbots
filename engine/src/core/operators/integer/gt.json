@@ -1,7 +1,7 @@
 {
   "name": "gt",
   "description": "compares two integers to see if greater than",
-  "labels": ["integer", "math"],
+  "labels": ["integer", "math", "comparison"],
   "signature": {
     "input": ["integer", "integer"],
     "output": ["boolean"],
