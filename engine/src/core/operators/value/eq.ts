@@ -1,4 +1,4 @@
-import { Value } from '@api/index.js';
+import type { Value } from '@api/index.js';
 import { toBooleanValue, valuesOf } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 
