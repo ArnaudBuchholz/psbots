@@ -4,6 +4,7 @@ import './get.js';
 import './length.js';
 import './mark.js';
 import './neq.js';
+import './put.js';
 import './true.js';
 import './type.js';
 import './wcheck.js';

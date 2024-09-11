@@ -1,0 +1,79 @@
+{
+  "name": "put",
+  "description": "sets an indexed item in the value",
+  "labels": ["generic"],
+  "signature": {
+    "input": ["any", "any", "any"],
+    "output": ["any"],
+    "exceptions": []
+  },
+  "samples": [{
+    "description": "sets the Nth item of an array",
+    "in": "[ 1 2 3 ] 1 5 put",
+    "out": "[ 1 5 3 ]"
+  }, {
+    "description": "fails if the array is not writable",
+    "in": "{ 1 2 3 } 1 5 put",
+    "out": "{ 1 2 3 } 1 5 invalidaccess"
+  }, {
+    "description": "fails if invalid index for the array",
+    "in": "[ 1 2 3 ] \"a\" 5 put",
+    "out": "[ 1 2 3 ] \"a\" 5 typecheck"
+  }, {
+    "description": "fails if out of bound index for the array",
+    "in": "[ 1 2 3 ] -1 5 put",
+    "out": "[ 1 2 3 ] -1 5 rangecheck"
+  }, {
+    "description": "fails if out of bound index for the array",
+    "in": "[ 1 2 3 ] 3 5 put",
+    "out": "[ 1 2 3 ] -1 put"
+  }, {
+    "description": "sets the Nth character of a string (returns a new string, using ascii code)",
+    "in": "\"abc\" 1 66 put",
+    "out": "\"aBc\""
+  }, {
+    "description": "fails if setting an invalid value",
+    "in": "\"abc\" 1 \"B\" put",
+    "out": "\"abc\" 1 \"B\" typecheck"
+  }, {
+    "description": "fails if setting an invalid value",
+    "in": "\"abc\" 1 -1 put",
+    "out": "\"abc\" 1 -1 typecheck"
+  }, {
+    "description": "fails if invalid index for a string",
+    "in": "\"abc\" \"a\" 66 put",
+    "out": "\"abc\" \"a\" 66 typecheck"
+  }, {
+    "description": "fails if out of bound index for a string",
+    "in": "\"abc\" -1 66 put",
+    "out": "\"abc\" -1 66 rangecheck"
+  }, {
+    "description": "fails if out of bound index for a string",
+    "in": "\"abc\" 3 66 put",
+    "out": "\"abc\" 3 66 rangecheck"
+  }, {
+    "description": "sets an indexed item of a dictionary",
+    "in": "userdict \"test\" 123 put userdict \"test\" get",
+    "out": "123"
+  }, {
+    "description": "fails if the dictionary is not writable",
+    "in": "systemdict \"test\" 123 put",
+    "out": "systemdict \"test\" 123 invalidaccess"
+  }, {
+    "description": "fails if invalid index for a dictionary",
+    "in": "userdict 0 123 put",
+    "out": "userdict 0 123 typecheck"
+  }, {
+    "description": "fails if not a container",
+    "in": "1 0 1 put",
+    "out": "1 0 1 typecheck"
+  }, {
+    "description": "fails if not a container",
+    "in": "false 0 1 put",
+    "out": "false 0 1 typecheck"
+  }, {
+    "description": "fails if not a container",
+    "in": "mark 0 1 put",
+    "out": "mark 0 1 typecheck"
+  }]
+}
