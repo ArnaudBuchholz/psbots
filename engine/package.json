@@ -27,6 +27,7 @@
     "check": "tsc --noEmit && dpdm ./src/** -T --no-tree --no-warning && eslint src/**/*.ts --fix",
     "pretest": "npm run make-sources",
     "test": "vitest run --coverage",
+    "pretest:operators": "npm run make-sources",
     "test:operators": "vitest run --no-coverage operators.spec",
     "prebuild": "npm run make-sources",
     "build": "tsc --project tsconfig.build.json",
