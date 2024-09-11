@@ -1,5 +1,6 @@
 import './eq.js';
 import './false.js';
+import './get.js';
 import './length.js';
 import './mark.js';
 import './neq.js';
