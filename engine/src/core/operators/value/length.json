@@ -15,7 +15,8 @@
     "description": "returns the number of items in an executable array",
     "in": "{ 1 2 3 } length",
     "out": "3"
-  }, {    "description": "returns the size of a string",
+  }, {
+    "description": "returns the size of a string",
     "in": "\"abc\" length",
     "out": "3"
   }, {
