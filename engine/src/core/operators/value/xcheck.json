@@ -1,7 +1,7 @@
 {
   "name": "xcheck",
   "description": "checks if value is executable",
-  "labels": ["value", "permission"],
+  "labels": ["value", "generic", "permission"],
   "signature": {
     "input": ["any"],
     "output": ["boolean"]

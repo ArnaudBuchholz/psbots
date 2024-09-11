@@ -1,7 +1,7 @@
 {
   "name": "type",
   "description": "pushes the type of the value in the operand stack",
-  "labels": ["value"],
+  "labels": ["value", "generic"],
   "signature": {
     "input": ["any"],
     "output": ["string"]

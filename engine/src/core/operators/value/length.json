@@ -1,0 +1,39 @@
+{
+  "name": "length",
+  "description": "returns the length of the value",
+  "labels": ["generic"],
+  "signature": {
+    "input": ["any"],
+    "output": ["integer"],
+    "exceptions": []
+  },
+  "samples": [{
+    "description": "returns the number of items in an array",
+    "in": "[ 1 2 3 ] length",
+    "out": "3"
+  }, {
+    "description": "returns the number of items in an executable array",
+    "in": "{ 1 2 3 } length",
+    "out": "3"
+  }, {    "description": "returns the size of a string",
+    "in": "\"abc\" length",
+    "out": "3"
+  }, {
+    "description": "returns the number of keys in a dictionary",
+    "in": "systemdict length 0 gt",
+    "out": "true"
+  }, {
+    "description": "fails if not a container",
+    "in": "1 length",
+    "out": "1 typecheck"
+  }, {
+    "description": "fails if not a container",
+    "in": "false length",
+    "out": "false typecheck"
+  }, {
+    "description": "fails if not a container",
+    "in": "mark length",
+    "out": "mark typecheck"
+  }]
+}
+  

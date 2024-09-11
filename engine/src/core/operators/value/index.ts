@@ -1,5 +1,8 @@
+import './eq.js';
 import './false.js';
+import './length.js';
 import './mark.js';
+import './neq.js';
 import './true.js';
 import './type.js';
 import './wcheck.js';
