@@ -50,8 +50,8 @@ buildFunctionOperator(get, function ({ operands }, container: Value, index: Valu
     throw new TypeCheckException();
   }
   const output = implementation(container as never, index);
+  output.tracker?.addValueRef(output);
   try {
-    output.tracker?.addValueRef(output);
     operands.pop();
     operands.pop();
     operands.push(output);
