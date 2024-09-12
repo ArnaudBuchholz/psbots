@@ -1,4 +1,4 @@
-import type { Value } from '@api/index.js';
+import type { IValueTracker, Value } from '@api/index.js';
 import { ValueType } from '@api/index.js';
 
 export function toBooleanValue(isSet: boolean): Value<ValueType.boolean> {
@@ -21,8 +21,17 @@ export function toIntegerValue(integer: number): Value<ValueType.integer> {
 
 export function toStringValue(
   string: string,
-  { isExecutable = false }: { isExecutable?: boolean } = {}
+  { isExecutable = false, tracker }: { isExecutable?: boolean, tracker?: IValueTracker } = {}
 ): Value<ValueType.string> {
+  if (tracker) {
+    return {
+      type: ValueType.string,
+      isExecutable,
+      isReadOnly: true,
+      string,
+      tracker
+    };
+  }
   return {
     type: ValueType.string,
     isExecutable,
