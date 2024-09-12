@@ -1,8 +1,24 @@
 import { StackUnderflowException } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 
-import stackUnderflow from './stackUnderflow.json' with { type: 'json' };
-
-buildFunctionOperator(stackUnderflow, function () {
-  throw new StackUnderflowException();
-});
+buildFunctionOperator(
+  {
+    name: 'stackunderflow',
+    description: 'throws the exception : Not enough operands on the stack to perform the operation',
+    labels: ['exception'],
+    signature: {
+      input: [],
+      output: [],
+      exceptions: ['stackunderflow']
+    },
+    samples: [
+      {
+        in: 'stackunderflow',
+        out: 'stackunderflow'
+      }
+    ]
+  },
+  () => {
+    throw new StackUnderflowException();
+  }
+);

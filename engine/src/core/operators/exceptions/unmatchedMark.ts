@@ -1,8 +1,24 @@
 import { UnmatchedMarkException } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 
-import unmatchedMark from './unmatchedMark.json' with { type: 'json' };
-
-buildFunctionOperator(unmatchedMark, function () {
-  throw new UnmatchedMarkException();
-});
+buildFunctionOperator(
+  {
+    name: 'unmatchedmark',
+    description: 'throws the exception : Unmatched mark in the operand stack',
+    labels: ['exception'],
+    signature: {
+      input: [],
+      output: [],
+      exceptions: ['unmatchedmark']
+    },
+    samples: [
+      {
+        in: 'unmatchedmark',
+        out: 'unmatchedmark'
+      }
+    ]
+  },
+  () => {
+    throw new UnmatchedMarkException();
+  }
+);

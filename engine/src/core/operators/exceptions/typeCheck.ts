@@ -1,8 +1,24 @@
 import { TypeCheckException } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 
-import typeCheck from './typeCheck.json' with { type: 'json' };
-
-buildFunctionOperator(typeCheck, function () {
-  throw new TypeCheckException();
-});
+buildFunctionOperator(
+  {
+    name: 'typecheck',
+    description: 'throws the exception : Operand is of the wrong type',
+    labels: ['exception'],
+    signature: {
+      input: [],
+      output: [],
+      exceptions: ['typecheck']
+    },
+    samples: [
+      {
+        in: 'typecheck',
+        out: 'typecheck'
+      }
+    ]
+  },
+  () => {
+    throw new TypeCheckException();
+  }
+);

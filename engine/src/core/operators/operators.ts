@@ -8,8 +8,24 @@ import { OperatorType } from '@sdk/interfaces/IOperator.js';
 export type OperatorDefinition = {
   name: string;
   description: string;
+  labels: (
+    | 'array'
+    | 'comparison'
+    | 'exception'
+    | 'flow'
+    | 'generic'
+    | 'integer'
+    | 'mark'
+    | 'math'
+    | 'non_standard'
+    | 'operand'
+    | 'permission'
+    | 'value'
+  )[];
   signature: {
-    input: string[];
+    input: (ValueType | null)[];
+    output: (ValueType | null)[];
+    exceptions?: string[];
   };
   samples: {
     description?: string;
@@ -32,12 +48,7 @@ export function buildFunctionOperator(
 ): void {
   let operator: IOperator;
   if (definition.signature.input.length > 0) {
-    const typeCheck = definition.signature.input.map((type) => {
-      if (type === 'any') {
-        return null;
-      }
-      return ValueType[type as ValueType];
-    });
+    const { input: typeCheck } = definition.signature;
     operator = {
       type: OperatorType.implementation,
       name: definition.name,

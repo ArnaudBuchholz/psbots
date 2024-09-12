@@ -1,8 +1,24 @@
 import { DictStackUnderflowException } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 
-import dictStackUnderflow from './dictStackUnderflow.json' with { type: 'json' };
-
-buildFunctionOperator(dictStackUnderflow, function () {
-  throw new DictStackUnderflowException();
-});
+buildFunctionOperator(
+  {
+    name: 'dictstackunderflow',
+    description: 'throws the exception : No custom dictionary left to unstack',
+    labels: ['exception'],
+    signature: {
+      input: [],
+      output: [],
+      exceptions: ['dictstackunderflow']
+    },
+    samples: [
+      {
+        in: 'dictstackunderflow',
+        out: 'dictstackunderflow'
+      }
+    ]
+  },
+  () => {
+    throw new DictStackUnderflowException();
+  }
+);

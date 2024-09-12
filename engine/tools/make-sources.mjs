@@ -59,41 +59,31 @@ export class ${uppercasedName}Exception extends BaseException {
     const lowercasedName = name.toLowerCase();
 
     writeFile(
-      `src/core/operators/exceptions/${lowercasedName}.json`,
-      `{
-  "name": "${lowercasedName}",
-  "description": "throws the exception : ${message}",
-  "labels": ["exception"],
-  "signature": {
-    "input": [],
-    "output": [],
-    "exceptions": ["${lowercasedName}"]
-  },
-  "samples": [{
-    "in": "${lowercasedName}",
-    "out": "${lowercasedName}"
-  }]
-}
-`
-    );
-
-    let safeName;
-    if (['break', 'undefined'].includes(name)) {
-      safeName = name + 'Def';
-    } else {
-      safeName = name;
-    }
-
-    writeFile(
       `src/core/operators/exceptions/${name}.ts`,
       `import { ${uppercasedName}Exception } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 
-import ${safeName} from './${name}.json' with { type: 'json' };
-
-buildFunctionOperator(${safeName}, function () {
-  throw new ${uppercasedName}Exception();
-});
+buildFunctionOperator(
+  {
+    name: '${lowercasedName}',
+    description: 'throws the exception : ${message}',
+    labels: ['exception'],
+    signature: {
+      input: [],
+      output: [],
+      exceptions: ['${lowercasedName}']
+    },
+    samples: [
+      {
+        in: '${lowercasedName}',
+        out: '${lowercasedName}'
+      }
+    ]
+  },
+  () => {
+    throw new ${uppercasedName}Exception();
+  }
+);
 `
     );
   }

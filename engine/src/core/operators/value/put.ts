@@ -9,8 +9,6 @@ import {
 } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 
-import put from './put.json' with { type: 'json' };
-
 function checkPos(index: Value, length: number): number {
   if (index.type !== ValueType.integer) {
     throw new TypeCheckException();
@@ -62,19 +60,122 @@ const implementations: { [type in ValueType]?: (container: Value<type>, index: V
   }
 };
 
-buildFunctionOperator(put, function ({ operands }, container: Value, index: Value, value: Value) {
-  const implementation = implementations[container.type];
-  if (implementation === undefined) {
-    throw new TypeCheckException();
+buildFunctionOperator(
+  {
+    name: 'put',
+    description: 'sets an indexed item in the value',
+    labels: ['generic', 'non_standard'],
+    signature: {
+      input: [null, null, null],
+      output: [null]
+    },
+    samples: [
+      {
+        description: 'sets the Nth item of an array',
+        in: '[ 1 2 3 ] 1 5 put',
+        out: '[ 1 5 3 ]'
+      },
+      {
+        description: 'fails if the array is not writable',
+        in: '{ 1 2 3 } 1 5 put',
+        out: '{ 1 2 3 } 1 5 invalidaccess'
+      },
+      {
+        description: 'fails if invalid index for the array',
+        in: '[ 1 2 3 ] "a" 5 put',
+        out: '[ 1 2 3 ] "a" 5 typecheck'
+      },
+      {
+        description: 'fails if out of bound index for the array',
+        in: '[ 1 2 3 ] -1 5 put',
+        out: '[ 1 2 3 ] -1 5 rangecheck'
+      },
+      {
+        description: 'fails if out of bound index for the array',
+        in: '[ 1 2 3 ] 3 5 put',
+        out: '[ 1 2 3 ] 3 5 rangecheck'
+      },
+      {
+        description: 'sets the Nth character of a string (returns a new string, using ascii code)',
+        in: '"abc" 1 66 put',
+        out: '"aBc"'
+      },
+      {
+        description: 'fails if setting an invalid value',
+        in: '"abc" 1 "B" put',
+        out: '"abc" 1 "B" typecheck'
+      },
+      {
+        description: 'fails if setting an invalid value',
+        in: '"abc" 1 -1 put',
+        out: '"abc" 1 -1 rangecheck'
+      },
+      {
+        description: 'fails if setting an invalid value',
+        in: '"abc" 1 65536 put',
+        out: '"abc" 1 65536 rangecheck'
+      },
+      {
+        description: 'fails if invalid index for a string',
+        in: '"abc" "a" 66 put',
+        out: '"abc" "a" 66 typecheck'
+      },
+      {
+        description: 'fails if out of bound index for a string',
+        in: '"abc" -1 66 put',
+        out: '"abc" -1 66 rangecheck'
+      },
+      {
+        description: 'fails if out of bound index for a string',
+        in: '"abc" 3 66 put',
+        out: '"abc" 3 66 rangecheck'
+      },
+      {
+        description: 'sets an indexed item of a dictionary',
+        in: 'userdict "test" 123 put userdict "test" get',
+        out: '123'
+      },
+      {
+        description: 'fails if the dictionary is not writable',
+        in: 'systemdict "test" 123 put',
+        out: 'systemdict "test" 123 invalidaccess'
+      },
+      {
+        description: 'fails if invalid index for a dictionary',
+        in: 'userdict 0 123 put',
+        out: 'userdict 0 123 typecheck'
+      },
+      {
+        description: 'fails if not a container',
+        in: '1 0 1 put',
+        out: '1 0 1 typecheck'
+      },
+      {
+        description: 'fails if not a container',
+        in: 'false 0 1 put',
+        out: 'false 0 1 typecheck'
+      },
+      {
+        description: 'fails if not a container',
+        in: 'mark 0 1 put',
+        out: 'mark 0 1 typecheck'
+      }
+    ]
+  },
+  ({ operands }, container: Value, index: Value, value: Value) => {
+    const implementation = implementations[container.type];
+    if (implementation === undefined) {
+      throw new TypeCheckException();
+    }
+    const output = implementation(container as never, index, value);
+    output.tracker?.addValueRef(output);
+    try {
+      operands.pop();
+      operands.pop();
+      operands.pop();
+      operands.push(output);
+    } finally {
+      output.tracker?.releaseValue(output);
+    }
   }
-  const output = implementation(container as never, index, value);
-  output.tracker?.addValueRef(output);
-  try {
-    operands.pop();
-    operands.pop();
-    operands.pop();
-    operands.push(output);
-  } finally {
-    output.tracker?.releaseValue(output);
-  }
-});
+);

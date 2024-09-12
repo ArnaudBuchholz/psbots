@@ -1,8 +1,24 @@
 import { RangeCheckException } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 
-import rangeCheck from './rangeCheck.json' with { type: 'json' };
-
-buildFunctionOperator(rangeCheck, function () {
-  throw new RangeCheckException();
-});
+buildFunctionOperator(
+  {
+    name: 'rangecheck',
+    description: 'throws the exception : Operand is too big or too small',
+    labels: ['exception'],
+    signature: {
+      input: [],
+      output: [],
+      exceptions: ['rangecheck']
+    },
+    samples: [
+      {
+        in: 'rangecheck',
+        out: 'rangecheck'
+      }
+    ]
+  },
+  () => {
+    throw new RangeCheckException();
+  }
+);

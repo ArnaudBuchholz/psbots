@@ -1,8 +1,24 @@
 import { VmOverflowException } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 
-import vmOverflow from './vmOverflow.json' with { type: 'json' };
-
-buildFunctionOperator(vmOverflow, function () {
-  throw new VmOverflowException();
-});
+buildFunctionOperator(
+  {
+    name: 'vmoverflow',
+    description: 'throws the exception : Virtual memory exceeded',
+    labels: ['exception'],
+    signature: {
+      input: [],
+      output: [],
+      exceptions: ['vmoverflow']
+    },
+    samples: [
+      {
+        in: 'vmoverflow',
+        out: 'vmoverflow'
+      }
+    ]
+  },
+  () => {
+    throw new VmOverflowException();
+  }
+);

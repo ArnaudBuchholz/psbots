@@ -1,8 +1,24 @@
 import { BusyException } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 
-import busy from './busy.json' with { type: 'json' };
-
-buildFunctionOperator(busy, function () {
-  throw new BusyException();
-});
+buildFunctionOperator(
+  {
+    name: 'busy',
+    description: 'throws the exception : Engine is already busy',
+    labels: ['exception'],
+    signature: {
+      input: [],
+      output: [],
+      exceptions: ['busy']
+    },
+    samples: [
+      {
+        in: 'busy',
+        out: 'busy'
+      }
+    ]
+  },
+  () => {
+    throw new BusyException();
+  }
+);

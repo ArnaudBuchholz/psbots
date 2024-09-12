@@ -1,9 +1,24 @@
 import { buildFunctionOperator } from '@core/operators/operators.js';
 
-import clear from './clear.json' with { type: 'json' };
-
-buildFunctionOperator(clear, function ({ operands }) {
-  while (operands.length) {
-    operands.pop();
+buildFunctionOperator(
+  {
+    name: 'clear',
+    description: 'clears the operand stack',
+    labels: ['operand'],
+    signature: {
+      input: [],
+      output: []
+    },
+    samples: [
+      {
+        in: '1 2 3 clear',
+        out: ''
+      }
+    ]
+  },
+  ({ operands }) => {
+    while (operands.length) {
+      operands.pop();
+    }
   }
-});
+);
