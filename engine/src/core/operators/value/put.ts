@@ -22,9 +22,6 @@ function checkPos(index: Value, length: number): number {
 
 const implementations: { [type in ValueType]?: (container: Value<type>, index: Value, value: Value) => Value } = {
   [ValueType.string]: ({ string, tracker }, index, value) => {
-    if (tracker === undefined) {
-      throw new InternalException('Unexpected string with no tracker');
-    }
     const pos = checkPos(index, string.length);
     if (value.type !== ValueType.integer) {
       throw new TypeCheckException();
@@ -34,7 +31,7 @@ const implementations: { [type in ValueType]?: (container: Value<type>, index: V
       throw new RangeCheckException();
     }
     const newString = string.substring(0, pos) + String.fromCharCode(charCode) + string.substring(pos + 1);
-    return Object.assign({ tracker }, toStringValue(newString));
+    return Object.assign({ tracker }, toStringValue(newString, { tracker }));
   },
 
   [ValueType.array]: (container, index, value) => {

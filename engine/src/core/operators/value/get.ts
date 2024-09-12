@@ -21,12 +21,7 @@ function checkPos(index: Value, length: number): number {
 }
 
 const implementations: { [type in ValueType]?: (container: Value<type>, index: Value) => Value } = {
-  [ValueType.string]: ({ string, tracker }, index) => {
-    if (tracker === undefined) {
-      throw new InternalException('Unexpected string with no tracker');
-    }
-    return Object.assign({ tracker }, toStringValue(string.charAt(checkPos(index, string.length))));
-  },
+  [ValueType.string]: ({ string, tracker }, index) => Object.assign(toStringValue(string.charAt(checkPos(index, string.length)), { tracker })),
 
   [ValueType.array]: ({ array }, index) => array.at(checkPos(index, array.length))!, // length is validated
 
