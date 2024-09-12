@@ -11,6 +11,7 @@ export type OperatorDefinition = {
   labels: (
     | 'array'
     | 'comparison'
+    | 'dictstack'
     | 'exception'
     | 'flow'
     | 'generic'
