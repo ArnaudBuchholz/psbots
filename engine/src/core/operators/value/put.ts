@@ -32,6 +32,9 @@ const implementations: { [type in ValueType]?: (container: Value<type>, index: V
       throw new TypeCheckException();
     }
     const { integer: charCode } = value;
+    if (charCode < 0 || charCode > 65535) {
+      throw new RangeCheckException();
+    }
     const newString = string.substring(0, pos) + String.fromCharCode(charCode) + string.substring(pos + 1);
     return Object.assign({ tracker }, toStringValue(newString));
   },
@@ -60,7 +63,7 @@ const implementations: { [type in ValueType]?: (container: Value<type>, index: V
 };
 
 buildFunctionOperator(put, function ({ operands }, container: Value, index: Value, value: Value) {
-  const implementation = implementations[value.type];
+  const implementation = implementations[container.type];
   if (implementation === undefined) {
     throw new TypeCheckException();
   }
