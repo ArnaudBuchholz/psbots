@@ -8,6 +8,7 @@ import { OperatorType } from '@sdk/interfaces/IOperator.js';
 export type OperatorDefinition = {
   name: string;
   description: string;
+  postScriptDeviation?: string;
   labels: (
     | 'array'
     | 'comparison'
@@ -18,11 +19,11 @@ export type OperatorDefinition = {
     | 'integer'
     | 'mark'
     | 'math'
-    | 'non_standard'
     | 'operand'
     | 'permission'
     | 'value'
   )[];
+
   signature: {
     input: (ValueType | null)[];
     output: (ValueType | null)[];

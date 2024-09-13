@@ -1,12 +1,6 @@
 import type { Value } from '@api/index.js';
 import { ValueType } from '@api/index.js';
-import {
-  InternalException,
-  RangeCheckException,
-  toStringValue,
-  TypeCheckException,
-  UndefinedException
-} from '@sdk/index.js';
+import { RangeCheckException, toStringValue, TypeCheckException, UndefinedException } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 
 function checkPos(index: Value, length: number): number {
@@ -21,7 +15,8 @@ function checkPos(index: Value, length: number): number {
 }
 
 const implementations: { [type in ValueType]?: (container: Value<type>, index: Value) => Value } = {
-  [ValueType.string]: ({ string, tracker }, index) => Object.assign(toStringValue(string.charAt(checkPos(index, string.length)), { tracker })),
+  [ValueType.string]: ({ string, tracker }, index) =>
+    Object.assign(toStringValue(string.charAt(checkPos(index, string.length)), { tracker })),
 
   [ValueType.array]: ({ array }, index) => array.at(checkPos(index, array.length))!, // length is validated
 

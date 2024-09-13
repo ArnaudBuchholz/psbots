@@ -1,12 +1,6 @@
 import type { IArray, IDictionary, Value } from '@api/index.js';
 import { ValueType } from '@api/index.js';
-import {
-  InternalException,
-  InvalidAccessException,
-  RangeCheckException,
-  toStringValue,
-  TypeCheckException
-} from '@sdk/index.js';
+import { InvalidAccessException, RangeCheckException, toStringValue, TypeCheckException } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 
 function checkPos(index: Value, length: number): number {
@@ -61,7 +55,8 @@ buildFunctionOperator(
   {
     name: 'put',
     description: 'sets an indexed item in the value',
-    labels: ['generic', 'non_standard'],
+    postScriptDeviation: 'returns the modified object or a new string',
+    labels: ['generic'],
     signature: {
       input: [null, null, null],
       output: [null]

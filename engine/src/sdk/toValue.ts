@@ -21,7 +21,7 @@ export function toIntegerValue(integer: number): Value<ValueType.integer> {
 
 export function toStringValue(
   string: string,
-  { isExecutable = false, tracker }: { isExecutable?: boolean, tracker?: IValueTracker } = {}
+  { isExecutable = false, tracker }: { isExecutable?: boolean; tracker?: IValueTracker } = {}
 ): Value<ValueType.string> {
   if (tracker) {
     return {

@@ -8,8 +8,10 @@ import { waitForGenerator } from '@test/wait-for-generator.js';
 const nullDefinition: OperatorDefinition = {
   name: 'null',
   description: '',
+  labels: [],
   signature: {
-    input: []
+    input: [],
+    output: []
   },
   samples: []
 };
