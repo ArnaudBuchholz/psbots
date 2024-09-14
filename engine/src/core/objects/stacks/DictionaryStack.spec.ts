@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, beforeAll } from 'vitest';
-import type { IReadOnlyDictionary, Value } from '@api/index.js';
+import type { IDictionary, IReadOnlyDictionary, Value } from '@api/index.js';
 import { USER_MEMORY_TYPE } from '@api/index.js';
 import type { DictionaryStackWhereResult } from '@sdk/index.js';
 import { DictStackUnderflowException, UndefinedException } from '@sdk/index.js';
@@ -48,52 +48,49 @@ it('starts with three dictionaries', () => {
 });
 
 it('exposes the host dictionary', () => {
-  const { host: iHostRODictionary } = stack;
-  expect(iHostRODictionary).toStrictEqual(host);
+  expect(stack.host.dictionary).toStrictEqual(host);
 });
 
 it('exposes the system dictionary', () => {
-  const { system: iSystemRODictionary } = stack;
-  expect(iSystemRODictionary).toStrictEqual(SystemDictionary.instance);
+  expect(stack.system.dictionary).toStrictEqual(SystemDictionary.instance);
 });
 
 it('exposes an empty global dictionary', () => {
   const { global } = stack;
-  expect(global.names.length).toStrictEqual(0);
+  expect(global.dictionary.names.length).toStrictEqual(0);
 });
 
 it('exposes first dictionary as top', () => {
-  const global = stack.top;
-  expect(global.dictionary).toStrictEqual(stack.global);
+  expect(stack.top).toStrictEqual(stack.global);
 });
 
 it('creates an empty dictionary if host is not specified', () => {
-  const stackWithoutHost = new DictionaryStack(tracker);
-  expect(stackWithoutHost.ref.length).toStrictEqual(3);
-  const { host: iHostRODictionary } = stackWithoutHost;
-  expect(iHostRODictionary.names).toStrictEqual<string[]>([]);
-  expect(stackWithoutHost.release()).toStrictEqual(false);
+  const hostFreeStack = new DictionaryStack(tracker);
+  expect(hostFreeStack.ref.length).toStrictEqual(3);
+  expect(hostFreeStack.host.dictionary.names).toStrictEqual<string[]>([]);
+  expect(hostFreeStack.release()).toStrictEqual(false);
 });
 
 describe('where', () => {
   it('searches for a known name (from host dictionary)', () => {
     expect(stack.where('hostname')).toStrictEqual<DictionaryStackWhereResult>({
-      dictionary: stack.host,
+      dictionary: stack.host.dictionary,
       value: toValue('localhost')
     });
   });
 
   it('searches for a known name (from system dictionary)', () => {
     expect(stack.where('mark')).toStrictEqual<DictionaryStackWhereResult>({
-      dictionary: stack.system,
+      dictionary: stack.system.dictionary,
       value: markOp
     });
   });
 
   it('searches for a known name (from global dictionary)', () => {
-    stack.global.def('clear', toValue('clear'));
+    const global = stack.global.dictionary as IDictionary;
+    global.def('clear', toValue('clear'));
     expect(stack.where('clear')).toStrictEqual<DictionaryStackWhereResult>({
-      dictionary: stack.global,
+      dictionary: global,
       value: toValue('clear')
     });
   });
@@ -113,7 +110,8 @@ describe('lookup', () => {
   });
 
   it('searches for a known name (from global dictionary)', () => {
-    stack.global.def('clear', toValue('clear'));
+    const global = stack.global.dictionary as IDictionary;
+    global.def('clear', toValue('clear'));
     expect(stack.lookup('clear')).toStrictEqual<Value>(toValue('clear'));
   });
 

@@ -8,9 +8,9 @@ export type DictionaryStackWhereResult = {
 
 /** Dictionary stack */
 export interface IDictionaryStack extends IStack {
-  readonly host: IReadOnlyDictionary;
-  readonly system: IReadOnlyDictionary;
-  readonly global: IDictionary;
+  readonly host: DictionaryValue;
+  readonly system: DictionaryValue;
+  readonly global: DictionaryValue;
   readonly top: DictionaryValue;
   begin: (dictionary: DictionaryValue) => void;
   end: () => void;

@@ -1,4 +1,4 @@
-import type { IReadOnlyDictionary, IDictionary, Value, DictionaryValue } from '@api/index.js';
+import type { IReadOnlyDictionary, Value, DictionaryValue } from '@api/index.js';
 import { SYSTEM_MEMORY_TYPE, ValueType } from '@api/index.js';
 import type { DictionaryStackWhereResult, IDictionaryStack } from '@sdk/index.js';
 import { DictStackUnderflowException, UndefinedException } from '@sdk/index.js';
@@ -21,19 +21,9 @@ export class DictionaryStack extends ValueStack implements IDictionaryStack {
     this._system = SystemDictionary.instance;
     const global = new Dictionary(tracker, SYSTEM_MEMORY_TYPE);
     this._global = global;
-    this.begin({
-      type: ValueType.dictionary,
-      isExecutable: false,
-      isReadOnly: true,
-      dictionary: this._host
-    });
-    this.begin({
-      type: ValueType.dictionary,
-      isExecutable: false,
-      isReadOnly: true,
-      dictionary: this._system
-    });
-    this.begin(global.toValue({ isReadOnly: false }));
+    this.begin(this.host);
+    this.begin(this.system);
+    this.begin(this.global);
   }
 
   protected override _dispose(): void {
@@ -45,16 +35,26 @@ export class DictionaryStack extends ValueStack implements IDictionaryStack {
     return super.top as DictionaryValue;
   }
 
-  get host(): IReadOnlyDictionary {
-    return this._host;
+  get host(): DictionaryValue {
+    return {
+      type: ValueType.dictionary,
+      isExecutable: false,
+      isReadOnly: true,
+      dictionary: this._host
+    };
   }
 
-  get system(): IReadOnlyDictionary {
-    return this._system;
+  get system(): DictionaryValue {
+    return {
+      type: ValueType.dictionary,
+      isExecutable: false,
+      isReadOnly: true,
+      dictionary: this._system
+    };
   }
 
-  get global(): IDictionary {
-    return this._global;
+  get global(): DictionaryValue {
+    return this._global.toValue({ isReadOnly: false });
   }
 
   begin(dictionary: DictionaryValue): void {
