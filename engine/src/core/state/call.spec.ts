@@ -1,7 +1,7 @@
 import { it, expect, beforeEach, afterEach, beforeAll } from 'vitest';
-import { ExceptionDictionaryName } from '@api/index.js';
+import { ExceptionDictionaryName, parse } from '@api/index.js';
 import type { IDebugSource, IDictionary, Value } from '@api/index.js';
-import { toValue } from '@test/index.js';
+import { toValue, waitForGenerator } from '@test/index.js';
 import { State } from './State.js';
 import { SystemDictionary } from '@core/objects/dictionaries/System.js';
 
@@ -56,6 +56,22 @@ it('puts the call in the operand stack when calls are prevented', () => {
   state.cycle();
   expect(state.calls.length).toStrictEqual(0);
   expect(state.operands.ref).toStrictEqual([markCall]);
+});
+
+it('*always* execute { and } even if it changes callEnabled', () => {
+  state.calls.push(toValue('{', { isExecutable: true }));
+  state.cycle();
+  state.cycle();
+  expect(state.callEnabled).toStrictEqual(false);
+  state.calls.push(toValue('}', { isExecutable: true }));
+  state.cycle();
+  state.cycle();
+  expect(state.callEnabled).toStrictEqual(true);
+});
+
+it('*always* execute { and } (cumulated)', () => {
+  waitForGenerator(state.process(parse('{ { } { } }')));
+  expect(state.callEnabled).toStrictEqual(true);
 });
 
 it('forwards debug info to the resolved value (if none)', () => {
