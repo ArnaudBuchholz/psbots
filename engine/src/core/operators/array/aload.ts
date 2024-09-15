@@ -13,15 +13,16 @@ buildFunctionOperator(
     },
     samples: [
       {
-        in: '[ 1 2 3 ] aload',
+        in: '[ 1 2 3 ] aload pop',
         out: '1 2 3'
       }
     ]
   },
   ({ operands }, array: IReadOnlyArray) => {
-    operands.pop();
+    const arrayValue = operands.top;
     for (const value of enumIArrayValues(array)) {
       operands.push(value);
     }
+    operands.push(arrayValue);
   }
 );
