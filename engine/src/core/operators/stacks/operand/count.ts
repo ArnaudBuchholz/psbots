@@ -18,7 +18,5 @@ buildFunctionOperator(
       }
     ]
   },
-  ({ operands }) => {
-    operands.push(toIntegerValue(operands.length));
-  }
+  ({ operands }) => operands.push(toIntegerValue(operands.length))
 );

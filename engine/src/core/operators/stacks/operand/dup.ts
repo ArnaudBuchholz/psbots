@@ -17,7 +17,5 @@ buildFunctionOperator(
       }
     ]
   },
-  ({ operands }, value: Value) => {
-    operands.push(value);
-  }
+  ({ operands }, value: Value) => operands.push(value)
 );

@@ -20,6 +20,7 @@ buildFunctionOperator(
   },
   ({ operands }, array: IReadOnlyArray) => {
     const arrayValue = operands.top;
+    operands.pop();
     for (const value of enumIArrayValues(array)) {
       operands.push(value);
     }

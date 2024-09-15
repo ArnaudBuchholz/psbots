@@ -24,7 +24,5 @@ buildFunctionOperator(
     ]
   },
 
-  ({ operands }) => {
-    operands.push(toIntegerValue(findMarkPos(operands)));
-  }
+  ({ operands }) => operands.push(toIntegerValue(findMarkPos(operands)))
 );
