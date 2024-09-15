@@ -43,8 +43,8 @@ afterEach(() => {
   expect(tracker.used).toStrictEqual(0);
 });
 
-it('starts with three dictionaries', () => {
-  expect(stack.ref.length).toStrictEqual(3);
+it('starts with four dictionaries', () => {
+  expect(stack.ref.length).toStrictEqual(4);
 });
 
 it('exposes the host dictionary', () => {
@@ -66,7 +66,7 @@ it('exposes first dictionary as top', () => {
 
 it('creates an empty dictionary if host is not specified', () => {
   const hostFreeStack = new DictionaryStack(tracker);
-  expect(hostFreeStack.ref.length).toStrictEqual(3);
+  expect(hostFreeStack.ref.length).toStrictEqual(4);
   expect(hostFreeStack.host.dictionary.names).toStrictEqual<string[]>([]);
   expect(hostFreeStack.release()).toStrictEqual(false);
 });

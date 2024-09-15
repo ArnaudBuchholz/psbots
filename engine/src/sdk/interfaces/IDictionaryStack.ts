@@ -11,6 +11,7 @@ export interface IDictionaryStack extends IStack {
   readonly host: DictionaryValue;
   readonly system: DictionaryValue;
   readonly global: DictionaryValue;
+  readonly user: DictionaryValue;
   readonly top: DictionaryValue;
   begin: (dictionary: DictionaryValue) => void;
   end: () => void;
