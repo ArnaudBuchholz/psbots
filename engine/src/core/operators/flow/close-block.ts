@@ -19,5 +19,8 @@ buildFunctionOperator(
       }
     ]
   },
-  (state: IInternalState) => closeToMark(state, { isExecutable: true })
+  (state: IInternalState) => {
+    closeToMark(state, { isExecutable: true });
+    state.allowCall();
+  }
 );

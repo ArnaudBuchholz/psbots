@@ -1,5 +1,6 @@
 import { buildFunctionOperator } from '@core/operators/operators.js';
 import { openWithMark } from '@core/operators/open-close.js';
+import type { IInternalState } from '@sdk/interfaces';
 
 buildFunctionOperator(
   {
@@ -23,5 +24,8 @@ buildFunctionOperator(
       }
     ]
   },
-  openWithMark
+  (state: IInternalState) => {
+    openWithMark(state);
+    state.preventCall();
+  }
 );
