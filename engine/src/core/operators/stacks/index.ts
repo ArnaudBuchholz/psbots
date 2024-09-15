@@ -1,2 +1,2 @@
-import './dictstack/index.js';
-import './operands/index.js';
+import './dictionary/index.js';
+import './operand/index.js';
