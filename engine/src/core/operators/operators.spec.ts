@@ -39,10 +39,11 @@ Object.keys(registry)
       });
 
       definition.samples.forEach((sample, index) => {
-        const missingOperators = [...parse(sample.in)]
+        const missingOperators = [...parse(sample.in), ...parse(sample.out)]
           .filter((value) => value.type === 'string' && value.isExecutable)
           .map((value) => (value.type === 'string' ? value.string : ''))
-          .filter((name) => !Object.prototype.hasOwnProperty.call(registry, name));
+          .filter((name) => !Object.prototype.hasOwnProperty.call(registry, name))
+          .reduce((names, name) => (names.includes(name) ? names : [name, ...names]), <string[]>[]);
         const sampleId = `${operatorName}#${index}`;
         const description = sample.description ?? definition.description;
         if (missingOperators.length > 0) {
