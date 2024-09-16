@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "description": "A project about a PostScript based programming language for robots",
   "scripts": {
+    "update": "ncu --packageFile ./**/package.json -i --format group",
     "precheck": "ncu --packageFile ./**/package.json",
     "check": "eslint ./tools/*.mjs --fix && npm run check --workspaces",
     "test": "npm run test --workspaces",
@@ -30,7 +31,7 @@
     "eslint-plugin-import": "^2.30.0",
     "eslint-plugin-prettier": "^5.2.1",
     "npm-check-updates": "^17.1.1",
-    "typescript": "^5.5.4",
+    "typescript": "^5.6.2",
     "typescript-eslint": "^7.16.1"
   }
 }
