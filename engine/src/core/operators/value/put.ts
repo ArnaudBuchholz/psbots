@@ -125,7 +125,7 @@ buildFunctionOperator(
       {
         description: 'sets an indexed item of a dictionary',
         in: 'userdict "test" 123 put pop test',
-        out: 'userdict "test" 456 put 123'
+        out: 'userdict "test" 456 put pop 123'
       },
       {
         description: 'fails if the dictionary is not writable',
