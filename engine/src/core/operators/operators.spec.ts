@@ -42,7 +42,7 @@ Object.keys(registry)
         const missingOperators = [...parse(sample.in), ...parse(sample.out)]
           .filter((value) => value.type === 'string' && value.isExecutable)
           .map((value) => (value.type === 'string' ? value.string : ''))
-          .filter((name) => !Object.prototype.hasOwnProperty.call(registry, name))
+          .filter((name) => !Object.prototype.hasOwnProperty.call(registry, name) && !name.startsWith('test'))
           .reduce((names, name) => (names.includes(name) ? names : [name, ...names]), <string[]>[]);
         const sampleId = `${operatorName}#${index}`;
         const description = sample.description ?? definition.description;
