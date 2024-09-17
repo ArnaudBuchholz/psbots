@@ -1,6 +1,6 @@
 import { ValueType } from '@api/index.js';
+import { toIntegerValue } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
-import { toIntegerValue } from '@sdk/toValue';
 
 buildFunctionOperator(
   {
