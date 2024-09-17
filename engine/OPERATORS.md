@@ -17,7 +17,7 @@ Here the list of official POSTSCRIPT operators extracted from this [index](https
 |add|✅|
 |aload|✅|
 |anchorsearch|🚧|
-|and|🚧|
+|and|✅|
 |arc|❓|
 |arcn|❓|
 |arct|❓|
@@ -50,8 +50,8 @@ Here the list of official POSTSCRIPT operators extracted from this [index](https
 |copypage|📄|
 |cos|❓|
 |count|✅|
-|countdictstack|🚧|
-|countexecstack|🚧|
+|countdictstack|✅|
+|countexecstack|✅|
 |counttomark|✅|
 |cshow|📄|
 |currentblackgeneration|📄|

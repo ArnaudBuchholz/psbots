@@ -12,6 +12,7 @@ export type OperatorDefinition = {
   labels: (
     | 'array'
     | 'boolean'
+    | 'callstack'
     | 'comparison'
     | 'dictstack'
     | 'exception'
