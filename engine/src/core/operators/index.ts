@@ -1,5 +1,6 @@
 export * from './operators.js';
 import './array/index.js';
+import './boolean/index.js';
 import './exceptions/index.js';
 import './flow/index.js';
 import './integer/index.js';

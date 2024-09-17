@@ -13,7 +13,7 @@ Here the list of official POSTSCRIPT operators extracted from this [index](https
 
 | name | status |
 |---|---|
-|abs|🚧|
+|abs|✅|
 |add|✅|
 |aload|✅|
 |anchorsearch|🚧|
@@ -228,7 +228,7 @@ Here the list of official POSTSCRIPT operators extracted from this [index](https
 |notify|❓|
 |null|❓|
 |nulldevice|📄|
-|or|🚧|
+|or|✅|
 |packedarray|❓|
 |pathbbox|📄|
 |pathforall|📄|
@@ -391,7 +391,7 @@ Here the list of official POSTSCRIPT operators extracted from this [index](https
 |writestring|❓|
 |wtranslation|❓|
 |xcheck|✅|
-|xor|🚧|
+|xor|✅|
 |xshow|📄|
 |xyshow|📄|
 |yield|❓|

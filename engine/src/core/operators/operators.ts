@@ -11,6 +11,7 @@ export type OperatorDefinition = {
   postScriptDeviation?: string;
   labels: (
     | 'array'
+    | 'boolean'
     | 'comparison'
     | 'dictstack'
     | 'exception'
