@@ -1,4 +1,4 @@
-import type { Value } from '@api/index.js';
+import type { IOperatorValue, Value } from '@api/index.js';
 import { ValueType } from '@api/index.js';
 import { valuesOf } from '@sdk/index.js';
 import type { IInternalState } from '@sdk/interfaces/IInternalState.js';
@@ -7,6 +7,7 @@ import { OperatorType } from '@sdk/interfaces/IOperator.js';
 
 export type OperatorDefinition = {
   name: string;
+  aliases?: string[];
   description: string;
   postScriptDeviation?: string;
   labels: (
@@ -14,6 +15,7 @@ export type OperatorDefinition = {
     | 'boolean'
     | 'callstack'
     | 'comparison'
+    | 'dictionary'
     | 'dictstack'
     | 'exception'
     | 'flow'
@@ -74,15 +76,24 @@ export function buildFunctionOperator(
       implementation
     };
   }
+  const value = {
+    type: ValueType.operator,
+    isExecutable: true,
+    isReadOnly: true,
+    operator
+  } satisfies IOperatorValue;
   registry[definition.name] = {
     definition,
-    value: {
-      type: ValueType.operator,
-      isExecutable: true,
-      isReadOnly: true,
-      operator
-    }
+    value
   };
+  if (definition.aliases) {
+    definition.aliases.forEach(alias => {
+      registry[alias] = {
+        definition,
+        value
+      };
+    })
+  }
 }
 
 export function buildConstantOperator(definition: OperatorDefinition, value: Value): void {
