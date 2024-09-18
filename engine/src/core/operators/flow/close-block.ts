@@ -18,6 +18,11 @@ buildFunctionOperator(
         out: '3 "array"'
       },
       {
+        description: 'allocated an empty block',
+        in: '{} dup length exch type',
+        out: '0 "array"'
+      },
+      {
         description: 'fails if the corresponding block start does not exist',
         in: ' 1 2 3 }',
         out: '1 2 3 unmatchedmark'
@@ -25,7 +30,7 @@ buildFunctionOperator(
     ]
   },
   (state: IInternalState) => {
-    closeToMark(state, { isExecutable: true });
     state.allowCall();
+    closeToMark(state, { isExecutable: true });
   }
 );

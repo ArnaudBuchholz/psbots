@@ -18,6 +18,11 @@ buildFunctionOperator(
         out: '3 "array"'
       },
       {
+        description: 'allocates an empty array',
+        in: '[] dup length exch type',
+        out: '0 "array"'
+      },
+      {
         description: 'fails if the corresponding array start does not exist',
         in: ' 1 2 3 ]',
         out: '1 2 3 unmatchedmark'
