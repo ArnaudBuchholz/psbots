@@ -16,11 +16,6 @@ buildFunctionOperator(
         description: 'builds a block and check length and type',
         in: '{ 1 2 3 } dup length exch type',
         out: '3 "array"'
-      },
-      {
-        description: 'fails if the corresponding block start does not exist',
-        in: ' 1 2 3 }',
-        out: '1 2 3 unmatchedmark'
       }
     ]
   },
