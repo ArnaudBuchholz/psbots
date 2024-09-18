@@ -3,7 +3,7 @@ import type { Value } from '@api/values/Value';
 import type { IDebugSource } from '@api/interfaces/IDebugSource';
 
 export function* parse(source: string, pos: number = 0, filename?: string): Generator<Value> {
-  const matcher = /%[^\n]*|(?:"([^"]*)")|\s|((?:-|\+)?\d+)|(\[|\]|{|}|[^[\]{}}\s]+)/g;
+  const matcher = /%[^\n]*|(?:"([^"]*)")|\s|((?:-|\+)?\d+)|(\[|\]|{|}|<<|>>|«|»|[^[\]{}<>«»\s]+)/g;
   matcher.lastIndex = pos;
   let match = matcher.exec(source);
   while (match !== null) {

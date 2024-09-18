@@ -39,7 +39,7 @@ The engine **parser** recognizes only **three** type of tokens, usually separate
   * The following names are **explicitely** identified and extracted **separately** even without space between them :
     * `[` and `]` for arrays
     * `{` and `}` for blocks
-    * `<<` and `>>` for dictionaries
+    * `<<`, `«`, `>>` and `»` for dictionaries
 
 ### Complex objects
 
@@ -48,7 +48,7 @@ Special operators are designed to build complex objects :
 * Arrays : `[ 1 2 3 ]`
 
 * Blocks of code : `{ 1 2 add }`
-  *  While composing a block, **no** names (other than `{`, `}`, `<<` and `>>`) are executed.
+  *  While composing a block, **no** names (other than `{`, `}`, `<<`, `«`, `>>` and `»`) are executed.
 
 * Dictionaries : `<< test 123 method { 1 2 add } >>`
-  *  While composing a dictionary, no names (other than `{`, `}`, `<<` and `>>`) are executed.
+  *  While composing a dictionary, no names (other than `{`, `}`, `<<`, `«`, `>>` and `»`) are executed.
