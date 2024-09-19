@@ -63,33 +63,37 @@ buildFunctionOperator(
     }
     const { top: closeOp } = calls;
     const dictionary = new Dictionary(memoryTracker as MemoryTracker, USER_MEMORY_TYPE);
-    for (let operandIndex = 0; operandIndex < markPos; operandIndex += 2) {
-      const value = operands.top;
-      value.tracker?.addValueRef(value);
+    try {
+      for (let operandIndex = 0; operandIndex < markPos; operandIndex += 2) {
+        const value = operands.top;
+        value.tracker?.addValueRef(value);
+        operands.pop();
+        checkStringValue(operands.top);
+        const [name] = valuesOf<ValueType.string>(operands.top);
+        operands.pop();
+        dictionary.def(name, value);
+        value.tracker?.releaseValue(value);
+      }
+      const { top: mark } = operands;
       operands.pop();
-      checkStringValue(operands.top);
-      const [name] = valuesOf<ValueType.string>(operands.top);
-      operands.pop();
-      dictionary.def(name, value);
-      value.tracker?.releaseValue(value);
-    }
-    const { top: mark } = operands;
-    operands.pop();
-    const dictionaryValue = dictionary.toValue();
-    if (mark.debugSource && closeOp.debugSource) {
-      operands.push(
-        Object.assign(
-          {
-            debugSource: {
-              ...mark.debugSource,
-              length: closeOp.debugSource.pos - mark.debugSource.pos + closeOp.debugSource.length
-            }
-          },
-          dictionaryValue
-        )
-      );
-    } else {
-      operands.push(dictionaryValue);
+      const dictionaryValue = dictionary.toValue();
+      if (mark.debugSource && closeOp.debugSource) {
+        operands.push(
+          Object.assign(
+            {
+              debugSource: {
+                ...mark.debugSource,
+                length: closeOp.debugSource.pos - mark.debugSource.pos + closeOp.debugSource.length
+              }
+            },
+            dictionaryValue
+          )
+        );
+      } else {
+        operands.push(dictionaryValue);
+      }
+    } finally {
+      dictionary.release();
     }
   }
 );
