@@ -8,6 +8,15 @@ import { status } from './status.js';
 
 export * from './IReplIO.js';
 
+function showError(replIO: IReplIO, e: unknown) {
+  if (!(e instanceof BaseException)) {
+    replIO.output(`${red}(X) Unknown error`);
+  } else {
+    replIO.output(`${red}/!\\ ${e.message}`);
+    e.engineStack.forEach((line) => replIO.output(`${red}${line}`));
+  }
+}
+
 export async function repl(replIO: IReplIO, debug?: boolean): Promise<void> {
   if (debug === true) {
     replIO.output(`${green}DEBUG mode enabled`);
@@ -98,13 +107,15 @@ export async function repl(replIO: IReplIO, debug?: boolean): Promise<void> {
         })
       );
     } catch (e) {
-      if (!(e instanceof BaseException)) {
-        replIO.output(`${red}(X) Unknown error`);
-      } else {
-        replIO.output(`${red}/!\\ ${e.message}`);
-        e.engineStack.forEach((line) => replIO.output(`${red}${line}`));
-      }
+      showError(replIO, e);
     }
+  }
+
+  replIO.output(`${red}terminating...`);
+  try {
+    state.destroy();
+  } catch (e) {
+    showError(replIO, e);
   }
   replIO.output(`${red}terminated.`);
 }
