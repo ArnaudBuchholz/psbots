@@ -8,7 +8,7 @@ export function callCycle(
 ): void {
   if (calls.step === STEP_DONE) {
     calls.pop();
-  } else if (callEnabled || ['{', '}'].includes(value.string)) {
+  } else if (callEnabled || ['{', '}', '<<', '«', '>>', '»'].includes(value.string)) {
     calls.step = STEP_DONE;
     const entry = dictionaries.lookup(value.string);
     if (value.debugSource) {
