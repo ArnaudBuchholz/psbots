@@ -121,8 +121,22 @@ export class State implements IInternalState {
     this._operands.release();
     this._dictionaries.release();
     this._destroyed = true;
-    if (this._memoryTracker.used !== 0) {
-      throw new InternalException('Memory leak detected');
+    const { used } = this._memoryTracker;
+    if (used !== 0) {
+      const header = `Memory leaks detected (${used}b)`;
+      const allocations: string[] = [];
+      for (const { container, total, calls } of this._memoryTracker.enumContainersAllocations()) {
+        const constructorName = container.deref()!.constructor.name;
+        allocations.push(`${constructorName} ${total}b ${calls.length}`);
+        for(const { type, bytes, integers, pointers, values, stack } of calls) {
+          allocations.push('  ' + JSON.stringify({ type, bytes, integers, pointers, values } + '@' + stack));
+        }
+      }
+      if (allocations) {
+        throw new InternalException(`${header}\n${allocations.join('\n')}`);
+      } else {
+        throw new InternalException(header);
+      }
     }
   }
 
