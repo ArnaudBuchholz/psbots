@@ -43,6 +43,7 @@ export class MemoryTracker implements IValueTracker, IMemoryTracker {
     user: 0,
     string: 0
   };
+  private _containers: WeakRef<object>[] = [];
   private _byContainers: WeakMap<object, ContainerRegisters> | undefined;
 
   constructor(options: MemoryTrackerOptions = {}) {
@@ -120,12 +121,14 @@ export class MemoryTracker implements IValueTracker, IMemoryTracker {
       const { container, ...other } = details;
       let containerRegisters = this._byContainers.get(container);
       if (containerRegisters === undefined) {
+        const containerRef = new WeakRef(container);
         containerRegisters = {
-          container: new WeakRef(container),
+          container: containerRef,
           type,
           total: 0,
           calls: []
         };
+        this._containers.push(containerRef);
         this._byContainers.set(container, containerRegisters);
       }
       if (containerRegisters.type !== type) {
@@ -144,13 +147,19 @@ export class MemoryTracker implements IValueTracker, IMemoryTracker {
         }
         containerRegisters.calls.push({ ...other, stack });
       } else {
+        const index = this._containers.findIndex(containerRef => containerRef.deref() === container);
+        this._containers.splice(index, 1);
         this._byContainers.delete(container);
       }
     }
   }
 
-  get byContainers() {
-    return this._byContainers;
+  * enumContainersAllocations(): Generator<ContainerRegisters> {
+    if (this._byContainers !== undefined) {
+      for (const containerRef of this._containers) {
+        yield this._byContainers.get(containerRef.deref()!)!;
+      }
+    }
   }
 
   // region IMemoryTracker
