@@ -8,7 +8,8 @@
     "check": "eslint ./tools/*.mjs --fix && npm run check --workspaces",
     "test": "npm run test --workspaces",
     "build": "npm run build --workspaces",
-    "cli": "node ./cli/index.js"
+    "cli": "node ./cli/index.js",
+    "cli:debug": "node ./cli/index.js --debug"
   },
   "engines": {
     "node": ">=20.17.0"
