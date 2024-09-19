@@ -22,7 +22,7 @@ Here the list of official POSTSCRIPT operators extracted from this [index](https
 |arcn|❓|
 |arct|❓|
 |arcto|❓|
-|array|❌ *(use `[ ]`)*|
+|array|❌ *(use `[]`)*|
 |ashow|📄|
 |astore|🚧|
 |atan|❓|
@@ -109,7 +109,7 @@ Here the list of official POSTSCRIPT operators extracted from this [index](https
 |deletefile|❓|
 |detach|❓|
 |deviceinfo|📄|
-|dict|🚧|
+|dict|❌ *(use `<<>>`)*|
 |dictfull|❓ *(no size limit)*|
 |dictstack|❓|
 |dictstackoverflow|❓ *(no size limit)*|
