@@ -147,14 +147,14 @@ export class MemoryTracker implements IValueTracker, IMemoryTracker {
         }
         containerRegisters.calls.push({ ...other, stack });
       } else {
-        const index = this._containers.findIndex(containerRef => containerRef.deref() === container);
+        const index = this._containers.findIndex((containerRef) => containerRef.deref() === container);
         this._containers.splice(index, 1);
         this._byContainers.delete(container);
       }
     }
   }
 
-  * enumContainersAllocations(): Generator<ContainerRegisters> {
+  *enumContainersAllocations(): Generator<ContainerRegisters> {
     if (this._byContainers !== undefined) {
       for (const containerRef of this._containers) {
         yield this._byContainers.get(containerRef.deref()!)!;

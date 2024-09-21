@@ -52,13 +52,19 @@ describe('debug', () => {
 
   it('keeps track of allocation containers', () => {
     tracker.register({ container, type: SYSTEM_MEMORY_TYPE, bytes: 1 });
-    expect(tracker.byContainers?.has(container)).toStrictEqual(true);
+    const containerRegisters = [...tracker.enumContainersAllocations()];
+    expect(
+      containerRegisters.findIndex((containerRegister) => containerRegister.container.deref() === container)
+    ).not.toStrictEqual(-1);
   });
 
   it('removes fully freed references', () => {
     tracker.register({ container, type: SYSTEM_MEMORY_TYPE, bytes: 1 });
     tracker.register({ container, type: SYSTEM_MEMORY_TYPE, bytes: -1 });
-    expect(tracker.byContainers?.has(container)).toStrictEqual(false);
+    const containerRegisters = [...tracker.enumContainersAllocations()];
+    expect(
+      containerRegisters.findIndex((containerRegister) => containerRegister.container.deref() === container)
+    ).toStrictEqual(-1);
   });
 
   it('detects and prevents memory type change for a given container', () => {
