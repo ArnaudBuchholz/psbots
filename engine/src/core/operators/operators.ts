@@ -90,7 +90,13 @@ export function buildFunctionOperator(
     definition.aliases.forEach(alias => {
       registry[alias] = {
         definition,
-        value
+        value: {
+          ...value,
+          operator: {
+            ...value.operator,
+            name: alias
+          }
+        }
       };
     })
   }
