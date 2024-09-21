@@ -2,13 +2,14 @@ import { USER_MEMORY_TYPE, ValueType } from '@api/index.js';
 import { checkStringValue, findMarkPos, TypeCheckException, valuesOf } from '@sdk/index.js';
 import type { IInternalState } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
+import { pushOpenClosedValueWithDebugInfo } from '@core/operators/open-close.js';
 import { Dictionary } from '@core/objects/dictionaries/Dictionary.js';
 import type { MemoryTracker } from '@core/MemoryTracker.js';
 
 buildFunctionOperator(
   {
     name: '>>',
-    aliases: ['»'],
+    aliases: ['»', 'dicttomark'],
     description: 'finalizes an array',
     labels: ['dictionary', 'mark'],
     signature: {
@@ -18,13 +19,23 @@ buildFunctionOperator(
     samples: [
       {
         description: 'builds a dictionary check length and type',
-        in: '<< test 123 >> dup length exch type',
+        in: '<< "test" 123 >> dup length exch type',
         out: '1 "dictionary"'
       },
       {
         description: 'builds a dictionary check length and type',
-        in: '« test 123 » dup length exch type',
+        in: '« "test" 123 » dup length exch type',
         out: '1 "dictionary"'
+      },
+      {
+        description: 'builds a dictionary check length and type',
+        in: 'mark "test" 123 dicttomark dup length exch type',
+        out: '1 "dictionary"'
+      },
+      {
+        description: 'builds a dictionary with shared values, check length and type',
+        in: '<< "test" 123 "test_array" [ ] "test_dictionary" << >> >> dup length exch type',
+        out: '3 "dictionary"'
       },
       {
         description: 'allocates an empty dictionary',
@@ -49,7 +60,6 @@ buildFunctionOperator(
     ]
   },
   (state: IInternalState) => {
-    state.allowCall(); // TODO: won't work with dicttomark
     const { operands, memoryTracker, calls } = state;
     const markPos = findMarkPos(operands);
     if (markPos % 2 !== 0) {
@@ -76,22 +86,12 @@ buildFunctionOperator(
       }
       const { top: mark } = operands;
       operands.pop();
-      const dictionaryValue = dictionary.toValue();
-      if (mark.debugSource && closeOp.debugSource) {
-        operands.push(
-          Object.assign(
-            {
-              debugSource: {
-                ...mark.debugSource,
-                length: closeOp.debugSource.pos - mark.debugSource.pos + closeOp.debugSource.length
-              }
-            },
-            dictionaryValue
-          )
-        );
-      } else {
-        operands.push(dictionaryValue);
-      }
+      pushOpenClosedValueWithDebugInfo({
+        operands,
+        value: dictionary.toValue(),
+        mark,
+        closeOp
+      });
     } finally {
       dictionary.release();
     }

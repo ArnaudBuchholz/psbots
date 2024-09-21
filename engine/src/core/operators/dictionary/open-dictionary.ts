@@ -15,18 +15,15 @@ buildFunctionOperator(
     samples: [
       {
         description: 'builds a dictionary check length and type',
-        in: '<< test 123 >> dup length exch type',
+        in: '<< "test" 123 >> dup length exch type',
         out: '1 "dictionary"'
       },
       {
         description: 'builds a dictionary check length and type',
-        in: '« test 123 » dup length exch type',
+        in: '« "test" 123 » dup length exch type',
         out: '1 "dictionary"'
       }
     ]
   },
-  (state: IInternalState) => {
-    openWithMark(state);
-    state.preventCall();
-  }
+  (state: IInternalState) => openWithMark(state)
 );
