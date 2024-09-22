@@ -1,30 +1,14 @@
 import type { IState } from '@psbots/engine';
+import { formatBytes } from '@psbots/engine/sdk';
 import { blue, cyan, green, red, white, yellow } from './colors.js';
-
-const bytesScales: Array<{
-  factor: number;
-  unit: string;
-}> = [
-  { factor: 1024 * 1024, unit: 'MB' },
-  { factor: 1024, unit: 'kB' }
-];
-
-function scaleBytes(bytes: number): string {
-  for (const scale of bytesScales) {
-    if (bytes > scale.factor) {
-      return `${(bytes / scale.factor).toFixed(2)}${scale.unit}`;
-    }
-  }
-  return `${bytes}B`;
-}
 
 export function memory(state: IState): string {
   const { used, peak, total } = state.memoryTracker;
-  const usage = scaleBytes(used) + ' (top:' + scaleBytes(peak) + ')' + blue + '/';
+  const usage = formatBytes(used) + ' (top:' + formatBytes(peak) + ')' + blue + '/';
   if (total === Infinity) {
     return usage + '∞' + white;
   }
-  return usage + scaleBytes(total) + white;
+  return usage + formatBytes(total) + white;
 }
 
 interface StatusOptions {
