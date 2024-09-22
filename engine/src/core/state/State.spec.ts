@@ -125,8 +125,7 @@ describe('IInternalState', () => {
 describe('memory', () => {
   it('ensures memory is handled for strings', () => {
     expect(state.memoryTracker.byType[STRING_MEMORY_TYPE]).toStrictEqual(0);
-    const generator = state.process('"123"');
-    waitForGenerator(generator);
+    waitForGenerator(state.process('"123"'));
     const value = state.operands.ref[0];
     expect(value?.type).toStrictEqual(ValueType.string);
     expect(value?.tracker).not.toBeUndefined();
@@ -134,18 +133,18 @@ describe('memory', () => {
   });
 
   it('releases memory when the string is popped', () => {
-    const generator = state.process('"123"');
-    waitForGenerator(generator);
+    waitForGenerator(state.process('"123"'));
     state.operands.pop();
     expect(state.memoryTracker.byType[STRING_MEMORY_TYPE]).toStrictEqual(0);
   });
 
-  it('detects memory leaks', () => {
-    const generator = state.process('"123"');
-    waitForGenerator(generator);
-    // NEVER do that !
-    Object.assign(state.operands.ref[0]!, { tracker: undefined });
-    expect(() => state.destroy()).toThrowError();
+  it('detects memory leaks (short version)', () => {
+    const productionState = new State();
+    waitForGenerator(productionState.process('"123"'));
+    const value = productionState.operands.top;
+    value.tracker?.addValueRef(value); // will leak
+    expect(() => productionState.destroy()).toThrowError(`Memory leaks detected
+used: 4B`);
   });
 });
 
