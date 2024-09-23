@@ -14,6 +14,9 @@ function showError(replIO: IReplIO, e: unknown) {
   } else {
     replIO.output(`${red}/!\\ ${e.message}`);
     e.engineStack.forEach((line) => replIO.output(`${red}${line}`));
+    if (e instanceof InternalException && typeof e.reason === 'object') {
+      replIO.output(`${red}${JSON.stringify(e.reason, undefined, 2)}`);
+    }
   }
 }
 

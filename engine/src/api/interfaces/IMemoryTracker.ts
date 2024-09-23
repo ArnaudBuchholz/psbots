@@ -20,8 +20,7 @@ interface IMemoryTrackerUsage {
   readonly byType: IMemoryByType;
 }
 
-export interface IMemorySnapshot extends IMemoryTrackerUsage {
-}
+export interface IMemorySnapshot extends IMemoryTrackerUsage {}
 
 export interface IMemoryTracker extends IMemoryTrackerUsage {
   /** Generate a snapshot of memory state (available only if memory debugging is set) */
