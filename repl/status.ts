@@ -1,5 +1,5 @@
 import type { IState } from '@psbots/engine';
-import { formatBytes } from '@psbots/engine/sdk';
+import { formatBytes } from './formatBytes.js';
 import { blue, cyan, green, red, white, yellow } from './colors.js';
 
 export function memory(state: IState): string {
@@ -41,9 +41,9 @@ export function status(state: IState, options: StatusOptions): string {
   if (lastUsedMemory !== undefined) {
     const currentUsedMemory = state.memoryTracker.used;
     if (currentUsedMemory > lastUsedMemory) {
-      memoryVariation = ` ${red}+${scaleBytes(currentUsedMemory - lastUsedMemory)}`;
+      memoryVariation = ` ${red}+${formatBytes(currentUsedMemory - lastUsedMemory)}`;
     } else if (currentUsedMemory < lastUsedMemory) {
-      memoryVariation = ` ${green}-${scaleBytes(lastUsedMemory - currentUsedMemory)}`;
+      memoryVariation = ` ${green}-${formatBytes(lastUsedMemory - currentUsedMemory)}`;
     }
   }
   let flags = '';
