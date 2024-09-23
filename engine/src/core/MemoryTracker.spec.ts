@@ -2,7 +2,10 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { STRING_MEMORY_TYPE, MemoryTracker } from './MemoryTracker.js';
 import { toValue } from '@test/index.js';
 import { SYSTEM_MEMORY_TYPE, USER_MEMORY_TYPE } from '@api/index.js';
-import type { IMemoryByType } from '@api/index.js';
+import type { IMemoryByType, IMemorySnapshot } from '@api/index.js';
+
+const helloWorldString = 'hello world!';
+const helloWorldValue = toValue(helloWorldString);
 
 describe('initial state', () => {
   it('starts with used being 0', () => {
@@ -34,6 +37,45 @@ describe('tracking', () => {
       system: 50,
       string: 20,
       user: 10
+    });
+  });
+
+  it('provides a minimal snapshot', () => {
+    tracker.register({ container: {}, type: SYSTEM_MEMORY_TYPE, bytes: 50 });
+    tracker.register({ container: {}, type: USER_MEMORY_TYPE, bytes: 20 });
+    tracker.addValueRef(helloWorldValue);
+    expect(tracker.used).toStrictEqual(87);
+    expect(tracker.snapshot()).toMatchObject<IMemorySnapshot>({
+      used: 87,
+      peak: 87,
+      total: MAX_MEMORY,
+      byType: {
+        system: 50,
+        user: 20,
+        string: 17
+      },
+      string: [
+        {
+          references: 1,
+          string: helloWorldString,
+          size: 13,
+          total: 17
+        }
+      ],
+      system: [],
+      user: []
+      // system: [{
+      //   container: {
+      //     class: 'Object'
+      //   },
+      //   total: 50
+      // }],
+      // user: [{
+      //   container: {
+      //     class: 'Object'
+      //   },
+      //   total: 20
+      // }]
     });
   });
 
@@ -83,63 +125,43 @@ describe('debug', () => {
 });
 
 describe('string management', () => {
-  const STRING_CACHE_THRESHOLD = 10;
   let tracker: MemoryTracker;
 
   beforeEach(() => {
-    tracker = new MemoryTracker({
-      stringCacheThreshold: STRING_CACHE_THRESHOLD
-    });
+    tracker = new MemoryTracker();
   });
 
-  describe('small strings', () => {
-    it('counts string size', () => {
-      tracker.addValueRef(toValue('hello'));
-      expect(tracker.used).toStrictEqual(6);
-    });
-
-    it('sums up bytes', () => {
-      const string = toValue('hello');
-      tracker.addValueRef(string);
-      tracker.addValueRef(string);
-      expect(tracker.used).toStrictEqual(12);
-    });
-
-    it('frees bytes', () => {
-      const string = toValue('hello');
-      tracker.addValueRef(string);
-      expect(tracker.releaseValue(string)).toStrictEqual(false);
-      expect(tracker.used).toStrictEqual(0);
-      expect(tracker.peak).toStrictEqual(6);
-    });
+  it('counts string size', () => {
+    tracker.addValueRef(toValue('hello world!'));
+    expect(tracker.used).toStrictEqual(17);
   });
 
-  describe('larger strings (over the threshold)', () => {
-    it('counts string size', () => {
-      tracker.addValueRef(toValue('hello world!'));
-      expect(tracker.used).toStrictEqual(17);
-    });
+  it('does *not* sums up bytes', () => {
+    tracker.addValueRef(helloWorldValue);
+    tracker.addValueRef(helloWorldValue);
+    expect(tracker.used).toStrictEqual(17);
+  });
 
-    it('does *not* sums up bytes', () => {
-      const string = toValue('hello world!');
-      tracker.addValueRef(string);
-      tracker.addValueRef(string);
-      expect(tracker.used).toStrictEqual(17);
-    });
+  it('keeps the string valid until fully released', () => {
+    tracker.addValueRef(helloWorldValue);
+    tracker.addValueRef(helloWorldValue);
+    expect(tracker.releaseValue(helloWorldValue)).toStrictEqual(true);
+    expect(tracker.used).toStrictEqual(17);
+  });
 
-    it('keeps the string valid until fully released', () => {
-      const string = toValue('hello world!');
-      tracker.addValueRef(string);
-      tracker.addValueRef(string);
-      expect(tracker.releaseValue(string)).toStrictEqual(true);
-    });
+  it('frees bytes (one reference)', () => {
+    tracker.addValueRef(helloWorldValue);
+    expect(tracker.releaseValue(helloWorldValue)).toStrictEqual(false);
+    expect(tracker.used).toStrictEqual(0);
+    expect(tracker.peak).toStrictEqual(17);
+  });
 
-    it('frees bytes', () => {
-      const string = toValue('hello world!');
-      tracker.addValueRef(string);
-      expect(tracker.releaseValue(string)).toStrictEqual(false);
-      expect(tracker.used).toStrictEqual(0);
-      expect(tracker.peak).toStrictEqual(17);
-    });
+  it('frees bytes (two references)', () => {
+    tracker.addValueRef(helloWorldValue);
+    tracker.addValueRef(helloWorldValue);
+    expect(tracker.releaseValue(helloWorldValue)).toStrictEqual(true);
+    expect(tracker.releaseValue(helloWorldValue)).toStrictEqual(false);
+    expect(tracker.used).toStrictEqual(0);
+    expect(tracker.peak).toStrictEqual(17);
   });
 });

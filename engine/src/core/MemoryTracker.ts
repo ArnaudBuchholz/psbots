@@ -1,7 +1,12 @@
+import { SYSTEM_MEMORY_TYPE } from '@api/index.js';
 import type { Value, IValueTracker, IMemoryTracker, MemoryType, IMemoryByType, IMemorySnapshot } from '@api/index.js';
 import { InternalException, VmOverflowException, checkStringValue } from '@sdk/index.js';
 
 export const STRING_MEMORY_TYPE: MemoryType = 'string';
+
+const INTEGER_BYTES = 4;
+const POINTER_BYTES = 4;
+const VALUE_BYTES = 32;
 
 const stringSizer = (data: string): number => {
   const encoder = new TextEncoder();
@@ -12,8 +17,6 @@ const stringSizer = (data: string): number => {
 type MemoryTrackerOptions = {
   /** Maximum memory allowed */
   total?: number;
-  /** Minimum length for a string to be cached (default: 32) */
-  stringCacheThreshold?: number;
   /** Keep track of register */
   debug?: boolean;
 };
@@ -47,70 +50,52 @@ export class MemoryTracker implements IValueTracker, IMemoryTracker {
   private _byContainers: WeakMap<object, ContainerRegisters> | undefined;
 
   constructor(options: MemoryTrackerOptions = {}) {
-    const { total = Infinity, stringCacheThreshold = 32 } = options;
+    const { total = Infinity } = options;
     this._total = total;
-    this._stringCacheThreshold = stringCacheThreshold;
     if (options.debug) {
       this._byContainers = new WeakMap();
     }
   }
 
-  private readonly _stringCacheThreshold: number;
   private readonly _strings: string[] = [];
   private readonly _stringsRefCount: number[] = [];
 
   private _addStringRef(string: string): void {
     const size = stringSizer(string);
-    if (string.length >= this._stringCacheThreshold) {
-      const pos = this._strings.indexOf(string);
-      if (pos === -1) {
-        this._strings.push(string);
-        this._stringsRefCount.push(1);
-        this.register({
-          container: this,
-          type: STRING_MEMORY_TYPE,
-          bytes: size,
-          integers: 1
-        });
-        return;
-      }
-      ++this._stringsRefCount[pos]!; // _strings & _stringsRefCount are in sync
+    const pos = this._strings.indexOf(string);
+    if (pos === -1) {
+      this._strings.push(string);
+      this._stringsRefCount.push(1);
+      this.register({
+        container: this,
+        type: STRING_MEMORY_TYPE,
+        bytes: size,
+        integers: 1
+      });
       return;
     }
-    this.register({
-      container: this,
-      type: STRING_MEMORY_TYPE,
-      bytes: size
-    });
+    ++this._stringsRefCount[pos]!; // _strings & _stringsRefCount are in sync
   }
 
   private _releaseString(string: string): boolean {
     const size = stringSizer(string);
-    if (string.length >= this._stringCacheThreshold) {
-      const pos = this._strings.indexOf(string);
-      const refCount = --this._stringsRefCount[pos]!; // _strings & _stringsRefCount are in sync
-      if (refCount === 0) {
-        this.register({
-          container: this,
-          type: STRING_MEMORY_TYPE,
-          bytes: -size,
-          integers: -1
-        });
-        return false;
-      }
-      return true;
+    const pos = this._strings.indexOf(string);
+    const refCount = --this._stringsRefCount[pos]!; // _strings & _stringsRefCount are in sync
+    if (refCount === 0) {
+      this.register({
+        container: this,
+        type: STRING_MEMORY_TYPE,
+        bytes: -size,
+        integers: -1
+      });
+      return false;
     }
-    this.register({
-      container: this,
-      type: STRING_MEMORY_TYPE,
-      bytes: -size
-    });
-    return false;
+    return true;
   }
 
   register(details: MemoryRegistrationDetails) {
     const { type, bytes = 0, integers = 0, pointers = 0, values = 0 } = details;
-    const step = bytes + integers * 4 + pointers * 4 + values * 32;
+    const step = bytes + integers * INTEGER_BYTES + pointers * POINTER_BYTES + values * VALUE_BYTES;
     this._byType[type] += step;
     this._used += step;
     if (this._used > this._total) {
@@ -181,12 +166,44 @@ export class MemoryTracker implements IValueTracker, IMemoryTracker {
   }
 
   snapshot(): IMemorySnapshot {
-    return {
+    const result: IMemorySnapshot = {
       used: this._used,
       peak: this._peak,
       total: this._total,
-      byType: this._byType
+      byType: this._byType,
+      string: [],
+      system: [],
+      user: []
     };
+    if (this._strings.length) {
+      result.string = this._strings.map((string, index) => {
+        const size = stringSizer(string);
+        return {
+          references: this._stringsRefCount[index]!, // _strings & _stringsRefCount are in sync
+          string,
+          size,
+          total: size + INTEGER_BYTES
+        };
+      });
+    }
+    for (const { container, total, type } of this.enumContainersAllocations()) {
+      const info = {
+        container: {
+          class: '<unknown>'
+        },
+        total
+      };
+      const containerInstance = container.deref();
+      if (containerInstance !== undefined) {
+        info.container.class = containerInstance.constructor.name;
+      }
+      if (type === SYSTEM_MEMORY_TYPE) {
+        result.system.push(info);
+      } else {
+        result.user.push(info);
+      }
+    }
+    return result;
   }
 
   // endregion
