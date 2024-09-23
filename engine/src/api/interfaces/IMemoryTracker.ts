@@ -20,7 +20,27 @@ interface IMemoryTrackerUsage {
   readonly byType: IMemoryByType;
 }
 
-export interface IMemorySnapshot extends IMemoryTrackerUsage {}
+type ContainerMemorySnapshot = {
+  container: {
+    class: string;
+  };
+  total: number;
+}
+
+export interface IMemorySnapshot extends IMemoryTrackerUsage {
+  string: {
+    /** Number of active references for this string */
+    references: number;
+    string: string;
+    /** Size (in bytes) of the string buffer */
+    size: number;
+    total: number;
+  }[];
+  /** Available only if memory debugging is set */
+  system: ContainerMemorySnapshot[];
+  /** Available only if memory debugging is set */
+  user: ContainerMemorySnapshot[];
+}
 
 export interface IMemoryTracker extends IMemoryTrackerUsage {
   /** Generate a snapshot of memory state (available only if memory debugging is set) */
