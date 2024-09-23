@@ -138,13 +138,12 @@ describe('memory', () => {
     expect(state.memoryTracker.byType[STRING_MEMORY_TYPE]).toStrictEqual(0);
   });
 
-  it('detects memory leaks (short version)', () => {
+  it('detects memory leaks', () => {
     const productionState = new State();
     waitForGenerator(productionState.process('"123"'));
     const value = productionState.operands.top;
     value.tracker?.addValueRef(value); // will leak
-    expect(() => productionState.destroy()).toThrowError(`Memory leaks detected
-used: 4B`);
+    expect(() => productionState.destroy()).toThrowError('Memory leaks detected');
   });
 });
 

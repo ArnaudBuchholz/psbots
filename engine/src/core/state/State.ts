@@ -123,7 +123,7 @@ export class State implements IInternalState {
     this._destroyed = true;
     const { used } = this._memoryTracker;
     if (used !== 0) {
-      throw new InternalException(`Memory leaks detected\n${this._memoryTracker.report()}`);
+      throw new InternalException('Memory leaks detected');
     }
   }
 

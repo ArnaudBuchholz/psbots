@@ -1,5 +1,5 @@
-import type { Value, IValueTracker, IMemoryTracker, MemoryType, IMemoryByType } from '@api/index.js';
-import { InternalException, VmOverflowException, checkStringValue, formatBytes } from '@sdk/index.js';
+import type { Value, IValueTracker, IMemoryTracker, MemoryType, IMemoryByType, IMemorySnapshot } from '@api/index.js';
+import { InternalException, VmOverflowException, checkStringValue } from '@sdk/index.js';
 
 export const STRING_MEMORY_TYPE: MemoryType = 'string';
 
@@ -154,10 +154,6 @@ export class MemoryTracker implements IValueTracker, IMemoryTracker {
     }
   }
 
-  report(): string {
-    return `used: ${formatBytes(this.used)}`;
-  }
-
   *enumContainersAllocations(): Generator<ContainerRegisters> {
     if (this._byContainers !== undefined) {
       for (const containerRef of this._containers) {
@@ -182,6 +178,15 @@ export class MemoryTracker implements IValueTracker, IMemoryTracker {
 
   get byType(): IMemoryByType {
     return this._byType;
+  }
+
+  snapshot(): IMemorySnapshot {
+    return {
+      used: this._used,
+      peak: this._peak,
+      total: this._total,
+      byType: this._byType
+    };
   }
 
   // endregion
