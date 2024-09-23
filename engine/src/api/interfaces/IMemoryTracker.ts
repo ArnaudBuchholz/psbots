@@ -25,7 +25,7 @@ type ContainerMemorySnapshot = {
     class: string;
   };
   total: number;
-}
+};
 
 export interface IMemorySnapshot extends IMemoryTrackerUsage {
   string: {
