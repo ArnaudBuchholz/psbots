@@ -1,6 +1,14 @@
 import { SYSTEM_MEMORY_TYPE } from '@api/index.js';
-import type { Value, IValueTracker, IMemoryTracker, MemoryType, IMemoryByType, IMemorySnapshot } from '@api/index.js';
-import { InternalException, VmOverflowException, checkStringValue } from '@sdk/index.js';
+import type {
+  Value,
+  IValueTracker,
+  IMemoryTracker,
+  MemoryType,
+  IMemoryByType,
+  IMemorySnapshot,
+  ValueType
+} from '@api/index.js';
+import { InternalException, VmOverflowException } from '@sdk/index.js';
 
 export const STRING_MEMORY_TYPE: MemoryType = 'string';
 
@@ -206,13 +214,11 @@ export class MemoryTracker implements IValueTracker, IMemoryTracker {
   // region IValueTracker (for string)
 
   addValueRef(value: Value): void {
-    checkStringValue(value);
-    this._addStringRef(value.string);
+    this._addStringRef((value as Value<ValueType.string>).string);
   }
 
   releaseValue(value: Value): boolean {
-    checkStringValue(value);
-    return this._releaseString(value.string);
+    return this._releaseString((value as Value<ValueType.string>).string);
   }
 
   // endregion IValueTracker (for string)
