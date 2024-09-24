@@ -64,23 +64,61 @@ describe('tracking', () => {
       ],
       system: [],
       user: []
-      // system: [{
-      //   container: {
-      //     class: 'Object'
-      //   },
-      //   total: 50
-      // }],
-      // user: [{
-      //   container: {
-      //     class: 'Object'
-      //   },
-      //   total: 20
-      // }]
     });
   });
 
   it('fails when allocating too much memory', () => {
     expect(() => tracker.register({ container: {}, type: 'system', bytes: MAX_MEMORY + 1 })).toThrowError();
+  });
+
+  describe('debugging memory', () => {
+    beforeEach(() => {
+      tracker = new MemoryTracker({
+        total: MAX_MEMORY,
+        debug: true
+      });
+    });
+
+    it('provides a minimal snapshot', () => {
+      tracker.register({ container: {}, type: SYSTEM_MEMORY_TYPE, bytes: 50 });
+      tracker.register({ container: {}, type: USER_MEMORY_TYPE, bytes: 20 });
+      tracker.addValueRef(helloWorldValue);
+      expect(tracker.used).toStrictEqual(87);
+      expect(tracker.snapshot()).toMatchObject<IMemorySnapshot>({
+        used: 87,
+        peak: 87,
+        total: MAX_MEMORY,
+        byType: {
+          system: 50,
+          user: 20,
+          string: 17
+        },
+        string: [
+          {
+            references: 1,
+            string: helloWorldString,
+            size: 13,
+            total: 17
+          }
+        ],
+        system: [
+          {
+            container: {
+              class: 'Object'
+            },
+            total: 50
+          }
+        ],
+        user: [
+          {
+            container: {
+              class: 'Object'
+            },
+            total: 20
+          }
+        ]
+      });
+    });
   });
 });
 

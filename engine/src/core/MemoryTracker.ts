@@ -107,7 +107,7 @@ export class MemoryTracker implements IValueTracker, IMemoryTracker {
       throw new VmOverflowException();
     }
     this._peak = Math.max(this._used, this._peak);
-    if (this._byContainers) {
+    if (this._byContainers && details.container !== this /* exclude strings */) {
       const { container, ...other } = details;
       let containerRegisters = this._byContainers.get(container);
       if (containerRegisters === undefined) {
@@ -189,12 +189,13 @@ export class MemoryTracker implements IValueTracker, IMemoryTracker {
         total: size + INTEGER_BYTES
       });
     }
-    for (const { container, total, type } of this.enumContainersAllocations()) {
+    for (const { container, total, type, calls } of this.enumContainersAllocations()) {
       const info = {
         container: {
           class: '<unknown>'
         },
-        total
+        total,
+        calls
       };
       const containerInstance = container.deref();
       if (containerInstance !== undefined) {
