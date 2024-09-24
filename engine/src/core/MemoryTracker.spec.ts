@@ -3,6 +3,7 @@ import { STRING_MEMORY_TYPE, MemoryTracker } from './MemoryTracker.js';
 import { toValue } from '@test/index.js';
 import { SYSTEM_MEMORY_TYPE, USER_MEMORY_TYPE } from '@api/index.js';
 import type { IMemoryByType, IMemorySnapshot } from '@api/index.js';
+import { InternalException } from '@sdk/index.js';
 
 const helloWorldString = 'hello world!';
 const helloWorldValue = toValue(helloWorldString);
@@ -209,5 +210,11 @@ describe('string management', () => {
     tracker.addValueRef(helloWorldValue);
     tracker.releaseValue(helloWorldValue);
     expect(tracker.used).toStrictEqual(0);
+  });
+
+  it('fails if the reference count becomes incorrect', () => {
+    tracker.addValueRef(helloWorldValue);
+    tracker.releaseValue(helloWorldValue);
+    expect(() => tracker.releaseValue(helloWorldValue)).toThrowError(InternalException);
   });
 });

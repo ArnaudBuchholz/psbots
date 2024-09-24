@@ -82,8 +82,11 @@ export class MemoryTracker implements IValueTracker, IMemoryTracker {
   }
 
   private _releaseString(string: string): boolean {
-    const newRefCount = (this._strings.get(string) ?? 1) - 1;
-    if (newRefCount === 0) {
+    const refCount = this._strings.get(string);
+    if (refCount === undefined) {
+      throw new InternalException('Invalid string release', string);
+    }
+    if (refCount === 1) {
       const size = stringSizer(string);
       this.register({
         container: this,
@@ -94,7 +97,7 @@ export class MemoryTracker implements IValueTracker, IMemoryTracker {
       this._strings.delete(string);
       return false;
     }
-    this._strings.set(string, newRefCount);
+    this._strings.set(string, refCount - 1);
     return true;
   }
 
