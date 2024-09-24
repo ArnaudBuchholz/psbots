@@ -57,39 +57,36 @@ export class MemoryTracker implements IValueTracker, IMemoryTracker {
     }
   }
 
-  private readonly _strings: string[] = [];
-  private readonly _stringsRefCount: number[] = [];
+  private readonly _strings: Map<string, number> = new Map();
 
   private _addStringRef(string: string): void {
-    const size = stringSizer(string);
-    const pos = this._strings.indexOf(string);
-    if (pos === -1) {
-      this._strings.push(string);
-      this._stringsRefCount.push(1);
+    const refCount = this._strings.get(string) ?? 0;
+    if (refCount === 0) {
+      const size = stringSizer(string);
       this.register({
         container: this,
         type: STRING_MEMORY_TYPE,
         bytes: size,
         integers: 1
       });
-      return;
     }
-    ++this._stringsRefCount[pos]!; // _strings & _stringsRefCount are in sync
+    this._strings.set(string, refCount + 1);
   }
 
   private _releaseString(string: string): boolean {
-    const size = stringSizer(string);
-    const pos = this._strings.indexOf(string);
-    const refCount = --this._stringsRefCount[pos]!; // _strings & _stringsRefCount are in sync
-    if (refCount === 0) {
+    const newRefCount = (this._strings.get(string) ?? 1) - 1;
+    if (newRefCount === 0) {
+      const size = stringSizer(string);
       this.register({
         container: this,
         type: STRING_MEMORY_TYPE,
         bytes: -size,
         integers: -1
       });
+      this._strings.delete(string);
       return false;
     }
+    this._strings.set(string, newRefCount);
     return true;
   }
 
@@ -175,15 +172,13 @@ export class MemoryTracker implements IValueTracker, IMemoryTracker {
       system: [],
       user: []
     };
-    if (this._strings.length) {
-      result.string = this._strings.map((string, index) => {
-        const size = stringSizer(string);
-        return {
-          references: this._stringsRefCount[index]!, // _strings & _stringsRefCount are in sync
-          string,
-          size,
-          total: size + INTEGER_BYTES
-        };
+    for (const [string, references] of this._strings.entries()) {
+      const size = stringSizer(string);
+      result.string.push({
+        references,
+        string,
+        size,
+        total: size + INTEGER_BYTES
       });
     }
     for (const { container, total, type } of this.enumContainersAllocations()) {

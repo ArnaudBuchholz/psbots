@@ -164,4 +164,12 @@ describe('string management', () => {
     expect(tracker.used).toStrictEqual(0);
     expect(tracker.peak).toStrictEqual(17);
   });
+
+  it('resets string reference after release', () => {
+    tracker.addValueRef(helloWorldValue);
+    tracker.releaseValue(helloWorldValue);
+    tracker.addValueRef(helloWorldValue);
+    tracker.releaseValue(helloWorldValue);
+    expect(tracker.used).toStrictEqual(0);
+  });
 });
