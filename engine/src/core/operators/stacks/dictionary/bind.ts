@@ -1,7 +1,7 @@
-import type { IArray, Value } from '@api/index.js';
 import { ValueType } from '@api/index.js';
+import { ValueArray } from '@core/objects';
 import { buildFunctionOperator } from '@core/operators/operators.js';
-import { STEP_DONE, TypeCheckException, valuesOf } from '@sdk/index.js';
+import { checkArrayValue, STEP_DONE, TypeCheckException, valuesOf } from '@sdk/index.js';
 
 buildFunctionOperator(
   {
@@ -9,7 +9,7 @@ buildFunctionOperator(
     description: 'binds the array calls to their value by resolving the calls from the dictionary stack',
     labels: ['dictstack', 'flow'],
     signature: {
-      input: [ValueType.array],
+      input: [ValueType.array], // TODO: how to identify executable code blocks
       output: [ValueType.array]
     },
     samples: [
@@ -31,11 +31,12 @@ buildFunctionOperator(
   },
   ({ operands, calls, dictionaries }) => {
     let { step } = calls;
-    const [array] = valuesOf<ValueType.array>(operands.top as Value<ValueType.array>); // Validated by input specification
+    checkArrayValue(operands.top); // Already validated with signature but for TypeScript
+    const [array] = valuesOf<ValueType.array>(operands.top);
+    if (!operands.top.isExecutable || (!(array instanceof ValueArray))) {
+      throw new TypeCheckException();
+    }
     if (step === undefined || step === STEP_DONE) {
-      if (!operands.top.isExecutable) {
-        throw new TypeCheckException();
-      }
       step = 0;
     }
     if (step < array.length) {
@@ -43,7 +44,7 @@ buildFunctionOperator(
       if (value && value.isExecutable && value.type === ValueType.string) {
         const location = dictionaries.where(value.string);
         if (location !== null) {
-          (array as IArray).set(step, location.value);
+          array.set(step, location.value);
         }
       }
       ++step;
