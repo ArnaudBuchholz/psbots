@@ -1,7 +1,7 @@
 import { ValueType } from '@api/index.js';
-import { ValueArray } from '@core/objects';
-import { buildFunctionOperator } from '@core/operators/operators.js';
 import { checkArrayValue, STEP_DONE, TypeCheckException, valuesOf } from '@sdk/index.js';
+import { ValueArray } from '@core/objects/ValueArray.js';
+import { buildFunctionOperator } from '@core/operators/operators.js';
 
 buildFunctionOperator(
   {
@@ -33,7 +33,7 @@ buildFunctionOperator(
     let { step } = calls;
     checkArrayValue(operands.top); // Already validated with signature but for TypeScript
     const [array] = valuesOf<ValueType.array>(operands.top);
-    if (!operands.top.isExecutable || (!(array instanceof ValueArray))) {
+    if (!operands.top.isExecutable || !(array instanceof ValueArray)) {
       throw new TypeCheckException();
     }
     if (step === undefined || step === STEP_DONE) {
