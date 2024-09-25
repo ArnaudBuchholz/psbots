@@ -1,4 +1,4 @@
-import type { IOperatorValue, Value } from '@api/index.js';
+import type { IOperatorValue, OperatorValue, Value } from '@api/index.js';
 import { ValueType } from '@api/index.js';
 import { valuesOf } from '@sdk/index.js';
 import type { IInternalState } from '@sdk/interfaces/IInternalState.js';
@@ -27,7 +27,8 @@ export type OperatorDefinition = {
     | 'permission'
     | 'value'
   )[];
-
+  doNotRegister?: true;
+  callOnPop?: true;
   signature: {
     input: (ValueType | null)[];
     output: (ValueType | null)[];
@@ -51,7 +52,7 @@ export function buildFunctionOperator(
   definition: OperatorDefinition,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   implementation: (state: IInternalState, ...values: any[]) => void
-): void {
+): OperatorValue {
   let operator: IOperator;
   if (definition.signature.input.length > 0) {
     const { input: typeCheck } = definition.signature;
@@ -59,6 +60,7 @@ export function buildFunctionOperator(
       type: OperatorType.implementation,
       name: definition.name,
       typeCheck,
+      callOnPop: definition.callOnPop,
       implementation: function (state, parameters) {
         const values: unknown[] = parameters.map((value, index) => {
           if (typeCheck[index] === null) {
@@ -82,24 +84,27 @@ export function buildFunctionOperator(
     isReadOnly: true,
     operator
   } satisfies IOperatorValue;
-  registry[definition.name] = {
-    definition,
-    value
-  };
-  if (definition.aliases) {
-    definition.aliases.forEach((alias) => {
-      registry[alias] = {
-        definition,
-        value: {
-          ...value,
-          operator: {
-            ...value.operator,
-            name: alias
+  if (!definition.doNotRegister) {
+    registry[definition.name] = {
+      definition,
+      value
+    };
+    if (definition.aliases) {
+      definition.aliases.forEach((alias) => {
+        registry[alias] = {
+          definition,
+          value: {
+            ...value,
+            operator: {
+              ...value.operator,
+              name: alias
+            }
           }
-        }
-      };
-    });
+        };
+      });
+    }
   }
+  return value;
 }
 
 export function buildConstantOperator(definition: OperatorDefinition, value: Value): void {
