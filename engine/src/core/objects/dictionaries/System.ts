@@ -14,12 +14,12 @@ export class SystemDictionary implements IReadOnlyDictionary {
   // region IReadOnlyDictionary
 
   get names(): string[] {
-    return Object.keys(registry);
+    return Object.keys(registry).filter((name) => !registry[name]?.definition.internal);
   }
 
   lookup(name: string): Value | null {
     const operator = registry[name];
-    if (operator !== undefined) {
+    if (operator !== undefined && !operator.definition.internal) {
       return operator.value;
     }
     return null;

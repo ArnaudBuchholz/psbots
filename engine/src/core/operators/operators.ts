@@ -27,7 +27,7 @@ export type OperatorDefinition = {
     | 'permission'
     | 'value'
   )[];
-  doNotRegister?: true;
+  internal?: true;
   callOnPop?: true;
   signature: {
     input: (ValueType | null)[];
@@ -84,25 +84,23 @@ export function buildFunctionOperator(
     isReadOnly: true,
     operator
   } satisfies IOperatorValue;
-  if (!definition.doNotRegister) {
-    registry[definition.name] = {
-      definition,
-      value
-    };
-    if (definition.aliases) {
-      definition.aliases.forEach((alias) => {
-        registry[alias] = {
-          definition,
-          value: {
-            ...value,
-            operator: {
-              ...value.operator,
-              name: alias
-            }
+  registry[definition.name] = {
+    definition,
+    value
+  };
+  if (definition.aliases) {
+    definition.aliases.forEach((alias) => {
+      registry[alias] = {
+        definition,
+        value: {
+          ...value,
+          operator: {
+            ...value.operator,
+            name: alias
           }
-        };
-      });
-    }
+        }
+      };
+    });
   }
   return value;
 }
