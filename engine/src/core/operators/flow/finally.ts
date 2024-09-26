@@ -26,44 +26,8 @@ import type { BaseException } from '@sdk/index.js';
 import { TypeCheckException, STEP_DONE, STEP_POP } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 
-const onPop = buildFunctionOperator(
-  {
-    name: 'finally/onPop',
-    description: 'implements the finally operator when popped from the call stack',
-    labels: ['flow'],
-    internal: true,
-    callOnPop: true,
-    signature: {
-      input: [],
-      output: []
-    },
-    samples: []
-  },
-  (state) => {
-    const { calls } = state;
-    const { step } = calls;
-    if (step === STEP_POP) {
-      calls.step = 0;
-      if (state.exception) {
-        calls.def('exception', {
-          type: ValueType.dictionary,
-          isExecutable: false,
-          isReadOnly: true,
-          dictionary: state.exception
-        });
-        state.exception = undefined;
-      }
-      const finalBlock = calls.lookup('block');
-      calls.push(finalBlock!);
-    } else if (step === 0) {
-      const exception = calls.lookup('exception');
-      if (exception && exception.type === ValueType.dictionary && !state.exception) {
-        state.exception = exception.dictionary as BaseException;
-      }
-      calls.step = STEP_DONE;
-    }
-  }
-);
+const CALLS_BLOCK = 'block';
+const CALLS_EXCEPTION = 'exception';
 
 buildFunctionOperator(
   {
@@ -74,6 +38,7 @@ buildFunctionOperator(
       input: [ValueType.array, ValueType.array], // TODO: how to identify executable code blocks
       output: []
     },
+    callOnPop: true,
     samples: [
       {
         description: 'always executes the final block',
@@ -92,22 +57,47 @@ buildFunctionOperator(
       }
     ]
   },
-  ({ operands, calls }) => {
-    const [finalBlock, codeBlock] = operands.ref!;
-    if (finalBlock === undefined || !finalBlock.isExecutable || codeBlock === undefined || !codeBlock.isExecutable) {
-      throw new TypeCheckException();
-    }
-    // Since both operands are declared in the signature, their value remains valid during this
-    operands.pop();
-    operands.pop();
-    const finalOp = calls.top;
-    calls.pop();
-    if (finalOp.debugSource) {
-      calls.push(Object.assign({}, finalOp, { debugSource: finalOp.debugSource }));
+  (state) => {
+    const { operands, calls } = state;
+    const { step } = calls;
+    if (step === STEP_POP) {
+      calls.step = 0;
+      if (state.exception) {
+        calls.def(CALLS_EXCEPTION, {
+          type: ValueType.dictionary,
+          isExecutable: false,
+          isReadOnly: true,
+          dictionary: state.exception
+        });
+        state.exception = undefined;
+      }
+      const finalBlock = calls.lookup(CALLS_BLOCK);
+      if (finalBlock) {
+        finalBlock.tracker?.addValueRef(finalBlock);
+        try {
+          calls.def('CALLS_BLOCK', null);
+          calls.push(finalBlock);
+        } finally {
+          finalBlock.tracker?.release(finalBlock);
+        }
+      }
+  
+    } else if (step === 0) {
+      const exception = calls.lookup(CALLS_EXCEPTION);
+      if (exception && exception.type === ValueType.dictionary && !state.exception) {
+        state.exception = exception.dictionary as BaseException;
+      }
+      calls.step = STEP_DONE;
     } else {
-      calls.push(onPop);
+      const [finalBlock, codeBlock] = operands.ref!;
+      if (finalBlock === undefined || !finalBlock.isExecutable || codeBlock === undefined || !codeBlock.isExecutable) {
+        throw new TypeCheckException();
+      }
+      // Since both operands are declared in the signature, their value remains valid during this call
+      operands.pop();
+      operands.pop();
+      calls.def(CALLS_BLOCK, finalBlock);
+      calls.push(codeBlock);
     }
-    calls.def('block', finalBlock);
-    calls.push(codeBlock);
   }
 );
