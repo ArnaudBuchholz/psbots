@@ -75,6 +75,7 @@ export function buildFunctionOperator(
     operator = {
       type: OperatorType.implementation,
       name: definition.name,
+      callOnPop: definition.callOnPop,
       implementation
     };
   }

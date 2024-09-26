@@ -24,7 +24,7 @@ describe('executing in & out using debug', () => {
   Object.keys(registry)
     .sort()
     .forEach((operatorName) => {
-      describe(`operators/${operatorName})`, () => {
+      describe(`operators/${operatorName}`, () => {
         const definition: OperatorDefinition = registry[operatorName]?.definition ?? nullDefinition;
         let state: State;
         let expectedState: State;
@@ -86,8 +86,11 @@ describe('executing in only (performance)', () => {
   Object.keys(registry)
     .sort()
     .forEach((operatorName) => {
+      const definition: OperatorDefinition = registry[operatorName]?.definition ?? nullDefinition;
+      if (!definition.samples.length) {
+        return;
+      }
       describe(`operators/${operatorName}`, () => {
-        const definition: OperatorDefinition = registry[operatorName]?.definition ?? nullDefinition;
         let state: State;
 
         beforeEach(() => {
