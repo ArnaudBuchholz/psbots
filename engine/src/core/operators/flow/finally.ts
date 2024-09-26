@@ -22,9 +22,48 @@
  */
 
 import { ValueType } from '@api/index.js';
+import type { BaseException } from '@sdk/index.js';
+import { TypeCheckException, STEP_DONE, STEP_POP } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 
-
+const onPop = buildFunctionOperator(
+  {
+    name: 'finally/onPop',
+    description: 'implements the finally operator when popped from the call stack',
+    labels: ['flow'],
+    internal: true,
+    callOnPop: true,
+    signature: {
+      input: [],
+      output: []
+    },
+    samples: []
+  },
+  (state) => {
+    const { calls } = state;
+    const { step } = calls;
+    if (step === STEP_POP) {
+      calls.step = 0;
+      if (state.exception) {
+        calls.def('exception', {
+          type: ValueType.dictionary,
+          isExecutable: false,
+          isReadOnly: true,
+          dictionary: state.exception
+        });
+        state.exception = undefined;
+      }
+      const finalBlock = calls.lookup('block');
+      calls.push(finalBlock!);
+    } else if (step === 0) {
+      const exception = calls.lookup('exception');
+      if (exception && exception.type === ValueType.dictionary && !state.exception) {
+        state.exception = exception.dictionary as BaseException;
+      }
+      calls.step = STEP_DONE;
+    }
+  }
+);
 
 buildFunctionOperator(
   {
@@ -44,7 +83,7 @@ buildFunctionOperator(
       {
         description: 'does not prevent exception but enables post processing',
         in: '{ 1 undefined 2 } { 3 } finally',
-        out: '1 3'
+        out: '1 3 undefined'
       },
       {
         description: 'throws the last error',
@@ -54,15 +93,21 @@ buildFunctionOperator(
     ]
   },
   ({ operands, calls }) => {
-    const finalBlock = operands.top;
+    const [finalBlock, codeBlock] = operands.ref!;
+    if (finalBlock === undefined || !finalBlock.isExecutable || codeBlock === undefined || !codeBlock.isExecutable) {
+      throw new TypeCheckException();
+    }
+    // Since both operands are declared in the signature, their value remains valid during this
     operands.pop();
-    const codeBlock = operands.top;
     operands.pop();
-
+    const finalOp = calls.top;
     calls.pop();
-    calls.push('finally-finalized');
-    calls.def('')
-    const { step } = calls;
-
+    if (finalOp.debugSource) {
+      calls.push(Object.assign({}, finalOp, { debugSource: finalOp.debugSource }));
+    } else {
+      calls.push(onPop);
+    }
+    calls.def('block', finalBlock);
+    calls.push(codeBlock);
   }
 );
