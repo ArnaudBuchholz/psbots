@@ -330,7 +330,7 @@ describe('operator lifecycle', () => {
     expect(state.calls.length).toStrictEqual(0);
   });
 
-  it('may stack new calls during the pop (but requires step override for popping)', () => {
+  it.only('may stack new calls during the pop (but requires step override for popping)', () => {
     pushFunctionOperatorToCallStack({
       implementation({ calls, operands }: IInternalState /*, parameters: readonly Value[]*/) {
         if (calls.step === STEP_DONE) {
@@ -338,6 +338,7 @@ describe('operator lifecycle', () => {
         } else if (calls.step === STEP_POP) {
           operands.push(toValue(2));
           calls.step = 0;
+          calls.push(toValue(3));
         } else if (calls.step === 0) {
           calls.pop();
         }
@@ -348,8 +349,11 @@ describe('operator lifecycle', () => {
     expect(state.calls.length).toStrictEqual(1);
     expect(state.operands.ref).toStrictEqual([toValue(1)]);
     state.cycle();
-    expect(state.calls.length).toStrictEqual(1);
+    expect(state.calls.length).toStrictEqual(2);
     expect(state.operands.ref).toStrictEqual([toValue(2), toValue(1)]);
+    state.cycle();
+    expect(state.calls.length).toStrictEqual(1);
+    expect(state.operands.ref).toStrictEqual([toValue(3), toValue(2), toValue(1)]);
     state.cycle();
     expect(state.calls.length).toStrictEqual(0);
   });
