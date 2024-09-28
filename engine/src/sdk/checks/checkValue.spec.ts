@@ -1,8 +1,15 @@
 import { describe, it, expect } from 'vitest';
-import type { OperatorValue, StringValue, Value, IValuePermissions } from '@api/index.js';
+import type { OperatorValue, StringValue, Value, IValuePermissions, IntegerValue } from '@api/index.js';
 import { ValueType } from '@api/index.js';
 import { testCheckFunction, enumVariantsOf, values, toValue } from '@test/index.js';
-import { checkStringValue, checkOperatorValue, checkArrayValue, checkDictionaryValue } from '@sdk/checks/checkValue.js';
+import {
+  checkIntegerValue,
+  checkStringValue,
+  checkOperatorValue,
+  checkArrayValue,
+  checkDictionaryValue
+} from '@sdk/checks/checkValue.js';
+import { toIntegerValue, toStringValue } from '@sdk/toValue';
 
 function testFlags(
   check: (value: unknown, flags?: Partial<IValuePermissions>) => void,
@@ -35,20 +42,19 @@ function testFlags(
   });
 }
 
-describe('checkStringValue', () => {
-  const stringValue: StringValue = {
-    type: ValueType.string,
-    isReadOnly: true,
-    isExecutable: false,
-    string: 'test'
-  };
+describe('checkIntegerValue', () => {
+  const integerValue = toIntegerValue(123);
 
-  const executableStringValue: StringValue = {
-    type: ValueType.string,
-    isReadOnly: true,
-    isExecutable: true,
-    string: 'test'
-  };
+  testCheckFunction<IntegerValue>({
+    check: checkIntegerValue,
+    valid: [integerValue],
+    invalid: [...values.all, ...enumVariantsOf(integerValue)]
+  });
+});
+
+describe('checkStringValue', () => {
+  const stringValue = toStringValue('test');
+  const executableStringValue = toStringValue('test', { isExecutable: true });
 
   testCheckFunction<StringValue>({
     check: checkStringValue,

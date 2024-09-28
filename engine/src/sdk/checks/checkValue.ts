@@ -7,7 +7,8 @@ import type {
   DictionaryValue,
   IArray,
   IDictionary,
-  IValuePermissions
+  IValuePermissions,
+  IntegerValue
 } from '@api/index.js';
 import { ValueType } from '@api/index.js';
 import { InternalException } from '@sdk/exceptions/InternalException.js';
@@ -75,6 +76,12 @@ function check<T extends ValueType>(
   ) {
     throw new InternalException(baseErrorMessage);
   }
+}
+
+export function checkIntegerValue(value: unknown): asserts value is IntegerValue {
+  check(ValueType.integer, value, undefined, ({ integer }) => {
+    return typeof integer === 'number' && integer % 1 === 0;
+  });
 }
 
 export function checkStringValue(value: unknown, flags?: { isExecutable?: boolean }): asserts value is StringValue {
