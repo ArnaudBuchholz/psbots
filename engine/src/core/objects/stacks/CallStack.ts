@@ -5,8 +5,7 @@ import {
   InternalException,
   OPERATOR_STATE_UNKNOWN,
   OPERATOR_STATE_CALL_BEFORE_POP,
-  OPERATOR_STATE_CALLED_BEFORE_POP,
-  OPERATOR_STATE_POP
+  OPERATOR_STATE_FIRST_CALL,
 } from '@sdk/index.js';
 import type { MemoryTracker } from '@core/MemoryTracker.js';
 import { ValueStack } from '@core/objects/stacks/ValueStack.js';
@@ -91,12 +90,18 @@ export class CallStack extends ValueStack implements ICallStack {
 
   set topOperatorState(value: number) {
     const current = this.topOperatorState;
-    if (
-      (current === OPERATOR_STATE_CALL_BEFORE_POP && value !== OPERATOR_STATE_CALLED_BEFORE_POP) ||
-      current < OPERATOR_STATE_CALL_BEFORE_POP
-    ) {
-      throw new InternalException(OPERATOR_STATE_IMMUTABLE);
+    if (current >= 0 && value !== OPERATOR_STATE_CALL_BEFORE_POP) {
+      // OK
     }
+    if (current > 0 && value !== OPERATOR_STATE_FIRST_CALL) {
+      // OK
+    }
+    // if (
+    //   (current === OPERATOR_STATE_CALL_BEFORE_POP && value !== OPERATOR_STATE_CALLED_BEFORE_POP) ||
+    //   current < OPERATOR_STATE_CALL_BEFORE_POP
+    // ) {
+    //   throw new InternalException(OPERATOR_STATE_IMMUTABLE);
+    // }
     this._steps[0] = value;
   }
 

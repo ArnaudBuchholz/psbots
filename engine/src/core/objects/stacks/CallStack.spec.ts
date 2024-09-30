@@ -3,7 +3,9 @@ import {
   InternalException,
   OPERATOR_STATE_CALL_BEFORE_POP,
   OPERATOR_STATE_CALLED_BEFORE_POP,
+  OPERATOR_STATE_FIRST_CALL,
   OPERATOR_STATE_POP,
+  OPERATOR_STATE_REQUEST_CALL_BEFORE_POP,
   OPERATOR_STATE_UNKNOWN
 } from '@sdk/index.js';
 import { CallStack } from './CallStack.js';
@@ -79,35 +81,59 @@ describe('topOperatorState', () => {
     expect(callstack.topOperatorState).toStrictEqual(1);
   });
 
-  it('fails if the state is OPERATOR_STATE_CALL_BEFORE_POP and trying to set it to >= 0', () => {
-    callstack.push(toValue(123));
-    callstack.topOperatorState = OPERATOR_STATE_CALL_BEFORE_POP;
-    expect(() => {
-      callstack.topOperatorState = OPERATOR_STATE_POP;
-    }).toThrowError();
-  });
+  describe('state changes', () => {
+    const states = {
+      OPERATOR_STATE_UNKNOWN,
+      OPERATOR_STATE_FIRST_CALL,
+      OPERATOR_STATE_POP,
+      OPERATOR_STATE_REQUEST_CALL_BEFORE_POP,
+      OPERATOR_STATE_CALL_BEFORE_POP
+    }
 
-  it('fails if the state is OPERATOR_STATE_CALLED_BEFORE_POP and trying to set it to >= 0', () => {
-    callstack.push(toValue(123));
-    callstack.topOperatorState = OPERATOR_STATE_CALLED_BEFORE_POP;
-    expect(() => {
-      callstack.topOperatorState = OPERATOR_STATE_POP;
-    }).toThrowError();
-  });
+    function stringify(state: number): string {
+      const index = Object.values(states).indexOf(state);
+      if (index === -1) {
+        return state.toString();
+      }
+      return Object.keys(states)[index]!; // Index was validated
+    }
 
-  it('fails if the state is OPERATOR_STATE_CALLED_BEFORE_POP and trying to set it to OPERATOR_STATE_CALL_BEFORE_POP', () => {
-    callstack.push(toValue(123));
-    callstack.topOperatorState = OPERATOR_STATE_CALLED_BEFORE_POP;
-    expect(() => {
-      callstack.topOperatorState = OPERATOR_STATE_POP;
-    }).toThrowError();
-  });
+    function allows(from: number, to: number) {
+      it(`allows ${stringify(from)} ➝ ${stringify(to)}`, () => {
+        callstack.push(toValue(123));
+        callstack.topOperatorState = from;
+        expect(() => {
+          callstack.topOperatorState = to;
+        }).not.toThrowError();
+      });
+    }
 
-  it('does not fail if the state is OPERATOR_STATE_CALL_BEFORE_POP and trying to set it to OPERATOR_STATE_CALLED_BEFORE_POP', () => {
-    callstack.push(toValue(123));
-    callstack.topOperatorState = OPERATOR_STATE_CALL_BEFORE_POP;
-    expect(() => {
-      callstack.topOperatorState = OPERATOR_STATE_CALLED_BEFORE_POP;
-    }).not.toThrowError();
+    function forbids(from: number, to: number) {
+      it(`forbids ${stringify(from)} ➝ ${stringify(to)}`, () => {
+        callstack.push(toValue(123));
+        callstack.topOperatorState = from;
+        expect(() => {
+          callstack.topOperatorState = to;
+        }).toThrowError();
+      });
+    }
+
+    allows(OPERATOR_STATE_FIRST_CALL, OPERATOR_STATE_POP);
+    allows(OPERATOR_STATE_FIRST_CALL, 123);
+    allows(OPERATOR_STATE_FIRST_CALL, OPERATOR_STATE_REQUEST_CALL_BEFORE_POP);
+    allows(123, 456);
+    allows(123, OPERATOR_STATE_POP);
+    allows(123, OPERATOR_STATE_REQUEST_CALL_BEFORE_POP);
+    allows(OPERATOR_STATE_REQUEST_CALL_BEFORE_POP, OPERATOR_STATE_CALL_BEFORE_POP);
+
+    forbids(OPERATOR_STATE_FIRST_CALL, OPERATOR_STATE_CALL_BEFORE_POP);
+    forbids(123, OPERATOR_STATE_FIRST_CALL);
+    forbids(123, OPERATOR_STATE_CALL_BEFORE_POP);
+    forbids(OPERATOR_STATE_REQUEST_CALL_BEFORE_POP, OPERATOR_STATE_FIRST_CALL);
+    forbids(OPERATOR_STATE_REQUEST_CALL_BEFORE_POP, OPERATOR_STATE_POP);
+    forbids(OPERATOR_STATE_REQUEST_CALL_BEFORE_POP, 123);
+    forbids(OPERATOR_STATE_CALL_BEFORE_POP, OPERATOR_STATE_FIRST_CALL);
+    forbids(OPERATOR_STATE_CALL_BEFORE_POP, OPERATOR_STATE_POP);
+    forbids(OPERATOR_STATE_CALL_BEFORE_POP, 123);
   });
 });

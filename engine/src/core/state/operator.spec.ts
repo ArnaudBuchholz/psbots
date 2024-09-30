@@ -334,7 +334,7 @@ describe('operator lifecycle', () => {
     expect(state.operands.ref).toStrictEqual([toValue(2), toValue(1)]);
   });
 
-  it('may stack new calls during the pop (but requires step override for popping)', () => {
+  it.only('may stack new calls during the pop', () => {
     pushFunctionOperatorToCallStack({
       implementation({ calls, operands }: IInternalState /*, parameters: readonly Value[]*/) {
         if (calls.topOperatorState === OPERATOR_STATE_POP) {

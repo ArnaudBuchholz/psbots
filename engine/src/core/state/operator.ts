@@ -3,6 +3,7 @@ import {
   OPERATOR_STATE_CALL_BEFORE_POP,
   OPERATOR_STATE_CALLED_BEFORE_POP,
   OPERATOR_STATE_POP,
+  OPERATOR_STATE_UNKNOWN,
   OperatorType,
   StackUnderflowException,
   TypeCheckException
@@ -27,13 +28,17 @@ export function operatorCycle(state: IInternalState, value: Value<ValueType.oper
     return;
   }
   const { top } = calls;
+  const isFirstCall = calls.topOperatorState === OPERATOR_STATE_UNKNOWN;
+  if (isFirstCall) {
+    calls.topOperatorState = OPERATOR_STATE_POP;
+  }  
   const operator = value.operator as IOperator;
   if (operator.type === OperatorType.constant) {
     operands.push(operator.constant);
     calls.pop();
   } else {
     const parameters: Value[] = [];
-    if (operator.typeCheck !== undefined && calls.topOperatorState === OPERATOR_STATE_POP) {
+    if (operator.typeCheck !== undefined && isFirstCall) {
       let { length } = operator.typeCheck;
       if (operands.length < length) {
         throw new StackUnderflowException();
