@@ -28,7 +28,7 @@ Here the list of official POSTSCRIPT operators extracted from this [index](https
 |atan|❓|
 |awidthshow|📄|
 |begin|🚧|
-|bind|🚧|
+|bind|✅|
 |bitshift|🚧|
 |bytesavailable|❓|
 |cachestatus|📄|
