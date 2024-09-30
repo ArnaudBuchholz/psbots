@@ -90,7 +90,10 @@ export class CallStack extends ValueStack implements ICallStack {
 
   set topOperatorState(value: number) {
     const current = this.topOperatorState;
-    if ((current === OPERATOR_STATE_CALL_BEFORE_POP && value !== OPERATOR_STATE_CALLED_BEFORE_POP) || current < 0) {
+    if (
+      (current === OPERATOR_STATE_CALL_BEFORE_POP && value !== OPERATOR_STATE_CALLED_BEFORE_POP) ||
+      current < OPERATOR_STATE_CALL_BEFORE_POP
+    ) {
       throw new InternalException(OPERATOR_STATE_IMMUTABLE);
     }
     this._steps[0] = value;
