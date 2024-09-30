@@ -27,8 +27,6 @@ export type OperatorDefinition = {
     | 'permission'
     | 'value'
   )[];
-  internal?: true;
-  callOnPop?: true;
   signature: {
     input: (ValueType | null)[];
     output: (ValueType | null)[];
@@ -60,7 +58,6 @@ export function buildFunctionOperator(
       type: OperatorType.implementation,
       name: definition.name,
       typeCheck,
-      callOnPop: definition.callOnPop,
       implementation: function (state, parameters) {
         const values: unknown[] = parameters.map((value, index) => {
           if (typeCheck[index] === null) {
@@ -75,7 +72,6 @@ export function buildFunctionOperator(
     operator = {
       type: OperatorType.implementation,
       name: definition.name,
-      callOnPop: definition.callOnPop,
       implementation
     };
   }
