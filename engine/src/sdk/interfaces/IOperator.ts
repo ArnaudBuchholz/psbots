@@ -26,8 +26,6 @@ export interface IFunctionOperator extends IAbstractOperator {
    * parameters are given in the order indicated by typeCheck
    */
   readonly implementation: (state: IInternalState, parameters: readonly Value[]) => void;
-  /** Offers the possibility to handle operator popping (step === STEP_DONE) */
-  readonly callOnPop?: true;
 }
 
 /** Operator */
