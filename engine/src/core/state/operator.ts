@@ -1,13 +1,20 @@
 import type { Value, ValueType } from '@api/index.js';
-import { OperatorType, StackUnderflowException, STEP_DONE, STEP_POP, TypeCheckException } from '@sdk/index.js';
+import {
+  OPERATOR_STATE_CALL_BEFORE_POP,
+  OPERATOR_STATE_CALLED_BEFORE_POP,
+  OPERATOR_STATE_POP,
+  OperatorType,
+  StackUnderflowException,
+  TypeCheckException
+} from '@sdk/index.js';
 import type { IFunctionOperator, IInternalState, IOperator } from '@sdk/index.js';
 
 export function operatorPop(state: IInternalState, value: Value<ValueType.operator>): void {
   const { calls } = state;
   const operator = value.operator as IFunctionOperator;
-  if (operator.callOnPop) {
-    calls.step = STEP_POP;
+  if (calls.topOperatorState === OPERATOR_STATE_CALL_BEFORE_POP) {
     operator.implementation(state, []);
+    calls.topOperatorState = OPERATOR_STATE_CALLED_BEFORE_POP;
   } else {
     calls.pop();
   }
@@ -15,22 +22,18 @@ export function operatorPop(state: IInternalState, value: Value<ValueType.operat
 
 export function operatorCycle(state: IInternalState, value: Value<ValueType.operator>): void {
   const { operands, calls } = state;
-  if (calls.step === STEP_DONE || calls.step === STEP_POP) {
+  if (calls.topOperatorState <= 0) {
     operatorPop(state, value);
     return;
   }
   const { top } = calls;
-  const isFirstCall = calls.step === undefined;
-  if (isFirstCall) {
-    calls.step = STEP_DONE;
-  }
   const operator = value.operator as IOperator;
   if (operator.type === OperatorType.constant) {
     operands.push(operator.constant);
     calls.pop();
   } else {
     const parameters: Value[] = [];
-    if (operator.typeCheck !== undefined && isFirstCall) {
+    if (operator.typeCheck !== undefined && calls.topOperatorState === OPERATOR_STATE_POP) {
       let { length } = operator.typeCheck;
       if (operands.length < length) {
         throw new StackUnderflowException();
@@ -50,7 +53,7 @@ export function operatorCycle(state: IInternalState, value: Value<ValueType.oper
     } finally {
       parameters.forEach((value) => value.tracker?.releaseValue(value));
     }
-    if (calls.length && calls.top === top && operator.callOnPop !== true && calls.step === STEP_DONE) {
+    if (calls.length && calls.top === top && calls.topOperatorState === OPERATOR_STATE_POP) {
       calls.pop();
     }
   }

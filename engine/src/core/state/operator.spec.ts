@@ -4,10 +4,10 @@ import { ValueType } from '@api/index.js';
 import type { IFunctionOperator, IInternalState, IOperator } from '@sdk/index.js';
 import {
   InternalException,
+  OPERATOR_STATE_CALL_BEFORE_POP,
+  OPERATOR_STATE_POP,
   OperatorType,
   StackUnderflowException,
-  STEP_DONE,
-  STEP_POP,
   TypeCheckException
 } from '@sdk/index.js';
 import { toValue } from '@test/index.js';
@@ -196,12 +196,12 @@ describe('With parameters', () => {
     beforeEach(() => {
       pushFunctionOperatorToCallStack({
         implementation({ calls, operands }: IInternalState, parameters: readonly Value[]) {
-          if (calls.step === STEP_DONE) {
+          if (calls.topOperatorState === OPERATOR_STATE_POP) {
             operands.pop(); // remove 123 from the stack
-            calls.step = 0;
+            calls.topOperatorState = 1;
           } else {
             operands.push(toValue(parameters.length === 0));
-            calls.step = STEP_DONE;
+            calls.topOperatorState = OPERATOR_STATE_POP;
           }
         },
         typeCheck: [null]
@@ -221,7 +221,7 @@ describe('With parameters', () => {
 });
 
 describe('operator lifecycle', () => {
-  it('is immediately removed from call stack if step is not used and no subsequent call', () => {
+  it('is immediately removed from call stack if topOperatorState is not used and no subsequent call', () => {
     pushFunctionOperatorToCallStack({
       implementation({ operands }: IInternalState /*, parameters: readonly Value[]*/) {
         operands.push(toValue(true));
@@ -232,14 +232,14 @@ describe('operator lifecycle', () => {
     expect(state.operands.ref).toStrictEqual([toValue(true)]);
   });
 
-  it('is not removed from call stack when step is used until set to STEP_DONE', () => {
+  it('is not removed from call stack when topOperatorState is used until set to OPERATOR_STATE_POP', () => {
     pushFunctionOperatorToCallStack({
       implementation({ calls, operands }: IInternalState /*, parameters: readonly Value[]*/) {
-        if (calls.step === STEP_DONE) {
-          calls.step = 1;
+        if (calls.topOperatorState === OPERATOR_STATE_POP) {
+          calls.topOperatorState = 1;
           operands.push(toValue(1));
         } else {
-          calls.step = STEP_DONE;
+          calls.topOperatorState = OPERATOR_STATE_POP;
           operands.push(toValue(2));
         }
       }
@@ -274,11 +274,11 @@ describe('operator lifecycle', () => {
     expect(state.operands.ref).toStrictEqual([toValue(2), toValue(1)]);
   });
 
-  it('continues to execute the operator after subsequent call until step is STEP_DONE', () => {
+  it('continues to execute the operator after subsequent call until topOperatorState is OPERATOR_STATE_POP', () => {
     pushFunctionOperatorToCallStack({
       implementation({ calls, operands }: IInternalState /*, parameters: readonly Value[]*/) {
-        if (calls.step === STEP_DONE) {
-          calls.step = 1;
+        if (calls.topOperatorState === OPERATOR_STATE_POP) {
+          calls.topOperatorState = 1;
           operands.push(toValue(1));
           pushFunctionOperatorToCallStack({
             implementation({ operands }: IInternalState /*, parameters: readonly Value[]*/) {
@@ -286,7 +286,7 @@ describe('operator lifecycle', () => {
             }
           });
         } else {
-          calls.step = STEP_DONE;
+          calls.topOperatorState = OPERATOR_STATE_POP;
           operands.push(toValue(3));
           pushFunctionOperatorToCallStack({
             implementation({ operands }: IInternalState /*, parameters: readonly Value[]*/) {
@@ -312,40 +312,39 @@ describe('operator lifecycle', () => {
     expect(state.calls.length).toStrictEqual(0);
   });
 
-  it('is called with step = STEP_POP if callOnPop is set', () => {
+  it('handles OPERATOR_STATE_CALL_BEFORE_POP', () => {
     pushFunctionOperatorToCallStack({
       implementation({ calls, operands }: IInternalState /*, parameters: readonly Value[]*/) {
-        if (calls.step === STEP_DONE) {
+        if (calls.topOperatorState === OPERATOR_STATE_POP) {
+          calls.topOperatorState = OPERATOR_STATE_CALL_BEFORE_POP;
           operands.push(toValue(1));
-        } else if (calls.step === STEP_POP) {
-          calls.pop();
+        } else if (calls.topOperatorState === OPERATOR_STATE_CALL_BEFORE_POP) {
+          operands.push(toValue(2));
         }
-      },
-      callOnPop: true
+      }
     });
     state.cycle();
     expect(state.calls.length).toStrictEqual(1);
     expect(state.operands.ref).toStrictEqual([toValue(1)]);
     state.cycle();
+    expect(state.calls.length).toStrictEqual(1);
+    expect(state.operands.ref).toStrictEqual([toValue(2), toValue(1)]);
+    state.cycle();
     expect(state.calls.length).toStrictEqual(0);
+    expect(state.operands.ref).toStrictEqual([toValue(2), toValue(1)]);
   });
 
   it('may stack new calls during the pop (but requires step override for popping)', () => {
     pushFunctionOperatorToCallStack({
       implementation({ calls, operands }: IInternalState /*, parameters: readonly Value[]*/) {
-        if (calls.step === STEP_DONE) {
+        if (calls.topOperatorState === OPERATOR_STATE_POP) {
           operands.push(toValue(1));
-        } else if (calls.step === STEP_POP) {
-          if (calls.lookup('done') !== null) {
-            calls.pop();
-          } else {
-            operands.push(toValue(2));
-            calls.def('done', toValue(true));
-            calls.push(toValue(3));
-          }
+          calls.topOperatorState = OPERATOR_STATE_CALL_BEFORE_POP;
+        } else {
+          operands.push(toValue(2));
+          calls.push(toValue(3));
         }
-      },
-      callOnPop: true
+      }
     });
     state.cycle();
     expect(state.calls.length).toStrictEqual(1);
@@ -363,12 +362,13 @@ describe('operator lifecycle', () => {
   it('calls on pop if an exception occurred (even while looping), popping can be called several times', () => {
     pushFunctionOperatorToCallStack({
       implementation({ calls, operands }: IInternalState /*, parameters: readonly Value[]*/) {
-        if (calls.step === STEP_DONE) {
+        if (calls.topOperatorState === OPERATOR_STATE_POP) {
           operands.push(toValue(1));
-          calls.step = 1;
-        } else if (calls.step === 1) {
+          calls.topOperatorState = 1;
+        } else if (calls.topOperatorState === 1) {
           operands.pop();
           operands.push(toValue(2));
+          calls.topOperatorState = OPERATOR_STATE_CALL_BEFORE_POP;
           pushFunctionOperatorToCallStack({
             implementation(/* state: IInternalState, parameters: readonly Value[]*/) {
               operands.pop();
@@ -376,17 +376,12 @@ describe('operator lifecycle', () => {
               throw new InternalException('STOP');
             }
           });
-        } else if (calls.step === STEP_POP) {
-          if (calls.lookup('already_called') === null) {
-            operands.pop();
-            operands.push(toValue(4));
-            calls.def('already_called', toValue(true));
-          } else {
-            calls.pop();
-          }
+        } else if (calls.topOperatorState === OPERATOR_STATE_CALL_BEFORE_POP) {
+          operands.pop();
+          operands.push(toValue(4));
+          calls.def('already_called', toValue(true));
         }
-      },
-      callOnPop: true
+      }
     });
     state.cycle();
     expect(state.calls.length).toStrictEqual(1);
