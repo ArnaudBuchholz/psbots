@@ -3,7 +3,8 @@ import {
   InternalException,
   OPERATOR_STATE_CALL_BEFORE_POP,
   OPERATOR_STATE_CALLED_BEFORE_POP,
-  OPERATOR_STATE_POP
+  OPERATOR_STATE_POP,
+  OPERATOR_STATE_UNKNOWN
 } from '@sdk/index.js';
 import { CallStack } from './CallStack.js';
 import { MemoryTracker } from '@core/index.js';
@@ -59,7 +60,7 @@ describe('topOperatorState', () => {
 
   it('allocates a state on the current item', () => {
     callstack.push(toValue(123));
-    expect(callstack.topOperatorState).toStrictEqual(OPERATOR_STATE_POP);
+    expect(callstack.topOperatorState).toStrictEqual(OPERATOR_STATE_UNKNOWN);
   });
 
   it('associates a state on the current item', () => {

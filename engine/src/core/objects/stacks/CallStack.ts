@@ -3,6 +3,7 @@ import { SYSTEM_MEMORY_TYPE } from '@api/index.js';
 import type { ICallStack } from '@sdk/index.js';
 import {
   InternalException,
+  OPERATOR_STATE_UNKNOWN,
   OPERATOR_STATE_CALL_BEFORE_POP,
   OPERATOR_STATE_CALLED_BEFORE_POP,
   OPERATOR_STATE_POP
@@ -31,7 +32,7 @@ export class CallStack extends ValueStack implements ICallStack {
       integers: 1
     });
     this._dictionaries.unshift(undefined);
-    this._steps.unshift(OPERATOR_STATE_POP);
+    this._steps.unshift(OPERATOR_STATE_UNKNOWN);
   }
 
   protected override popImpl(): Value | null {
