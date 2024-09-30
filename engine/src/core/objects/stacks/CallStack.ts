@@ -1,12 +1,18 @@
 import type { Value } from '@api/index.js';
 import { SYSTEM_MEMORY_TYPE } from '@api/index.js';
 import type { ICallStack } from '@sdk/index.js';
-import { InternalException } from '@sdk/index.js';
+import {
+  InternalException,
+  OPERATOR_STATE_CALL_BEFORE_POP,
+  OPERATOR_STATE_CALLED_BEFORE_POP,
+  OPERATOR_STATE_POP
+} from '@sdk/index.js';
 import type { MemoryTracker } from '@core/MemoryTracker.js';
 import { ValueStack } from '@core/objects/stacks/ValueStack.js';
 import { Dictionary } from '@core/objects/dictionaries/Dictionary.js';
 
 const EMPTY_STACK = 'Empty stack';
+const OPERATOR_STATE_IMMUTABLE = 'Operator state cannot be changed';
 
 export class CallStack extends ValueStack implements ICallStack {
   constructor(tracker: MemoryTracker) {
@@ -25,7 +31,7 @@ export class CallStack extends ValueStack implements ICallStack {
       integers: 1
     });
     this._dictionaries.unshift(undefined);
-    this._steps.unshift(undefined);
+    this._steps.unshift(OPERATOR_STATE_POP);
   }
 
   protected override popImpl(): Value | null {
@@ -75,13 +81,17 @@ export class CallStack extends ValueStack implements ICallStack {
 
   // region ICallStack
 
-  get step(): number | undefined {
-    return this._steps[0];
-  }
-
-  set step(value: number) {
+  get topOperatorState(): number {
     if (this.length === 0) {
       throw new InternalException(EMPTY_STACK);
+    }
+    return this._steps[0]!; // Because length has been tested
+  }
+
+  set topOperatorState(value: number) {
+    const current = this.topOperatorState;
+    if ((current === OPERATOR_STATE_CALL_BEFORE_POP && value !== OPERATOR_STATE_CALLED_BEFORE_POP) || current < 0) {
+      throw new InternalException(OPERATOR_STATE_IMMUTABLE);
     }
     this._steps[0] = value;
   }

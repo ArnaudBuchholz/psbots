@@ -1,5 +1,10 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { InternalException } from '@sdk/index.js';
+import {
+  InternalException,
+  OPERATOR_STATE_CALL_BEFORE_POP,
+  OPERATOR_STATE_CALLED_BEFORE_POP,
+  OPERATOR_STATE_POP
+} from '@sdk/index.js';
 import { CallStack } from './CallStack.js';
 import { MemoryTracker } from '@core/index.js';
 import { toValue } from '@test/index.js';
@@ -45,31 +50,63 @@ describe('IDictionary', () => {
   });
 });
 
-describe('step', () => {
+describe('topOperatorState', () => {
   it('fails if no item exists in the stack', () => {
     expect(() => {
-      callstack.step = 0;
+      callstack.topOperatorState = 0;
     }).toThrowError(InternalException);
   });
 
-  it('allocates a step on the current item', () => {
+  it('allocates a state on the current item', () => {
     callstack.push(toValue(123));
-    expect(callstack.step).toStrictEqual(undefined);
+    expect(callstack.topOperatorState).toStrictEqual(OPERATOR_STATE_POP);
   });
 
-  it('associates a step on the current item', () => {
+  it('associates a state on the current item', () => {
     callstack.push(toValue(123));
-    callstack.step = 1;
-    expect(callstack.step).toStrictEqual(1);
+    callstack.topOperatorState = 1;
+    expect(callstack.topOperatorState).toStrictEqual(1);
   });
 
-  it('removes the step when popping the item', () => {
+  it('removes the state when popping the item', () => {
     callstack.push(toValue(123));
-    callstack.step = 1;
+    callstack.topOperatorState = 1;
     callstack.push(toValue(456));
-    callstack.step = 2;
-    expect(callstack.step).toStrictEqual(2);
+    callstack.topOperatorState = 2;
+    expect(callstack.topOperatorState).toStrictEqual(2);
     callstack.pop();
-    expect(callstack.step).toStrictEqual(1);
+    expect(callstack.topOperatorState).toStrictEqual(1);
+  });
+
+  it('fails if the state is OPERATOR_STATE_CALL_BEFORE_POP and trying to set it to >= 0', () => {
+    callstack.push(toValue(123));
+    callstack.topOperatorState = OPERATOR_STATE_CALL_BEFORE_POP;
+    expect(() => {
+      callstack.topOperatorState = OPERATOR_STATE_POP;
+    }).toThrowError();
+  });
+
+  it('fails if the state is OPERATOR_STATE_CALLED_BEFORE_POP and trying to set it to >= 0', () => {
+    callstack.push(toValue(123));
+    callstack.topOperatorState = OPERATOR_STATE_CALLED_BEFORE_POP;
+    expect(() => {
+      callstack.topOperatorState = OPERATOR_STATE_POP;
+    }).toThrowError();
+  });
+
+  it('fails if the state is OPERATOR_STATE_CALLED_BEFORE_POP and trying to set it to OPERATOR_STATE_CALL_BEFORE_POP', () => {
+    callstack.push(toValue(123));
+    callstack.topOperatorState = OPERATOR_STATE_CALLED_BEFORE_POP;
+    expect(() => {
+      callstack.topOperatorState = OPERATOR_STATE_POP;
+    }).toThrowError();
+  });
+
+  it('does not fail if the state is OPERATOR_STATE_CALL_BEFORE_POP and trying to set it to OPERATOR_STATE_CALLED_BEFORE_POP', () => {
+    callstack.push(toValue(123));
+    callstack.topOperatorState = OPERATOR_STATE_CALL_BEFORE_POP;
+    expect(() => {
+      callstack.topOperatorState = OPERATOR_STATE_CALLED_BEFORE_POP;
+    }).not.toThrowError();
   });
 });
