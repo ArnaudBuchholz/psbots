@@ -4,15 +4,17 @@ import type { ICallStack } from '@sdk/index.js';
 import {
   InternalException,
   OPERATOR_STATE_UNKNOWN,
-  OPERATOR_STATE_CALL_BEFORE_POP,
   OPERATOR_STATE_FIRST_CALL,
+  OPERATOR_STATE_POP,
+  OPERATOR_STATE_REQUEST_CALL_BEFORE_POP,
+  OPERATOR_STATE_CALL_BEFORE_POP
 } from '@sdk/index.js';
 import type { MemoryTracker } from '@core/MemoryTracker.js';
 import { ValueStack } from '@core/objects/stacks/ValueStack.js';
 import { Dictionary } from '@core/objects/dictionaries/Dictionary.js';
 
 const EMPTY_STACK = 'Empty stack';
-const OPERATOR_STATE_IMMUTABLE = 'Operator state cannot be changed';
+const OPERATOR_STATE_INVALID = 'Invalid operator state change';
 
 export class CallStack extends ValueStack implements ICallStack {
   constructor(tracker: MemoryTracker) {
@@ -90,18 +92,17 @@ export class CallStack extends ValueStack implements ICallStack {
 
   set topOperatorState(value: number) {
     const current = this.topOperatorState;
-    if (current >= 0 && value !== OPERATOR_STATE_CALL_BEFORE_POP) {
-      // OK
+    if (
+      (current === OPERATOR_STATE_UNKNOWN && value !== OPERATOR_STATE_FIRST_CALL) ||
+      (current !== OPERATOR_STATE_UNKNOWN && value === OPERATOR_STATE_FIRST_CALL) ||
+      value === OPERATOR_STATE_UNKNOWN ||
+      (current !== OPERATOR_STATE_REQUEST_CALL_BEFORE_POP && value === OPERATOR_STATE_CALL_BEFORE_POP) ||
+      (current === OPERATOR_STATE_REQUEST_CALL_BEFORE_POP && value !== OPERATOR_STATE_CALL_BEFORE_POP) ||
+      current === OPERATOR_STATE_POP ||
+      current === OPERATOR_STATE_CALL_BEFORE_POP
+    ) {
+      throw new InternalException(OPERATOR_STATE_INVALID);
     }
-    if (current > 0 && value !== OPERATOR_STATE_FIRST_CALL) {
-      // OK
-    }
-    // if (
-    //   (current === OPERATOR_STATE_CALL_BEFORE_POP && value !== OPERATOR_STATE_CALLED_BEFORE_POP) ||
-    //   current < OPERATOR_STATE_CALL_BEFORE_POP
-    // ) {
-    //   throw new InternalException(OPERATOR_STATE_IMMUTABLE);
-    // }
     this._steps[0] = value;
   }
 
