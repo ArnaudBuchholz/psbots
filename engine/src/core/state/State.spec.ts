@@ -4,7 +4,7 @@ import type { Value } from '@api/index.js';
 import { State } from './State.js';
 import { waitForGenerator, toValue } from '@test/index.js';
 import type { IFunctionOperator } from '@sdk/index.js';
-import { BusyException, InternalException, InvalidAccessException, OperatorType } from '@sdk/index.js';
+import { BusyException, InternalException, InvalidAccessException, OPERATOR_STATE_FIRST_CALL, OperatorType } from '@sdk/index.js';
 import { STRING_MEMORY_TYPE } from '@core/MemoryTracker.js';
 
 let state: State;
@@ -194,7 +194,8 @@ describe('exception handling', () => {
       isReadOnly: true,
       string: 'step2'
     });
-    state.calls.step = 5;
+    state.calls.topOperatorState = OPERATOR_STATE_FIRST_CALL;
+    state.calls.topOperatorState = 5;
     state.calls.push({
       type: ValueType.operator,
       isExecutable: true,

@@ -1,7 +1,7 @@
 import type { Value, IReadOnlyDictionary, ValueStream } from '@api/index.js';
 import { parse, SYSTEM_MEMORY_TYPE, ValueType } from '@api/index.js';
 import type { IInternalState, IOperator } from '@sdk/index.js';
-import { BaseException, BusyException, InternalException, OperatorType, STEP_DONE, toString } from '@sdk/index.js';
+import { BaseException, BusyException, InternalException, OPERATOR_STATE_POP, OperatorType, toString } from '@sdk/index.js';
 import { MemoryTracker } from '@core/MemoryTracker.js';
 import { DictionaryStack } from '@core/objects/stacks/DictionaryStack.js';
 import { ValueStack } from '@core/objects/stacks/ValueStack.js';
@@ -100,9 +100,9 @@ export class State implements IInternalState {
         implementation: ({ calls }) => {
           const { value, done } = generator.next();
           if (done) {
-            calls.step = STEP_DONE;
+            calls.topOperatorState = OPERATOR_STATE_POP;
           } else {
-            calls.step = 0;
+            calls.topOperatorState = 1;
             if (value.type === ValueType.string) {
               Object.assign(value, { tracker: this.memoryTracker });
             }
@@ -189,7 +189,7 @@ export class State implements IInternalState {
           throw new InternalException('Unsupported executable value', top);
         }
       } catch (e) {
-        calls.step = STEP_DONE;
+        calls.topOperatorState = OPERATOR_STATE_POP;
         let exception: BaseException;
         if (!(e instanceof BaseException)) {
           exception = new InternalException('An unexpected error occurred', e);
