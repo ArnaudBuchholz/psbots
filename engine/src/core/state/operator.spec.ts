@@ -4,8 +4,10 @@ import { ValueType } from '@api/index.js';
 import type { IFunctionOperator, IInternalState, IOperator } from '@sdk/index.js';
 import {
   InternalException,
-  OPERATOR_STATE_CALL_BEFORE_POP,
+  OPERATOR_STATE_FIRST_CALL,
   OPERATOR_STATE_POP,
+  OPERATOR_STATE_REQUEST_CALL_BEFORE_POP,
+  OPERATOR_STATE_CALL_BEFORE_POP,
   OperatorType,
   StackUnderflowException,
   TypeCheckException
@@ -196,7 +198,7 @@ describe('With parameters', () => {
     beforeEach(() => {
       pushFunctionOperatorToCallStack({
         implementation({ calls, operands }: IInternalState, parameters: readonly Value[]) {
-          if (calls.topOperatorState === OPERATOR_STATE_POP) {
+          if (calls.topOperatorState === OPERATOR_STATE_FIRST_CALL) {
             operands.pop(); // remove 123 from the stack
             calls.topOperatorState = 1;
           } else {
@@ -235,7 +237,7 @@ describe('operator lifecycle', () => {
   it('is not removed from call stack when topOperatorState is used until set to OPERATOR_STATE_POP', () => {
     pushFunctionOperatorToCallStack({
       implementation({ calls, operands }: IInternalState /*, parameters: readonly Value[]*/) {
-        if (calls.topOperatorState === OPERATOR_STATE_POP) {
+        if (calls.topOperatorState === OPERATOR_STATE_FIRST_CALL) {
           calls.topOperatorState = 1;
           operands.push(toValue(1));
         } else {
@@ -277,7 +279,7 @@ describe('operator lifecycle', () => {
   it('continues to execute the operator after subsequent call until topOperatorState is OPERATOR_STATE_POP', () => {
     pushFunctionOperatorToCallStack({
       implementation({ calls, operands }: IInternalState /*, parameters: readonly Value[]*/) {
-        if (calls.topOperatorState === OPERATOR_STATE_POP) {
+        if (calls.topOperatorState === OPERATOR_STATE_FIRST_CALL) {
           calls.topOperatorState = 1;
           operands.push(toValue(1));
           pushFunctionOperatorToCallStack({
@@ -315,8 +317,8 @@ describe('operator lifecycle', () => {
   it('handles OPERATOR_STATE_CALL_BEFORE_POP', () => {
     pushFunctionOperatorToCallStack({
       implementation({ calls, operands }: IInternalState /*, parameters: readonly Value[]*/) {
-        if (calls.topOperatorState === OPERATOR_STATE_POP) {
-          calls.topOperatorState = OPERATOR_STATE_CALL_BEFORE_POP;
+        if (calls.topOperatorState === OPERATOR_STATE_FIRST_CALL) {
+          calls.topOperatorState = OPERATOR_STATE_REQUEST_CALL_BEFORE_POP;
           operands.push(toValue(1));
         } else if (calls.topOperatorState === OPERATOR_STATE_CALL_BEFORE_POP) {
           operands.push(toValue(2));
@@ -334,12 +336,12 @@ describe('operator lifecycle', () => {
     expect(state.operands.ref).toStrictEqual([toValue(2), toValue(1)]);
   });
 
-  it.only('may stack new calls during the pop', () => {
+  it('may stack new calls during the pop', () => {
     pushFunctionOperatorToCallStack({
       implementation({ calls, operands }: IInternalState /*, parameters: readonly Value[]*/) {
-        if (calls.topOperatorState === OPERATOR_STATE_POP) {
+        if (calls.topOperatorState === OPERATOR_STATE_FIRST_CALL) {
           operands.push(toValue(1));
-          calls.topOperatorState = OPERATOR_STATE_CALL_BEFORE_POP;
+          calls.topOperatorState = OPERATOR_STATE_REQUEST_CALL_BEFORE_POP;
         } else {
           operands.push(toValue(2));
           calls.push(toValue(3));
@@ -362,13 +364,13 @@ describe('operator lifecycle', () => {
   it('calls on pop if an exception occurred (even while looping), popping can be called several times', () => {
     pushFunctionOperatorToCallStack({
       implementation({ calls, operands }: IInternalState /*, parameters: readonly Value[]*/) {
-        if (calls.topOperatorState === OPERATOR_STATE_POP) {
+        if (calls.topOperatorState === OPERATOR_STATE_FIRST_CALL) {
           operands.push(toValue(1));
           calls.topOperatorState = 1;
         } else if (calls.topOperatorState === 1) {
           operands.pop();
           operands.push(toValue(2));
-          calls.topOperatorState = OPERATOR_STATE_CALL_BEFORE_POP;
+          calls.topOperatorState = OPERATOR_STATE_REQUEST_CALL_BEFORE_POP;
           pushFunctionOperatorToCallStack({
             implementation(/* state: IInternalState, parameters: readonly Value[]*/) {
               operands.pop();
