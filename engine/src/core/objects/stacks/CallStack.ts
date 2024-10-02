@@ -98,8 +98,11 @@ export class CallStack extends ValueStack implements ICallStack {
       value === OPERATOR_STATE_UNKNOWN ||
       (current !== OPERATOR_STATE_REQUEST_CALL_BEFORE_POP && value === OPERATOR_STATE_CALL_BEFORE_POP) ||
       (current === OPERATOR_STATE_REQUEST_CALL_BEFORE_POP && value !== OPERATOR_STATE_CALL_BEFORE_POP) ||
+      (current < OPERATOR_STATE_FIRST_CALL && value === OPERATOR_STATE_REQUEST_CALL_BEFORE_POP) ||
       current === OPERATOR_STATE_POP ||
-      current === OPERATOR_STATE_CALL_BEFORE_POP
+      (current === OPERATOR_STATE_CALL_BEFORE_POP && value >= OPERATOR_STATE_CALL_BEFORE_POP) ||
+      (current > 0 && value < OPERATOR_STATE_CALL_BEFORE_POP) ||
+      (current < OPERATOR_STATE_CALL_BEFORE_POP && value > OPERATOR_STATE_FIRST_CALL)
     ) {
       throw new InternalException(OPERATOR_STATE_INVALID);
     }
