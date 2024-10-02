@@ -30,6 +30,7 @@ buildFunctionOperator(
     ]
   },
   ({ operands, calls, dictionaries }) => {
+    // TODO: recursivity
     let { step } = calls;
     checkArrayValue(operands.top); // Already validated with signature but for TypeScript
     const [array] = valuesOf<ValueType.array>(operands.top);

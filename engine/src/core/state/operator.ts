@@ -32,7 +32,7 @@ export function operatorCycle(state: IInternalState, value: Value<ValueType.oper
   const isFirstCall = calls.topOperatorState === OPERATOR_STATE_UNKNOWN;
   if (isFirstCall) {
     calls.topOperatorState = OPERATOR_STATE_FIRST_CALL;
-  }  
+  }
   const operator = value.operator as IOperator;
   if (operator.type === OperatorType.constant) {
     operands.push(operator.constant);
@@ -59,7 +59,11 @@ export function operatorCycle(state: IInternalState, value: Value<ValueType.oper
     } finally {
       parameters.forEach((value) => value.tracker?.releaseValue(value));
     }
-    if (calls.length && calls.top === top && (calls.topOperatorState === OPERATOR_STATE_POP || calls.topOperatorState === OPERATOR_STATE_FIRST_CALL)) {
+    if (
+      calls.length &&
+      calls.top === top &&
+      (calls.topOperatorState === OPERATOR_STATE_POP || calls.topOperatorState === OPERATOR_STATE_FIRST_CALL)
+    ) {
       calls.pop();
     }
   }
