@@ -322,6 +322,7 @@ describe('operator lifecycle', () => {
           operands.push(toValue(1));
         } else if (calls.topOperatorState === OPERATOR_STATE_CALL_BEFORE_POP) {
           operands.push(toValue(2));
+          calls.topOperatorState = OPERATOR_STATE_POP;
         }
       }
     });
@@ -344,6 +345,7 @@ describe('operator lifecycle', () => {
           calls.topOperatorState = OPERATOR_STATE_REQUEST_CALL_BEFORE_POP;
         } else {
           operands.push(toValue(2));
+          calls.topOperatorState = OPERATOR_STATE_POP;
           calls.push(toValue(3));
         }
       }
@@ -381,7 +383,11 @@ describe('operator lifecycle', () => {
         } else if (calls.topOperatorState === OPERATOR_STATE_CALL_BEFORE_POP) {
           operands.pop();
           operands.push(toValue(4));
-          calls.def('already_called', toValue(true));
+          calls.topOperatorState = -100;
+        } else if (calls.topOperatorState === -100) {
+          operands.pop();
+          operands.push(toValue(5));
+          calls.topOperatorState = OPERATOR_STATE_POP;
         }
       }
     });
@@ -400,6 +406,9 @@ describe('operator lifecycle', () => {
     state.cycle();
     expect(state.calls.length).toStrictEqual(1);
     expect(state.operands.ref).toStrictEqual([toValue(4)]);
+    state.cycle();
+    expect(state.calls.length).toStrictEqual(1);
+    expect(state.operands.ref).toStrictEqual([toValue(5)]);
     state.cycle();
     expect(state.calls.length).toStrictEqual(0);
   });
