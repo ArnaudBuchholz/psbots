@@ -36,7 +36,7 @@ const bind = buildFunctionOperator(
     ]
   },
   ({ operands, calls, dictionaries }) => {
-    let { topOperatorState: step } = calls;
+    const { topOperatorState: step } = calls;
     checkArrayValue(operands.top); // Already validated with signature but for TypeScript
     const [array] = valuesOf<ValueType.array>(operands.top);
     if (!operands.top.isExecutable || !(array instanceof ValueArray)) {
