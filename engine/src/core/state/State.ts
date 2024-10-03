@@ -1,7 +1,16 @@
 import type { Value, IReadOnlyDictionary, ValueStream } from '@api/index.js';
 import { parse, SYSTEM_MEMORY_TYPE, ValueType } from '@api/index.js';
 import type { IInternalState, IOperator } from '@sdk/index.js';
-import { BaseException, BusyException, InternalException, OPERATOR_STATE_POP, OperatorType, toString } from '@sdk/index.js';
+import {
+  BaseException,
+  BusyException,
+  InternalException,
+  OPERATOR_STATE_FIRST_CALL,
+  OPERATOR_STATE_POP,
+  OPERATOR_STATE_UNKNOWN,
+  OperatorType,
+  toString
+} from '@sdk/index.js';
 import { MemoryTracker } from '@core/MemoryTracker.js';
 import { DictionaryStack } from '@core/objects/stacks/DictionaryStack.js';
 import { ValueStack } from '@core/objects/stacks/ValueStack.js';
@@ -186,6 +195,7 @@ export class State implements IInternalState {
         } else if (top.type === ValueType.array) {
           blockCycle(this, top);
         } else {
+          calls.topOperatorState = OPERATOR_STATE_FIRST_CALL;
           throw new InternalException('Unsupported executable value', top);
         }
       } catch (e) {

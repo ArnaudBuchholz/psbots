@@ -6,7 +6,6 @@ import {
   InternalException,
   OPERATOR_STATE_FIRST_CALL,
   OPERATOR_STATE_POP,
-  OPERATOR_STATE_REQUEST_CALL_BEFORE_POP,
   OPERATOR_STATE_CALL_BEFORE_POP,
   OperatorType,
   StackUnderflowException,
@@ -318,9 +317,9 @@ describe('operator lifecycle', () => {
     pushFunctionOperatorToCallStack({
       implementation({ calls, operands }: IInternalState /*, parameters: readonly Value[]*/) {
         if (calls.topOperatorState === OPERATOR_STATE_FIRST_CALL) {
-          calls.topOperatorState = OPERATOR_STATE_REQUEST_CALL_BEFORE_POP;
+          calls.topOperatorState = OPERATOR_STATE_CALL_BEFORE_POP;
           operands.push(toValue(1));
-        } else if (calls.topOperatorState === OPERATOR_STATE_CALL_BEFORE_POP) {
+        } else {
           operands.push(toValue(2));
           calls.topOperatorState = OPERATOR_STATE_POP;
         }
@@ -342,7 +341,7 @@ describe('operator lifecycle', () => {
       implementation({ calls, operands }: IInternalState /*, parameters: readonly Value[]*/) {
         if (calls.topOperatorState === OPERATOR_STATE_FIRST_CALL) {
           operands.push(toValue(1));
-          calls.topOperatorState = OPERATOR_STATE_REQUEST_CALL_BEFORE_POP;
+          calls.topOperatorState = OPERATOR_STATE_CALL_BEFORE_POP;
         } else {
           operands.push(toValue(2));
           calls.topOperatorState = OPERATOR_STATE_POP;
@@ -372,7 +371,7 @@ describe('operator lifecycle', () => {
         } else if (calls.topOperatorState === 1) {
           operands.pop();
           operands.push(toValue(2));
-          calls.topOperatorState = OPERATOR_STATE_REQUEST_CALL_BEFORE_POP;
+          calls.topOperatorState = OPERATOR_STATE_CALL_BEFORE_POP;
           pushFunctionOperatorToCallStack({
             implementation(/* state: IInternalState, parameters: readonly Value[]*/) {
               operands.pop();
@@ -384,7 +383,7 @@ describe('operator lifecycle', () => {
           operands.pop();
           operands.push(toValue(4));
           calls.topOperatorState = -100;
-        } else if (calls.topOperatorState === -100) {
+        } else {
           operands.pop();
           operands.push(toValue(5));
           calls.topOperatorState = OPERATOR_STATE_POP;

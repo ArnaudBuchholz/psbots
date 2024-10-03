@@ -3,8 +3,6 @@ import {
   OPERATOR_STATE_UNKNOWN,
   OPERATOR_STATE_FIRST_CALL,
   OPERATOR_STATE_POP,
-  OPERATOR_STATE_REQUEST_CALL_BEFORE_POP,
-  OPERATOR_STATE_CALL_BEFORE_POP,
   OperatorType,
   StackUnderflowException,
   TypeCheckException
@@ -14,11 +12,10 @@ import type { IFunctionOperator, IInternalState, IOperator } from '@sdk/index.js
 export function operatorPop(state: IInternalState, value: Value<ValueType.operator>): void {
   const { calls } = state;
   const operator = value.operator as IFunctionOperator;
-  if (calls.topOperatorState === OPERATOR_STATE_REQUEST_CALL_BEFORE_POP) {
-    calls.topOperatorState = OPERATOR_STATE_CALL_BEFORE_POP;
-    operator.implementation(state, []);
-  } else {
+  if (calls.topOperatorState === OPERATOR_STATE_FIRST_CALL || calls.topOperatorState === OPERATOR_STATE_POP) {
     calls.pop();
+  } else {
+    operator.implementation(state, []);
   }
 }
 

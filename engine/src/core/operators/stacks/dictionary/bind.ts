@@ -1,5 +1,5 @@
 import { ValueType } from '@api/index.js';
-import { checkArrayValue, STEP_DONE, TypeCheckException, valuesOf } from '@sdk/index.js';
+import { checkArrayValue, OPERATOR_STATE_POP, TypeCheckException, valuesOf } from '@sdk/index.js';
 import { ValueArray } from '@core/objects/ValueArray.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 
@@ -31,14 +31,11 @@ buildFunctionOperator(
   },
   ({ operands, calls, dictionaries }) => {
     // TODO: recursivity
-    let { step } = calls;
+    let { topOperatorState: step } = calls;
     checkArrayValue(operands.top); // Already validated with signature but for TypeScript
     const [array] = valuesOf<ValueType.array>(operands.top);
     if (!operands.top.isExecutable || !(array instanceof ValueArray)) {
       throw new TypeCheckException();
-    }
-    if (step === undefined || step === STEP_DONE) {
-      step = 0;
     }
     if (step < array.length) {
       const value = array.at(step);
@@ -51,9 +48,9 @@ buildFunctionOperator(
       ++step;
     }
     if (step === array.length) {
-      calls.step = STEP_DONE;
+      calls.topOperatorState = OPERATOR_STATE_POP;
     } else {
-      calls.step = step;
+      calls.topOperatorState = step;
     }
   }
 );
