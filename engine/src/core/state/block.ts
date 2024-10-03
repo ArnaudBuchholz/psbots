@@ -1,10 +1,11 @@
 import type { Value, ValueType } from '@api/index.js';
-import { OPERATOR_STATE_FIRST_CALL, OPERATOR_STATE_UNKNOWN, type IInternalState } from '@sdk/index.js';
+import { OPERATOR_STATE_FIRST_CALL, OPERATOR_STATE_UNKNOWN } from '@sdk/index.js';
+import type { IInternalState } from '@sdk/index.js';
 
 export function blockCycle({ calls }: IInternalState, { array }: Value<ValueType.array>): void {
   const { length } = array;
   if (calls.topOperatorState === OPERATOR_STATE_UNKNOWN) {
-    calls.topOperatorState = OPERATOR_STATE_FIRST_CALL; 
+    calls.topOperatorState = OPERATOR_STATE_FIRST_CALL;
   }
   if (calls.topOperatorState === length) {
     calls.pop();
