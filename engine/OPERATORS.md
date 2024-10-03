@@ -264,7 +264,7 @@ Here the list of official POSTSCRIPT operators extracted from this [index](https
 |revision|❓|
 |rlineto|📄|
 |rmoveto|📄|
-|roll|🚧|
+|roll|✅|
 |rootfont|📄|
 |rotate|📄|
 |round|🚧|
