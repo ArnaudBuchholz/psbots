@@ -41,20 +41,24 @@ export function operatorCycle(state: IInternalState, value: Value<ValueType.oper
       if (operands.length < length) {
         throw new StackUnderflowException();
       }
-      operator.typeCheck.forEach((valueType) => {
+      for (const valueType of operator.typeCheck) {
         const value = operands.ref[--length]!; // length has been verified before
         if (valueType === null || valueType === value.type) {
           parameters.push(value);
         } else {
           throw new TypeCheckException();
         }
-      });
-      parameters.forEach((value) => value.tracker?.addValueRef(value));
+      }
+      for (const value of parameters) {
+        value.tracker?.addValueRef(value);
+      }
     }
     try {
       operator.implementation(state, parameters);
     } finally {
-      parameters.forEach((value) => value.tracker?.releaseValue(value));
+      for (const value of parameters) {
+        value.tracker?.releaseValue(value);
+      }
     }
     if (
       calls.length &&
