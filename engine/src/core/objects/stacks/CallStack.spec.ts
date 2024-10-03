@@ -3,9 +3,8 @@ import {
   InternalException,
   OPERATOR_STATE_UNKNOWN,
   OPERATOR_STATE_FIRST_CALL,
-  OPERATOR_STATE_POP,
-  OPERATOR_STATE_REQUEST_CALL_BEFORE_POP,
-  OPERATOR_STATE_CALL_BEFORE_POP
+  OPERATOR_STATE_CALL_BEFORE_POP,
+  OPERATOR_STATE_POP
 } from '@sdk/index.js';
 import { CallStack } from './CallStack.js';
 import { MemoryTracker } from '@core/index.js';
@@ -86,20 +85,26 @@ describe('topOperatorState', () => {
     const states = {
       OPERATOR_STATE_UNKNOWN,
       OPERATOR_STATE_FIRST_CALL,
+      OPERATOR_STATE_CALL_BEFORE_POP,
       OPERATOR_STATE_POP,
-      OPERATOR_STATE_REQUEST_CALL_BEFORE_POP,
-      OPERATOR_STATE_CALL_BEFORE_POP
+      '> 0': 123,
+      '> 0 (2)': 456,
+      '< -1': -123,
+      '< -1 (2)': -456
     };
 
     function stringify(state: number): string {
       const index = Object.values(states).indexOf(state);
       if (index === -1) {
-        return state.toString();
+        throw new Error('Unexpected state');
       }
-      return Object.keys(states)[index]!; // Index was validated
+      return Object.keys(states)[index]!;
     }
 
+    const allowed: { from: number; to: number }[] = [];
+
     function allows(from: number, to: number) {
+      allowed.push({ from, to });
       it(`allows ${stringify(from)} ➝ ${stringify(to)}`, () => {
         callstack.push(toValue(123));
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -109,6 +114,25 @@ describe('topOperatorState', () => {
         }).not.toThrowError();
       });
     }
+
+    allows(OPERATOR_STATE_UNKNOWN, OPERATOR_STATE_FIRST_CALL);
+    allows(OPERATOR_STATE_FIRST_CALL, OPERATOR_STATE_POP);
+    allows(OPERATOR_STATE_FIRST_CALL, OPERATOR_STATE_CALL_BEFORE_POP);
+    allows(OPERATOR_STATE_FIRST_CALL, 123);
+    allows(OPERATOR_STATE_FIRST_CALL, 456);
+    allows(123, 456);
+    allows(123, OPERATOR_STATE_POP);
+    allows(123, OPERATOR_STATE_CALL_BEFORE_POP);
+    allows(456, 123);
+    allows(456, OPERATOR_STATE_POP);
+    allows(456, OPERATOR_STATE_CALL_BEFORE_POP);
+    allows(OPERATOR_STATE_CALL_BEFORE_POP, OPERATOR_STATE_POP);
+    allows(OPERATOR_STATE_CALL_BEFORE_POP, -123);
+    allows(OPERATOR_STATE_CALL_BEFORE_POP, -456);
+    allows(-123, -456);
+    allows(-123, OPERATOR_STATE_POP);
+    allows(-456, -123);
+    allows(-456, OPERATOR_STATE_POP);
 
     function forbids(from: number, to: number) {
       it(`forbids ${stringify(from)} ➝ ${stringify(to)}`, () => {
@@ -121,75 +145,12 @@ describe('topOperatorState', () => {
       });
     }
 
-    /*
-      stateDiagram-v2
-          [*] --> OPERATOR_STATE_UNKNOWN
-          OPERATOR_STATE_UNKNOWN --> OPERATOR_STATE_FIRST_CALL*
-          OPERATOR_STATE_FIRST_CALL* --> OPERATOR_STATE_POP
-          OPERATOR_STATE_FIRST_CALL* --> 123*
-          123* --> 456*
-          456* --> 123*
-          456* --> OPERATOR_STATE_POP
-          456* --> OPERATOR_STATE_REQUEST_CALL_BEFORE_POP
-          OPERATOR_STATE_FIRST_CALL* --> OPERATOR_STATE_REQUEST_CALL_BEFORE_POP
-          OPERATOR_STATE_REQUEST_CALL_BEFORE_POP --> OPERATOR_STATE_CALL_BEFORE_POP*
-          NEG_123: -123*
-          OPERATOR_STATE_CALL_BEFORE_POP* --> NEG_123
-          NEG_456: -456*
-          NEG_123 --> NEG_456
-          NEG_456 --> NEG_123
-          NEG_456 --> OPERATOR_STATE_POP
-          OPERATOR_STATE_POP --> [*]
-    */
-
-    allows(OPERATOR_STATE_UNKNOWN, OPERATOR_STATE_FIRST_CALL);
-    allows(OPERATOR_STATE_FIRST_CALL, OPERATOR_STATE_POP);
-    allows(OPERATOR_STATE_FIRST_CALL, 123);
-    allows(OPERATOR_STATE_FIRST_CALL, OPERATOR_STATE_REQUEST_CALL_BEFORE_POP);
-    allows(123, 456);
-    allows(456, 123);
-    allows(456, OPERATOR_STATE_POP);
-    allows(456, OPERATOR_STATE_REQUEST_CALL_BEFORE_POP);
-    allows(OPERATOR_STATE_REQUEST_CALL_BEFORE_POP, OPERATOR_STATE_CALL_BEFORE_POP);
-    allows(OPERATOR_STATE_CALL_BEFORE_POP, -123);
-    allows(-123, -456);
-    allows(-456, -123);
-    allows(-456, OPERATOR_STATE_POP);
-
-    forbids(OPERATOR_STATE_UNKNOWN, 123);
-    forbids(OPERATOR_STATE_UNKNOWN, OPERATOR_STATE_POP);
-    forbids(OPERATOR_STATE_UNKNOWN, OPERATOR_STATE_REQUEST_CALL_BEFORE_POP);
-    forbids(OPERATOR_STATE_UNKNOWN, OPERATOR_STATE_CALL_BEFORE_POP);
-
-    forbids(OPERATOR_STATE_FIRST_CALL, OPERATOR_STATE_UNKNOWN);
-    forbids(OPERATOR_STATE_FIRST_CALL, OPERATOR_STATE_CALL_BEFORE_POP);
-
-    forbids(123, OPERATOR_STATE_UNKNOWN);
-    forbids(123, OPERATOR_STATE_FIRST_CALL);
-    forbids(123, OPERATOR_STATE_CALL_BEFORE_POP);
-    forbids(123, -123);
-
-    forbids(OPERATOR_STATE_POP, OPERATOR_STATE_UNKNOWN);
-    forbids(OPERATOR_STATE_POP, OPERATOR_STATE_FIRST_CALL);
-    forbids(OPERATOR_STATE_POP, 123);
-    forbids(OPERATOR_STATE_POP, OPERATOR_STATE_REQUEST_CALL_BEFORE_POP);
-    forbids(OPERATOR_STATE_POP, OPERATOR_STATE_CALL_BEFORE_POP);
-    forbids(OPERATOR_STATE_POP, -123);
-
-    forbids(OPERATOR_STATE_REQUEST_CALL_BEFORE_POP, OPERATOR_STATE_UNKNOWN);
-    forbids(OPERATOR_STATE_REQUEST_CALL_BEFORE_POP, OPERATOR_STATE_FIRST_CALL);
-    forbids(OPERATOR_STATE_REQUEST_CALL_BEFORE_POP, 123);
-    forbids(OPERATOR_STATE_REQUEST_CALL_BEFORE_POP, -123);
-
-    forbids(OPERATOR_STATE_CALL_BEFORE_POP, OPERATOR_STATE_UNKNOWN);
-    forbids(OPERATOR_STATE_CALL_BEFORE_POP, OPERATOR_STATE_FIRST_CALL);
-    forbids(OPERATOR_STATE_CALL_BEFORE_POP, 123);
-    forbids(OPERATOR_STATE_CALL_BEFORE_POP, OPERATOR_STATE_REQUEST_CALL_BEFORE_POP);
-
-    forbids(-123, OPERATOR_STATE_UNKNOWN);
-    forbids(-123, OPERATOR_STATE_FIRST_CALL);
-    forbids(-123, OPERATOR_STATE_REQUEST_CALL_BEFORE_POP);
-    forbids(-123, OPERATOR_STATE_CALL_BEFORE_POP);
-    forbids(-123, 123);
+    for (const from of Object.values(states)) {
+      for (const to of Object.values(states)) {
+        if (from !== to && !allowed.some((item) => item.from === from && item.to === to)) {
+          forbids(from, to);
+        }
+      }
+    }
   });
 });

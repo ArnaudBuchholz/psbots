@@ -6,7 +6,6 @@ import {
   OPERATOR_STATE_UNKNOWN,
   OPERATOR_STATE_FIRST_CALL,
   OPERATOR_STATE_POP,
-  OPERATOR_STATE_REQUEST_CALL_BEFORE_POP,
   OPERATOR_STATE_CALL_BEFORE_POP
 } from '@sdk/index.js';
 import type { MemoryTracker } from '@core/MemoryTracker.js';
@@ -96,13 +95,12 @@ export class CallStack extends ValueStack implements ICallStack {
       (current === OPERATOR_STATE_UNKNOWN && value !== OPERATOR_STATE_FIRST_CALL) ||
       (current !== OPERATOR_STATE_UNKNOWN && value === OPERATOR_STATE_FIRST_CALL) ||
       value === OPERATOR_STATE_UNKNOWN ||
-      (current !== OPERATOR_STATE_REQUEST_CALL_BEFORE_POP && value === OPERATOR_STATE_CALL_BEFORE_POP) ||
-      (current === OPERATOR_STATE_REQUEST_CALL_BEFORE_POP && value !== OPERATOR_STATE_CALL_BEFORE_POP) ||
-      (current < OPERATOR_STATE_FIRST_CALL && value === OPERATOR_STATE_REQUEST_CALL_BEFORE_POP) ||
       current === OPERATOR_STATE_POP ||
-      (current === OPERATOR_STATE_CALL_BEFORE_POP && value >= OPERATOR_STATE_CALL_BEFORE_POP) ||
-      (current > 0 && value < OPERATOR_STATE_CALL_BEFORE_POP) ||
-      (current < OPERATOR_STATE_CALL_BEFORE_POP && value > OPERATOR_STATE_FIRST_CALL)
+      (value !== OPERATOR_STATE_POP &&
+        ((current > OPERATOR_STATE_FIRST_CALL && value < OPERATOR_STATE_CALL_BEFORE_POP) ||
+          (current < OPERATOR_STATE_CALL_BEFORE_POP && value >= OPERATOR_STATE_CALL_BEFORE_POP) ||
+          (current < OPERATOR_STATE_FIRST_CALL && value >= OPERATOR_STATE_FIRST_CALL) ||
+          (current === OPERATOR_STATE_FIRST_CALL && value < OPERATOR_STATE_CALL_BEFORE_POP)))
     ) {
       throw new InternalException(OPERATOR_STATE_INVALID);
     }
