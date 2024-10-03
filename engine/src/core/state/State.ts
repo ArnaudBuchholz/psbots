@@ -7,7 +7,6 @@ import {
   InternalException,
   OPERATOR_STATE_FIRST_CALL,
   OPERATOR_STATE_POP,
-  OPERATOR_STATE_UNKNOWN,
   OperatorType,
   toString
 } from '@sdk/index.js';
