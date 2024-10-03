@@ -1,6 +1,6 @@
 import { buildFunctionOperator } from '@core/operators/operators.js';
 
-buildFunctionOperator(
+export const pop = buildFunctionOperator(
   {
     name: 'pop',
     description: 'removes the top item of the operand stack',
