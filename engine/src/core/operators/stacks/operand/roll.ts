@@ -1,6 +1,6 @@
 import { ValueType } from '@api/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
-import { RangeCheckException } from '@sdk/exceptions';
+import { RangeCheckException } from '@sdk/index.js';
 
 buildFunctionOperator(
   {
