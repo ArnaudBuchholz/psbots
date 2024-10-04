@@ -335,8 +335,8 @@ Here the list of official POSTSCRIPT operators extracted from this [index](https
 |startjob|❓|
 |status|❓|
 |statusdict|❓|
-|stop|🚧|
-|stopped|🚧|
+|stop|✅|
+|stopped|✅|
 |store|🚧|
 |string|❌ *(because of the way strings are handled)*|
 |stringwidth|📄|

@@ -1,11 +1,10 @@
 {
-  "break": "Loop break",
   "busy": "Engine is already busy",
   "dictStackUnderflow": "No custom dictionary left to unstack",
   "invalidAccess": "Object is read-only",
-  "invalidBreak": "break has been invoked outside of a loop",
   "rangeCheck": "Operand is too big or too small",
   "stackUnderflow": "Not enough operands on the stack to perform the operation",
+  "stop": "Execution stopped",
   "typeCheck": "Operand is of the wrong type",
   "undefined": "Name is not defined in the dictionary stack",
   "unmatchedMark": "Unmatched mark in the operand stack",

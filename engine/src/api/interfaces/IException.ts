@@ -12,20 +12,6 @@ export enum ExceptionType {
   custom = 'custom'
 }
 
-export enum SystemExceptionName {
-  break = 'break',
-  busy = 'busy',
-  dictStackUnderflow = 'dictStackUnderflow',
-  invalidAccess = 'invalidAccess',
-  invalidBreak = 'invalidBreak',
-  rangeCheck = 'rangeCheck',
-  stackUnderflow = 'stackUnderflow',
-  typeCheck = 'typeCheck',
-  undefined = 'undefined',
-  unmatchedMark = 'unmatchedMark',
-  vmError = 'vmError'
-}
-
 export interface IException extends Error, IReadOnlyDictionary {
   readonly type: ExceptionType;
   readonly engineStack: string[];

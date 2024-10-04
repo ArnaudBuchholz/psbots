@@ -1,24 +1,24 @@
-import { BreakException } from '@sdk/index.js';
+import { StopException } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 
 buildFunctionOperator(
   {
-    name: 'break',
-    description: 'throws the exception : Loop break',
+    name: 'stop',
+    description: 'throws the exception : Execution stopped',
     labels: ['exception'],
     signature: {
       input: [],
       output: [],
-      exceptions: ['break']
+      exceptions: ['stop']
     },
     samples: [
       {
-        in: 'break',
-        out: 'break'
+        in: 'stop',
+        out: 'stop'
       }
     ]
   },
   () => {
-    throw new BreakException();
+    throw new StopException();
   }
 );

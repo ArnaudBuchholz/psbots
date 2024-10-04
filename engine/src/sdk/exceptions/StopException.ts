@@ -1,8 +1,8 @@
 import { BaseException } from '@sdk/exceptions/BaseException.js';
 
-const MESSAGE = 'Loop break';
+const MESSAGE = 'Execution stopped';
 
-export class BreakException extends BaseException {
+export class StopException extends BaseException {
   constructor() {
     super(MESSAGE);
   }
