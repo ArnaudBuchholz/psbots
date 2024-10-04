@@ -21,6 +21,7 @@ export type OperatorDefinition = {
     | 'flow'
     | 'generic'
     | 'integer'
+    | 'loop'
     | 'mark'
     | 'math'
     | 'operand'

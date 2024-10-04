@@ -208,7 +208,7 @@ Here the list of official POSTSCRIPT operators extracted from this [index](https
 |load|🚧|
 |lock|❓|
 |log|❓|
-|loop|🚧|
+|loop|✅|
 |lt|✅|
 |makefont|📄|
 |makepattern|📄|
