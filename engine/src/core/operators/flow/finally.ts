@@ -47,7 +47,7 @@ buildFunctionOperator(
     const { operands, calls } = state;
     const { topOperatorState } = calls;
     if (topOperatorState === OPERATOR_STATE_FIRST_CALL) {
-      const [finalBlock, codeBlock] = operands.ref!;
+      const [finalBlock, codeBlock] = operands.ref;
       if (finalBlock === undefined || !finalBlock.isExecutable || codeBlock === undefined || !codeBlock.isExecutable) {
         throw new TypeCheckException();
       }
