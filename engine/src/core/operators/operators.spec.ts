@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, onTestFailed } from 'vitest';
 import { parse } from '@api/index.js';
 import type { OperatorDefinition } from './operators.js';
 import { registry } from './operators.js';
@@ -19,6 +19,7 @@ const nullDefinition: OperatorDefinition = {
 let skipped = 0;
 let debugCycles = 0;
 let debugMilliseconds = 0;
+let failed = false;
 
 describe('executing in & out using debug', () => {
   Object.keys(registry)
@@ -56,6 +57,9 @@ describe('executing in & out using debug', () => {
             ++skipped;
           } else {
             it(`[${sampleId}] ${description}`, () => {
+              onTestFailed(() => {
+                failed = true;
+              });
               const start = performance.now();
               debugCycles += waitForGenerator(state.process(sample.in)).length;
               debugCycles += waitForGenerator(expectedState.process(sample.out)).length;
@@ -81,8 +85,10 @@ describe('executing in & out using debug', () => {
 
 let cycles = 0;
 let milliseconds = 0;
+let minMs = Number.POSITIVE_INFINITY;
+let maxMs = 0;
 
-describe('executing in only (performance)', () => {
+describe.runIf(!failed)('executing in only (performance)', () => {
   Object.keys(registry)
     .sort()
     .forEach((operatorName) => {
@@ -111,9 +117,20 @@ describe('executing in only (performance)', () => {
           const description = sample.description ?? definition.description;
           if (missingOperators.length === 0) {
             it(`[${sampleId}] ${description}`, () => {
-              const start = performance.now();
-              cycles += waitForGenerator(state.process(sample.in)).length;
-              milliseconds += Math.ceil(performance.now() - start);
+              const iterator = state.process(sample.in);
+              // eslint-disable-next-line no-constant-condition
+              while (true) {
+                const start = performance.now();
+                const { done } = iterator.next();
+                const timeSpent = performance.now() - start;
+                ++cycles;
+                milliseconds += timeSpent;
+                minMs = Math.min(minMs, timeSpent);
+                maxMs = Math.max(maxMs, timeSpent);
+                if (done === true) {
+                  break;
+                }
+              }
             });
           }
         });
@@ -128,16 +145,19 @@ describe('Execution report for operators', () => {
     it.skip(`${skipped} tests are skipped`);
   }
 
+  const round = (value: number) => Math.floor(value * 10000) / 10000;
+
   it('(debug) cycles/ms > 0', () => {
-    const debugRatio = Math.floor((100 * debugCycles) / debugMilliseconds) / 100;
+    const debugRatio = round(debugCycles / debugMilliseconds);
     console.log('(debug) cycles/ms', debugRatio);
     expect(debugRatio).toBeGreaterThan(0);
   });
 
-  it('cycles/ms > (debug) cycles/ms', () => {
-    const debugRatio = Math.floor((100 * debugCycles) / debugMilliseconds) / 100;
-    const ratio = Math.floor((100 * cycles) / milliseconds) / 100;
+  it.runIf(!failed)('cycles/ms > (debug) cycles/ms', () => {
+    const ratio = round(cycles / milliseconds);
     console.log('cycles/ms', ratio);
+    console.log('cycle (ms)', round(minMs), '<', round(milliseconds / cycles), '<', round(maxMs));
+    const debugRatio = round(debugCycles / debugMilliseconds);
     expect(ratio).toBeGreaterThan(debugRatio);
   });
 });
