@@ -1,6 +1,6 @@
 import type { IOperatorValue, OperatorValue, Value } from '@api/index.js';
 import { ValueType } from '@api/index.js';
-import { valuesOf } from '@sdk/index.js';
+import { InternalException, valuesOf } from '@sdk/index.js';
 import type { IInternalState } from '@sdk/interfaces/IInternalState.js';
 import type { IOperator } from '@sdk/interfaces/IOperator.js';
 import { OperatorType } from '@sdk/interfaces/IOperator.js';
@@ -52,6 +52,10 @@ export function buildFunctionOperator(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   implementation: (state: IInternalState, ...values: any[]) => void
 ): OperatorValue {
+  /* istanbul ignore next */ // Should NOT happen
+  if (registry[definition.name] !== undefined) {
+    throw new InternalException(`Operator ${definition.name} already defined`);
+  }
   let operator: IOperator;
   if (definition.signature.input.length > 0) {
     const { input: typeCheck } = definition.signature;
