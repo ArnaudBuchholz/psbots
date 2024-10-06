@@ -56,6 +56,7 @@ export function buildFunctionOperator(
   if (registry[definition.name] !== undefined) {
     throw new InternalException(`Operator ${definition.name} already defined`);
   }
+  Object.freeze(definition); // Can't be altered
   let operator: IOperator;
   if (definition.signature.input.length > 0) {
     const { input: typeCheck } = definition.signature;
