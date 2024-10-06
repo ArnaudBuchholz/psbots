@@ -1,7 +1,7 @@
 import { createState, parse } from '@psbots/engine';
-import { BaseException, InternalException } from '@psbots/engine/sdk';
+import { BaseException, checkStringValue, InternalException, toStringValue } from '@psbots/engine/sdk';
 import type { IReplIO } from './IReplIO.js';
-import { /* blue, */ cyan, green, red, /* white, */ yellow } from './colors.js';
+import { /* blue, */ cyan, green, magenta, red, /* white, */ yellow } from './colors.js';
 import { createHostDictionary } from './host/index.js';
 import { ExitError } from './host/exit.js';
 import { status } from './status.js';
@@ -10,9 +10,9 @@ export * from './IReplIO.js';
 
 function showError(replIO: IReplIO, e: unknown) {
   if (!(e instanceof BaseException)) {
-    replIO.output(`${red}(X) Unknown error`);
+    replIO.output(`${red}💣 Unknown error`);
   } else {
-    replIO.output(`${red}/!\\ ${e.message}`);
+    replIO.output(`${red}❌ ${e.message}`);
     e.engineStack.forEach((line) => replIO.output(`${red}${line}`));
     if (e instanceof InternalException && typeof e.reason === 'object') {
       replIO.output(`${red}${JSON.stringify(e.reason, undefined, 2)}`);
@@ -21,6 +21,17 @@ function showError(replIO: IReplIO, e: unknown) {
 }
 
 export async function repl(replIO: IReplIO, debug?: boolean): Promise<void> {
+  const state = createState({
+    hostDictionary: createHostDictionary(replIO),
+    debugMemory: debug
+  });
+
+  [...state.process([toStringValue('version', { isExecutable: true })])];
+  const version = state.operands.at(0);
+  checkStringValue(version);
+  replIO.output(`${cyan}Welcome to 🤖${magenta}${version.string}`);
+  [...state.process([toStringValue('pop', { isExecutable: true })])];
+
   if (debug === true) {
     replIO.output(`${green}DEBUG mode enabled`);
   }
@@ -28,10 +39,6 @@ export async function repl(replIO: IReplIO, debug?: boolean): Promise<void> {
   replIO.output(`${cyan}Use '${yellow}state${cyan}' to print a state summary`);
   replIO.output(`${cyan}Use '${yellow}help${cyan}'  to display help`);
 
-  const state = createState({
-    hostDictionary: createHostDictionary(replIO),
-    debugMemory: debug
-  });
   let replIndex = 0;
 
   // eslint-disable-next-line no-constant-condition
@@ -99,8 +106,7 @@ export async function repl(replIO: IReplIO, debug?: boolean): Promise<void> {
         break;
       }
       if (exception !== undefined) {
-        replIO.output(`${red}/!\\ ${exception.message}`);
-        exception.engineStack.forEach((line) => replIO.output(`${red}${line}`));
+        showError(replIO, exception);
       }
       replIO.output(
         status(state, {

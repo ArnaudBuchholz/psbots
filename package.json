@@ -9,7 +9,8 @@
     "test": "npm run test --workspaces",
     "build": "npm run build --workspaces",
     "cli": "node ./cli/index.js",
-    "cli:debug": "node ./cli/index.js --debug"
+    "cli:debug": "node ./cli/index.js --debug",
+    "wi": "npm run dev --workspace wi"
   },
   "engines": {
     "node": ">=20.17.0"
