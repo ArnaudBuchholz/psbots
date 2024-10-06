@@ -89,9 +89,22 @@ buildFunctionOperator(
   }
 }
 
+async function updateVersion() {
+  const projectPackage = JSON.parse(await readFile('./package.json', 'utf-8'));
+  const VERSION_OPERATOR_PATH = './src/core/operators/value/version.ts';
+  await writeFile(
+    VERSION_OPERATOR_PATH,
+    (await readFile(VERSION_OPERATOR_PATH, 'utf-8')).replace(
+      /const VERSION = '[^']*';/,
+      () => `const VERSION = '${projectPackage.name}@${projectPackage.version}';`
+    )
+  );
+}
+
 async function main() {
   generateExceptions();
   generateIndexes('src', false);
+  updateVersion();
 }
 
 main().catch((reason) => {

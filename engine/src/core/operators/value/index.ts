@@ -7,5 +7,6 @@ import './neq.js';
 import './put.js';
 import './true.js';
 import './type.js';
+import './version.js';
 import './wcheck.js';
 import './xcheck.js';

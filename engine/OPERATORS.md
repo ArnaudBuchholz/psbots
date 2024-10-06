@@ -375,7 +375,7 @@ Here the list of official POSTSCRIPT operators extracted from this [index](https
 |usertime|🚧|
 |ustroke|📄|
 |ustrokepath|📄|
-|version|🚧|
+|version|✅|
 |viewclip|📄|
 |viewclippath|📄|
 |VMerror|🚧|
