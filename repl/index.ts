@@ -24,8 +24,9 @@ export async function repl(replIO: IReplIO, debug?: boolean): Promise<void> {
   if (debug === true) {
     replIO.output(`${green}DEBUG mode enabled`);
   }
-  replIO.output(`${cyan}Use '${yellow}exit${cyan}' to quit`);
+  replIO.output(`${cyan}Use '${yellow}exit${cyan}'  to quit`);
   replIO.output(`${cyan}Use '${yellow}state${cyan}' to print a state summary`);
+  replIO.output(`${cyan}Use '${yellow}help${cyan}'  to display help`);
 
   const state = createState({
     hostDictionary: createHostDictionary(replIO),

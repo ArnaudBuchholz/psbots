@@ -2,11 +2,13 @@ import type { Value, IReadOnlyDictionary } from '@psbots/engine';
 import type { IReplIO } from '../IReplIO.js';
 import { exit } from './exit.js';
 import { createStateOperator } from './state.js';
+import { createHelpOperator } from './help.js';
 
 export function createHostDictionary(replIO: IReplIO): IReadOnlyDictionary {
   const hostMappings: Record<string, Value> = {
     exit,
-    state: createStateOperator(replIO)
+    state: createStateOperator(replIO),
+    help: createHelpOperator(replIO)
   };
 
   return {
