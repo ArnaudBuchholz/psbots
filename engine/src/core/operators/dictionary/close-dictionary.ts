@@ -10,7 +10,7 @@ buildFunctionOperator(
   {
     name: '>>',
     aliases: ['»', 'dicttomark'],
-    description: 'finalizes an array',
+    description: 'finalizes a dictionary',
     labels: ['dictionary', 'mark'],
     signature: {
       input: [],
