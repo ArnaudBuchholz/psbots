@@ -6,6 +6,7 @@ Here the list of official POSTSCRIPT operators extracted from this [index](https
 |---|---|
 |✅| implemented |
 |✅∗| implemented but non compliant |
+|⚙️| implemented in REPL |
 |🚧| implementation to come |
 |❓| status to be determined |
 |❌| won't be implemented |
@@ -134,7 +135,7 @@ Here the list of official POSTSCRIPT operators extracted from this [index](https
 |execuserobject|❓|
 |executeonly|❓|
 |executive|❓|
-|exit|🚧 *(must update `repl`)*|
+|exit|⚙️|
 |exp|🚧|
 |false|✅|
 |file|❓|
@@ -237,7 +238,7 @@ Here the list of official POSTSCRIPT operators extracted from this [index](https
 |printobject|❓|
 |product|❓|
 |prompt|❓|
-|pstack|🚧|
+|pstack|⚙️|
 |put|✅∗|
 |putinterval|🚧|
 |quit|🚧|

@@ -5,15 +5,29 @@ import type { IReplIO } from './IReplIO.js';
 import { blue, cyan, /* green, red, white, */ yellow } from './colors.js';
 import { memory } from './status.js';
 
-function enumAndDisplay(replIO: IReplIO, values: IReadOnlyArray): void {
+type EnumAndDisplayOptions = {
+  includeDebugSource: boolean;
+  includeIndex: boolean;
+};
+
+export function enumAndDisplay(
+  replIO: IReplIO,
+  values: IReadOnlyArray,
+  options: EnumAndDisplayOptions = {
+    includeDebugSource: true,
+    includeIndex: true
+  }
+): void {
+  const { includeDebugSource, includeIndex } = options;
   let index = 0;
   for (const value of enumIArrayValues(values)) {
     const formattedIndex = index.toString();
     // TODO handle array
-    const formatted = toString(value, {
-      includeDebugSource: true,
-      maxWidth: replIO.width - formattedIndex.length - 1
-    });
+    let maxWidth = replIO.width;
+    if (includeIndex) {
+      maxWidth -= formattedIndex.length + 1;
+    }
+    const formatted = toString(value, { includeDebugSource, maxWidth });
     const withDebugInfo = formatted.match(/^(.*)@([^:@]+:\d+:\d+)$/);
     let instruction = formatted;
     let debugInfo = '';
@@ -21,7 +35,11 @@ function enumAndDisplay(replIO: IReplIO, values: IReadOnlyArray): void {
       instruction = withDebugInfo[1]!;
       debugInfo = `${blue}@${withDebugInfo[2]}`;
     }
-    replIO.output(`${formattedIndex} ${instruction}${debugInfo}`);
+    if (options.includeIndex) {
+      replIO.output(`${formattedIndex} ${instruction}${debugInfo}`);
+    } else {
+      replIO.output(`${instruction}${debugInfo}`);
+    }
     ++index;
   }
 }
