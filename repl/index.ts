@@ -26,11 +26,11 @@ export async function repl(replIO: IReplIO, debug?: boolean): Promise<void> {
     debugMemory: debug
   });
 
-  [...state.process([toStringValue('version', { isExecutable: true })])];
+  [...state.process(parse('version'))];
   const version = state.operands.at(0);
   checkStringValue(version);
   replIO.output(`${cyan}Welcome to 🤖${magenta}${version.string}`);
-  [...state.process([toStringValue('pop', { isExecutable: true })])];
+  [...state.process(parse('pop'))];
 
   if (debug === true) {
     replIO.output(`${green}DEBUG mode enabled`);
