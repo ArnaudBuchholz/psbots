@@ -10,13 +10,16 @@ function enumAndDisplay(replIO: IReplIO, values: IReadOnlyArray): void {
   for (const value of enumIArrayValues(values)) {
     const formattedIndex = index.toString();
     // TODO handle array
-    const [instruction, debug] = toString(value, {
+    const formatted = toString(value, {
       includeDebugSource: true,
       maxWidth: replIO.width - formattedIndex.length - 1
-    }).split('@');
+    });
+    const withDebugInfo = formatted.match(/^(.*)@([^:@]+:\d+:\d+)$/);
+    let instruction = formatted;
     let debugInfo = '';
-    if (debug) {
-      debugInfo = `${blue}@${debug}`;
+    if (withDebugInfo) {
+      instruction = withDebugInfo[1]!;
+      debugInfo = `${blue}@${withDebugInfo[2]}`;
     }
     replIO.output(`${formattedIndex} ${instruction}${debugInfo}`);
     ++index;
