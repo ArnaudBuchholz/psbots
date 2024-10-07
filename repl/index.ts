@@ -1,5 +1,5 @@
 import { createState, parse } from '@psbots/engine';
-import { BaseException, checkStringValue, InternalException, toStringValue } from '@psbots/engine/sdk';
+import { BaseException, checkStringValue, InternalException } from '@psbots/engine/sdk';
 import type { IReplIO } from './IReplIO.js';
 import { /* blue, */ cyan, green, magenta, red, /* white, */ yellow } from './colors.js';
 import { createHostDictionary } from './host/index.js';
