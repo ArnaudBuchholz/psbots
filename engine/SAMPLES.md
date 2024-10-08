@@ -13,11 +13,11 @@
 
   1 exch
   %% result n
-  loop {
+  {
     dup 2 lt { pop stop } if
-    dup 3 1 roll mull
+    dup 3 1 roll mul
     exch
     1 sub
-  }
+  } loop
 } bind def
 ```
