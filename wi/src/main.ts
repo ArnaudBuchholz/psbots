@@ -24,7 +24,6 @@ async function main() {
     if (terminated) {
       return;
     }
-
     if (e === '\r') {
       // Enter
       term.write('\r\n');
@@ -50,10 +49,9 @@ async function main() {
       return term.rows;
     },
     output(text) {
-      term.write(text + '\r\n');
+      term.write(text);
     },
     async input() {
-      term.write('? ');
       return new Promise((resolve) => {
         resolveInput = resolve;
       });
