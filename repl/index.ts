@@ -1,7 +1,7 @@
 import { createState, parse } from '@psbots/engine';
 import { BaseException, checkStringValue, InternalException } from '@psbots/engine/sdk';
 import type { IReplIO } from './IReplIO.js';
-import { /* blue, */ cyan, green, magenta, red, /* white, */ yellow } from './colors.js';
+import { /* blue, */ cyan, green, magenta, red, white, /* white, */ yellow } from './colors.js';
 import { createHostDictionary } from './host/index.js';
 import { ExitError } from './host/exit.js';
 import { status } from './status.js';
@@ -10,12 +10,12 @@ export * from './IReplIO.js';
 
 function showError(replIO: IReplIO, e: unknown) {
   if (!(e instanceof BaseException)) {
-    replIO.output(`${red}💣 Unknown error`);
+    replIO.output(`${red}💣 Unknown error${white}\r\n`);
   } else {
-    replIO.output(`${red}❌ ${e.message}`);
-    e.engineStack.forEach((line) => replIO.output(`${red}${line}`));
+    replIO.output(`${red}❌ ${e.message}${white}\r\n`);
+    e.engineStack.forEach((line) => replIO.output(`${red}${line}${white}\r\n`));
     if (e instanceof InternalException && typeof e.reason === 'object') {
-      replIO.output(`${red}${JSON.stringify(e.reason, undefined, 2)}`);
+      replIO.output(`${red}${JSON.stringify(e.reason, undefined, 2)}${white}\r\n`);
     }
   }
 }
@@ -29,20 +29,21 @@ export async function repl(replIO: IReplIO, debug?: boolean): Promise<void> {
   [...state.process(parse('version'))];
   const version = state.operands.at(0);
   checkStringValue(version);
-  replIO.output(`${cyan}Welcome to 🤖${magenta}${version.string}`);
+  replIO.output(`${cyan}Welcome to 🤖${magenta}${version.string}${white}\r\n`);
   [...state.process(parse('pop'))];
 
   if (debug === true) {
-    replIO.output(`${green}DEBUG mode enabled`);
+    replIO.output(`${green}DEBUG mode enabled${white}\r\n`);
   }
-  replIO.output(`${cyan}Use '${yellow}exit${cyan}'  to quit`);
-  replIO.output(`${cyan}Use '${yellow}state${cyan}' to print a state summary`);
-  replIO.output(`${cyan}Use '${yellow}help${cyan}'  to display help`);
+  replIO.output(`${cyan}Use '${yellow}exit${cyan}'  to quit${white}\r\n`);
+  replIO.output(`${cyan}Use '${yellow}state${cyan}' to print a state summary${white}\r\n`);
+  replIO.output(`${cyan}Use '${yellow}help${cyan}'  to display help${white}\r\n`);
 
   let replIndex = 0;
 
   // eslint-disable-next-line no-constant-condition
   while (true) {
+    replIO.output('? ');
     const src = await replIO.input();
     try {
       const lastOperandsCount = state.operands.length;
@@ -56,17 +57,17 @@ export async function repl(replIO: IReplIO, debug?: boolean): Promise<void> {
         // let nextValue: unknown;
         // if (value === $state) {
         //   const dictLength = state.dictionaries.length;
-        //   replHost.output(`${cyan}memory: ${yellow}${memory(state)}`);
-        //   replHost.output(`${cyan}dictionaries: ${yellow}${dictLength}`);
+        //   replHost.output(`${cyan}memory: ${yellow}${memory(state)}${white}\r\n`);
+        //   replHost.output(`${cyan}dictionaries: ${yellow}${dictLength}${white}\r\n`);
         //   forEach(state.dictionaries, (value, formattedIndex) => {
-        //     replHost.output(`${formattedIndex} ${formatters[value.type](value)}`);
+        //     replHost.output(`${formattedIndex} ${formatters[value.type](value)}${white}\r\n`);
         //   });
         //   operands();
         // }
 
         // while (debugging) {
         //   if (typeof value === 'string') {
-        //     replHost.output(`${blue}${value}`);
+        //     replHost.output(`${blue}${value}${white}\r\n`);
         //   }
         //   replHost.output(
         //     renderCallStack(state.calls)
@@ -74,6 +75,7 @@ export async function repl(replIO: IReplIO, debug?: boolean): Promise<void> {
         //       .replace(/@.*\n/g, (match: string): string => `${blue}${match}${white}`)
         //       .replace(/\/!\\.*\n/g, (match: string): string => `${red}${match}${white}`)
         //       .replace(/…|↵|⭲/g, (match: string): string => `${blue}${match}${white}`)
+        //     + `${white}\r\n`
         //   );
         //   replHost.output(
         //     status(state, {
@@ -121,11 +123,11 @@ export async function repl(replIO: IReplIO, debug?: boolean): Promise<void> {
     }
   }
 
-  replIO.output(`${red}terminating...`);
+  replIO.output(`${red}terminating...${white}\r\n`);
   try {
     state.destroy();
   } catch (e) {
     showError(replIO, e);
   }
-  replIO.output(`${red}terminated.`);
+  replIO.output(`${red}terminated.${white}\r\n`);
 }

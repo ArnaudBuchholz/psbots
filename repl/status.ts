@@ -57,6 +57,7 @@ export function status(state: IState, options: StatusOptions): string {
     `${cyan} memory: ${yellow}${memory(state)}${memoryVariation}`,
     white,
     options.concat,
-    white
+    white,
+    '\r\n'
   ].join('');
 }

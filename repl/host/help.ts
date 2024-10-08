@@ -2,7 +2,7 @@ import { getOperatorDefinitionRegistry, ValueType } from '@psbots/engine';
 import type { Value } from '@psbots/engine';
 import { OperatorType } from '@psbots/engine/sdk';
 import type { IFunctionOperator } from '@psbots/engine/sdk';
-import { cyan, yellow } from '../colors.js';
+import { cyan, white, yellow } from '../colors.js';
 import type { IReplIO } from '../IReplIO.js';
 
 export function createHelpOperator(replIO: IReplIO): Value<ValueType.operator> {
@@ -18,7 +18,7 @@ export function createHelpOperator(replIO: IReplIO): Value<ValueType.operator> {
         const names = Object.keys(operators).sort();
         for (const name of names) {
           const definition = operators[name];
-          replIO.output(`${yellow}${name}${cyan} ${definition?.description}`);
+          replIO.output(`${yellow}${name}${cyan} ${definition?.description}${white}\r\n`);
         }
       }
     }

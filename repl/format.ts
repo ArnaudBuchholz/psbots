@@ -2,7 +2,7 @@ import { enumIArrayValues } from '@psbots/engine';
 import type { IReadOnlyArray, IState } from '@psbots/engine';
 import { toString } from '@psbots/engine/sdk';
 import type { IReplIO } from './IReplIO.js';
-import { blue, cyan, /* green, red, white, */ yellow } from './colors.js';
+import { blue, cyan, white, /* green, red, white, */ yellow } from './colors.js';
 import { memory } from './status.js';
 
 type EnumAndDisplayOptions = {
@@ -36,23 +36,23 @@ export function enumAndDisplay(
       debugInfo = `${blue}@${withDebugInfo[2]}`;
     }
     if (options.includeIndex) {
-      replIO.output(`${formattedIndex} ${instruction}${debugInfo}`);
+      replIO.output(`${formattedIndex} ${instruction}${debugInfo}${white}\r\n`);
     } else {
-      replIO.output(`${instruction}${debugInfo}`);
+      replIO.output(`${instruction}${debugInfo}${white}\r\n`);
     }
     ++index;
   }
 }
 
 export function operands(replIO: IReplIO, state: IState): void {
-  replIO.output(`${cyan}operands: ${yellow}${state.operands.length}`);
+  replIO.output(`${cyan}operands: ${yellow}${state.operands.length}${white}\r\n`);
   enumAndDisplay(replIO, state.operands);
 }
 
 export function state(replIO: IReplIO, state: IState): void {
   const dictLength = state.dictionaries.length;
-  replIO.output(`${cyan}memory: ${yellow}${memory(state)}`);
-  replIO.output(`${cyan}dictionaries: ${yellow}${dictLength}`);
+  replIO.output(`${cyan}memory: ${yellow}${memory(state)}${white}\r\n`);
+  replIO.output(`${cyan}dictionaries: ${yellow}${dictLength}${white}\r\n`);
   enumAndDisplay(replIO, state.dictionaries);
   operands(replIO, state);
 }
