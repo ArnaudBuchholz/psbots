@@ -20,6 +20,36 @@ function showError(replIO: IReplIO, e: unknown) {
   }
 }
 
+function buildInputHandler(replIO: IReplIO): () => Promise<string> {
+  const inputs: string[] = [];
+
+  let newInput: () => void;
+  let waitForInput = Promise.resolve();
+
+  const noInputs = () => {
+    waitForInput = new Promise((resolve) => { newInput = resolve; });
+  };
+  noInputs();
+
+  replIO.setInputBuffer({
+    addLine(input: string) {
+      inputs.push(input);
+      newInput();
+    }
+  });
+
+  return async () => {
+    if (inputs.length === 0) {
+      await waitForInput;
+    }
+    const input = inputs.shift()!; // inputs length checked
+    if (inputs.length === 0) {
+      noInputs();
+    }
+    return input;
+  }
+}
+
 export async function repl(replIO: IReplIO, debug?: boolean): Promise<void> {
   const state = createState({
     hostDictionary: createHostDictionary(replIO),
@@ -40,11 +70,12 @@ export async function repl(replIO: IReplIO, debug?: boolean): Promise<void> {
   replIO.output(`${cyan}Use '${yellow}help${cyan}'  to display help${white}\r\n`);
 
   let replIndex = 0;
+  const getInput = buildInputHandler(replIO);
 
   // eslint-disable-next-line no-constant-condition
   while (true) {
     replIO.output('? ');
-    const src = await replIO.input();
+    const src = await getInput();
     try {
       const lastOperandsCount = state.operands.length;
       const lastUsedMemory = state.memoryTracker.used;

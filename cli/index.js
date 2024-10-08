@@ -1,30 +1,28 @@
 import { repl } from '@psbots/repl';
 import * as readline from 'node:readline/promises';
 import { stdin, stdout } from 'node:process';
-
-const lines = [];
-let newLineInBuffer = () => {};
+import { read } from 'node:fs';
 
 const rl = readline.createInterface({ input: stdin, output: stdout });
-rl.on('line', (line) => {
-  lines.push(line);
-  newLineInBuffer();
-});
 
 await repl(
   {
     width: process.stdout.columns,
     height: process.stdout.rows,
+    setInputBuffer(buffer) {
+      rl.on('line', (line) => {
+        buffer.addLine(line);
+      });
+    },
+    async waitForKey() {
+      stdin.setRawMode(true);
+      const buffer = Buffer.alloc(1);
+      await read(0, buffer, 0, 1);
+      stdin.setRawMode(false);
+      return buffer.toString('utf8');
+    },
     output(text) {
       stdout.write(text);
-    },
-    async input() {
-      if (lines.length === 0) {
-        await new Promise((resolve) => {
-          newLineInBuffer = resolve;
-        });
-      }
-      return lines.shift();
     }
   },
   process.argv.includes('--debug')

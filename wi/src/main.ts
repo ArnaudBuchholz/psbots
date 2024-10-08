@@ -48,13 +48,13 @@ async function main() {
     get height() {
       return term.rows;
     },
+    setInputBuffer(/*buffer*/) {
+    },
+    async waitForKey() {
+      return '';
+    },
     output(text) {
       term.write(text);
-    },
-    async input() {
-      return new Promise((resolve) => {
-        resolveInput = resolve;
-      });
     }
   }).catch((reason) => {
     console.error(reason);
