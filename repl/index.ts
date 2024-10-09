@@ -25,6 +25,7 @@ function buildInputHandler(replIO: IReplIO): () => Promise<string> {
 
   let newInput: () => void;
   let waitForInput = Promise.resolve();
+  let newInputTimerId: ReturnType<typeof setTimeout> | undefined;
 
   const noInputs = () => {
     waitForInput = new Promise((resolve) => { newInput = resolve; });
@@ -33,8 +34,11 @@ function buildInputHandler(replIO: IReplIO): () => Promise<string> {
 
   replIO.setInputBuffer({
     addLine(input: string) {
+      if (newInputTimerId !== undefined) {
+        clearTimeout(newInputTimerId);
+      }
       inputs.push(input);
-      newInput();
+      newInputTimerId = setTimeout(newInput, 100);
     }
   });
 
@@ -42,10 +46,9 @@ function buildInputHandler(replIO: IReplIO): () => Promise<string> {
     if (inputs.length === 0) {
       await waitForInput;
     }
-    const input = inputs.shift()!; // inputs length checked
-    if (inputs.length === 0) {
-      noInputs();
-    }
+    const input = inputs.join('\n');
+    inputs.length = 0;
+    noInputs();
     return input;
   }
 }
