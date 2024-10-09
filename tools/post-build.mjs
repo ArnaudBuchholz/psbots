@@ -1,3 +1,4 @@
+/* eslint-env node */
 import { readdir, readFile, stat, writeFile } from 'node:fs/promises';
 import { join, relative } from 'node:path';
 

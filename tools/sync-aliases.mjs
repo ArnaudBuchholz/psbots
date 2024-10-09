@@ -1,3 +1,4 @@
+/* eslint-env node */
 import { readFile, writeFile } from 'node:fs/promises';
 
 const main = async () => {
