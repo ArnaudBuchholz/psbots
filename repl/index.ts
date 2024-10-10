@@ -28,7 +28,9 @@ function buildInputHandler(replIO: IReplIO): () => Promise<string> {
   let newInputTimerId: ReturnType<typeof setTimeout> | undefined;
 
   const noInputs = () => {
-    waitForInput = new Promise((resolve) => { newInput = resolve; });
+    waitForInput = new Promise((resolve) => {
+      newInput = resolve;
+    });
   };
   noInputs();
 
@@ -50,7 +52,7 @@ function buildInputHandler(replIO: IReplIO): () => Promise<string> {
     inputs.length = 0;
     noInputs();
     return input;
-  }
+  };
 }
 
 export async function repl(replIO: IReplIO, debug?: boolean): Promise<void> {
