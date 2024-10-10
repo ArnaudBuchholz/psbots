@@ -1,7 +1,7 @@
 import { repl } from '@psbots/repl';
 import * as readline from 'node:readline/promises';
 import { stdin, stdout } from 'node:process';
-import { read } from 'node:fs';
+import { readSync } from 'node:fs';
 
 const rl = readline.createInterface({ input: stdin, output: stdout });
 
@@ -17,7 +17,7 @@ await repl(
     async waitForKey() {
       stdin.setRawMode(true);
       const buffer = Buffer.alloc(1);
-      await read(0, buffer, 0, 1);
+      readSync(0, buffer, 0, 1);
       stdin.setRawMode(false);
       return buffer.toString('utf8');
     },

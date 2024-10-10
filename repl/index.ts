@@ -1,17 +1,26 @@
 import { createState, parse } from '@psbots/engine';
-import { BaseException, checkStringValue, InternalException } from '@psbots/engine/sdk';
+import type { IInternalState } from '@psbots/engine/sdk';
+import { BaseException, checkStringValue, InternalException, toString } from '@psbots/engine/sdk';
 import type { IReplIO } from './IReplIO.js';
-import { /* blue, */ cyan, green, magenta, red, white, /* white, */ yellow } from './colors.js';
+import { /* blue, */ blue, cyan, green, magenta, red, white, /* white, */ yellow } from './colors.js';
 import { createHostDictionary } from './host/index.js';
 import { ExitError } from './host/exit.js';
 import { status } from './status.js';
 import { buildInputHandler } from './inputHandler.js';
+import { DebugError } from './host/debug.js';
+import { operands } from './format.js';
 
 export * from './IReplIO.js';
 
 function showError(replIO: IReplIO, e: unknown) {
   if (!(e instanceof BaseException)) {
-    replIO.output(`${red}💣 Unknown error${white}\r\n`);
+    let message: string;
+    if (e instanceof Error) {
+      message = e.toString();
+    } else {
+      message = JSON.stringify(e);
+    }
+    replIO.output(`${red}💣 Unknown error: ${message}${white}\r\n`);
   } else {
     replIO.output(`${red}❌ ${e.message}${white}\r\n`);
     e.engineStack.forEach((line) => replIO.output(`${red}${line}${white}\r\n`));
@@ -42,56 +51,59 @@ export async function repl(replIO: IReplIO, debug?: boolean): Promise<void> {
 
   let replIndex = 0;
   const getInput = buildInputHandler(replIO);
+  let debugging = false;
 
   // eslint-disable-next-line no-constant-condition
   while (true) {
     replIO.output('? ');
     const src = await getInput();
     try {
-      const lastOperandsCount = state.operands.length;
-      const lastUsedMemory = state.memoryTracker.used;
+      let lastOperandsCount = state.operands.length;
+      let lastUsedMemory = state.memoryTracker.used;
       let cycle = 0;
-      // const debugging = false;
 
       const iterator = state.process(parse(src, 0, `repl${replIndex++}`));
       let { done } = iterator.next();
       while (done === false) {
-        // let nextValue: unknown;
-
-        // while (debugging) {
-        //   replHost.output(
-        //     renderCallStack(state.calls)
-        //       .replace(/».*«/g, (match: string): string => `${yellow}${match}${white}`)
-        //       .replace(/@.*\n/g, (match: string): string => `${blue}${match}${white}`)
-        //       .replace(/\/!\\.*\n/g, (match: string): string => `${red}${match}${white}`)
-        //       .replace(/…|↵|⭲/g, (match: string): string => `${blue}${match}${white}`)
-        //     + `${white}\r\n`
-        //   );
-        //   replHost.output(
-        //     status(state, {
-        //       cycle,
-        //       absolute: true,
-        //       lastOperandsCount,
-        //       lastUsedMemory,
-        //       concat: ` ${yellow}o${cyan}perands ${yellow}c${cyan}ontinue ${yellow}q${cyan}uit`
-        //     })
-        //   );
-        //   lastOperandsCount = state.operands.length;
-        //   lastUsedMemory = state.memory.used;
-        //   const step = await replIO.getChar();
-        //   if (step === 'o') {
-        //     operands();
-        //   } else if (step === 'q') {
-        //     debugging = false;
-        //   } else {
-        //     break;
-        //   }
-        // }
-
+        const { exception } = state;
+        if (exception instanceof InternalException && exception.reason instanceof DebugError) {
+          debugging = true;
+        }
+        while (debugging) {
+          replIO.output(
+            (state as IInternalState).calls.ref
+              .map((value) =>
+                toString(value, { includeDebugSource: true, maxWidth: replIO.width })
+                  .replace(/».*«/g, (match: string): string => `${yellow}${match}${white}`)
+                  .replace(/@.*\n/g, (match: string): string => `${blue}${match}${white}`)
+                  .replace(/\/!\\.*\n/g, (match: string): string => `${red}${match}${white}`)
+                  .replace(/…|↵|⭲/g, (match: string): string => `${blue}${match}${white}`)
+              )
+              .join('\r\n') + `${white}\r\n`
+          );
+          replIO.output(
+            status(state, {
+              cycle,
+              absolute: true,
+              lastOperandsCount,
+              lastUsedMemory,
+              concat: ` ${yellow}o${cyan}perands ${yellow}c${cyan}ontinue ${yellow}q${cyan}uit`
+            })
+          );
+          lastOperandsCount = state.operands.length;
+          lastUsedMemory = state.memoryTracker.used;
+          const step = await replIO.waitForKey();
+          if (step === 'o') {
+            operands(replIO, state);
+          } else if (step === 'q') {
+            debugging = false;
+          } else {
+            break;
+          }
+        }
         ++cycle;
         const next = iterator.next();
         done = next.done;
-        // value = next.value;
       }
       const { exception } = state;
       if (exception instanceof InternalException && exception.reason instanceof ExitError) {

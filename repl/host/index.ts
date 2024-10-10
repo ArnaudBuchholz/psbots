@@ -4,13 +4,15 @@ import { exit } from './exit.js';
 import { createStateOperator } from './state.js';
 import { createHelpOperator } from './help.js';
 import { createPstackOperator } from './pstack.js';
+import { debug } from './debug.js';
 
 export function createHostDictionary(replIO: IReplIO): IReadOnlyDictionary {
   const hostMappings: Record<string, Value> = {
     exit,
     state: createStateOperator(replIO),
     help: createHelpOperator(replIO),
-    pstack: createPstackOperator(replIO)
+    pstack: createPstackOperator(replIO),
+    debug
   };
 
   return {
