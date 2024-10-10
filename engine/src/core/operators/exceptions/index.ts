@@ -6,5 +6,6 @@ import './stackUnderflow.js';
 import './stop.js';
 import './typeCheck.js';
 import './undefined.js';
+import './undefinedResult.js';
 import './unmatchedMark.js';
 import './vmOverflow.js';

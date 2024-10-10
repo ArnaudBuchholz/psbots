@@ -363,7 +363,7 @@ Here the list of official POSTSCRIPT operators extracted from this [index](https
 |undefined|✅|
 |undefinedfilename|❓|
 |undefineresource|❓|
-|undefinedresult|❓|
+|undefinedresult|✅|
 |undefinefont|📄|
 |undefineresource|📄|
 |undefinedresource|📄|

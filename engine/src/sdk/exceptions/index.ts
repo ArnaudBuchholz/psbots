@@ -8,5 +8,6 @@ export * from './StackUnderflowException.js';
 export * from './StopException.js';
 export * from './TypeCheckException.js';
 export * from './UndefinedException.js';
+export * from './UndefinedResultException.js';
 export * from './UnmatchedMarkException.js';
 export * from './VmOverflowException.js';
