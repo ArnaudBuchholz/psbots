@@ -67,6 +67,7 @@ export async function repl(replIO: IReplIO, debug?: boolean): Promise<void> {
       while (done === false) {
         const { exception } = state;
         if (exception instanceof InternalException && exception.reason instanceof DebugError) {
+          (state as IInternalState).exception = undefined;
           debugging = true;
         }
         while (debugging) {
