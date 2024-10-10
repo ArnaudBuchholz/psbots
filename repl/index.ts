@@ -5,6 +5,7 @@ import { /* blue, */ cyan, green, magenta, red, white, /* white, */ yellow } fro
 import { createHostDictionary } from './host/index.js';
 import { ExitError } from './host/exit.js';
 import { status } from './status.js';
+import { buildInputHandler } from './inputHandler.js';
 
 export * from './IReplIO.js';
 
@@ -18,41 +19,6 @@ function showError(replIO: IReplIO, e: unknown) {
       replIO.output(`${red}${JSON.stringify(e.reason, undefined, 2)}${white}\r\n`);
     }
   }
-}
-
-function buildInputHandler(replIO: IReplIO): () => Promise<string> {
-  const inputs: string[] = [];
-
-  let newInput: () => void;
-  let waitForInput = Promise.resolve();
-  let newInputTimerId: ReturnType<typeof setTimeout> | undefined;
-
-  const noInputs = () => {
-    waitForInput = new Promise((resolve) => {
-      newInput = resolve;
-    });
-  };
-  noInputs();
-
-  replIO.setInputBuffer({
-    addLine(input: string) {
-      if (newInputTimerId !== undefined) {
-        clearTimeout(newInputTimerId);
-      }
-      inputs.push(input);
-      newInputTimerId = setTimeout(newInput, 100);
-    }
-  });
-
-  return async () => {
-    if (inputs.length === 0) {
-      await waitForInput;
-    }
-    const input = inputs.join('\n');
-    inputs.length = 0;
-    noInputs();
-    return input;
-  };
 }
 
 export async function repl(replIO: IReplIO, debug?: boolean): Promise<void> {
@@ -88,23 +54,11 @@ export async function repl(replIO: IReplIO, debug?: boolean): Promise<void> {
       // const debugging = false;
 
       const iterator = state.process(parse(src, 0, `repl${replIndex++}`));
-      let { done /*, value */ } = iterator.next();
+      let { done } = iterator.next();
       while (done === false) {
         // let nextValue: unknown;
-        // if (value === $state) {
-        //   const dictLength = state.dictionaries.length;
-        //   replHost.output(`${cyan}memory: ${yellow}${memory(state)}${white}\r\n`);
-        //   replHost.output(`${cyan}dictionaries: ${yellow}${dictLength}${white}\r\n`);
-        //   forEach(state.dictionaries, (value, formattedIndex) => {
-        //     replHost.output(`${formattedIndex} ${formatters[value.type](value)}${white}\r\n`);
-        //   });
-        //   operands();
-        // }
 
         // while (debugging) {
-        //   if (typeof value === 'string') {
-        //     replHost.output(`${blue}${value}${white}\r\n`);
-        //   }
         //   replHost.output(
         //     renderCallStack(state.calls)
         //       .replace(/».*«/g, (match: string): string => `${yellow}${match}${white}`)
@@ -124,7 +78,7 @@ export async function repl(replIO: IReplIO, debug?: boolean): Promise<void> {
         //   );
         //   lastOperandsCount = state.operands.length;
         //   lastUsedMemory = state.memory.used;
-        //   const step = await replHost.getChar();
+        //   const step = await replIO.getChar();
         //   if (step === 'o') {
         //     operands();
         //   } else if (step === 'q') {
