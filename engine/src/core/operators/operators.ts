@@ -52,10 +52,11 @@ export function buildFunctionOperator(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   implementation: (state: IInternalState, ...values: any[]) => void
 ): OperatorValue {
-  /* istanbul ignore next */ // Should NOT happen
+  /* c8 ignore start */ // Should NOT happen
   if (registry[definition.name] !== undefined) {
     throw new InternalException(`Operator ${definition.name} already defined`);
   }
+  /* c8 ignore stop */
   Object.freeze(definition); // Can't be altered
   let operator: IOperator;
   if (definition.signature.input.length > 0) {
