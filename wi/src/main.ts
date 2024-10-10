@@ -2,6 +2,7 @@ import './style.css';
 import '@xterm/xterm/css/xterm.css';
 import { Terminal } from '@xterm/xterm';
 import { FitAddon } from '@xterm/addon-fit';
+import type { IReplInputBuffer } from '@psbots/repl';
 import { repl } from '@psbots/repl';
 
 let terminated = false;
@@ -17,17 +18,34 @@ async function main() {
 
   window.addEventListener('resize', () => fitAddon.fit());
 
+  let replInputBuffer: IReplInputBuffer;
   const input: string[] = [];
-  let resolveInput = (input: string) => console.log(input);
 
   term.onData((e) => {
     if (terminated) {
       return;
     }
-    if (e === '\r') {
+    if (e.length > 1) {
+      let unterminatedLine: string;
+      if (e.includes('\r')) {
+        const lines = e.split('\r');
+        unterminatedLine = lines.pop()!; // because it includes \r
+        lines.forEach((line) => {
+          term.write(line);
+          term.write('\r\n');
+          replInputBuffer.addLine(line);
+        });
+      } else {
+        unterminatedLine = e;
+      }
+      if (unterminatedLine.length > 0) {
+        input.push(...unterminatedLine.split(''));
+        term.write(unterminatedLine);
+      }
+    } else if (e === '\r') {
       // Enter
       term.write('\r\n');
-      resolveInput(input.join(''));
+      replInputBuffer.addLine(input.join(''));
       input.length = 0;
     } else if (e === '\u007F') {
       // Backspace (DEL)
@@ -48,7 +66,8 @@ async function main() {
     get height() {
       return term.rows;
     },
-    setInputBuffer(/*buffer*/) {
+    setInputBuffer(inputBuffer) {
+      replInputBuffer = inputBuffer;
     },
     async waitForKey() {
       return '';
