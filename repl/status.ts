@@ -48,7 +48,10 @@ export function status(state: IState, options: StatusOptions): string {
   }
   let flags = '';
   if (!state.callEnabled) {
-    flags = ` ${red}!call`;
+    flags += ` ${red}!call`;
+  }
+  if (state.exception) {
+    flags += ` ${red}❌${state.exception.name}`;
   }
   return [
     `${cyan}${cycleLabel}${yellow}${options.cycle}`,

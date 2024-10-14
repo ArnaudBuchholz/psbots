@@ -100,6 +100,7 @@ export async function repl(replIO: IReplIO, debug?: boolean): Promise<void> {
           lastOperandsCount = state.operands.length;
           lastUsedMemory = state.memoryTracker.used;
           const step = await waitForChar();
+          replIO.output('\b \b');
           if (step === 'o') {
             operands(replIO, state);
           } else if (step === 'q') {
