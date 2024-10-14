@@ -5,19 +5,15 @@ export interface IInputHandler {
   waitForChar: () => Promise<string>;
 }
 
-export class EndOfTextError extends Error {
+export class InputError extends Error {
   constructor() {
     super();
-    this.name = 'EndOfTextError';
+    this.name = this.constructor.name;
   }
 }
 
-export class EscapeError extends Error {
-  constructor() {
-    super();
-    this.name = 'EscapeError';
-  }
-}
+class EndOfTextError extends InputError {}
+class EscapeError extends InputError {}
 
 export function buildInputHandler(replIO: IReplIO): IInputHandler {
   const linesBuffer: string[] = [];
