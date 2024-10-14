@@ -5,12 +5,29 @@ export interface IInputHandler {
   waitForChar: () => Promise<string>;
 }
 
+export class EndOfTextError extends Error {
+  constructor() {
+    super();
+    this.name = 'EndOfTextError';
+  }
+}
+
+export class EscapeError extends Error {
+  constructor() {
+    super();
+    this.name = 'EscapeError';
+  }
+}
+
 export function buildInputHandler(replIO: IReplIO): IInputHandler {
   const linesBuffer: string[] = [];
 
   let linesBufferChange = Promise.resolve();
 
   let notifyLinesBufferChange = () => {};
+  let rejectInput = (error: Error) => {
+    error;
+  };
   const appendToLinesBuffer = (data: string, newLine = false) => {
     if (data.length) {
       linesBuffer[0] = linesBuffer[0] + data;
@@ -19,8 +36,9 @@ export function buildInputHandler(replIO: IReplIO): IInputHandler {
       linesBuffer.unshift('');
     }
     notifyLinesBufferChange();
-    linesBufferChange = new Promise<void>((resolve) => {
+    linesBufferChange = new Promise<void>((resolve, reject) => {
       notifyLinesBufferChange = resolve;
+      rejectInput = reject;
     });
   };
 
@@ -28,6 +46,9 @@ export function buildInputHandler(replIO: IReplIO): IInputHandler {
 
   replIO.input((data) => {
     if (data.length > 1) {
+      if (data.charAt(0) === '\u001b') {
+        return; // ignore
+      }
       let unterminatedLine: string;
       if (data.includes('\r')) {
         const lines = data.split('\r');
@@ -48,13 +69,17 @@ export function buildInputHandler(replIO: IReplIO): IInputHandler {
       // Enter
       replIO.output('\r\n');
       appendToLinesBuffer('', true);
-    } else if (data === '\u007F') {
+    } else if (data === '\u0008' || data === '\u007F') {
       // Backspace (DEL)
       const line = linesBuffer[0];
       if (line && line.length > 0) {
         replIO.output('\b \b');
         linesBuffer[0] = line.substring(0, line.length - 1);
       }
+    } else if (data === '\u0003') {
+      rejectInput(new EndOfTextError());
+    } else if (data === '\u001b') {
+      rejectInput(new EscapeError());
     } else if ((data >= String.fromCharCode(0x20) && data <= String.fromCharCode(0x7e)) || data >= '\u00a0') {
       replIO.output(data);
       appendToLinesBuffer(data, false);
