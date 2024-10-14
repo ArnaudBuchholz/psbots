@@ -6,7 +6,7 @@ import { /* blue, */ blue, cyan, green, magenta, red, white, /* white, */ yellow
 import { createHostDictionary } from './host/index.js';
 import { ExitError } from './host/exit.js';
 import { status } from './status.js';
-import { buildInputHandler } from './inputHandler.js';
+import { buildInputHandler, InputError } from './inputHandler.js';
 import { DebugError } from './host/debug.js';
 import { operands } from './format.js';
 
@@ -14,13 +14,19 @@ export * from './IReplIO.js';
 
 function showError(replIO: IReplIO, e: unknown) {
   if (!(e instanceof BaseException)) {
+    let name: string;
     let message: string;
     if (e instanceof Error) {
-      message = e.toString();
+      name = e.name;
+      message = e.message;
     } else {
+      name = 'Unknown error';
       message = JSON.stringify(e);
     }
-    replIO.output(`${red}💣 Unknown error: ${message}${white}\r\n`);
+    if (message.length) {
+      message = ': ' + message;
+    }
+    replIO.output(`${red}💣 ${name}${message}${white}\r\n`);
   } else {
     replIO.output(`${red}❌ ${e.message}${white}\r\n`);
     e.engineStack.forEach((line) => replIO.output(`${red}${line}${white}\r\n`));
@@ -56,8 +62,8 @@ export async function repl(replIO: IReplIO, debug?: boolean): Promise<void> {
   // eslint-disable-next-line no-constant-condition
   while (true) {
     replIO.output('? ');
-    const src = await waitForLines();
     try {
+      const src = await waitForLines();
       let lastOperandsCount = state.operands.length;
       let lastUsedMemory = state.memoryTracker.used;
       let cycle = 0;
@@ -123,6 +129,9 @@ export async function repl(replIO: IReplIO, debug?: boolean): Promise<void> {
       );
     } catch (e) {
       showError(replIO, e);
+      if (e instanceof InputError) {
+        break;
+      }
     }
   }
 
