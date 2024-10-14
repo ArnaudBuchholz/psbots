@@ -84,6 +84,21 @@ export class State implements IInternalState {
     return this._dictionaries;
   }
 
+  get callStack() {
+    return this.calls.ref.map((value) => toString(value, { includeDebugSource: true }));
+  }
+
+  private _callDisablingCount = 0;
+
+  get callEnabled() {
+    return this._callDisablingCount === 0;
+  }
+
+  get exception() {
+    this._checkIfDestroyed();
+    return this._exception;
+  }
+
   process(values: ValueStream): Generator {
     this._checkIfDestroyed();
     if (!this.idle) {
@@ -139,11 +154,6 @@ export class State implements IInternalState {
 
   // region IInternalState
 
-  get exception() {
-    this._checkIfDestroyed();
-    return this._exception;
-  }
-
   set exception(value: BaseException | undefined) {
     // TODO check if exception must be released for memory
     this._exception = value;
@@ -151,12 +161,6 @@ export class State implements IInternalState {
 
   get calls() {
     return this._calls;
-  }
-
-  private _callDisablingCount = 0;
-
-  get callEnabled() {
-    return this._callDisablingCount === 0;
   }
 
   allowCall() {
@@ -206,7 +210,7 @@ export class State implements IInternalState {
           exception = e;
         }
         this.exception = exception;
-        exception.engineStack = this.calls.ref.map((value) => toString(value, { includeDebugSource: true }));
+        exception.engineStack = this.callStack;
       }
     } else {
       this._operands.push(top);
