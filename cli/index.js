@@ -1,25 +1,14 @@
 import { repl } from '@psbots/repl';
-import * as readline from 'node:readline/promises';
 import { stdin, stdout } from 'node:process';
-import { readSync } from 'node:fs';
 
-const rl = readline.createInterface({ input: stdin, output: stdout });
+stdin.setRawMode(true);
 
 await repl(
   {
     width: process.stdout.columns,
     height: process.stdout.rows,
-    setInputBuffer(buffer) {
-      rl.on('line', (line) => {
-        buffer.addLine(line);
-      });
-    },
-    async waitForKey() {
-      stdin.setRawMode(true);
-      const buffer = Buffer.alloc(1);
-      readSync(0, buffer, 0, 1);
-      stdin.setRawMode(false);
-      return buffer.toString('utf8');
+    input: (callback) => {
+      stdin.on('data', (chunk) => callback(chunk.toString()));
     },
     output(text) {
       stdout.write(text);
@@ -31,4 +20,4 @@ await repl(
   process.exitCode = -1;
 });
 
-rl.close();
+process.exit();
