@@ -50,13 +50,13 @@ export async function repl(replIO: IReplIO, debug?: boolean): Promise<void> {
   replIO.output(`${cyan}Use '${yellow}help${cyan}'  to display help${white}\r\n`);
 
   let replIndex = 0;
-  const getInput = buildInputHandler(replIO);
+  const { waitForLines, waitForChar } = buildInputHandler(replIO);
   let debugging = false;
 
   // eslint-disable-next-line no-constant-condition
   while (true) {
     replIO.output('? ');
-    const src = await getInput();
+    const src = await waitForLines();
     try {
       let lastOperandsCount = state.operands.length;
       let lastUsedMemory = state.memoryTracker.used;
@@ -93,7 +93,7 @@ export async function repl(replIO: IReplIO, debug?: boolean): Promise<void> {
           );
           lastOperandsCount = state.operands.length;
           lastUsedMemory = state.memoryTracker.used;
-          const step = await replIO.waitForKey();
+          const step = await waitForChar();
           if (step === 'o') {
             operands(replIO, state);
           } else if (step === 'q') {
