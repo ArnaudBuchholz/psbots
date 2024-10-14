@@ -3,10 +3,7 @@
   "extends": "../tsconfig.json",
   "compilerOptions": {
     "rootDir": ".",
-    "baseUrl": ".",
-    "outDir": "./dist",
-    "declaration": true,
-    "removeComments": false
+    "baseUrl": "."
   },
   "include": [
     "./**/*.ts"
