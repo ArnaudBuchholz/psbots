@@ -85,7 +85,7 @@ export class State implements IInternalState {
   }
 
   get callStack() {
-    return this.calls.ref.map((value) => toString(value, { includeDebugSource: true }));
+    return this.calls.callStack();
   }
 
   private _callDisablingCount = 0;
@@ -210,7 +210,9 @@ export class State implements IInternalState {
           exception = e;
         }
         this.exception = exception;
-        exception.engineStack = this.callStack;
+        exception.engineStack = this.callStack.map(({ value, operatorState }) =>
+          toString(value, { operatorState, includeDebugSource: true })
+        );
       }
     } else {
       this._operands.push(top);

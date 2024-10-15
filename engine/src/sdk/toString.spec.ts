@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import type { IDebugSource, Value } from '@api/index.js';
 import { toString } from '@sdk/toString.js';
 import { toValue, values, stringify } from '@test/index.js';
+import { OPERATOR_STATE_CALL_BEFORE_POP, OPERATOR_STATE_FIRST_CALL, OPERATOR_STATE_POP, OPERATOR_STATE_UNKNOWN } from './interfaces';
 
 const stringValue = toValue('Hello World !');
 const executableStringValue = Object.assign(toValue('exec'), { isExecutable: true });
@@ -188,5 +189,45 @@ if`,
     expect(toString(operator('test.ps'), { includeDebugSource: true, maxWidth: 20 })).toStrictEqual(
       '-operat…@test.ps:3:3'
     );
+  });
+});
+
+describe('operatorState', () => {
+  describe('operator', () => {
+    it('converts an operator with OPERATOR_STATE_UNKNOWN', () => {
+      expect(toString(toValue.operator, {
+        operatorState: OPERATOR_STATE_UNKNOWN
+      })).toStrictEqual('-operator-');
+    });
+  
+    it('converts an operator with OPERATOR_STATE_FIRST_CALL', () => {
+      expect(toString(toValue.operator, {
+        operatorState: OPERATOR_STATE_FIRST_CALL
+      })).toStrictEqual('-operator-');
+    });
+  
+    it('converts an operator with operator state 12', () => {
+      expect(toString(toValue.operator, {
+        operatorState: 12
+      })).toStrictEqual('-operator-#12');
+    });
+  
+    it('converts an operator with OPERATOR_STATE_CALL_BEFORE_POP', () => {
+      expect(toString(toValue.operator, {
+        operatorState: OPERATOR_STATE_CALL_BEFORE_POP
+      })).toStrictEqual('-operator-#bpop');
+    });
+  
+    it('converts an operator with operator state -12', () => {
+      expect(toString(toValue.operator, {
+        operatorState: 12
+      })).toStrictEqual('-operator-#-12');
+    });
+  
+    it('converts an operator with OPERATOR_STATE_POP', () => {
+      expect(toString(toValue.operator, {
+        operatorState: OPERATOR_STATE_POP
+      })).toStrictEqual('-operator-#pop');
+    });
   });
 });

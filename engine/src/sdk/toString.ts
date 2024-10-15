@@ -2,6 +2,7 @@ import type { IDebugSource, Value } from '@api/index.js';
 import { ValueType } from '@api/index.js';
 
 type ToStringOptions = {
+  operatorState?: number;
   includeDebugSource?: boolean;
   maxWidth?: number;
 };
