@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import type { IState } from '@api/index.js';
 import {
   InternalException,
   OPERATOR_STATE_UNKNOWN,
@@ -30,7 +31,7 @@ describe('callStack', () => {
 
   it('returns default value for operatorState', () => {
     callstack.push(toValue(1));
-    expect(callstack.callStack()).toStrictEqual<ReturnType<(typeof CallStack.prototype)['callStack']>>([
+    expect(callstack.callStack()).toStrictEqual<IState['callStack']>([
       {
         value: toValue(1),
         operatorState: OPERATOR_STATE_UNKNOWN
@@ -44,7 +45,7 @@ describe('callStack', () => {
     callstack.push(toValue(2));
     callstack.topOperatorState = OPERATOR_STATE_FIRST_CALL;
     callstack.topOperatorState = 123;
-    expect(callstack.callStack()).toStrictEqual<ReturnType<(typeof CallStack.prototype)['callStack']>>([
+    expect(callstack.callStack()).toStrictEqual<IState['callStack']>([
       {
         value: toValue(2),
         operatorState: 123

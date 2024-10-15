@@ -1,4 +1,4 @@
-import type { Value } from '@api/index.js';
+import type { IState, Value } from '@api/index.js';
 import { SYSTEM_MEMORY_TYPE } from '@api/index.js';
 import type { ICallStack } from '@sdk/index.js';
 import {
@@ -52,7 +52,7 @@ export class CallStack extends ValueStack implements ICallStack {
     return result;
   }
 
-  callStack(): { value: Value; operatorState: number }[] {
+  callStack(): IState['callStack'] {
     return this.ref.map((value, index) => ({
       value,
       operatorState: this._steps[index]!
