@@ -23,6 +23,40 @@ afterEach(() => {
   expect(tracker.used).toStrictEqual(0);
 });
 
+describe('callStack', () => {
+  it('returns empty array when empty', () => {
+    expect(callstack.callStack()).toStrictEqual([]);
+  });
+
+  it('returns default value for operatorState', () => {
+    callstack.push(toValue(1));
+    expect(callstack.callStack()).toStrictEqual<ReturnType<(typeof CallStack.prototype)['callStack']>>([
+      {
+        value: toValue(1),
+        operatorState: OPERATOR_STATE_UNKNOWN
+      }
+    ]);
+  });
+
+  it('returns value set for operatorState', () => {
+    callstack.push(toValue(1));
+    callstack.topOperatorState = OPERATOR_STATE_FIRST_CALL;
+    callstack.push(toValue(2));
+    callstack.topOperatorState = OPERATOR_STATE_FIRST_CALL;
+    callstack.topOperatorState = 123;
+    expect(callstack.callStack()).toStrictEqual<ReturnType<(typeof CallStack.prototype)['callStack']>>([
+      {
+        value: toValue(2),
+        operatorState: 123
+      },
+      {
+        value: toValue(1),
+        operatorState: OPERATOR_STATE_FIRST_CALL
+      }
+    ]);
+  });
+});
+
 describe('IDictionary', () => {
   it('implements IDictionary interface', () => {
     expect(callstack.names).toStrictEqual([]);

@@ -52,6 +52,13 @@ export class CallStack extends ValueStack implements ICallStack {
     return result;
   }
 
+  callStack(): { value: Value; operatorState: number }[] {
+    return this.ref.map((value, index) => ({
+      value,
+      operatorState: this._steps[index]!
+    }));
+  }
+
   // region IDictionary
 
   get names(): string[] {
