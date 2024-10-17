@@ -1,6 +1,13 @@
 import { createState, parse } from '@psbots/engine';
 import type { IInternalState } from '@psbots/engine/sdk';
-import { BaseException, checkStringValue, InternalException, toString } from '@psbots/engine/sdk';
+import {
+  BaseException,
+  checkStringValue,
+  InternalException,
+  toString,
+  TOSTRING_BEGIN_MARKER,
+  TOSTRING_END_MARKER
+} from '@psbots/engine/sdk';
 import type { IReplIO } from './IReplIO.js';
 import { /* blue, */ blue, cyan, green, magenta, red, white, /* white, */ yellow } from './colors.js';
 import { createHostDictionary } from './host/index.js';
@@ -78,12 +85,14 @@ export async function repl(replIO: IReplIO, debug?: boolean): Promise<void> {
         }
         while (debugging) {
           replIO.output(
-            (state as IInternalState).calls.ref
-              .map((value) =>
-                toString(value, { includeDebugSource: true, maxWidth: replIO.width })
-                  .replace(/».*«/g, (match: string): string => `${yellow}${match}${white}`)
-                  .replace(/@.*\n/g, (match: string): string => `${blue}${match}${white}`)
-                  .replace(/\/!\\.*\n/g, (match: string): string => `${red}${match}${white}`)
+            state.callStack
+              .map(({ value, operatorState }) =>
+                toString(value, { operatorState, includeDebugSource: true, maxWidth: replIO.width })
+                  .replace(
+                    new RegExp(TOSTRING_BEGIN_MARKER + '.*' + TOSTRING_END_MARKER, 'g'),
+                    (match: string): string => `${yellow}${match}${white}`
+                  )
+                  .replace(/@.*$/g, (match: string): string => `${blue}${match}${white}`)
                   .replace(/…|↵|⭲/g, (match: string): string => `${blue}${match}${white}`)
               )
               .join('\r\n') + `${white}\r\n`
