@@ -9,7 +9,8 @@ import {
   InternalException,
   InvalidAccessException,
   OPERATOR_STATE_FIRST_CALL,
-  OperatorType
+  OperatorType,
+  TOSTRING_END_MARKER
 } from '@sdk/index.js';
 import { STRING_MEMORY_TYPE } from '@core/MemoryTracker.js';
 
@@ -216,6 +217,10 @@ describe('exception handling', () => {
     });
     state.cycle();
     expect(state.exception).toBeInstanceOf(InvalidAccessException);
-    expect(state.exception?.engineStack).toStrictEqual(['-invalidaccess-', 'step2', 'step1']);
+    expect(state.exception?.engineStack).toStrictEqual([
+      `-invalidaccess-${TOSTRING_END_MARKER}${TOSTRING_END_MARKER}`,
+      'step2',
+      'step1'
+    ]);
   });
 });

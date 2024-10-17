@@ -1,5 +1,14 @@
 import type { IDebugSource, Value } from '@api/index.js';
-import { ValueType } from '@api/index.js';
+import { ValueType, parse } from '@api/index.js';
+import {
+  OPERATOR_STATE_CALL_BEFORE_POP,
+  OPERATOR_STATE_FIRST_CALL,
+  OPERATOR_STATE_POP,
+  OPERATOR_STATE_UNKNOWN
+} from '@sdk/interfaces/ICallStack.js';
+
+export const TOSTRING_BEGIN_MARKER = '▻';
+export const TOSTRING_END_MARKER = '◅';
 
 type ToStringOptions = {
   operatorState?: number;
@@ -68,16 +77,47 @@ const implementations: { [type in ValueType]: (container: Value<type>, options: 
   [ValueType.boolean]: ({ isSet, debugSource }, options) => decorate(isSet ? 'true' : 'false', debugSource, options),
   [ValueType.integer]: ({ integer, debugSource }, options) => decorate(integer.toString(), debugSource, options),
   [ValueType.string]: ({ isExecutable, string, debugSource }, options) => {
-    let stringified: string;
+    let stringified: string | undefined;
     if (isExecutable) {
       stringified = string.replace(/ /g, '␣');
     } else {
-      stringified = JSON.stringify(string);
+      const { operatorState } = options;
+      if (operatorState !== undefined && operatorState >= OPERATOR_STATE_FIRST_CALL) {
+        const [token] = parse(string, operatorState, 'toString');
+        const length = token?.debugSource?.length;
+        if (length !== undefined) {
+          stringified = JSON.stringify(
+            string.substring(0, operatorState) +
+              TOSTRING_BEGIN_MARKER +
+              string.substring(operatorState, operatorState + length) +
+              TOSTRING_END_MARKER +
+              string.substring(operatorState + length)
+          );
+        }
+      }
+      if (stringified === undefined) {
+        stringified = JSON.stringify(string);
+      }
     }
     return decorate(stringified, debugSource, options);
   },
   [ValueType.mark]: ({ debugSource }, options) => decorate('--mark--', debugSource, options),
-  [ValueType.operator]: ({ operator, debugSource }, options) => decorate(`-${operator.name}-`, debugSource, options),
+  [ValueType.operator]: ({ operator, debugSource }, options) => {
+    let stringified = `-${operator.name}-`;
+    const { operatorState } = options;
+    if (operatorState !== undefined && operatorState !== OPERATOR_STATE_UNKNOWN) {
+      if (operatorState > OPERATOR_STATE_FIRST_CALL) {
+        stringified += `${TOSTRING_BEGIN_MARKER}${operatorState?.toString()}`;
+      } else if (operatorState === OPERATOR_STATE_CALL_BEFORE_POP) {
+        stringified += TOSTRING_END_MARKER;
+      } else if (operatorState === OPERATOR_STATE_POP) {
+        stringified += `${TOSTRING_END_MARKER}${TOSTRING_END_MARKER}`;
+      } else if (operatorState < OPERATOR_STATE_CALL_BEFORE_POP) {
+        stringified += `${TOSTRING_END_MARKER}${operatorState?.toString()}`;
+      }
+    }
+    return decorate(stringified, debugSource, options);
+  },
   [ValueType.array]: ({ isExecutable, array, debugSource }, options) => {
     const output: string[] = [];
     if (isExecutable) {
@@ -86,20 +126,24 @@ const implementations: { [type in ValueType]: (container: Value<type>, options: 
       output.push('[');
     }
     const { length } = array;
+    const { operatorState } = options;
     for (let index = 0; index < length; ++index) {
       const item = array.at(index);
       if (item === null) {
         output.push('␀');
       } else {
-        output.push(
-          implementations[item.type](
-            item as never,
-            Object.assign({}, options, {
-              includeDebugSource: false,
-              maxWidth: 0
-            })
-          )
+        const stringifiedItem = implementations[item.type](
+          item as never,
+          Object.assign({}, options, {
+            includeDebugSource: false,
+            maxWidth: 0
+          })
         );
+        if (isExecutable && operatorState === index) {
+          output.push(TOSTRING_BEGIN_MARKER + stringifiedItem + TOSTRING_END_MARKER);
+        } else {
+          output.push(stringifiedItem);
+        }
       }
     }
     if (isExecutable) {

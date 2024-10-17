@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import type { IDebugSource, Value } from '@api/index.js';
-import { toString } from '@sdk/toString.js';
+import { toString, TOSTRING_BEGIN_MARKER, TOSTRING_END_MARKER } from '@sdk/toString.js';
 import {
   OPERATOR_STATE_CALL_BEFORE_POP,
   OPERATOR_STATE_FIRST_CALL,
@@ -28,7 +28,7 @@ describe('basic conversion', () => {
   });
 
   it('converts a spaced executable string value', () => {
-    expect(toString(Object.assign(toValue('spaced exec'), { isExecutable: true }))).toStrictEqual('spaced␣exec');
+    expect(toString(toValue('spaced exec', { isExecutable: true }))).toStrictEqual('spaced␣exec');
   });
 
   it('converts a mark', () => {
@@ -56,7 +56,7 @@ describe('basic conversion', () => {
   });
 
   it('converts an executable array', () => {
-    expect(toString(Object.assign(toValue([1, 2, 3]), { isExecutable: true }))).toStrictEqual('{ 1 2 3 }');
+    expect(toString(toValue([1, 2, 3], { isExecutable: true }))).toStrictEqual('{ 1 2 3 }');
   });
 
   it('summarizes a dictionary', () => {
@@ -198,6 +198,80 @@ if`,
 });
 
 describe('operatorState', () => {
+  describe('string', () => {
+    const string = `"factorial"
+{
+  %% check stack
+  count 1 lt { stackunderflow } if
+  dup type "integer" neq { typecheck } if
+
+  1 exch
+  %% result n
+  {
+    dup 2 lt { pop stop } if
+    dup 3 1 roll mul
+    exch
+    1 sub
+  } loop
+} bind def
+
+`;
+
+    it('converts string and indicate current position (OPERATOR_STATE_UNKNOWN)', () => {
+      expect(toString(toValue(string), { operatorState: OPERATOR_STATE_UNKNOWN })).toStrictEqual(
+        toString(toValue(string))
+      );
+    });
+
+    it('converts string and indicate current position (OPERATOR_STATE_FIRST_CALL)', () => {
+      expect(toString(toValue(string), { operatorState: OPERATOR_STATE_FIRST_CALL })).toStrictEqual(
+        toString(
+          toValue(`${TOSTRING_BEGIN_MARKER}"factorial"${TOSTRING_END_MARKER}
+{
+  %% check stack
+  count 1 lt { stackunderflow } if
+  dup type "integer" neq { typecheck } if
+
+  1 exch
+  %% result n
+  {
+    dup 2 lt { pop stop } if
+    dup 3 1 roll mul
+    exch
+    1 sub
+  } loop
+} bind def
+
+`)
+        )
+      );
+    });
+
+    it('converts string and indicate current position (operator state is 12)', () => {
+      expect(toString(toValue(string), { operatorState: 12 })).toStrictEqual(
+        toString(
+          toValue(`"factorial"
+${TOSTRING_BEGIN_MARKER}{${TOSTRING_END_MARKER}
+  %% check stack
+  count 1 lt { stackunderflow } if
+  dup type "integer" neq { typecheck } if
+
+  1 exch
+  %% result n
+  {
+    dup 2 lt { pop stop } if
+    dup 3 1 roll mul
+    exch
+    1 sub
+  } loop
+} bind def
+
+`)
+        )
+      );
+    });
+  });
+
   describe('operator', () => {
     it('converts an operator with OPERATOR_STATE_UNKNOWN', () => {
       expect(
@@ -220,7 +294,7 @@ describe('operatorState', () => {
         toString(toValue.operator, {
           operatorState: 12
         })
-      ).toStrictEqual('-operator-»12');
+      ).toStrictEqual(`-operator-${TOSTRING_BEGIN_MARKER}12`);
     });
 
     it('converts an operator with OPERATOR_STATE_CALL_BEFORE_POP', () => {
@@ -228,15 +302,15 @@ describe('operatorState', () => {
         toString(toValue.operator, {
           operatorState: OPERATOR_STATE_CALL_BEFORE_POP
         })
-      ).toStrictEqual('-operator-«');
+      ).toStrictEqual(`-operator-${TOSTRING_END_MARKER}`);
     });
 
     it('converts an operator with operator state -12', () => {
       expect(
         toString(toValue.operator, {
-          operatorState: 12
+          operatorState: -12
         })
-      ).toStrictEqual('-operator-«-12');
+      ).toStrictEqual(`-operator-${TOSTRING_END_MARKER}-12`);
     });
 
     it('converts an operator with OPERATOR_STATE_POP', () => {
@@ -244,14 +318,16 @@ describe('operatorState', () => {
         toString(toValue.operator, {
           operatorState: OPERATOR_STATE_POP
         })
-      ).toStrictEqual('-operator-««');
+      ).toStrictEqual(`-operator-${TOSTRING_END_MARKER}${TOSTRING_END_MARKER}`);
     });
   });
 
   describe('executable array', () => {
+    const array = toValue([1, 2, 3], { isExecutable: true });
+
     it('converts an executable array with OPERATOR_STATE_UNKNOWN', () => {
       expect(
-        toString(Object.assign(toValue([1, 2, 3]), { isExecutable: true }), {
+        toString(array, {
           operatorState: OPERATOR_STATE_UNKNOWN
         })
       ).toStrictEqual('{ 1 2 3 }');
@@ -259,18 +335,18 @@ describe('operatorState', () => {
 
     it('converts an executable array with OPERATOR_STATE_FIRST_CALL', () => {
       expect(
-        toString(Object.assign(toValue([1, 2, 3]), { isExecutable: true }), {
-          operatorState: OPERATOR_STATE_UNKNOWN
+        toString(array, {
+          operatorState: OPERATOR_STATE_FIRST_CALL
         })
-      ).toStrictEqual('{ »1« 2 3 }');
+      ).toStrictEqual(`{ ${TOSTRING_BEGIN_MARKER}1${TOSTRING_END_MARKER} 2 3 }`);
     });
 
     it('converts an executable array with operator state 1', () => {
       expect(
-        toString(Object.assign(toValue([1, 2, 3]), { isExecutable: true }), {
-          operatorState: OPERATOR_STATE_UNKNOWN
+        toString(array, {
+          operatorState: 1
         })
-      ).toStrictEqual('{ 1 »2« 3 }');
+      ).toStrictEqual(`{ 1 ${TOSTRING_BEGIN_MARKER}2${TOSTRING_END_MARKER} 3 }`);
     });
   });
 });
