@@ -7,6 +7,7 @@ import {
   OPERATOR_STATE_POP,
   OPERATOR_STATE_UNKNOWN
 } from '@sdk/interfaces/ICallStack.js';
+import { OperatorType } from '@sdk/interfaces/IOperator.js';
 import { toValue, values, stringify } from '@test/index.js';
 
 const stringValue = toValue('Hello World !');
@@ -37,6 +38,20 @@ describe('basic conversion', () => {
 
   it('converts an operator', () => {
     expect(toString(toValue.operator)).toStrictEqual('-operator-');
+  });
+
+  it('enables the override of toString by the operator', () => {
+    const operatorValue = {
+      ...toValue.operator,
+      operator: {
+        name: 'operator',
+        type: OperatorType.implementation,
+        toString() {
+          return 'overridden';
+        }
+      }
+    };
+    expect(toString(operatorValue)).toStrictEqual('overridden');
   });
 
   it('converts a non executable array', () => {
