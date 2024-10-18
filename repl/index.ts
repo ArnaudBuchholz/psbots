@@ -9,7 +9,7 @@ import {
   TOSTRING_END_MARKER
 } from '@psbots/engine/sdk';
 import type { IReplIO } from './IReplIO.js';
-import { /* blue, */ blue, cyan, green, magenta, red, white, /* white, */ yellow } from './colors.js';
+import { blue, cyan, green, magenta, red, white, yellow } from './colors.js';
 import { createHostDictionary } from './host/index.js';
 import { ExitError } from './host/exit.js';
 import { status } from './status.js';
@@ -84,19 +84,23 @@ export async function repl(replIO: IReplIO, debug?: boolean): Promise<void> {
           debugging = true;
         }
         while (debugging) {
-          replIO.output(
-            state.callStack
-              .map(({ value, operatorState }) =>
-                toString(value, { operatorState, includeDebugSource: true, maxWidth: replIO.width })
-                  .replace(
-                    new RegExp(TOSTRING_BEGIN_MARKER + '.*' + TOSTRING_END_MARKER, 'g'),
-                    (match: string): string => `${yellow}${match}${white}`
-                  )
-                  .replace(/@.*$/g, (match: string): string => `${blue}${match}${white}`)
-                  .replace(/…|↵|⭲/g, (match: string): string => `${blue}${match}${white}`)
-              )
-              .join('\r\n') + `${white}\r\n`
-          );
+          if (state.callStack.length) {
+            replIO.output(
+              state.callStack
+                .map(({ value, operatorState }) =>
+                  toString(value, { operatorState, includeDebugSource: true, maxWidth: replIO.width })
+                    .replace(
+                      new RegExp(TOSTRING_BEGIN_MARKER + '.*' + TOSTRING_END_MARKER, 'g'),
+                      (match: string): string => `${yellow}${match}${white}`
+                    )
+                    .replace(/@.*$/g, (match: string): string => `${blue}${match}${white}`)
+                    .replace(/…|↵|⭲/g, (match: string): string => `${blue}${match}${white}`)
+                )
+                .join('\r\n') + `${white}\r\n`
+            );
+          } else {
+            replIO.output('∅ call stack is empty\r\n');
+          }
           replIO.output(
             status(state, {
               cycle,
