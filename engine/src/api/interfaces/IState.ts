@@ -13,10 +13,10 @@ export interface IState {
   readonly dictionaries: IReadOnlyArray;
   readonly callStack: { value: Value; operatorState: number }[];
   readonly callEnabled: boolean;
-  /** Set when an exception stops the current processing */
+  /** Set when an exception is raised */
   readonly exception: IException | undefined;
   /** Reset any exception */
-  process: (values: ValueStream) => Generator;
+  exec: (value: Value) => Generator;
   /** Release associated memory, using the state *after* may fail */
   destroy: () => void;
 }

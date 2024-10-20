@@ -39,9 +39,9 @@ export function* parse(source: string, pos: number = 0, filename?: string): Gene
     } else if (call !== undefined) {
       yield {
         ...common,
-        type: ValueType.string,
+        type: ValueType.name,
         isExecutable: true,
-        string: call
+        name: call
       };
     }
     match = matcher.exec(source);

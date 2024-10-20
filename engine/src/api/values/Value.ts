@@ -2,6 +2,7 @@ import type { ValueType } from '@api/values/ValueType.js';
 import type { BooleanValue } from '@api/values/BooleanValue.js';
 import type { IntegerValue } from '@api/values/IntegerValue.js';
 import type { StringValue } from '@api/values/StringValue.js';
+import type { NameValue } from '@api/values/NameValue.js';
 import type { MarkValue } from '@api/values/MarkValue.js';
 import type { OperatorValue } from '@api/values/OperatorValue.js';
 import type { ArrayValue } from '@api/values/ArrayValue.js';
@@ -19,15 +20,25 @@ export type Value<T = unknown> = T extends ValueType.boolean
     ? IntegerValue
     : T extends ValueType.string
       ? StringValue
-      : T extends ValueType.mark
-        ? MarkValue
-        : T extends ValueType.operator
-          ? OperatorValue
-          : T extends ValueType.array
-            ? ArrayValue
-            : T extends ValueType.dictionary
-              ? DictionaryValue
-              : BooleanValue | IntegerValue | StringValue | MarkValue | OperatorValue | ArrayValue | DictionaryValue;
+      : T extends ValueType.name
+        ? NameValue
+        : T extends ValueType.mark
+          ? MarkValue
+          : T extends ValueType.operator
+            ? OperatorValue
+            : T extends ValueType.array
+              ? ArrayValue
+              : T extends ValueType.dictionary
+                ? DictionaryValue
+                :
+                    | BooleanValue
+                    | IntegerValue
+                    | StringValue
+                    | NameValue
+                    | MarkValue
+                    | OperatorValue
+                    | ArrayValue
+                    | DictionaryValue;
 
 export type ValueOf<T> = T extends ValueType.boolean
   ? boolean
@@ -35,12 +46,14 @@ export type ValueOf<T> = T extends ValueType.boolean
     ? number
     : T extends ValueType.string
       ? string
-      : T extends ValueType.mark
-        ? null
-        : T extends ValueType.operator
-          ? IAbstractOperator
-          : T extends ValueType.array
-            ? IReadOnlyArray | IArray
-            : T extends ValueType.dictionary
-              ? IReadOnlyDictionary | IDictionary
-              : never;
+      : T extends ValueType.name
+        ? string
+        : T extends ValueType.mark
+          ? null
+          : T extends ValueType.operator
+            ? IAbstractOperator
+            : T extends ValueType.array
+              ? IReadOnlyArray | IArray
+              : T extends ValueType.dictionary
+                ? IReadOnlyDictionary | IDictionary
+                : never;
