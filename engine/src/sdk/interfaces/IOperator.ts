@@ -30,7 +30,7 @@ export interface IFunctionOperator extends IAbstractOperator {
   /**
    * Used when converting operator to string (for call stack rendering)
    */
-  readonly toString?: (options?: ToStringOptions & { debugSource?: IDebugSource }) => string;
+  readonly toString?: (options: ToStringOptions & { debugSource?: IDebugSource }) => string;
 }
 
 /** Operator */
