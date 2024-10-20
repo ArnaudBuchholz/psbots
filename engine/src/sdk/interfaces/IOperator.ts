@@ -7,6 +7,8 @@ export enum OperatorType {
   implementation
 }
 
+export type IFunctionOperatorToString = (options: ToStringOptions & { debugSource?: IDebugSource }) => string;
+
 /** A constant operator is associated to a value (like true, false, mark) */
 export interface IConstantOperator extends IAbstractOperator {
   readonly type: OperatorType.constant;
@@ -30,7 +32,7 @@ export interface IFunctionOperator extends IAbstractOperator {
   /**
    * Used when converting operator to string (for call stack rendering)
    */
-  readonly toString?: (options: ToStringOptions & { debugSource?: IDebugSource }) => string;
+  readonly toString?: IFunctionOperatorToString;
 }
 
 /** Operator */
