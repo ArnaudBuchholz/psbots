@@ -6,8 +6,6 @@ import {
   OPERATOR_STATE_POP,
   OPERATOR_STATE_UNKNOWN
 } from '@sdk/interfaces/ICallStack.js';
-import { OperatorType } from '@sdk/interfaces/IOperator.js';
-import type { IFunctionOperator } from '@sdk/interfaces/IOperator.js';
 
 export const TOSTRING_BEGIN_MARKER = '▻';
 export const TOSTRING_END_MARKER = '◅';
@@ -105,14 +103,6 @@ const implementations: { [type in ValueType]: (container: Value<type>, options: 
   },
   [ValueType.mark]: ({ debugSource }, options) => decorate('--mark--', debugSource, options),
   [ValueType.operator]: ({ operator, debugSource }, options) => {
-    const realOperator = operator as IFunctionOperator;
-    if (
-      realOperator.type === OperatorType.implementation &&
-      Object.hasOwnProperty.call(realOperator, 'toString') &&
-      realOperator.toString
-    ) {
-      return realOperator.toString({ ...options, debugSource });
-    }
     let stringified = `-${operator.name}-`;
     const { operatorState } = options;
     if (operatorState !== undefined && operatorState !== OPERATOR_STATE_UNKNOWN) {

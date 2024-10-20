@@ -1,13 +1,10 @@
-import type { IAbstractOperator, IDebugSource, Value, ValueType } from '@api/index.js';
+import type { IAbstractOperator, Value, ValueType } from '@api/index.js';
 import type { IInternalState } from '@sdk/interfaces/IInternalState.js';
-import type { ToStringOptions } from '@sdk/toString.js';
 
 export enum OperatorType {
   constant,
   implementation
 }
-
-export type IFunctionOperatorToString = (options: ToStringOptions & { debugSource?: IDebugSource }) => string;
 
 /** A constant operator is associated to a value (like true, false, mark) */
 export interface IConstantOperator extends IAbstractOperator {
@@ -29,10 +26,6 @@ export interface IFunctionOperator extends IAbstractOperator {
    * parameters are given in the order indicated by typeCheck
    */
   readonly implementation: (state: IInternalState, parameters: readonly Value[]) => void;
-  /**
-   * Used when converting operator to string (for call stack rendering)
-   */
-  readonly toString?: IFunctionOperatorToString;
 }
 
 /** Operator */

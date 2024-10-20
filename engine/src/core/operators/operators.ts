@@ -1,6 +1,6 @@
 import type { IOperatorValue, OperatorValue, Value } from '@api/index.js';
 import { ValueType } from '@api/index.js';
-import type { IInternalState, IFunctionOperatorToString, IOperator, IFunctionOperator } from '@sdk/index.js';
+import type { IInternalState, IFunctionOperator } from '@sdk/index.js';
 import { OperatorType, InternalException, valuesOf } from '@sdk/index.js';
 
 export type OperatorDefinition = {
@@ -8,7 +8,6 @@ export type OperatorDefinition = {
   aliases?: string[];
   description: string;
   postScriptDeviation?: string;
-  register?: false;
   labels: (
     | 'array'
     | 'boolean'
@@ -49,8 +48,7 @@ export const registry: {
 export function buildFunctionOperator(
   definition: OperatorDefinition,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  implementation: (state: IInternalState, ...values: any[]) => void,
-  toString?: IFunctionOperatorToString
+  implementation: (state: IInternalState, ...values: any[]) => void
 ): OperatorValue {
   /* c8 ignore start */ // Should NOT happen
   if (registry[definition.name] !== undefined) {
@@ -82,34 +80,29 @@ export function buildFunctionOperator(
       implementation
     };
   }
-  if (toString) {
-    Object.assign(operator, { toString });
-  }
   const value = {
     type: ValueType.operator,
     isExecutable: true,
     isReadOnly: true,
     operator
   } satisfies IOperatorValue;
-  if (definition.register !== false) {
-    registry[definition.name] = {
-      definition,
-      value
-    };
-    if (definition.aliases) {
-      definition.aliases.forEach((alias) => {
-        registry[alias] = {
-          definition,
-          value: {
-            ...value,
-            operator: {
-              ...value.operator,
-              name: alias
-            }
+  registry[definition.name] = {
+    definition,
+    value
+  };
+  if (definition.aliases) {
+    definition.aliases.forEach((alias) => {
+      registry[alias] = {
+        definition,
+        value: {
+          ...value,
+          operator: {
+            ...value.operator,
+            name: alias
           }
-        };
-      });
-    }
+        }
+      };
+    });
   }
   return value;
 }
