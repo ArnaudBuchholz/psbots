@@ -9,7 +9,6 @@ Even if largely inspired from the [PostScript engine](https://en.wikipedia.org/w
 In particular :
 
 * **Many** types are missing :
-  * `name` (replaced with executable string)
   * `condition` *(❓might be implemented)*
   * `null` *(❓might be implemented)*
   * `file` *(❓might be implemented)*
@@ -19,6 +18,8 @@ In particular :
   * `gstate`
   * `save` *(❓might be implemented)*
   * `lock` *(❓might be implemented)*
+
+> types are reduced to their name without `type` suffix
 
 * Some operators are not compliant with their official equivalent, please double check the definitions
 
