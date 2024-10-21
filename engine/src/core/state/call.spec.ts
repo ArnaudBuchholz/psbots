@@ -1,5 +1,5 @@
 import { it, expect, beforeEach, afterEach, beforeAll } from 'vitest';
-import { ExceptionDictionaryName, parse } from '@api/index.js';
+import { ExceptionDictionaryName } from '@api/index.js';
 import type { IDebugSource, IDictionary, Value } from '@api/index.js';
 import { toValue, waitForGenerator } from '@test/index.js';
 import { State } from './State.js';
@@ -70,7 +70,7 @@ it('*always* execute { and } even if it changes callEnabled', () => {
 });
 
 it('*always* execute { and } (cumulated)', () => {
-  waitForGenerator(state.process(parse('{ { } { } }')));
+  waitForGenerator(state.exec(toValue('{ { } { } }', { isExecutable: true })));
   expect(state.callEnabled).toStrictEqual(true);
 });
 

@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { parse, ValueType } from '@api/index.js';
+import { ValueType } from '@api/index.js';
 import type { Value } from '@api/index.js';
 import { State } from './State.js';
-import { waitForGenerator, toValue } from '@test/index.js';
+import { toValue, waitForGenerator } from '@test/index.js';
 import type { IFunctionOperator } from '@sdk/index.js';
 import {
   BusyException,
@@ -78,28 +78,10 @@ describe('IState', () => {
   });
 });
 
-describe('processing', () => {
-  it('processes a string', () => {
+describe('exec', () => {
+  it('executes an executable string', () => {
     expect(state.idle).toStrictEqual(true);
-    const generator = state.process('123');
-    expect(state.idle).toStrictEqual(false);
-    waitForGenerator(generator);
-    expect(state.idle).toStrictEqual(true);
-    expect(state.operands.ref).toStrictEqual<Value[]>([toValue(123)]);
-  });
-
-  it('processes an array', () => {
-    expect(state.idle).toStrictEqual(true);
-    const generator = state.process([toValue(123)]);
-    expect(state.idle).toStrictEqual(false);
-    waitForGenerator(generator);
-    expect(state.idle).toStrictEqual(true);
-    expect(state.operands.ref).toStrictEqual<Value[]>([toValue(123)]);
-  });
-
-  it('processes a generator', () => {
-    expect(state.idle).toStrictEqual(true);
-    const generator = state.process(parse('123'));
+    const generator = state.exec(toValue('123', { isExecutable: true }));
     expect(state.idle).toStrictEqual(false);
     waitForGenerator(generator);
     expect(state.idle).toStrictEqual(true);
@@ -107,8 +89,8 @@ describe('processing', () => {
   });
 
   it('fails if already busy', () => {
-    state.process(parse('123'));
-    expect(() => state.process(parse('456'))).toThrowError(BusyException);
+    state.exec(toValue('123', { isExecutable: true }));
+    expect(() => state.exec(toValue('456', { isExecutable: true }))).toThrowError(BusyException);
   });
 });
 
@@ -132,7 +114,7 @@ describe('IInternalState', () => {
 describe('memory', () => {
   it('ensures memory is handled for strings', () => {
     expect(state.memoryTracker.byType[STRING_MEMORY_TYPE]).toStrictEqual(0);
-    waitForGenerator(state.process('"123"'));
+    waitForGenerator(state.exec(toValue('"123"', { isExecutable: true })));
     const value = state.operands.ref[0];
     expect(value?.type).toStrictEqual(ValueType.string);
     expect(value?.tracker).not.toBeUndefined();
@@ -140,14 +122,14 @@ describe('memory', () => {
   });
 
   it('releases memory when the string is popped', () => {
-    waitForGenerator(state.process('"123"'));
+    waitForGenerator(state.exec(toValue('"123"', { isExecutable: true })));
     state.operands.pop();
     expect(state.memoryTracker.byType[STRING_MEMORY_TYPE]).toStrictEqual(0);
   });
 
   it('detects memory leaks', () => {
     const productionState = new State();
-    waitForGenerator(productionState.process('"123"'));
+    waitForGenerator(state.exec(toValue('"123"', { isExecutable: true })));
     const value = productionState.operands.top;
     value.tracker?.addValueRef(value); // will leak
     expect(() => productionState.destroy()).toThrowError('Memory leaks detected');

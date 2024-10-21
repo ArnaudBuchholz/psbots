@@ -1,8 +1,7 @@
 import { it, expect, beforeEach, afterEach } from 'vitest';
 import type { IDebugSource } from '@api/index.js';
-import { parse } from '@api/index.js';
 import { State } from '@core/state/State.js';
-import { waitForGenerator } from '@test/wait-for-generator.js';
+import { toValue, waitForGenerator } from '@test/index.js';
 
 let state: State;
 
@@ -16,11 +15,19 @@ afterEach(() => {
 
 it('forwards debug info', async () => {
   const source = '[ 1 2 3 ]';
-  await waitForGenerator(state.process(parse(source, 0, 'test')));
-  expect(state.operands.top.debugSource).toStrictEqual<IDebugSource>({
+  const debugSource = {
     filename: 'test',
     pos: 0,
     length: 9,
     source
-  });
+  } satisfies IDebugSource;
+  await waitForGenerator(
+    state.exec(
+      Object.assign({
+        debugSource,
+        ...toValue(source, { isExecutable: true })
+      })
+    )
+  );
+  expect(state.operands.top.debugSource).toStrictEqual<IDebugSource>(debugSource);
 });

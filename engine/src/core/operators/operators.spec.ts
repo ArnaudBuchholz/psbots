@@ -3,7 +3,7 @@ import { parse } from '@api/index.js';
 import type { OperatorDefinition } from './operators.js';
 import { registry } from './operators.js';
 import { State } from '@core/state/State.js';
-import { waitForGenerator } from '@test/wait-for-generator.js';
+import { toValue, waitForGenerator } from '@test/index.js';
 
 const nullDefinition: OperatorDefinition = {
   name: 'null',
@@ -61,8 +61,8 @@ describe('executing in & out using debug', () => {
                 failed = true;
               });
               const start = performance.now();
-              debugCycles += waitForGenerator(state.process(sample.in)).length;
-              debugCycles += waitForGenerator(expectedState.process(sample.out)).length;
+              debugCycles += waitForGenerator(state.exec(toValue(sample.in, { isExecutable: true }))).length;
+              debugCycles += waitForGenerator(expectedState.exec(toValue(sample.out, { isExecutable: true }))).length;
               debugMilliseconds += Math.ceil(performance.now() - start);
               if (expectedState.exception) {
                 expect(state.exception).not.toBeUndefined();
@@ -117,7 +117,7 @@ describe.runIf(!failed)('executing in only (performance)', () => {
           const description = sample.description ?? definition.description;
           if (missingOperators.length === 0) {
             it(`[${sampleId}] ${description}`, () => {
-              const iterator = state.process(sample.in);
+              const iterator = state.exec(toValue(sample.in, { isExecutable: true }));
               // eslint-disable-next-line no-constant-condition
               while (true) {
                 const start = performance.now();

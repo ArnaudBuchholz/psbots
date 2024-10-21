@@ -1,13 +1,12 @@
-import type { Value, IReadOnlyDictionary, ValueStream } from '@api/index.js';
-import { parse, SYSTEM_MEMORY_TYPE, ValueType } from '@api/index.js';
-import type { IInternalState, IOperator } from '@sdk/index.js';
+import type { Value, IReadOnlyDictionary } from '@api/index.js';
+import { SYSTEM_MEMORY_TYPE, ValueType } from '@api/index.js';
+import type { IInternalState } from '@sdk/index.js';
 import {
   BaseException,
   BusyException,
   InternalException,
   OPERATOR_STATE_FIRST_CALL,
   OPERATOR_STATE_POP,
-  OperatorType,
   toString
 } from '@sdk/index.js';
 import { MemoryTracker } from '@core/MemoryTracker.js';
@@ -99,41 +98,13 @@ export class State implements IInternalState {
     return this._exception;
   }
 
-  process(values: ValueStream): Generator {
+  exec(value: Value): Generator {
     this._checkIfDestroyed();
     if (!this.idle) {
       throw new BusyException();
     }
     this._resetException();
-    let generator: Iterator<Value>;
-    if (typeof values === 'string') {
-      generator = parse(values);
-    } else if (Array.isArray(values)) {
-      generator = values[Symbol.iterator]();
-    } else {
-      generator = values;
-    }
-    this.calls.push({
-      type: ValueType.operator,
-      isExecutable: true,
-      isReadOnly: true,
-      operator: <IOperator>{
-        type: OperatorType.implementation,
-        name: 'Processable source',
-        implementation: ({ calls }) => {
-          const { value, done } = generator.next();
-          if (done) {
-            calls.topOperatorState = OPERATOR_STATE_POP;
-          } else {
-            calls.topOperatorState = 1;
-            if (value.type === ValueType.string) {
-              Object.assign(value, { tracker: this.memoryTracker });
-            }
-            calls.push(value);
-          }
-        }
-      }
-    });
+    this.calls.push(value);
     return this.run();
   }
 
