@@ -3,6 +3,7 @@ export * from './BooleanValue.js';
 export * from './DictionaryValue.js';
 export * from './IntegerValue.js';
 export * from './MarkValue.js';
+export * from './NameValue.js';
 export * from './OperatorValue.js';
 export * from './StringValue.js';
 export * from './Value.js';
