@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import type { OperatorValue, StringValue, Value, IValuePermissions, IntegerValue } from '@api/index.js';
+import type { OperatorValue, StringValue, Value, IValuePermissions, IntegerValue, NameValue } from '@api/index.js';
 import { ValueType } from '@api/index.js';
 import { testCheckFunction, enumVariantsOf, values, toValue } from '@test/index.js';
 import {
@@ -7,9 +7,10 @@ import {
   checkStringValue,
   checkOperatorValue,
   checkArrayValue,
-  checkDictionaryValue
+  checkDictionaryValue,
+  checkNameValue
 } from '@sdk/checks/checkValue.js';
-import { toIntegerValue, toStringValue } from '@sdk/toValue';
+import { toIntegerValue, toNameValue, toStringValue } from '@sdk/toValue';
 
 function testFlags(
   check: (value: unknown, flags?: Partial<IValuePermissions>) => void,
@@ -63,6 +64,19 @@ describe('checkStringValue', () => {
   });
 
   testFlags(checkStringValue, [stringValue, executableStringValue], ['isExecutable']);
+});
+
+describe('checkNameValue', () => {
+  const nameValue = toNameValue('test');
+  const executableNameValue = toNameValue('test', { isExecutable: true });
+
+  testCheckFunction<NameValue>({
+    check: checkNameValue,
+    valid: [nameValue, executableNameValue],
+    invalid: [...values.all, ...enumVariantsOf(nameValue), ...enumVariantsOf(executableNameValue)]
+  });
+
+  testFlags(checkNameValue, [nameValue, executableNameValue], ['isExecutable']);
 });
 
 describe('checkOperatorValue', () => {

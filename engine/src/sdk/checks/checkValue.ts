@@ -8,7 +8,8 @@ import type {
   IArray,
   IDictionary,
   IValuePermissions,
-  IntegerValue
+  IntegerValue,
+  NameValue
 } from '@api/index.js';
 import { ValueType } from '@api/index.js';
 import { InternalException } from '@sdk/exceptions/InternalException.js';
@@ -87,6 +88,12 @@ export function checkIntegerValue(value: unknown): asserts value is IntegerValue
 export function checkStringValue(value: unknown, flags?: { isExecutable?: boolean }): asserts value is StringValue {
   check(ValueType.string, value, flags, ({ string }) => {
     return typeof string === 'string';
+  });
+}
+
+export function checkNameValue(value: unknown, flags?: { isExecutable?: boolean }): asserts value is NameValue {
+  check(ValueType.name, value, flags, ({ name }) => {
+    return typeof name === 'string';
   });
 }
 
