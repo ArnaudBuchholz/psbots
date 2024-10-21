@@ -3,8 +3,6 @@ import type { IMemoryTracker } from '@api/interfaces/IMemoryTracker.js';
 import type { IException } from '@api/interfaces/IException.js';
 import type { Value } from '@api/values/Value.js';
 
-export type ValueStream = string | Value[] | Iterator<Value>;
-
 /** Public version of the engine state */
 export interface IState {
   readonly idle: boolean;
@@ -15,7 +13,7 @@ export interface IState {
   readonly callEnabled: boolean;
   /** Set when an exception is raised */
   readonly exception: IException | undefined;
-  /** Reset any exception */
+  /** Reset any exception, fails if engine is not idle */
   exec: (value: Value) => Generator;
   /** Release associated memory, using the state *after* may fail */
   destroy: () => void;
