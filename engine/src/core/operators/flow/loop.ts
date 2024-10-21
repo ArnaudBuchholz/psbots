@@ -28,7 +28,7 @@ buildFunctionOperator(
       {
         description: 'does not catch errors',
         in: '{ 1 typecheck } loop',
-        out: '1typecheck'
+        out: '1 typecheck'
       },
       {
         description: 'fails on no code block',

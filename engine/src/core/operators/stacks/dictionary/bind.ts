@@ -16,17 +16,17 @@ const bind = buildFunctionOperator(
     samples: [
       {
         in: '{ clear } bind 0 get',
-        out: 'systemdict "clear" get'
+        out: 'systemdict /clear get'
       },
       {
         description: 'does not fail on unknown names',
         in: '{ clear test_unknown bind } bind 2 get',
-        out: 'systemdict "bind" get'
+        out: 'systemdict /bind get'
       },
       {
         description: 'works recursively',
         in: '{ clear { bind } } bind 1 get 0 get',
-        out: 'systemdict "bind" get'
+        out: 'systemdict /bind get'
       },
       {
         description: 'works only on code blocks',

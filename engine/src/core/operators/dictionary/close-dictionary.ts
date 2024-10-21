@@ -1,5 +1,5 @@
 import { USER_MEMORY_TYPE, ValueType } from '@api/index.js';
-import { checkStringValue, findMarkPos, TypeCheckException, valuesOf } from '@sdk/index.js';
+import { checkNameValue, findMarkPos, TypeCheckException, valuesOf } from '@sdk/index.js';
 import type { IInternalState } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 import { pushOpenClosedValueWithDebugInfo } from '@core/operators/open-close.js';
@@ -19,43 +19,43 @@ buildFunctionOperator(
     samples: [
       {
         description: 'builds a dictionary check length and type',
-        in: '<< "test" 123 >> dup length exch type',
-        out: '1 "dictionary"'
+        in: '<< /test 123 >> dup length exch type',
+        out: '1 /dictionary'
       },
       {
         description: 'builds a dictionary check length and type',
-        in: '« "test" 123 » dup length exch type',
-        out: '1 "dictionary"'
+        in: '« /test 123 » dup length exch type',
+        out: '1 /dictionary'
       },
       {
         description: 'builds a dictionary check length and type',
-        in: 'mark "test" 123 dicttomark dup length exch type',
-        out: '1 "dictionary"'
+        in: 'mark /test 123 dicttomark dup length exch type',
+        out: '1 /dictionary'
       },
       {
         description: 'builds a dictionary with shared values, check length and type',
-        in: '<< "test" 123 "test_array" [ ] "test_dictionary" << >> >> dup length exch type',
-        out: '3 "dictionary"'
+        in: '<< /test 123 /test_array [ ] /test_dictionary << >> >> dup length exch type',
+        out: '3 /dictionary'
       },
       {
         description: 'allocates an empty dictionary',
         in: '<<>> dup length exch type',
-        out: '0 "dictionary"'
+        out: '0 /dictionary'
       },
       {
         description: 'fails if the corresponding dictionary start does not exist',
-        in: '"test" 123 >>',
-        out: '"test" 123 unmatchedmark'
+        in: '/test 123 >>',
+        out: '/test 123 unmatchedmark'
       },
       {
         description: 'fails if the dictionary definition is invalid (names must be strings)',
-        in: '<< 123 "test" >>',
-        out: 'mark 123 "test" typecheck'
+        in: '<< 123 /test >>',
+        out: 'mark 123 /test typecheck'
       },
       {
         description: 'fails if the dictionary definition is invalid (missing name value pair)',
-        in: '<< "test" 123 "missing_value" >>',
-        out: 'mark 123 "test" "missing_value" typecheck'
+        in: '<< /test 123 /missing_value >>',
+        out: 'mark 123 /test /missing_value typecheck'
       }
     ]
   },
@@ -67,7 +67,7 @@ buildFunctionOperator(
     }
     for (let operandIndex = 1; operandIndex < markPos; operandIndex += 2) {
       const name = operands.ref[operandIndex]!; // markPos was verified
-      if (name.type !== ValueType.string) {
+      if (name.type !== ValueType.name) {
         throw new TypeCheckException();
       }
     }
@@ -78,8 +78,8 @@ buildFunctionOperator(
         const value = operands.top;
         value.tracker?.addValueRef(value);
         operands.pop();
-        checkStringValue(operands.top);
-        const [name] = valuesOf<ValueType.string>(operands.top);
+        checkNameValue(operands.top);
+        const [name] = valuesOf<ValueType.name>(operands.top);
         operands.pop();
         dictionary.def(name, value);
         value.tracker?.releaseValue(value);
