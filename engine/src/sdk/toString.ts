@@ -79,7 +79,7 @@ const implementations: { [type in ValueType]: (container: Value<type>, options: 
   [ValueType.string]: ({ isExecutable, string, debugSource }, options) => {
     let stringified: string | undefined;
     if (isExecutable) {
-      stringified = string.replace(/ /g, '␣');
+      stringified = string;
     } else {
       const { operatorState } = options;
       if (operatorState !== undefined && operatorState >= OPERATOR_STATE_FIRST_CALL) {
@@ -98,6 +98,13 @@ const implementations: { [type in ValueType]: (container: Value<type>, options: 
       if (stringified === undefined) {
         stringified = JSON.stringify(string);
       }
+    }
+    return decorate(stringified, debugSource, options);
+  },
+  [ValueType.name]: ({ isExecutable, name, debugSource }, options) => {
+    let stringified: string = name.replace(/ /g, '␣');
+    if (!isExecutable) {
+      stringified = `/${stringified}`;
     }
     return decorate(stringified, debugSource, options);
   },

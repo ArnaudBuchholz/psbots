@@ -9,9 +9,6 @@ import {
 } from '@sdk/interfaces/ICallStack.js';
 import { toValue, values, stringify } from '@test/index.js';
 
-const stringValue = toValue('Hello World !');
-const executableStringValue = Object.assign(toValue('exec'), { isExecutable: true });
-
 describe('basic conversion', () => {
   [...values.booleans, ...values.negativeIntegers, ...values.positiveIntegers].forEach((value) => {
     it(`converts a primitive value (${stringify(value)})`, () => {
@@ -20,15 +17,27 @@ describe('basic conversion', () => {
   });
 
   it('converts a non executable string value', () => {
-    expect(toString(stringValue)).toStrictEqual('"Hello World !"');
+    expect(toString(toValue('Hello World !'))).toStrictEqual('"Hello World !"');
   });
 
   it('converts an executable string value', () => {
-    expect(toString(executableStringValue)).toStrictEqual('exec');
+    expect(toString(toValue('Hello World !', { isExecutable: true }))).toStrictEqual('Hello World !');
   });
 
-  it('converts a spaced executable string value', () => {
-    expect(toString(toValue('spaced exec', { isExecutable: true }))).toStrictEqual('spaced␣exec');
+  it('converts a non executable name value', () => {
+    expect(toString(toValue(Symbol.for('test')))).toStrictEqual('/test');
+  });
+
+  it('converts a spaced non executable name value', () => {
+    expect(toString(toValue(Symbol.for('test 2')))).toStrictEqual('/test␣2');
+  });
+
+  it('converts an executable name value', () => {
+    expect(toString(toValue(Symbol.for('test'), { isExecutable: true }))).toStrictEqual('test');
+  });
+
+  it('converts a spaced executable name value', () => {
+    expect(toString(toValue(Symbol.for('test 2'), { isExecutable: true }))).toStrictEqual('test␣2');
   });
 
   it('converts a mark', () => {
