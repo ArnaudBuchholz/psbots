@@ -44,6 +44,27 @@ export function toStringValue(
   };
 }
 
+export function toNameValue(
+  name: string,
+  { isExecutable = false, tracker }: { isExecutable?: boolean; tracker?: IValueTracker } = {}
+): Value<ValueType.name> {
+  if (tracker) {
+    return {
+      type: ValueType.name,
+      isExecutable,
+      isReadOnly: true,
+      name,
+      tracker
+    };
+  }
+  return {
+    type: ValueType.name,
+    isExecutable,
+    isReadOnly: true,
+    name
+  };
+}
+
 export function toMarkValue(): Value<ValueType.mark> {
   return {
     type: ValueType.mark,
