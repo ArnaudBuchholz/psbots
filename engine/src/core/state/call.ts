@@ -4,13 +4,13 @@ import type { IInternalState } from '@sdk/index.js';
 
 export function callCycle(
   { dictionaries, calls, callEnabled, operands }: IInternalState,
-  value: Value<ValueType.string>
+  value: Value<ValueType.name>
 ): void {
   if (calls.topOperatorState === OPERATOR_STATE_FIRST_CALL) {
     calls.pop();
-  } else if (callEnabled || ['{', '}', '<<', '«', '>>', '»'].includes(value.string)) {
+  } else if (callEnabled || ['{', '}', '<<', '«', '>>', '»'].includes(value.name)) {
     calls.topOperatorState = OPERATOR_STATE_FIRST_CALL;
-    const entry = dictionaries.lookup(value.string);
+    const entry = dictionaries.lookup(value.name);
     if (value.debugSource) {
       calls.push(
         Object.assign(

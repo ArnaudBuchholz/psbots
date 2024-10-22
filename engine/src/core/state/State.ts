@@ -16,6 +16,7 @@ import { CallStack } from '@core/objects/stacks/CallStack.js';
 import { operatorPop, operatorCycle } from './operator.js';
 import { callCycle } from './call.js';
 import { blockCycle } from './block.js';
+import { parseCycle } from './parse.js';
 
 export interface StateFactorySettings {
   /** Augment the list of known names */
@@ -164,10 +165,12 @@ export class State implements IInternalState {
       try {
         if (top.type === ValueType.operator) {
           operatorCycle(this, top);
-        } else if (top.type === ValueType.string) {
+        } else if (top.type === ValueType.name) {
           callCycle(this, top);
         } else if (top.type === ValueType.array) {
           blockCycle(this, top);
+        } else if (top.type === ValueType.string) {
+          parseCycle(this, top);
         } else {
           calls.topOperatorState = OPERATOR_STATE_FIRST_CALL;
           throw new InternalException('Unsupported executable value', top);
