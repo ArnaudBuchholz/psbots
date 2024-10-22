@@ -208,11 +208,11 @@ if`,
 
 describe('operatorState', () => {
   describe('string', () => {
-    const string = `"factorial"
+    const string = `/factorial
 {
   %% check stack
   count 1 lt { stackunderflow } if
-  dup type "integer" neq { typecheck } if
+  dup type /integer neq { typecheck } if
 
   1 exch
   %% result n
@@ -227,19 +227,20 @@ describe('operatorState', () => {
 `;
 
     it('converts string and indicate current position (OPERATOR_STATE_UNKNOWN)', () => {
-      expect(toString(toValue(string), { operatorState: OPERATOR_STATE_UNKNOWN })).toStrictEqual(
-        toString(toValue(string))
-      );
+      expect(
+        toString(toValue(string, { isExecutable: true }), { operatorState: OPERATOR_STATE_UNKNOWN })
+      ).toStrictEqual(string);
     });
 
     it('converts string and indicate current position (OPERATOR_STATE_FIRST_CALL)', () => {
-      expect(toString(toValue(string), { operatorState: OPERATOR_STATE_FIRST_CALL })).toStrictEqual(
-        toString(
-          toValue(`${TOSTRING_BEGIN_MARKER}"factorial"${TOSTRING_END_MARKER}
+      expect(
+        toString(toValue(string, { isExecutable: true }), { operatorState: OPERATOR_STATE_FIRST_CALL })
+      ).toStrictEqual(
+        `${TOSTRING_BEGIN_MARKER}/factorial${TOSTRING_END_MARKER}
 {
   %% check stack
   count 1 lt { stackunderflow } if
-  dup type "integer" neq { typecheck } if
+  dup type /integer neq { typecheck } if
 
   1 exch
   %% result n
@@ -251,19 +252,17 @@ describe('operatorState', () => {
   } loop
 } bind def
 
-`)
-        )
+`
       );
     });
 
-    it('converts string and indicate current position (operator state is 12)', () => {
-      expect(toString(toValue(string), { operatorState: 12 })).toStrictEqual(
-        toString(
-          toValue(`"factorial"
+    it('converts string and indicate current position (operator state is 11)', () => {
+      expect(toString(toValue(string, { isExecutable: true }), { operatorState: 11 })).toStrictEqual(
+        `/factorial
 ${TOSTRING_BEGIN_MARKER}{${TOSTRING_END_MARKER}
   %% check stack
   count 1 lt { stackunderflow } if
-  dup type "integer" neq { typecheck } if
+  dup type /integer neq { typecheck } if
 
   1 exch
   %% result n
@@ -275,8 +274,7 @@ ${TOSTRING_BEGIN_MARKER}{${TOSTRING_END_MARKER}
   } loop
 } bind def
 
-`)
-        )
+`
       );
     });
   });
