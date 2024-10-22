@@ -1,4 +1,4 @@
-import { it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import type { IDebugSource, Value } from '@api/index.js';
 import { toValue } from '@test/index.js';
 import { State } from './State.js';
@@ -83,4 +83,26 @@ it('forwards debugging information', () => {
     )
   ]);
   expect(state.calls.length).toStrictEqual(0);
+});
+
+describe('memory tracker', () => {
+  it('sets a tracker on names', () => {
+    state.calls.push(toValue('/abc', { isExecutable: true }));
+    state.cycle();
+    state.cycle();
+    expect(state.operands.ref).toStrictEqual<Value[]>([
+      Object.assign({ tracker: state.memoryTracker }, toValue(Symbol.for('abc')))
+    ]);
+    expect(state.calls.length).toStrictEqual(0);
+  });
+
+  it('sets a tracker on strings', () => {
+    state.calls.push(toValue('"abc"', { isExecutable: true }));
+    state.cycle();
+    state.cycle();
+    expect(state.operands.ref).toStrictEqual<Value[]>([
+      Object.assign({ tracker: state.memoryTracker }, toValue('abc'))
+    ]);
+    expect(state.calls.length).toStrictEqual(0);
+  });
 });

@@ -1,11 +1,12 @@
-import type { Value, ValueType } from '@api/index.js';
+import type { Value } from '@api/index.js';
+import { ValueType } from '@api/index.js';
 import { parse } from '@api/index.js';
 import { OPERATOR_STATE_FIRST_CALL, OPERATOR_STATE_UNKNOWN } from '@sdk/index.js';
 import type { IInternalState } from '@sdk/index.js';
 
 const UNKNOWN_FILENAME = 'unknown';
 
-export function parseCycle({ calls, operands }: IInternalState, value: Value<ValueType.string>): void {
+export function parseCycle({ calls, operands, memoryTracker }: IInternalState, value: Value<ValueType.string>): void {
   let token: Value | undefined;
   if (calls.topOperatorState === OPERATOR_STATE_UNKNOWN) {
     calls.topOperatorState = OPERATOR_STATE_FIRST_CALL;
@@ -26,6 +27,9 @@ export function parseCycle({ calls, operands }: IInternalState, value: Value<Val
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { debugSource, ...tokenWithoutDebugSource } = token;
       token = tokenWithoutDebugSource;
+    }
+    if (token.type === ValueType.string || token.type === ValueType.name) {
+      Object.assign(token, { tracker: memoryTracker });
     }
     if (token.isExecutable) {
       calls.push(token);
