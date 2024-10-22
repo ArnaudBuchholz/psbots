@@ -1,4 +1,5 @@
-import { createState, parse } from '@psbots/engine';
+import type { IDebugSource } from '@psbots/engine';
+import { createState } from '@psbots/engine';
 import type { IInternalState } from '@psbots/engine/sdk';
 import {
   BaseException,
@@ -6,7 +7,8 @@ import {
   InternalException,
   toString,
   TOSTRING_BEGIN_MARKER,
-  TOSTRING_END_MARKER
+  TOSTRING_END_MARKER,
+  toStringValue
 } from '@psbots/engine/sdk';
 import type { IReplIO } from './IReplIO.js';
 import { blue, cyan, green, magenta, red, white, yellow } from './colors.js';
@@ -49,11 +51,11 @@ export async function repl(replIO: IReplIO, debug?: boolean): Promise<void> {
     debugMemory: debug
   });
 
-  [...state.process(parse('version'))];
+  [...state.exec(toStringValue('version', { isExecutable: true }))];
   const version = state.operands.at(0);
   checkStringValue(version);
   replIO.output(`${cyan}Welcome to 🤖${magenta}${version.string}${white}\r\n`);
-  [...state.process(parse('pop'))];
+  [...state.exec(toStringValue('pop', { isExecutable: true }))];
 
   if (debug === true) {
     replIO.output(`${green}DEBUG mode enabled${white}\r\n`);
@@ -75,7 +77,20 @@ export async function repl(replIO: IReplIO, debug?: boolean): Promise<void> {
       let lastUsedMemory = state.memoryTracker.used;
       let cycle = 0;
 
-      const iterator = state.process(parse(src, 0, `repl${replIndex++}`));
+      const iterator = state.exec(
+        Object.assign(
+          {
+            debugSource: <IDebugSource>{
+              filename: `repl${replIndex++}`,
+              pos: 0,
+              length: src.length,
+              source: src
+            }
+          },
+          toStringValue(src, { isExecutable: true })
+        )
+      );
+
       let { done } = iterator.next();
       while (done === false) {
         const { exception } = state;
