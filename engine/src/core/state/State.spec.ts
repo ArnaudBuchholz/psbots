@@ -129,7 +129,7 @@ describe('memory', () => {
 
   it('detects memory leaks', () => {
     const productionState = new State();
-    waitForGenerator(state.exec(toValue('"123"', { isExecutable: true })));
+    waitForGenerator(productionState.exec(toValue('"123"', { isExecutable: true })));
     const value = productionState.operands.top;
     value.tracker?.addValueRef(value); // will leak
     expect(() => productionState.destroy()).toThrowError('Memory leaks detected');
