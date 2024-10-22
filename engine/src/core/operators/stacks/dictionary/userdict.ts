@@ -13,7 +13,7 @@ buildFunctionOperator(
     samples: [
       {
         in: 'userdict type',
-        out: '"dictionary"'
+        out: '/dictionary'
       }
     ]
   },

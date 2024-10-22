@@ -13,7 +13,7 @@ buildFunctionOperator(
     samples: [
       {
         in: 'currentdict type',
-        out: '"dictionary"'
+        out: '/dictionary'
       }
     ]
   },

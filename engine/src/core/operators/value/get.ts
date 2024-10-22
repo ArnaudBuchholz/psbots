@@ -99,8 +99,8 @@ buildFunctionOperator(
       },
       {
         description: 'fails if unknown index for a dictionary',
-        in: 'systemdict "not an operator" get',
-        out: 'systemdict "not an operator" undefined'
+        in: 'systemdict /not_an_operator get',
+        out: 'systemdict /not_an_operator undefined'
       },
       {
         description: 'fails if not a container',
