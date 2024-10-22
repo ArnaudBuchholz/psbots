@@ -46,8 +46,8 @@ const bind = buildFunctionOperator(
       const value = array.at(step);
       calls.topOperatorState = step + 1;
       if (value && value.isExecutable) {
-        if (value.type === ValueType.string) {
-          const location = dictionaries.where(value.string);
+        if (value.type === ValueType.name) {
+          const location = dictionaries.where(value.name);
           if (location !== null) {
             array.set(step, location.value);
           }
