@@ -21,10 +21,10 @@ const implementations: { [type in ValueType]?: (container: Value<type>, index: V
   [ValueType.array]: ({ array }, index) => array.at(checkPos(index, array.length))!, // length is validated
 
   [ValueType.dictionary]: ({ dictionary }, index) => {
-    if (index.type !== ValueType.string) {
+    if (index.type !== ValueType.name) {
       throw new TypeCheckException();
     }
-    const { string: name } = index;
+    const { name } = index;
     if (!dictionary.names.includes(name)) {
       throw new UndefinedException();
     }
@@ -54,8 +54,8 @@ buildFunctionOperator(
       },
       {
         description: 'fails if invalid index for the array',
-        in: '[ 1 2 3 ] "a" get',
-        out: '[ 1 2 3 ] "a" typecheck'
+        in: '[ 1 2 3 ] /a get',
+        out: '[ 1 2 3 ] /a typecheck'
       },
       {
         description: 'fails if out of bound index for the array',
@@ -89,7 +89,7 @@ buildFunctionOperator(
       },
       {
         description: 'returns the indexed item of a dictionary',
-        in: 'systemdict "get" get',
+        in: 'systemdict /get get',
         out: '{ get } bind 0 get'
       },
       {
@@ -99,8 +99,8 @@ buildFunctionOperator(
       },
       {
         description: 'fails if unknown index for a dictionary',
-        in: 'systemdict "not an operator" get',
-        out: 'systemdict "not an operator" undefined'
+        in: 'systemdict /not_an_operator get',
+        out: 'systemdict /not_an_operator undefined'
       },
       {
         description: 'fails if not a container',

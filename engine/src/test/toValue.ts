@@ -11,10 +11,18 @@ import type {
 } from '@api/index.js';
 import { ValueType } from '@api/index.js';
 import type { IOperator } from '@sdk/index.js';
-import { isObject, OperatorType, toBooleanValue, toIntegerValue, toStringValue, toMarkValue } from '@sdk/index.js';
+import {
+  isObject,
+  OperatorType,
+  toBooleanValue,
+  toIntegerValue,
+  toStringValue,
+  toMarkValue,
+  toNameValue
+} from '@sdk/index.js';
 import { ShareableObject } from '@core/index.js';
 
-export type CompatiblePrimitiveValue = string | number | boolean | Value | (() => void);
+export type CompatiblePrimitiveValue = string | symbol | number | boolean | Value | (() => void);
 export type CompatibleValue = CompatibleValue[] | { [key in string]: CompatibleValue } | CompatiblePrimitiveValue;
 
 function isValue(value: unknown): value is Value {
@@ -102,6 +110,7 @@ function toIDictionary(mapping: ValueDictionary): IDictionary {
 export function toValue(value: boolean, permissions?: Partial<IValuePermissions>): Value<ValueType.boolean>;
 export function toValue(value: number, permissions?: Partial<IValuePermissions>): Value<ValueType.integer>;
 export function toValue(value: string, permissions?: Partial<IValuePermissions>): Value<ValueType.string>;
+export function toValue(name: symbol, permissions?: Partial<IValuePermissions>): Value<ValueType.name>;
 export function toValue(value: () => void, permissions?: Partial<IValuePermissions>): Value<ValueType.operator>;
 export function toValue(value: CompatibleValue[], permissions?: Partial<IValuePermissions>): ArrayValue;
 export function toValue(
@@ -115,6 +124,13 @@ export function toValue(
 ): Value {
   if (typeof value === 'string') {
     return toStringValue(value, { isExecutable });
+  }
+  if (typeof value === 'symbol') {
+    const key = Symbol.keyFor(value);
+    if (!key) {
+      throw new Error('Use Symbol.for to ensure string can be extracted');
+    }
+    return toNameValue(key, { isExecutable });
   }
   if (typeof value === 'boolean') {
     return toBooleanValue(value);

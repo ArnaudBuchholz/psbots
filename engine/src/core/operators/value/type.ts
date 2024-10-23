@@ -1,6 +1,6 @@
 import { ValueType } from '@api/index.js';
 import type { Value } from '@api/index.js';
-import { toStringValue } from '@sdk/index.js';
+import { toNameValue } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 
 buildFunctionOperator(
@@ -10,25 +10,29 @@ buildFunctionOperator(
     labels: ['value', 'generic'],
     signature: {
       input: [null],
-      output: [ValueType.string]
+      output: [ValueType.name]
     },
     samples: [
       {
         in: 'false type',
-        out: '"boolean"'
+        out: '/boolean'
       },
       {
         in: '[ 1 2 3 ] type',
-        out: '"array"'
+        out: '/array'
       },
       {
         in: '"" type',
-        out: '"string"'
+        out: '/string'
+      },
+      {
+        in: '/type type',
+        out: '/name'
       }
     ]
   },
   ({ operands, memoryTracker }, value: Value) => {
     operands.pop();
-    operands.push(Object.assign(toStringValue(value.type), { tracker: memoryTracker }));
+    operands.push(Object.assign(toNameValue(value.type), { tracker: memoryTracker }));
   }
 );

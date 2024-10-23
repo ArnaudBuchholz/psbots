@@ -5,11 +5,11 @@
 `n! = n * (n-1) * (n-2) * ... * 3 * 2 * 1`
 
 ```postscript
-"factorial"
+/factorial
 {
   %% check stack
   count 1 lt { stackunderflow } if
-  dup type "integer" neq { typecheck } if
+  dup type /integer neq { typecheck } if
 
   1 exch
   %% result n

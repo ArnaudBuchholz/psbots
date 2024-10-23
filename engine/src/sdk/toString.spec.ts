@@ -9,9 +9,6 @@ import {
 } from '@sdk/interfaces/ICallStack.js';
 import { toValue, values, stringify } from '@test/index.js';
 
-const stringValue = toValue('Hello World !');
-const executableStringValue = Object.assign(toValue('exec'), { isExecutable: true });
-
 describe('basic conversion', () => {
   [...values.booleans, ...values.negativeIntegers, ...values.positiveIntegers].forEach((value) => {
     it(`converts a primitive value (${stringify(value)})`, () => {
@@ -20,15 +17,27 @@ describe('basic conversion', () => {
   });
 
   it('converts a non executable string value', () => {
-    expect(toString(stringValue)).toStrictEqual('"Hello World !"');
+    expect(toString(toValue('Hello World !'))).toStrictEqual('"Hello World !"');
   });
 
   it('converts an executable string value', () => {
-    expect(toString(executableStringValue)).toStrictEqual('exec');
+    expect(toString(toValue('Hello World !', { isExecutable: true }))).toStrictEqual('Hello World !');
   });
 
-  it('converts a spaced executable string value', () => {
-    expect(toString(toValue('spaced exec', { isExecutable: true }))).toStrictEqual('spaced␣exec');
+  it('converts a non executable name value', () => {
+    expect(toString(toValue(Symbol.for('test')))).toStrictEqual('/test');
+  });
+
+  it('converts a spaced non executable name value', () => {
+    expect(toString(toValue(Symbol.for('test 2')))).toStrictEqual('/test␣2');
+  });
+
+  it('converts an executable name value', () => {
+    expect(toString(toValue(Symbol.for('test'), { isExecutable: true }))).toStrictEqual('test');
+  });
+
+  it('converts a spaced executable name value', () => {
+    expect(toString(toValue(Symbol.for('test 2'), { isExecutable: true }))).toStrictEqual('test␣2');
   });
 
   it('converts a mark', () => {
@@ -199,11 +208,11 @@ if`,
 
 describe('operatorState', () => {
   describe('string', () => {
-    const string = `"factorial"
+    const string = `/factorial
 {
   %% check stack
   count 1 lt { stackunderflow } if
-  dup type "integer" neq { typecheck } if
+  dup type /integer neq { typecheck } if
 
   1 exch
   %% result n
@@ -218,19 +227,20 @@ describe('operatorState', () => {
 `;
 
     it('converts string and indicate current position (OPERATOR_STATE_UNKNOWN)', () => {
-      expect(toString(toValue(string), { operatorState: OPERATOR_STATE_UNKNOWN })).toStrictEqual(
-        toString(toValue(string))
-      );
+      expect(
+        toString(toValue(string, { isExecutable: true }), { operatorState: OPERATOR_STATE_UNKNOWN })
+      ).toStrictEqual(string);
     });
 
     it('converts string and indicate current position (OPERATOR_STATE_FIRST_CALL)', () => {
-      expect(toString(toValue(string), { operatorState: OPERATOR_STATE_FIRST_CALL })).toStrictEqual(
-        toString(
-          toValue(`${TOSTRING_BEGIN_MARKER}"factorial"${TOSTRING_END_MARKER}
+      expect(
+        toString(toValue(string, { isExecutable: true }), { operatorState: OPERATOR_STATE_FIRST_CALL })
+      ).toStrictEqual(
+        `${TOSTRING_BEGIN_MARKER}/factorial${TOSTRING_END_MARKER}
 {
   %% check stack
   count 1 lt { stackunderflow } if
-  dup type "integer" neq { typecheck } if
+  dup type /integer neq { typecheck } if
 
   1 exch
   %% result n
@@ -242,19 +252,17 @@ describe('operatorState', () => {
   } loop
 } bind def
 
-`)
-        )
+`
       );
     });
 
-    it('converts string and indicate current position (operator state is 12)', () => {
-      expect(toString(toValue(string), { operatorState: 12 })).toStrictEqual(
-        toString(
-          toValue(`"factorial"
+    it('converts string and indicate current position (operator state is 11)', () => {
+      expect(toString(toValue(string, { isExecutable: true }), { operatorState: 11 })).toStrictEqual(
+        `/factorial
 ${TOSTRING_BEGIN_MARKER}{${TOSTRING_END_MARKER}
   %% check stack
   count 1 lt { stackunderflow } if
-  dup type "integer" neq { typecheck } if
+  dup type /integer neq { typecheck } if
 
   1 exch
   %% result n
@@ -266,8 +274,7 @@ ${TOSTRING_BEGIN_MARKER}{${TOSTRING_END_MARKER}
   } loop
 } bind def
 
-`)
-        )
+`
       );
     });
   });
@@ -323,14 +330,14 @@ ${TOSTRING_BEGIN_MARKER}{${TOSTRING_END_MARKER}
   });
 
   describe('executable array', () => {
-    const array = toValue([1, 2, 3], { isExecutable: true });
+    const array = toValue([toValue.operator, 2, 3], { isExecutable: true });
 
     it('converts an executable array with OPERATOR_STATE_UNKNOWN', () => {
       expect(
         toString(array, {
           operatorState: OPERATOR_STATE_UNKNOWN
         })
-      ).toStrictEqual('{ 1 2 3 }');
+      ).toStrictEqual('{ -operator- 2 3 }');
     });
 
     it('converts an executable array with OPERATOR_STATE_FIRST_CALL', () => {
@@ -338,7 +345,7 @@ ${TOSTRING_BEGIN_MARKER}{${TOSTRING_END_MARKER}
         toString(array, {
           operatorState: OPERATOR_STATE_FIRST_CALL
         })
-      ).toStrictEqual(`{ ${TOSTRING_BEGIN_MARKER}1${TOSTRING_END_MARKER} 2 3 }`);
+      ).toStrictEqual(`{ ${TOSTRING_BEGIN_MARKER}-operator-${TOSTRING_END_MARKER} 2 3 }`);
     });
 
     it('converts an executable array with operator state 1', () => {
@@ -346,7 +353,7 @@ ${TOSTRING_BEGIN_MARKER}{${TOSTRING_END_MARKER}
         toString(array, {
           operatorState: 1
         })
-      ).toStrictEqual(`{ 1 ${TOSTRING_BEGIN_MARKER}2${TOSTRING_END_MARKER} 3 }`);
+      ).toStrictEqual(`{ -operator- ${TOSTRING_BEGIN_MARKER}2${TOSTRING_END_MARKER} 3 }`);
     });
   });
 });

@@ -15,12 +15,12 @@ buildFunctionOperator(
       {
         description: 'builds a block and check length and type',
         in: '{ 1 2 3 } dup length exch type',
-        out: '3 "array"'
+        out: '3 /array'
       },
       {
         description: 'allocated an empty block',
         in: '{} dup length exch type',
-        out: '0 "array"'
+        out: '0 /array'
       },
       {
         description: 'fails if the corresponding block start does not exist',

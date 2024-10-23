@@ -16,7 +16,7 @@ buildConstantOperator(
     samples: [
       {
         in: 'version type',
-        out: '"string"'
+        out: '/string'
       }
     ]
   },

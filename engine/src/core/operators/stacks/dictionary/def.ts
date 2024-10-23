@@ -8,17 +8,17 @@ buildFunctionOperator(
     description: 'associates key with value in the current dictionary, the one on the top of the dictionary stack',
     labels: ['dictstack'],
     signature: {
-      input: [ValueType.string, null],
+      input: [ValueType.name, null],
       output: []
     },
     samples: [
       {
-        in: '"test" 1 def test',
-        out: '"test" 1 def 1'
+        in: '/test 1 def test',
+        out: '/test 1 def 1'
       },
       {
-        in: 'systemdict begin "test" 1 def test',
-        out: 'systemdict begin "test" 1 invalidaccess'
+        in: 'systemdict begin /test 1 def test',
+        out: 'systemdict begin /test 1 invalidaccess'
       }
     ]
   },

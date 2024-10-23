@@ -15,7 +15,7 @@ buildFunctionOperator(
       {
         description: 'builds a block and check length and type',
         in: '{ 1 2 3 } dup length exch type',
-        out: '3 "array"'
+        out: '3 /array'
       }
     ]
   },

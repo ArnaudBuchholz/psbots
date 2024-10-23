@@ -37,12 +37,21 @@ export function* parse(source: string, pos: number = 0, filename?: string): Gene
         integer: parseInt(integer, 10)
       };
     } else if (call !== undefined) {
-      yield {
-        ...common,
-        type: ValueType.string,
-        isExecutable: true,
-        string: call
-      };
+      if (call.length > 1 && call.startsWith('/')) {
+        yield {
+          ...common,
+          type: ValueType.name,
+          isExecutable: false,
+          name: call.substring(1)
+        };
+      } else {
+        yield {
+          ...common,
+          type: ValueType.name,
+          isExecutable: true,
+          name: call
+        };
+      }
     }
     match = matcher.exec(source);
   }

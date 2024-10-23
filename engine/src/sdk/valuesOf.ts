@@ -5,6 +5,7 @@ const values: { [type in ValueType]: (value: Value<type>) => unknown } = {
   [ValueType.boolean]: (value) => value.isSet,
   [ValueType.integer]: (value) => value.integer,
   [ValueType.string]: (value) => value.string,
+  [ValueType.name]: (value) => value.name,
   [ValueType.mark]: () => null,
   [ValueType.operator]: (value) => value.operator,
   [ValueType.array]: (value) => value.array,

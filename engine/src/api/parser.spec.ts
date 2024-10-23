@@ -19,8 +19,16 @@ it('extracts a negative integer', () => {
   expect([...parse('-123')]).toStrictEqual<Value[]>([toValue(-123)]);
 });
 
-it('extracts a callable string', () => {
-  expect([...parse('test')]).toStrictEqual<Value[]>([toValue('test', { isExecutable: true })]);
+it('extracts an executable name', () => {
+  expect([...parse('test')]).toStrictEqual<Value[]>([toValue(Symbol.for('test'), { isExecutable: true })]);
+});
+
+it('extracts an executable name', () => {
+  expect([...parse('/')]).toStrictEqual<Value[]>([toValue(Symbol.for('/'), { isExecutable: true })]);
+});
+
+it('extracts a name', () => {
+  expect([...parse('/test')]).toStrictEqual<Value[]>([toValue(Symbol.for('test'))]);
 });
 
 it('should include debugging information', () => {
@@ -46,55 +54,29 @@ it('filters out comments', () => {
 });
 
 describe('handling of special characters', () => {
+  const name = (name: string) => toValue(Symbol.for(name), { isExecutable: true });
+
   it('isolates special characters from values (before / after)', () => {
-    expect([...parse('[123]')]).toStrictEqual<Value[]>([
-      toValue('[', { isExecutable: true }),
-      toValue(123),
-      toValue(']', { isExecutable: true })
-    ]);
+    expect([...parse('[123]')]).toStrictEqual<Value[]>([name('['), toValue(123), name(']')]);
   });
 
   it('isolates special characters from values (inside)', () => {
-    expect([...parse('a[b')]).toStrictEqual<Value[]>([
-      toValue('a', { isExecutable: true }),
-      toValue('[', { isExecutable: true }),
-      toValue('b', { isExecutable: true })
-    ]);
+    expect([...parse('a[b')]).toStrictEqual<Value[]>(['a', '[', 'b'].map((n) => name(n)));
   });
 
   it('isolates special characters individually (block)', () => {
-    expect([...parse('{{}}')]).toStrictEqual<Value[]>([
-      toValue('{', { isExecutable: true }),
-      toValue('{', { isExecutable: true }),
-      toValue('}', { isExecutable: true }),
-      toValue('}', { isExecutable: true })
-    ]);
+    expect([...parse('{{}}')]).toStrictEqual<Value[]>(['{', '{', '}', '}'].map((n) => name(n)));
   });
 
   it('isolates special characters individually (array)', () => {
-    expect([...parse('[[]]')]).toStrictEqual<Value[]>([
-      toValue('[', { isExecutable: true }),
-      toValue('[', { isExecutable: true }),
-      toValue(']', { isExecutable: true }),
-      toValue(']', { isExecutable: true })
-    ]);
+    expect([...parse('[[]]')]).toStrictEqual<Value[]>(['[', '[', ']', ']'].map((n) => name(n)));
   });
 
   it('isolates special characters individually (dictionary - unicode)', () => {
-    expect([...parse('««»»')]).toStrictEqual<Value[]>([
-      toValue('«', { isExecutable: true }),
-      toValue('«', { isExecutable: true }),
-      toValue('»', { isExecutable: true }),
-      toValue('»', { isExecutable: true })
-    ]);
+    expect([...parse('««»»')]).toStrictEqual<Value[]>(['«', '«', '»', '»'].map((n) => name(n)));
   });
 
   it('isolates special characters individually (dictionary - ascii)', () => {
-    expect([...parse('<<<<>>>>')]).toStrictEqual<Value[]>([
-      toValue('<<', { isExecutable: true }),
-      toValue('<<', { isExecutable: true }),
-      toValue('>>', { isExecutable: true }),
-      toValue('>>', { isExecutable: true })
-    ]);
+    expect([...parse('<<<<>>>>')]).toStrictEqual<Value[]>(['<<', '<<', '>>', '>>'].map((n) => name(n)));
   });
 });

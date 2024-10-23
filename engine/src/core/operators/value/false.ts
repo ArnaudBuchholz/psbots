@@ -14,7 +14,7 @@ buildConstantOperator(
     samples: [
       {
         in: 'false type',
-        out: '"boolean"'
+        out: '/boolean'
       }
     ]
   },

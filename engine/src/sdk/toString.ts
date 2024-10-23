@@ -79,25 +79,31 @@ const implementations: { [type in ValueType]: (container: Value<type>, options: 
   [ValueType.string]: ({ isExecutable, string, debugSource }, options) => {
     let stringified: string | undefined;
     if (isExecutable) {
-      stringified = string.replace(/ /g, '␣');
-    } else {
       const { operatorState } = options;
       if (operatorState !== undefined && operatorState >= OPERATOR_STATE_FIRST_CALL) {
         const [token] = parse(string, operatorState, 'toString');
         const length = token?.debugSource?.length;
         if (length !== undefined) {
-          stringified = JSON.stringify(
+          stringified =
             string.substring(0, operatorState) +
-              TOSTRING_BEGIN_MARKER +
-              string.substring(operatorState, operatorState + length) +
-              TOSTRING_END_MARKER +
-              string.substring(operatorState + length)
-          );
+            TOSTRING_BEGIN_MARKER +
+            string.substring(operatorState, operatorState + length) +
+            TOSTRING_END_MARKER +
+            string.substring(operatorState + length);
         }
       }
-      if (stringified === undefined) {
-        stringified = JSON.stringify(string);
+      if (!stringified) {
+        stringified = string;
       }
+    } else {
+      stringified = JSON.stringify(string);
+    }
+    return decorate(stringified, debugSource, options);
+  },
+  [ValueType.name]: ({ isExecutable, name, debugSource }, options) => {
+    let stringified: string = name.replace(/ /g, '␣');
+    if (!isExecutable) {
+      stringified = `/${stringified}`;
     }
     return decorate(stringified, debugSource, options);
   },
@@ -136,7 +142,8 @@ const implementations: { [type in ValueType]: (container: Value<type>, options: 
           item as never,
           Object.assign({}, options, {
             includeDebugSource: false,
-            maxWidth: 0
+            maxWidth: 0,
+            operatorState: OPERATOR_STATE_UNKNOWN
           })
         );
         if (isExecutable && operatorState === index) {

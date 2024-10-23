@@ -15,12 +15,12 @@ buildFunctionOperator(
       {
         description: 'builds an array and check length and type',
         in: '[ 1 2 3 ] dup length exch type',
-        out: '3 "array"'
+        out: '3 /array'
       },
       {
         description: 'allocates an empty array',
         in: '[] dup length exch type',
-        out: '0 "array"'
+        out: '0 /array'
       },
       {
         description: 'fails if the corresponding array start does not exist',

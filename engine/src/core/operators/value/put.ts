@@ -42,10 +42,10 @@ const implementations: { [type in ValueType]?: (container: Value<type>, index: V
     if (isReadOnly) {
       throw new InvalidAccessException();
     }
-    if (index.type !== ValueType.string) {
+    if (index.type !== ValueType.name) {
       throw new TypeCheckException();
     }
-    const { string: name } = index;
+    const { name } = index;
     (dictionary as IDictionary).def(name, value);
     return container;
   }
@@ -124,13 +124,13 @@ buildFunctionOperator(
       },
       {
         description: 'sets an indexed item of a dictionary',
-        in: 'userdict "test" 123 put pop test',
-        out: 'userdict "test" 456 put pop 123'
+        in: 'userdict /test 123 put pop test',
+        out: 'userdict /test 456 put pop 123'
       },
       {
         description: 'fails if the dictionary is not writable',
-        in: 'systemdict "test" 123 put',
-        out: 'systemdict "test" 123 invalidaccess'
+        in: 'systemdict /test 123 put',
+        out: 'systemdict /test 123 invalidaccess'
       },
       {
         description: 'fails if invalid index for a dictionary',
