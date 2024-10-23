@@ -48,6 +48,19 @@ function fitToMaxWidth(stringifiedValue: string, at: string | undefined, maxWidt
   if (maxWidth < 1 || result.length < maxWidth) {
     return result;
   }
+
+  const beginMarkerPos = stringifiedValue.indexOf(TOSTRING_BEGIN_MARKER);
+  const endMarkerPos = stringifiedValue.indexOf(TOSTRING_END_MARKER, beginMarkerPos + 1);
+  const markedAreaLength = endMarkerPos - beginMarkerPos + 1;
+  if (markedAreaLength > 0) {
+    if (maxWidth > markedAreaLength) {
+      // Recenter stringified value on markedAreaLength
+    } else {
+      // Ensure beginning of marked area appears
+      stringifiedValue = '…' + stringifiedValue.substring(beginMarkerPos - 1);
+    }
+  } 
+  
   if (at !== undefined) {
     const miminizedAt = minimizeAt(at);
     const width = maxWidth - (miminizedAt.length + 1);
