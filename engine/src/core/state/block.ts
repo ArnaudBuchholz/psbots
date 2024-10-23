@@ -7,12 +7,13 @@ export function blockCycle({ calls, operands }: IInternalState, { array }: Value
   const { length } = array;
   if (calls.topOperatorState === OPERATOR_STATE_UNKNOWN) {
     calls.topOperatorState = OPERATOR_STATE_FIRST_CALL;
+  } else {
+    calls.topOperatorState++;
   }
   if (calls.topOperatorState === length) {
     calls.pop();
   } else {
     const step = calls.topOperatorState;
-    calls.topOperatorState = step + 1;
     const value = array.at(step)!; // length has been checked
     if (!value.isExecutable || value.type === ValueType.array) {
       operands.push(value);

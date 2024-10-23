@@ -18,6 +18,7 @@ describe('simple code block', () => {
     state.cycle();
     expect(state.operands.ref).toStrictEqual([toValue(1)]);
     expect(state.calls.length).toStrictEqual(1);
+    expect(state.calls.topOperatorState).toStrictEqual(0);
   });
 
   it('pushes the second operand (cycle 2)', () => {
@@ -25,6 +26,7 @@ describe('simple code block', () => {
     state.cycle();
     expect(state.operands.ref).toStrictEqual([toValue(2), toValue(1)]);
     expect(state.calls.length).toStrictEqual(1);
+    expect(state.calls.topOperatorState).toStrictEqual(1);
   });
 
   it('pushes the third operand (cycle 3)', () => {
@@ -33,6 +35,7 @@ describe('simple code block', () => {
     state.cycle();
     expect(state.operands.ref).toStrictEqual([toValue(3), toValue(2), toValue(1)]);
     expect(state.calls.length).toStrictEqual(1);
+    expect(state.calls.topOperatorState).toStrictEqual(2);
   });
 
   it('unstacks itself (cycle 4)', () => {
