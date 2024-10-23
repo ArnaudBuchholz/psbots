@@ -142,7 +142,8 @@ const implementations: { [type in ValueType]: (container: Value<type>, options: 
           item as never,
           Object.assign({}, options, {
             includeDebugSource: false,
-            maxWidth: 0
+            maxWidth: 0,
+            operatorState: OPERATOR_STATE_UNKNOWN
           })
         );
         if (isExecutable && operatorState === index) {

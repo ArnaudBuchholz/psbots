@@ -330,14 +330,14 @@ ${TOSTRING_BEGIN_MARKER}{${TOSTRING_END_MARKER}
   });
 
   describe('executable array', () => {
-    const array = toValue([1, 2, 3], { isExecutable: true });
+    const array = toValue([toValue.operator, 2, 3], { isExecutable: true });
 
     it('converts an executable array with OPERATOR_STATE_UNKNOWN', () => {
       expect(
         toString(array, {
           operatorState: OPERATOR_STATE_UNKNOWN
         })
-      ).toStrictEqual('{ 1 2 3 }');
+      ).toStrictEqual('{ -operator- 2 3 }');
     });
 
     it('converts an executable array with OPERATOR_STATE_FIRST_CALL', () => {
@@ -345,7 +345,7 @@ ${TOSTRING_BEGIN_MARKER}{${TOSTRING_END_MARKER}
         toString(array, {
           operatorState: OPERATOR_STATE_FIRST_CALL
         })
-      ).toStrictEqual(`{ ${TOSTRING_BEGIN_MARKER}1${TOSTRING_END_MARKER} 2 3 }`);
+      ).toStrictEqual(`{ ${TOSTRING_BEGIN_MARKER}-operator-${TOSTRING_END_MARKER} 2 3 }`);
     });
 
     it('converts an executable array with operator state 1', () => {
@@ -353,7 +353,7 @@ ${TOSTRING_BEGIN_MARKER}{${TOSTRING_END_MARKER}
         toString(array, {
           operatorState: 1
         })
-      ).toStrictEqual(`{ 1 ${TOSTRING_BEGIN_MARKER}2${TOSTRING_END_MARKER} 3 }`);
+      ).toStrictEqual(`{ -operator- ${TOSTRING_BEGIN_MARKER}2${TOSTRING_END_MARKER} 3 }`);
     });
   });
 });
