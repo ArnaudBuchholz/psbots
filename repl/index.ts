@@ -66,10 +66,11 @@ export async function repl(replIO: IReplIO, debug?: boolean): Promise<void> {
 
   let replIndex = 0;
   const { waitForLines, waitForChar } = buildInputHandler(replIO);
-  let debugging = false;
+  let debugging: boolean;
 
   // eslint-disable-next-line no-constant-condition
   while (true) {
+    debugging = false;
     replIO.output('? ');
     try {
       const src = await waitForLines();
@@ -91,6 +92,7 @@ export async function repl(replIO: IReplIO, debug?: boolean): Promise<void> {
         )
       );
 
+      let lastCallStackSize = 1;
       let { done } = iterator.next();
       while (done === false) {
         const { exception } = state;
@@ -99,7 +101,19 @@ export async function repl(replIO: IReplIO, debug?: boolean): Promise<void> {
           debugging = true;
         }
         while (debugging) {
+          replIO.output('\n');
           if (state.callStack.length) {
+            const currentCallStackSize = state.callStack.length;
+            let callStackVariation: string;
+            if (currentCallStackSize > lastCallStackSize) {
+              callStackVariation = ` ${red}+${currentCallStackSize - lastCallStackSize}`;
+            } else if (currentCallStackSize < lastCallStackSize) {
+              callStackVariation = ` ${green}-${lastCallStackSize - currentCallStackSize}`;
+            } else {
+              callStackVariation = '';
+            }
+            replIO.output(`${cyan}call stack: ${yellow}${state.callStack.length}${callStackVariation}${white}\r\n`);
+
             replIO.output(
               state.callStack
                 .map(({ value, operatorState }) =>
@@ -127,6 +141,7 @@ export async function repl(replIO: IReplIO, debug?: boolean): Promise<void> {
           );
           lastOperandsCount = state.operands.length;
           lastUsedMemory = state.memoryTracker.used;
+          lastCallStackSize = state.callStack.length;
           const step = await waitForChar();
           replIO.output('\b \b');
           if (step === 'o') {
