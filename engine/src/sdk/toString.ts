@@ -52,15 +52,17 @@ function fitToMaxWidth(stringifiedValue: string, at: string | undefined, maxWidt
   const beginMarkerPos = stringifiedValue.indexOf(TOSTRING_BEGIN_MARKER);
   const endMarkerPos = stringifiedValue.indexOf(TOSTRING_END_MARKER, beginMarkerPos + 1);
   const markedAreaLength = endMarkerPos - beginMarkerPos + 1;
-  if (markedAreaLength > 0) {
+  if (beginMarkerPos > -1 && endMarkerPos > -1 && markedAreaLength > 0) {
     if (maxWidth > markedAreaLength) {
-      // Recenter stringified value on markedAreaLength
+      const from = beginMarkerPos - Math.ceil((maxWidth - markedAreaLength) / 2);
+      if (from > 0) {
+        stringifiedValue = '…' + stringifiedValue.substring(from);
+      }
     } else {
-      // Ensure beginning of marked area appears
       stringifiedValue = '…' + stringifiedValue.substring(beginMarkerPos - 1);
     }
-  } 
-  
+  }
+
   if (at !== undefined) {
     const miminizedAt = minimizeAt(at);
     const width = maxWidth - (miminizedAt.length + 1);

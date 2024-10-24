@@ -278,11 +278,20 @@ ${TOSTRING_BEGIN_MARKER}{${TOSTRING_END_MARKER}
       );
     });
 
-    it('recenter string on current item when witdh is limited', () => {
+    it('centers string on current item when width is limited', () => {
       expect(toString(toValue(string, { isExecutable: true }), { operatorState: 142, maxWidth: 40 })).toStrictEqual(
-        `…lt n\n  {\n    dup ${TOSTRING_BEGIN_MARKER}2${TOSTRING_END_MARKER} lt { pop stop } …`
+        `…sult n\n  {\n    dup ${TOSTRING_BEGIN_MARKER}2${TOSTRING_END_MARKER} lt { pop stop }…`
       );
-    })
+    });
+
+    it('converts string and indicate current position (operator state is 11, maxWidth set to 40)', () => {
+      expect(toString(toValue(string, { isExecutable: true }), { operatorState: 11, maxWidth: 40 })).toStrictEqual(
+        `/factorial
+${TOSTRING_BEGIN_MARKER}{${TOSTRING_END_MARKER}
+  %% check stack
+  count…`
+      );
+    });
   });
 
   describe('operator', () => {
