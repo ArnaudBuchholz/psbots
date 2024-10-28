@@ -19,6 +19,40 @@ interface StatusOptions {
   concat?: string;
 }
 
+export function formatCountVariation (last: number, current: number): { length: number; formatted: string } {
+  if (current > last) {
+    const formatted = `+${current - last}`;
+    return {
+      length: formatted.length + 1,
+      formatted: ` ${red}${formatted}`
+    }
+  } else if (current < last) {
+    const formatted = `-${last - current}`;
+    return {
+      length: formatted.length + 1,
+      formatted: ` ${red}${formatted}`
+    }
+  }
+  return { length: 0, formatted: '' };
+}
+
+export function formatMemoryVariation (last: number, current: number): { length: number; formatted: string } {
+  if (current > last) {
+    const formatted = `+${formatBytes(current - last)}`;
+    return {
+      length: formatted.length + 1,
+      formatted: ` ${red}${formatted}`
+    };
+  } else if (current < last) {
+    const formatted = `-${formatBytes(last - current)}`;
+    return {
+      length: formatted.length + 1,
+      formatted: ` ${green}${formatted}`
+    };
+  }
+  return { length: 0, formatted: '' };
+}
+
 export function status(state: IState, options: StatusOptions): string {
   let cycleLabel: string;
   if (options.absolute) {
@@ -26,26 +60,13 @@ export function status(state: IState, options: StatusOptions): string {
   } else {
     cycleLabel = 'cycles: ';
   }
-  let operandsVariation = '';
-  const { lastOperandsCount } = options;
-  if (lastOperandsCount !== undefined) {
-    const currentOperandsCount = state.operands.length;
-    if (currentOperandsCount > lastOperandsCount) {
-      operandsVariation = ` ${red}+${currentOperandsCount - lastOperandsCount}`;
-    } else if (currentOperandsCount < lastOperandsCount) {
-      operandsVariation = ` ${red}-${lastOperandsCount - currentOperandsCount}`;
-    }
-  }
-  let memoryVariation = '';
-  const { lastUsedMemory } = options;
-  if (lastUsedMemory !== undefined) {
-    const currentUsedMemory = state.memoryTracker.used;
-    if (currentUsedMemory > lastUsedMemory) {
-      memoryVariation = ` ${red}+${formatBytes(currentUsedMemory - lastUsedMemory)}`;
-    } else if (currentUsedMemory < lastUsedMemory) {
-      memoryVariation = ` ${green}-${formatBytes(lastUsedMemory - currentUsedMemory)}`;
-    }
-  }
+
+  const currentOperandsCount = state.operands.length;
+  const operandsVariation = formatCountVariation(options.lastOperandsCount ?? currentOperandsCount, currentOperandsCount).formatted;
+  
+  const currentUsedMemory = state.memoryTracker.used;
+  const memoryVariation = formatMemoryVariation(options.lastUsedMemory ?? currentUsedMemory, currentUsedMemory).formatted;
+
   let flags = '';
   if (!state.callEnabled) {
     flags += ` ${red}!call`;
