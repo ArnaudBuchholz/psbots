@@ -1,9 +1,10 @@
 import type { IState } from '@psbots/engine';
 import type { IReplIO } from './IReplIO.js';
 import { toString, TOSTRING_BEGIN_MARKER, TOSTRING_END_MARKER } from '@psbots/engine/sdk';
-import { blue, cyan, green /*, magenta*/, red, white, yellow } from './colors.js';
-import { status } from './status.js';
+import { blue, cyan, green, magenta, red, white, yellow } from './colors.js';
+import { formatMemoryVariation, status } from './status.js';
 import { operands } from './format.js';
+import { formatBytes } from './formatBytes.js';
 
 type DebugParameters = {
   replIO: IReplIO;
@@ -27,9 +28,34 @@ export async function runWithDebugger({ replIO, state, iterator, waitForChar }: 
     }
 
     replIO.output('\x1b[1;1H\x1b[J'); // clear display
-    replIO.output(`┌─────────────────┬${''.padStart(width - 20, '─')}┐`);
-    replIO.output(`│Cycle: #${cycle.toString().padEnd(5, ' ')} │Memory: ${''.padStart(width - 31, ' ')}│`);
-    replIO.output(`├─────────────────┴${''.padStart(width - 20, '─')}┤`);
+
+    const cycleLength = cycle.toString().length;
+    const cycleInfoLength = 8 + cycleLength;
+    const cycleInfo = `${white}Cycle: #${yellow}${cycle.toString()}`;
+
+    const spaceLeftForMemory = width - 3 /* ┌┬┐ */ - cycleInfoLength;
+
+    replIO.output(`${magenta}┌${''.padStart(cycleInfoLength, '─')}┬${''.padStart(spaceLeftForMemory, '─')}┐`);
+
+    const memoryVariation = formatMemoryVariation(lastUsedMemory, state.memoryTracker.used);
+    const currentMemory = formatBytes(state.memoryTracker.used);
+    let memoryInfoLength = 8 + currentMemory.length;
+    let memoryInfo = `${yellow}M${white}emory: ${yellow}${currentMemory}`;
+    if (memoryInfoLength + memoryVariation.length < spaceLeftForMemory) {
+      memoryInfo += memoryVariation.formatted;
+      memoryInfoLength += memoryVariation.length;
+    }
+    let memoryDetails = ` (user: ${formatBytes(state.memoryTracker.byType.user)}, strings: ${formatBytes(state.memoryTracker.byType.string)}, system: ${formatBytes(state.memoryTracker.byType.system)})`
+    if (memoryInfoLength + memoryDetails.length <= spaceLeftForMemory) {
+      memoryInfo += `${white}${memoryDetails}`;
+      memoryInfoLength += memoryDetails.length;
+    }
+    replIO.output(`│${cycleInfo}${magenta}│${memoryInfo}${''.padStart(spaceLeftForMemory - memoryInfoLength, ' ')}${magenta}│`);
+    replIO.output(`${magenta}├${''.padStart(cycleInfoLength, '─')}┴${''.padStart(spaceLeftForMemory, '─')}┤`);
+
+    const operandsWidth = Math.floor((width - 3) / 2);
+    const callStackWidth = width - 3 - operandsWidth;
+    replIO.output(`${magenta}│${''.padStart(operandsWidth, ' ')}│${''.padStart(callStackWidth, ' ')}│`);
 
     replIO.output('\n');
     if (state.callStack.length) {
