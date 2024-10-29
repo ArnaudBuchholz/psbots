@@ -13,6 +13,16 @@ type DebugParameters = {
   waitForChar: () => Promise<string>;
 };
 
+function colorize (string: string): string {
+  return string
+    .replace(
+      new RegExp(TOSTRING_BEGIN_MARKER + '.*' + TOSTRING_END_MARKER, 'g'),
+      (match: string): string => `${yellow}${match}${white}`
+    )
+    .replace(/@.*$/g, (match: string): string => `${blue}${match}${white}`)
+    .replace(/…|↵|⭲/g, (match: string): string => `${blue}${match}${white}`)
+}
+
 export async function runWithDebugger({ replIO, state, iterator, waitForChar }: DebugParameters): Promise<number> {
   let lastOperandsCount = state.operands.length;
   let lastUsedMemory = state.memoryTracker.used;
@@ -86,57 +96,27 @@ export async function runWithDebugger({ replIO, state, iterator, waitForChar }: 
 
       const operand = state.operands.at(index);
       if (null === operand) {
-        replIO.output(`${magenta}│${''.padStart(operandsWidth, ' ')}`);
+        replIO.output(''.padStart(operandsWidth, ' '));
       } else {
-        const operandInfo = toString(operand, { maxWidth: operandsWidth });
-        replIO.output(`${operandInfo}${''.padStart(operandsWidth - operandInfo.length, ' ')}`);
+        const operandInfo = toString(operand, { maxWidth: operandsWidth, includeDebugSource: true });
+        replIO.output(`${colorize(operandInfo)}${''.padStart(operandsWidth - operandInfo.length, ' ')}`);
       }
 
       replIO.output(`${magenta}│${white}`);
 
       if (index < callStack.length) {
         const { value, operatorState } = state.callStack[index]!;
-        const callStackInfo = toString(value, { maxWidth: callStackWidth, operatorState });
+        const callStackInfo = toString(value, { maxWidth: callStackWidth, operatorState, includeDebugSource: true });
         const callStackInfoSize = callStackInfo.length;
-        replIO.output(`${callStackInfo}${''.padStart(callStackWidth - callStackInfoSize, ' ')}`);
+        replIO.output(`${colorize(callStackInfo)}${''.padStart(callStackWidth - callStackInfoSize, ' ')}`);
       } else {
-        replIO.output(`${''.padStart(callStackWidth, ' ')}`);
+        replIO.output(''.padStart(callStackWidth, ' '));
       }
       replIO.output(`${magenta}│`);
     }
 
-    replIO.output(`\n`);
-    replIO.output(`${magenta}│${''.padStart(operandsWidth, ' ')}│${''.padStart(callStackWidth, ' ')}│`);
+    replIO.output(`${magenta}└${''.padStart(operandsWidth, '─')}┴${''.padStart(callStackWidth, '─')}┘`);
 
-    replIO.output('\n');
-    if (state.callStack.length) {
-      const currentCallStackSize = state.callStack.length;
-      let callStackVariation: string;
-      if (currentCallStackSize > lastCallStackSize) {
-        callStackVariation = ` ${red}+${currentCallStackSize - lastCallStackSize}`;
-      } else if (currentCallStackSize < lastCallStackSize) {
-        callStackVariation = ` ${green}-${lastCallStackSize - currentCallStackSize}`;
-      } else {
-        callStackVariation = '';
-      }
-      replIO.output(`${cyan}call stack: ${yellow}${state.callStack.length}${callStackVariation}${white}\r\n`);
-
-      replIO.output(
-        state.callStack
-          .map(({ value, operatorState }) =>
-            toString(value, { operatorState, includeDebugSource: true, maxWidth: replIO.width })
-              .replace(
-                new RegExp(TOSTRING_BEGIN_MARKER + '.*' + TOSTRING_END_MARKER, 'g'),
-                (match: string): string => `${yellow}${match}${white}`
-              )
-              .replace(/@.*$/g, (match: string): string => `${blue}${match}${white}`)
-              .replace(/…|↵|⭲/g, (match: string): string => `${blue}${match}${white}`)
-          )
-          .join('\r\n') + `${white}\r\n`
-      );
-    } else {
-      replIO.output('∅ call stack is empty\r\n');
-    }
     replIO.output(
       status(state, {
         cycle,
