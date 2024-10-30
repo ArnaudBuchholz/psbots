@@ -89,13 +89,13 @@ export function buildInputHandler(replIO: IReplIO): IInputHandler {
         if (linesBuffer.length === 1) {
           return waitForLine();
         }
-        // Wait 10 ms before returning lines
         let newInput = false;
         await Promise.race([
           linesBufferChange.then(() => {
             newInput = true;
           }),
-          new Promise((resolve) => setTimeout(resolve, 10))
+          // Wait before returning lines
+          new Promise((resolve) => setTimeout(resolve, 50))
         ]);
         if (newInput) {
           return waitForLine();
