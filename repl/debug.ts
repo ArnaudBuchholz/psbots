@@ -16,14 +16,14 @@ type DebugParameters = {
 const border = magenta;
 const shortcut = green;
 
-function colorize (string: string): string {
+function colorize(string: string): string {
   return string
     .replace(
       new RegExp(TOSTRING_BEGIN_MARKER + '.*' + TOSTRING_END_MARKER, 'g'),
       (match: string): string => `${yellow}${match}${white}`
     )
     .replace(/@.*$/g, (match: string): string => `${blue}${match}${white}`)
-    .replace(/…|↵|⭲/g, (match: string): string => `${blue}${match}${white}`)
+    .replace(/…|↵|⭲/g, (match: string): string => `${blue}${match}${white}`);
 }
 
 export async function runWithDebugger({ replIO, state, iterator, waitForChar }: DebugParameters): Promise<number> {

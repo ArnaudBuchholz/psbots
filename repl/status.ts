@@ -19,24 +19,24 @@ interface StatusOptions {
   concat?: string;
 }
 
-export function formatCountVariation (last: number, current: number): { length: number; formatted: string } {
+export function formatCountVariation(last: number, current: number): { length: number; formatted: string } {
   if (current > last) {
     const formatted = `+${current - last}`;
     return {
       length: formatted.length + 1,
       formatted: ` ${red}${formatted}`
-    }
+    };
   } else if (current < last) {
     const formatted = `-${last - current}`;
     return {
       length: formatted.length + 1,
       formatted: ` ${red}${formatted}`
-    }
+    };
   }
   return { length: 0, formatted: '' };
 }
 
-export function formatMemoryVariation (last: number, current: number): { length: number; formatted: string } {
+export function formatMemoryVariation(last: number, current: number): { length: number; formatted: string } {
   if (current > last) {
     const formatted = `+${formatBytes(current - last)}`;
     return {
@@ -62,10 +62,16 @@ export function status(state: IState, options: StatusOptions): string {
   }
 
   const currentOperandsCount = state.operands.length;
-  const operandsVariation = formatCountVariation(options.lastOperandsCount ?? currentOperandsCount, currentOperandsCount).formatted;
-  
+  const operandsVariation = formatCountVariation(
+    options.lastOperandsCount ?? currentOperandsCount,
+    currentOperandsCount
+  ).formatted;
+
   const currentUsedMemory = state.memoryTracker.used;
-  const memoryVariation = formatMemoryVariation(options.lastUsedMemory ?? currentUsedMemory, currentUsedMemory).formatted;
+  const memoryVariation = formatMemoryVariation(
+    options.lastUsedMemory ?? currentUsedMemory,
+    currentUsedMemory
+  ).formatted;
 
   let flags = '';
   if (!state.callEnabled) {
