@@ -32,6 +32,8 @@ export async function runWithDebugger({ replIO, state, iterator, waitForChar }: 
   let lastCallStackSize = state.callStack.length;
   let cycle = 0;
 
+  // TODO: show dictionaries
+
   // eslint-disable-next-line no-constant-condition
   while (true) {
     const { width, height } = replIO;
@@ -85,10 +87,24 @@ export async function runWithDebugger({ replIO, state, iterator, waitForChar }: 
     const callStackVariation = formatCountVariation(lastCallStackSize, state.callStack.length);
     let callStackInfo = `${white}C${shortcut}a${white}ll stack: ${yellow}${state.callStack.length}`;
     let callStackInfoSize = 12 + state.callStack.length.toString().length;
-    if (callStackInfoSize + callStackVariation.length < callStackWidth) {
-      callStackInfo += callStackVariation.formatted;
-      callStackInfoSize += callStackVariation.length;
+    let exceptionInfo = '';
+    let exceptionInfoSize = 0;
+    if (state.exception) {
+      const { name } = state.exception;
+      exceptionInfo = ` ${red}❌${name}`;
+      exceptionInfoSize = name.length + 2;
     }
+    if (callStackInfoSize + callStackVariation.length + exceptionInfoSize < callStackWidth) {
+      callStackInfo += callStackVariation.formatted + exceptionInfo;
+      callStackInfoSize += callStackVariation.length + exceptionInfoSize;
+    } else if (callStackInfoSize + exceptionInfoSize < callStackWidth) {
+      callStackInfo += exceptionInfo;
+      callStackInfoSize += exceptionInfoSize;
+    } else if (state.exception && callStackInfoSize + 2 < callStackWidth) {
+      callStackInfo += ' ❌';
+      callStackInfoSize += 2;
+    }
+
     replIO.output(`${border}│${callStackInfo}${''.padStart(callStackWidth - callStackInfoSize, ' ')}${border}│`);
 
     const callStack = state.callStack;
