@@ -292,6 +292,46 @@ ${TOSTRING_BEGIN_MARKER}{${TOSTRING_END_MARKER}
   count…`
       );
     });
+
+    it('converts string and indicate current position (operator state is 219, maxWidth set to 40)', () => {
+      expect(toString(toValue(string, { isExecutable: true }), { operatorState: 219, maxWidth: 40 })).toStrictEqual(
+        `… exch
+    1 sub
+  } loop
+} bind ${TOSTRING_BEGIN_MARKER}def${TOSTRING_END_MARKER}
+
+`
+      );
+    });
+
+    it('converts string and indicate current position (operator state is 219, maxWidth set to 40, includeDebugSource)', () => {
+      expect(
+        toString(
+          Object.assign(
+            {
+              debugSource: <IDebugSource>{
+                source: string,
+                filename: 'test.ps',
+                length: string.length,
+                pos: 0
+              }
+            },
+            toValue(string, { isExecutable: true })
+          ),
+          {
+            operatorState: 219,
+            maxWidth: 40,
+            includeDebugSource: true
+          }
+        )
+      ).toStrictEqual(
+        `…sub
+  } loop
+} bind ${TOSTRING_BEGIN_MARKER}def${TOSTRING_END_MARKER}
+
+@test.ps:1:1`
+      );
+    });
   });
 
   describe('operator', () => {

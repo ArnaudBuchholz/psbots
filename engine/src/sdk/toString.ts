@@ -45,8 +45,22 @@ function fitToMaxWidth(stringifiedValue: string, at: string | undefined, maxWidt
   } else {
     result = stringifiedValue;
   }
-  if (maxWidth < 1 || result.length < maxWidth) {
+  if (maxWidth < 1 || result.length <= maxWidth) {
     return result;
+  }
+
+  let minimizedAt = '';
+  if (at !== undefined) {
+    minimizedAt = `@${minimizeAt(at)}`;
+    result = `${stringifiedValue}${minimizedAt}`;
+    if (result.length <= maxWidth) {
+      return result;
+    }
+    if (maxWidth < minimizedAt.length) {
+      minimizedAt = ''; // ignore
+    } else {
+      maxWidth -= minimizedAt.length;
+    }
   }
 
   const beginMarkerPos = stringifiedValue.indexOf(TOSTRING_BEGIN_MARKER);
@@ -54,7 +68,10 @@ function fitToMaxWidth(stringifiedValue: string, at: string | undefined, maxWidt
   const markedAreaLength = endMarkerPos - beginMarkerPos + 1;
   if (beginMarkerPos > -1 && endMarkerPos > -1 && markedAreaLength > 0) {
     if (maxWidth > markedAreaLength) {
-      const from = beginMarkerPos - Math.ceil((maxWidth - markedAreaLength) / 2);
+      let from = beginMarkerPos - Math.ceil((maxWidth - markedAreaLength) / 2);
+      if (from + maxWidth > stringifiedValue.length) {
+        from = stringifiedValue.length - maxWidth + 1;
+      }
       if (from > 0) {
         stringifiedValue = '…' + stringifiedValue.substring(from);
       }
@@ -63,15 +80,13 @@ function fitToMaxWidth(stringifiedValue: string, at: string | undefined, maxWidt
     }
   }
 
-  if (at !== undefined) {
-    const miminizedAt = minimizeAt(at);
-    const width = maxWidth - (miminizedAt.length + 1);
-    if (width < stringifiedValue.length) {
-      return stringifiedValue.substring(0, width - 1) + '…@' + miminizedAt;
-    }
-    return stringifiedValue + '@' + miminizedAt;
+  if (stringifiedValue.length > maxWidth) {
+    stringifiedValue = stringifiedValue.substring(0, maxWidth - 1) + '…';
   }
-  return stringifiedValue.substring(0, maxWidth - 1) + '…';
+  if (minimizedAt) {
+    return `${stringifiedValue}${minimizedAt}`;
+  }
+  return stringifiedValue;
 }
 
 function decorate(
