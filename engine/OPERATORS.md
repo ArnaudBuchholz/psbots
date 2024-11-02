@@ -28,7 +28,7 @@ Here the list of official POSTSCRIPT operators extracted from this [index](https
 |astore|🚧|
 |atan|❓|
 |awidthshow|📄|
-|begin|🚧|
+|begin|✅|
 |bind|✅|
 |bitshift|🚧|
 |bytesavailable|❓|
@@ -120,7 +120,7 @@ Here the list of official POSTSCRIPT operators extracted from this [index](https
 |dup|✅|
 |echo|❌|
 |eexec|❓|
-|end|🚧|
+|end|✅|
 |eoclip|📄|
 |eofill|📄|
 |eoviewclip|📄|
