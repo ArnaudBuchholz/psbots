@@ -1,7 +1,9 @@
+import './begin.js';
 import './bind.js';
 import './countdictstack.js';
 import './currentdict.js';
 import './def.js';
+import './end.js';
 import './globaldict.js';
 import './systemdict.js';
 import './userdict.js';
