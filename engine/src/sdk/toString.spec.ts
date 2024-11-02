@@ -68,8 +68,12 @@ describe('basic conversion', () => {
     expect(toString(toValue([1, 2, 3], { isExecutable: true }))).toStrictEqual('{ 1 2 3 }');
   });
 
-  it('summarizes a dictionary', () => {
-    expect(toString(toValue({ a: 1 }))).toStrictEqual('--dictionary(1)--');
+  it('summarizes a dictionary (ro)', () => {
+    expect(toString(toValue({ a: 1 }, { isReadOnly: true }))).toStrictEqual('--dictionary(1)--');
+  });
+
+  it('summarizes a dictionary (r/w)', () => {
+    expect(toString(toValue({ a: 1 }))).toStrictEqual('--dictionary(1/∞)--');
   });
 });
 

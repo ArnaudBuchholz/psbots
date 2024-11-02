@@ -190,9 +190,13 @@ const implementations: { [type in ValueType]: (container: Value<type>, options: 
     }
     return decorate(output.join(' '), debugSource, options);
   },
-  [ValueType.dictionary]: ({ dictionary, debugSource }, options) => {
+  [ValueType.dictionary]: ({ dictionary, isReadOnly, debugSource }, options) => {
     const namesCount = dictionary.names.length.toString();
-    return decorate(`--dictionary(${namesCount})--`, debugSource, options);
+    let namesDescription = namesCount.toString();
+    if (!isReadOnly) {
+      namesDescription += '/∞'; // May be limited some day
+    }
+    return decorate(`--dictionary(${namesDescription})--`, debugSource, options);
   }
 };
 
