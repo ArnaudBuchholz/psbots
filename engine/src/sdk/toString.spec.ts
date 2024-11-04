@@ -164,6 +164,25 @@ if`,
       )
     ).toStrictEqual('[ 1 2 3 ]@test.ps:1:8');
   });
+
+  it('hides debug info if not enough space', () => {
+    expect(
+      toString(
+        Object.assign(toValue.operator, {
+          debugSource: <IDebugSource>{
+            source: 'true { operator } if',
+            filename: 'test.ps',
+            length: 8,
+            pos: 7
+          }
+        }),
+        {
+          includeDebugSource: true,
+          maxWidth: 4
+        }
+      )
+    ).toStrictEqual('-op…');
+  });
 });
 
 describe('conversion with a limited width', () => {
@@ -285,6 +304,12 @@ ${TOSTRING_BEGIN_MARKER}{${TOSTRING_END_MARKER}
     it('centers string on current item when width is limited', () => {
       expect(toString(toValue(string, { isExecutable: true }), { operatorState: 142, maxWidth: 40 })).toStrictEqual(
         `…sult n\n  {\n    dup ${TOSTRING_BEGIN_MARKER}2${TOSTRING_END_MARKER} lt { pop stop }…`
+      );
+    });
+
+    it('centers string on current item when width is limited (selected is larger than maxWidth)', () => {
+      expect(toString(toValue(string, { isExecutable: true }), { operatorState: 45, maxWidth: 10 })).toStrictEqual(
+        `… ${TOSTRING_BEGIN_MARKER}stacku…`
       );
     });
 
