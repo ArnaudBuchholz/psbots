@@ -28,6 +28,11 @@ buildFunctionOperator(
         out: '1 /dictionary'
       },
       {
+        description: 'builds a read/write dictionary',
+        in: '« /test 123 » wcheck',
+        out: 'true'
+      },
+      {
         description: 'builds a dictionary check length and type',
         in: 'mark /test 123 dicttomark dup length exch type',
         out: '1 /dictionary'
@@ -88,7 +93,7 @@ buildFunctionOperator(
       operands.pop();
       pushOpenClosedValueWithDebugInfo({
         operands,
-        value: dictionary.toValue(),
+        value: dictionary.toValue({ isReadOnly: false }),
         mark,
         closeOp
       });
