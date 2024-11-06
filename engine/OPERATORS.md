@@ -94,8 +94,8 @@ Here the list of official POSTSCRIPT operators extracted from this [index](https
 |currentundercolorremoval|📄|
 |currentuserparams|❓|
 |curveto|📄|
-|cvi|🚧|
-|cvlit|🚧|
+|cvi|✅|
+|cvlit|✅|
 |cvn|✅∗ → `cvx`|
 |cvr|❌|
 |cvrs|🚧|

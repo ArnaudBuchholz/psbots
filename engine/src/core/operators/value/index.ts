@@ -1,3 +1,4 @@
+import './convert/index.js';
 import './eq.js';
 import './false.js';
 import './get.js';

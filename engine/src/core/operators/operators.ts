@@ -13,6 +13,7 @@ export type OperatorDefinition = {
     | 'boolean'
     | 'callstack'
     | 'comparison'
+    | 'conversion'
     | 'dictionary'
     | 'dictstack'
     | 'exception'
