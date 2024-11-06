@@ -96,12 +96,12 @@ Here the list of official POSTSCRIPT operators extracted from this [index](https
 |curveto|📄|
 |cvi|✅|
 |cvlit|✅|
-|cvn|✅∗ → `cvx`|
+|cvn|✅|
 |cvr|❌|
 |cvrs|🚧|
 |cvs|🚧|
 |cvx|🚧|
-|def|🚧|
+|def|✅|
 |defaultmatrix|📄|
 |definefont|📄|
 |defineresource|📄|
