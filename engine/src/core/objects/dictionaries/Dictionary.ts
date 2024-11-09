@@ -1,15 +1,13 @@
-import type { Value, IDictionary, MemoryType, DictionaryValue, IValuePermissions } from '@api/index.js';
+import type { Value, IDictionary, MemoryType, DictionaryValue, IValuePermissions, Result } from '@api/index.js';
 import { ValueType } from '@api/index.js';
 import type { MemoryTracker } from '@core/MemoryTracker.js';
 import { ShareableObject } from '@core/objects/ShareableObject.js';
-import { InternalException } from '@sdk/index.js';
+import { assert } from '@sdk/index.js';
 
 export class Dictionary extends ShareableObject implements IDictionary {
   /** returned value is not addValueRef'ed */
   toValue({ isReadOnly = true, isExecutable }: Partial<IValuePermissions> = {}): DictionaryValue {
-    if (isExecutable === true) {
-      throw new InternalException('Unsupported permissions');
-    }
+    assert(isExecutable !== true, 'Unsupported permissions');
     return {
       type: ValueType.dictionary,
       isReadOnly,
@@ -21,9 +19,10 @@ export class Dictionary extends ShareableObject implements IDictionary {
 
   private readonly _values: { [key in string]: Value } = {};
 
-  constructor(
+  private constructor(
     private readonly _memoryTracker: MemoryTracker,
-    private readonly _memoryType: MemoryType
+    private readonly _memoryType: MemoryType,
+    private readonly _maxSize: number,
   ) {
     super();
     this._memoryTracker.register({
@@ -31,6 +30,19 @@ export class Dictionary extends ShareableObject implements IDictionary {
       pointers: 1,
       type: this._memoryType
     });
+  }
+
+  static create(memoryTracker: MemoryTracker, memoryType: MemoryType, maxSize?: number): Result<Dictionary> {
+    const 
+    const result = memoryTracker.register({
+      container: {},
+      pointers: 1,
+      type: memoryType
+    });
+    if (!result.success) {
+      return result;
+    }
+
   }
 
   // region IReadOnlyDictionary

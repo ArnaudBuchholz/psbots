@@ -12,7 +12,7 @@ import type {
   NameValue
 } from '@api/index.js';
 import { ValueType } from '@api/index.js';
-import { InternalException } from '@sdk/exceptions/InternalException.js';
+import { InternalException } from '@sdk/exceptions/AssertException.js';
 import { isObject } from '@sdk/checks/isObject.js';
 
 const expectedFlags: { [key in ValueType]?: Partial<IAbstractValue> } = {
