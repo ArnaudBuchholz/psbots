@@ -22,7 +22,7 @@ export class Dictionary extends ShareableObject implements IDictionary {
   private constructor(
     private readonly _memoryTracker: MemoryTracker,
     private readonly _memoryType: MemoryType,
-    private readonly _maxSize: number,
+    private readonly _maxSize: number
   ) {
     super();
     this._memoryTracker.register({
@@ -33,7 +33,6 @@ export class Dictionary extends ShareableObject implements IDictionary {
   }
 
   static create(memoryTracker: MemoryTracker, memoryType: MemoryType, maxSize?: number): Result<Dictionary> {
-    const 
     const result = memoryTracker.register({
       container: {},
       pointers: 1,
@@ -42,7 +41,6 @@ export class Dictionary extends ShareableObject implements IDictionary {
     if (!result.success) {
       return result;
     }
-
   }
 
   // region IReadOnlyDictionary
