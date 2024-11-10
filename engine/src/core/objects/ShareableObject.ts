@@ -1,9 +1,7 @@
 import type { Value, IValueTracker } from '@api/index.js';
 import { ValueType } from '@api/index.js';
-import { InternalException } from '@sdk/index.js';
-
-const INVALID_VALUE_TYPE = 'Invalid value type';
-const TOOMANY_RELEASE = 'Superfluous release';
+import type { MemorySize } from '@core/MemoryTracker';
+import { assert } from '@sdk/index.js';
 
 const getShareableObject = (value: Value): ShareableObject => {
   if (value.type === ValueType.array) {
@@ -12,10 +10,14 @@ const getShareableObject = (value: Value): ShareableObject => {
   if (value.type === ValueType.dictionary) {
     return value.dictionary as unknown as ShareableObject;
   }
-  throw new InternalException(INVALID_VALUE_TYPE);
+  assert(false, 'Invalid value type');
 };
 
 export abstract class ShareableObject {
+  static size: MemorySize = {
+    integers: 1
+  } as const;
+
   private _refCount: number;
 
   static tracker: IValueTracker = {
@@ -46,10 +48,7 @@ export abstract class ShareableObject {
       this._dispose();
       return false;
     }
-    // Stryker disable next-line EqualityOperator
-    else if (refCount < 0) {
-      throw new InternalException(TOOMANY_RELEASE);
-    }
+    assert(refCount > 0, 'Superfluous release');
     return true;
   }
 
