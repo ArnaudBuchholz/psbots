@@ -1,5 +1,6 @@
 /** Possible Value types */
 export enum ValueType {
+  null = 'null',
   boolean = 'boolean',
   integer = 'integer',
   string = 'string',
