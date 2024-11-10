@@ -1,3 +1,4 @@
+import type { Result } from '@api/index.js';
 import { BaseException } from '@sdk/exceptions/BaseException.js';
 
 class AssertException extends BaseException {
@@ -7,8 +8,14 @@ class AssertException extends BaseException {
   }
 }
 
-export function assert(condition: boolean, message: string, cause?: unknown): asserts condition {
-  if (!condition) {
-    throw new AssertException(message, cause);
+export function assert(result: Result<unknown>): asserts result is { success: true; value: undefined };
+export function assert(condition: boolean, message: string, cause?: unknown): asserts condition;
+export function assert(condition: boolean | Result<unknown>, message?: string, cause?: unknown) {
+  if (typeof condition !== 'boolean') {
+    if (!condition.success) {
+      throw new AssertException('Unexpected failed result', condition.error);
+    }
+  } else if (!condition) {
+    throw new AssertException(message ?? 'assertion failed', cause);
   }
 }
