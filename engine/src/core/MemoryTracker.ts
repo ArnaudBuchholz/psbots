@@ -111,11 +111,10 @@ export class MemoryTracker implements IValueTracker, IMemoryTracker {
     return true;
   }
 
-  checkIfAvailable(details: MemoryRegistration): Result<undefined, VmOverflowException> {
-    const { /* type, */ bytes = 0, integers = 0, pointers = 0, values = 0 } = details;
-    const step = bytes + integers * INTEGER_BYTES + pointers * POINTER_BYTES + values * VALUE_BYTES;
+  checkIfAvailable(details: MemorySize): Result<undefined, VmOverflowException> {
     // TODO: limit by type ?
-    // if (this._byType[type] + step > ) return false;
+    const { bytes = 0, integers = 0, pointers = 0, values = 0 } = details;
+    const step = bytes + integers * INTEGER_BYTES + pointers * POINTER_BYTES + values * VALUE_BYTES;
     if (this._used + step <= this._total) {
       return { success: true, value: undefined };
     }
