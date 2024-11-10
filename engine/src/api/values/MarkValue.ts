@@ -1,4 +1,4 @@
-import type { ValueType } from '@api/values/ValueType.js';
+import { ValueType } from '@api/values/ValueType.js';
 import type { IAbstractValue } from '@api/interfaces/IAbstractValue.js';
 
 export interface IMarkValue extends IAbstractValue {
@@ -9,3 +9,9 @@ export interface IMarkValue extends IAbstractValue {
 
 /** A mark */
 export type MarkValue = IMarkValue;
+
+export const markValue = {
+  type: ValueType.mark,
+  isReadOnly: true,
+  isExecutable: false
+};

@@ -1,4 +1,4 @@
-import type { ValueType } from '@api/values/ValueType.js';
+import { ValueType } from '@api/values/ValueType.js';
 import type { IAbstractValue } from '@api/interfaces/IAbstractValue.js';
 
 export interface INullValue extends IAbstractValue {
@@ -7,5 +7,11 @@ export interface INullValue extends IAbstractValue {
   readonly isExecutable: false;
 }
 
-/** A mark */
+/** Null */
 export type NullValue = INullValue;
+
+export const nullValue = {
+  type: ValueType.null,
+  isReadOnly: true,
+  isExecutable: false
+} as const;
