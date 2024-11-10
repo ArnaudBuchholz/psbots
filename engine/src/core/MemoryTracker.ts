@@ -6,9 +6,10 @@ import type {
   MemoryType,
   IMemoryByType,
   IMemorySnapshot,
-  ValueType
+  ValueType,
+  Result
 } from '@api/index.js';
-import { InternalException, VmOverflowException } from '@sdk/index.js';
+import { assert, VmOverflowException } from '@sdk/index.js';
 
 export const STRING_MEMORY_TYPE: MemoryType = 'string';
 
@@ -29,21 +30,32 @@ type MemoryTrackerOptions = {
   debug?: boolean;
 };
 
-type ContainerRegisters = {
-  container: WeakRef<object>;
-  type: MemoryType;
-  total: number;
-  calls: (Omit<MemoryRegistrationDetails, 'container'> & { stack?: string })[];
-};
-
-type MemoryRegistrationDetails = {
-  type: MemoryType;
-  container: object;
+export type MemorySize = {
   bytes?: number;
   integers?: number;
   pointers?: number;
   values?: number;
 };
+
+export type MemoryRegistration = MemorySize & {
+  type: MemoryType;
+};
+
+type ContainerRegisters = {
+  container: WeakRef<object>;
+  type: MemoryType;
+  total: number;
+  calls: (MemoryRegistration & { stack?: string })[];
+};
+
+export function addMemorySize(a: MemorySize, b: MemorySize): Required<MemorySize> {
+  return {
+    bytes: (a.bytes ?? 0) + (b.bytes ?? 0),
+    integers: (a.integers ?? 0) + (b.integers ?? 0),
+    pointers: (a.pointers ?? 0) + (b.pointers ?? 0),
+    values: (a.values ?? 0) + (b.values ?? 0)
+  };
+}
 
 export class MemoryTracker implements IValueTracker, IMemoryTracker {
   private readonly _total: number = Infinity;
@@ -83,9 +95,7 @@ export class MemoryTracker implements IValueTracker, IMemoryTracker {
 
   private _releaseString(string: string): boolean {
     const refCount = this._strings.get(string);
-    if (refCount === undefined) {
-      throw new InternalException('Invalid string release', string);
-    }
+    assert(refCount !== undefined, 'Unable to release string as it is not referenced', string);
     if (refCount === 1) {
       const size = stringSizer(string);
       this.register({
@@ -101,14 +111,26 @@ export class MemoryTracker implements IValueTracker, IMemoryTracker {
     return true;
   }
 
-  register(details: MemoryRegistrationDetails) {
+  checkIfAvailable(details: MemoryRegistration): Result<undefined, VmOverflowException> {
+    const { /* type, */ bytes = 0, integers = 0, pointers = 0, values = 0 } = details;
+    const step = bytes + integers * INTEGER_BYTES + pointers * POINTER_BYTES + values * VALUE_BYTES;
+    // TODO: limit by type ?
+    // if (this._byType[type] + step > ) return false;
+    if (this._used + step <= this._total) {
+      return { success: true, value: undefined };
+    }
+    return { success: false, error: new VmOverflowException() };
+  }
+
+  register(details: MemoryRegistration & { container: object }): Result<undefined, VmOverflowException> {
+    const isAvailable = this.checkIfAvailable(details);
+    if (!isAvailable.success) {
+      return isAvailable;
+    }
     const { type, bytes = 0, integers = 0, pointers = 0, values = 0 } = details;
     const step = bytes + integers * INTEGER_BYTES + pointers * POINTER_BYTES + values * VALUE_BYTES;
     this._byType[type] += step;
     this._used += step;
-    if (this._used > this._total) {
-      throw new VmOverflowException();
-    }
     this._peak = Math.max(this._used, this._peak);
     if (this._byContainers && details.container !== this /* exclude strings */) {
       const { container, ...other } = details;
@@ -124,13 +146,9 @@ export class MemoryTracker implements IValueTracker, IMemoryTracker {
         this._containers.push(containerRef);
         this._byContainers.set(container, containerRegisters);
       }
-      if (containerRegisters.type !== type) {
-        throw new InternalException('Unexpected memory type change');
-      }
+      assert(containerRegisters.type === type, 'Unexpected memory type change', details);
       containerRegisters.total += step;
-      if (containerRegisters.total < 0) {
-        throw new InternalException('Invalid memory registration');
-      }
+      assert(containerRegisters.total >= 0, 'Invalid memory registration', details);
       if (containerRegisters.total !== 0) {
         let stack: string | undefined;
         try {
@@ -145,6 +163,7 @@ export class MemoryTracker implements IValueTracker, IMemoryTracker {
         this._byContainers.delete(container);
       }
     }
+    return { success: true, value: undefined };
   }
 
   *enumContainersAllocations(): Generator<ContainerRegisters> {
