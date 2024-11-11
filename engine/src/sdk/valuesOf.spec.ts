@@ -1,21 +1,22 @@
 import { it, expect } from 'vitest';
+import { markValue, nullValue } from '@api/index.js';
 import type { ValueType } from '@api/index.js';
 import { valuesOf } from './valuesOf.js';
 import type { IFunctionOperator } from '@sdk/interfaces/IOperator.js';
 import { toValue, values } from '@test/index.js';
 
-it('destructures one parameter', () => {
+it('handles one parameter', () => {
   const [number] = valuesOf<ValueType.integer>(toValue(1));
   expect(number).toStrictEqual(1);
 });
 
-it('destructures two parameters', () => {
+it('handles two parameters', () => {
   const [number, string] = valuesOf<ValueType.integer, ValueType.string>(toValue(1), toValue('a'));
   expect(number).toStrictEqual(1);
   expect(string).toStrictEqual('a');
 });
 
-it('destructures three parameters', () => {
+it('handles three parameters', () => {
   const [number, string, boolean] = valuesOf<ValueType.integer, ValueType.string, ValueType.boolean>(
     toValue(1),
     toValue('a'),
@@ -26,7 +27,7 @@ it('destructures three parameters', () => {
   expect(boolean).toStrictEqual(true);
 });
 
-it('destructures four parameters', () => {
+it('handles four parameters', () => {
   const [number, string, boolean, array] = valuesOf<
     ValueType.integer,
     ValueType.string,
@@ -39,18 +40,23 @@ it('destructures four parameters', () => {
   [1, 'a', true].forEach((value, index) => expect(array.at(index)).toStrictEqual(toValue(value)));
 });
 
-it('destructures a mark', () => {
-  const [mark] = valuesOf<ValueType.mark>(toValue.mark);
-  expect(mark).toStrictEqual(null);
+it('handles null', () => {
+  const [value] = valuesOf<ValueType.null>(nullValue);
+  expect(value).toStrictEqual(null);
 });
 
-it('destructures an operator', () => {
+it('handles mark', () => {
+  const [value] = valuesOf<ValueType.mark>(markValue);
+  expect(value).toStrictEqual(null);
+});
+
+it('handles an operator', () => {
   const [operator] = valuesOf<ValueType.operator>(toValue(values.emptyFunction));
   expect(operator.name === 'emptyFunction');
   expect((operator as IFunctionOperator).implementation === values.emptyFunction);
 });
 
-it('destructures a dictionary', () => {
+it('handles a dictionary', () => {
   const [dictionary] = valuesOf<ValueType.dictionary>(toValue({ abc: 123 }));
   expect(dictionary.lookup('abc')).toStrictEqual(toValue(123));
 });
