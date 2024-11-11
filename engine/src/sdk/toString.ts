@@ -7,6 +7,7 @@ import {
   OPERATOR_STATE_UNKNOWN
 } from '@sdk/interfaces/ICallStack.js';
 
+export const TOSTRING_NULL = '␀';
 export const TOSTRING_BEGIN_MARKER = '▻';
 export const TOSTRING_END_MARKER = '◅';
 
@@ -104,6 +105,7 @@ function decorate(
 }
 
 const implementations: { [type in ValueType]: (container: Value<type>, options: ToStringOptions) => string } = {
+  [ValueType.null]: ({ debugSource }, options) => decorate(TOSTRING_NULL, debugSource, options),
   [ValueType.boolean]: ({ isSet, debugSource }, options) => decorate(isSet ? 'true' : 'false', debugSource, options),
   [ValueType.integer]: ({ integer, debugSource }, options) => decorate(integer.toString(), debugSource, options),
   [ValueType.string]: ({ isExecutable, string, debugSource }, options) => {
@@ -165,22 +167,18 @@ const implementations: { [type in ValueType]: (container: Value<type>, options: 
     const { operatorState } = options;
     for (let index = 0; index < length; ++index) {
       const item = array.at(index);
-      if (item === null) {
-        output.push('␀');
+      const stringifiedItem = implementations[item.type](
+        item as never,
+        Object.assign({}, options, {
+          includeDebugSource: false,
+          maxWidth: 0,
+          operatorState: OPERATOR_STATE_UNKNOWN
+        })
+      );
+      if (isExecutable && operatorState === index) {
+        output.push(TOSTRING_BEGIN_MARKER + stringifiedItem + TOSTRING_END_MARKER);
       } else {
-        const stringifiedItem = implementations[item.type](
-          item as never,
-          Object.assign({}, options, {
-            includeDebugSource: false,
-            maxWidth: 0,
-            operatorState: OPERATOR_STATE_UNKNOWN
-          })
-        );
-        if (isExecutable && operatorState === index) {
-          output.push(TOSTRING_BEGIN_MARKER + stringifiedItem + TOSTRING_END_MARKER);
-        } else {
-          output.push(stringifiedItem);
-        }
+        output.push(stringifiedItem);
       }
     }
     if (isExecutable) {
