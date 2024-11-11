@@ -9,17 +9,9 @@ import type {
   OperatorValue,
   Value
 } from '@api/index.js';
-import { ValueType } from '@api/index.js';
+import { markValue, ValueType } from '@api/index.js';
 import type { IOperator } from '@sdk/index.js';
-import {
-  isObject,
-  OperatorType,
-  toBooleanValue,
-  toIntegerValue,
-  toStringValue,
-  toMarkValue,
-  toNameValue
-} from '@sdk/index.js';
+import { isObject, OperatorType, toBooleanValue, toIntegerValue, toStringValue, toNameValue } from '@sdk/index.js';
 import { ShareableObject } from '@core/index.js';
 
 export type CompatiblePrimitiveValue = string | symbol | number | boolean | Value | (() => void);
@@ -184,7 +176,7 @@ export function toValue(
   };
 }
 
-toValue.mark = toMarkValue();
+toValue.mark = markValue;
 
 const operator: OperatorValue = {
   type: ValueType.operator,
