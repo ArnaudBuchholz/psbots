@@ -11,7 +11,7 @@ export interface IMarkValue extends IAbstractValue {
 /** A mark */
 export type MarkValue = IMarkValue;
 
-export const markValue: Value = {
+export const markValue: Value<ValueType.mark> = {
   type: ValueType.mark,
   isReadOnly: true,
   isExecutable: false

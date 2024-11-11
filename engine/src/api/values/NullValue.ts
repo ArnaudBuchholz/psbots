@@ -11,7 +11,7 @@ export interface INullValue extends IAbstractValue {
 /** Null */
 export type NullValue = INullValue;
 
-export const nullValue: Value = {
+export const nullValue: Value<ValueType.null> = {
   type: ValueType.null,
   isReadOnly: true,
   isExecutable: false
