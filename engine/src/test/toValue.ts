@@ -7,9 +7,10 @@ import type {
   IReadOnlyDictionary,
   IValuePermissions,
   OperatorValue,
+  Result,
   Value
 } from '@api/index.js';
-import { markValue, ValueType } from '@api/index.js';
+import { nullValue, ValueType } from '@api/index.js';
 import type { IOperator } from '@sdk/index.js';
 import { isObject, OperatorType, toBooleanValue, toIntegerValue, toStringValue, toNameValue } from '@sdk/index.js';
 import { ShareableObject } from '@core/index.js';
@@ -21,11 +22,11 @@ function isValue(value: unknown): value is Value {
   return isObject(value) && value.type in ValueType;
 }
 
-function releasePreviousValue(previousValue: Value | undefined): Value | null {
+function releasePreviousValue(previousValue: Value | undefined): Value {
   if (previousValue !== undefined && previousValue.tracker?.releaseValue(previousValue) === false) {
-    return null;
+    return nullValue;
   }
-  return previousValue ?? null;
+  return previousValue ?? nullValue;
 }
 
 function _toIReadOnlyArray(values: Value[]): { array: Value[]; iArray: IReadOnlyArray } {
@@ -40,8 +41,8 @@ function _toIReadOnlyArray(values: Value[]): { array: Value[]; iArray: IReadOnly
       return array.length;
     },
 
-    at(index: number): Value | null {
-      return array[index] ?? null;
+    at(index: number): Value {
+      return array[index] ?? nullValue;
     }
   };
   return { array, iArray };
@@ -50,13 +51,13 @@ function _toIReadOnlyArray(values: Value[]): { array: Value[]; iArray: IReadOnly
 function toIArray(values: Value[]): IArray {
   const { array, iArray } = _toIReadOnlyArray(values);
   return Object.assign(iArray, {
-    set(index: number, value: Value): Value | null {
+    set(index: number, value: Value): Result<Value> {
       const previousValue = releasePreviousValue(array[index]);
       array[index] = value;
       if (value.tracker) {
         value.tracker.addValueRef(value);
       }
-      return previousValue;
+      return { success: true, value: previousValue };
     }
   });
 }
@@ -78,8 +79,8 @@ function _toIReadOnlyDictionary(mapping: ValueDictionary): {
       return Object.keys(dictionary);
     },
 
-    lookup(name: string): Value | null {
-      return dictionary[name] ?? null;
+    lookup(name: string): Value {
+      return dictionary[name] ?? nullValue;
     }
   };
   return { dictionary, iDictionary };
@@ -88,13 +89,13 @@ function _toIReadOnlyDictionary(mapping: ValueDictionary): {
 function toIDictionary(mapping: ValueDictionary): IDictionary {
   const { dictionary, iDictionary } = _toIReadOnlyDictionary(mapping);
   return Object.assign(iDictionary, {
-    def(name: string, value: Value): Value | null {
+    def(name: string, value: Value): Result<Value> {
       const previousValue = releasePreviousValue(dictionary[name]);
       dictionary[name] = value;
       if (value.tracker) {
         value.tracker.addValueRef(value);
       }
-      return previousValue;
+      return { success: true, value: previousValue };
     }
   });
 }
@@ -175,8 +176,6 @@ export function toValue(
     dictionary: toIDictionary(mapping)
   };
 }
-
-toValue.mark = markValue;
 
 const operator: OperatorValue = {
   type: ValueType.operator,
