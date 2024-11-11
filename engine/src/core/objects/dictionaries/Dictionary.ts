@@ -1,5 +1,6 @@
 import type { Value, IDictionary, MemoryType, DictionaryValue, IValuePermissions, Result } from '@api/index.js';
-import { ValueType } from '@api/index.js';
+import { ValueType, nullValue } from '@api/index.js';
+import { addMemorySize } from '@core/MemoryTracker.js';
 import type { MemoryTracker } from '@core/MemoryTracker.js';
 import { ShareableObject } from '@core/objects/ShareableObject.js';
 import { assert } from '@sdk/index.js';
@@ -21,26 +22,32 @@ export class Dictionary extends ShareableObject implements IDictionary {
 
   private constructor(
     private readonly _memoryTracker: MemoryTracker,
-    private readonly _memoryType: MemoryType,
-    private readonly _maxSize: number
+    private readonly _memoryType: MemoryType
   ) {
     super();
-    this._memoryTracker.register({
-      container: this,
-      pointers: 1,
-      type: this._memoryType
-    });
+    const isMemoryAvailable = this._memoryTracker.register(
+      addMemorySize(ShareableObject.size, {
+        pointers: 1
+      }),
+      this._memoryType,
+      this
+    );
+    assert(isMemoryAvailable);
   }
 
-  static create(memoryTracker: MemoryTracker, memoryType: MemoryType, maxSize?: number): Result<Dictionary> {
-    const result = memoryTracker.register({
-      container: {},
-      pointers: 1,
-      type: memoryType
-    });
-    if (!result.success) {
-      return result;
+  static create(memoryTracker: MemoryTracker, memoryType: MemoryType): Result<Dictionary> {
+    const isMemoryAvailable = memoryTracker.checkIfAvailable(
+      addMemorySize(ShareableObject.size, {
+        pointers: 1
+      })
+    );
+    if (!isMemoryAvailable.success) {
+      return isMemoryAvailable;
     }
+    return {
+      success: true,
+      value: new Dictionary(memoryTracker, memoryType)
+    };
   }
 
   // region IReadOnlyDictionary
@@ -49,37 +56,55 @@ export class Dictionary extends ShareableObject implements IDictionary {
     return Object.keys(this._values);
   }
 
-  lookup(name: string): Value | null {
-    return this._values[name] ?? null;
+  lookup(name: string): Value {
+    return this._values[name] ?? nullValue;
   }
 
   // endregion IReadOnlyDictionary
 
   // region IDictionary
 
-  def(name: string, value: Value): Value | null {
-    let previousValue = this._values[name] ?? null;
-    if (previousValue !== null) {
+  def(name: string, value: Value): Result<Value> {
+    let previousValue = this._values[name] ?? nullValue;
+    if (previousValue !== undefined) {
       if (previousValue.tracker?.releaseValue(previousValue) === false) {
-        previousValue = null;
+        previousValue = nullValue;
       }
-    } else {
-      this._memoryTracker.addValueRef({
-        type: ValueType.string,
-        isExecutable: false,
-        isReadOnly: true,
-        string: name
-      });
-      this._memoryTracker.register({
-        container: this,
-        values: 1,
-        pointers: 3,
-        type: this._memoryType
-      });
+      if (value.type === ValueType.null) {
+        const isMemoryReleased = this._memoryTracker.register(
+          {
+            values: -1,
+            pointers: -3
+          },
+          this._memoryType,
+          this
+        );
+        if (!isMemoryReleased.success) {
+          return isMemoryReleased;
+        }
+        return { success: true, value: previousValue };
+      }
+    } else if (value.type !== ValueType.null) {
+      const isMemoryAvailableForName = this._memoryTracker.addStringRef(name);
+      if (!isMemoryAvailableForName.success) {
+        return isMemoryAvailableForName;
+      }
+      const isMemoryAvailableForPlaceholder = this._memoryTracker.register(
+        {
+          values: 1,
+          pointers: 3
+        },
+        this._memoryType,
+        this
+      );
+      if (!isMemoryAvailableForPlaceholder) {
+        this._memoryTracker.releaseString(name);
+        return isMemoryAvailableForPlaceholder;
+      }
     }
     value.tracker?.addValueRef(value);
     this._values[name] = value;
-    return previousValue;
+    return { success: true, value: previousValue };
   }
 
   // endregion IWritableDictionary
@@ -87,20 +112,18 @@ export class Dictionary extends ShareableObject implements IDictionary {
   protected _dispose(): void {
     const names = Object.keys(this._values);
     for (const name of names) {
-      this._memoryTracker.releaseValue({
-        type: ValueType.string,
-        isExecutable: false,
-        isReadOnly: true,
-        string: name
-      });
-      const value = this._values[name];
-      value?.tracker?.releaseValue(value);
+      this._memoryTracker.releaseString(name);
+      const value = this._values[name] ?? nullValue;
+      value.tracker?.releaseValue(value);
     }
-    this._memoryTracker.register({
-      container: this,
-      values: -names.length,
-      pointers: -3 * names.length - 1,
-      type: this._memoryType
-    });
+    const isMemoryReleased = this._memoryTracker.register(
+      {
+        values: -names.length,
+        pointers: -3 * names.length - 1
+      },
+      this._memoryType,
+      this
+    );
+    assert(isMemoryReleased);
   }
 }
