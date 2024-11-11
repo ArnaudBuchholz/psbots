@@ -1,4 +1,5 @@
 import type { IReadOnlyDictionary, Value } from '@api/index.js';
+import { nullValue } from '@api/index.js';
 
 export class EmptyDictionary implements IReadOnlyDictionary {
   protected constructor() {}
@@ -16,8 +17,8 @@ export class EmptyDictionary implements IReadOnlyDictionary {
     return [];
   }
 
-  lookup(/*name: string*/): Value | null {
-    return null;
+  lookup(/*name: string*/): Value {
+    return nullValue;
   }
 
   // endregion IReadOnlyDictionary

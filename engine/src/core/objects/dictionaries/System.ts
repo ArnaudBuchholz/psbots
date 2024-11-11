@@ -1,4 +1,5 @@
 import type { IReadOnlyDictionary, Value } from '@api/index.js';
+import { nullValue } from '@api/index.js';
 import { registry } from '@core/operators/index.js';
 
 export class SystemDictionary implements IReadOnlyDictionary {
@@ -17,12 +18,12 @@ export class SystemDictionary implements IReadOnlyDictionary {
     return Object.keys(registry);
   }
 
-  lookup(name: string): Value | null {
+  lookup(name: string): Value {
     const operator = registry[name];
     if (operator !== undefined) {
       return operator.value;
     }
-    return null;
+    return nullValue;
   }
 
   // endregion IReadOnlyDictionary
