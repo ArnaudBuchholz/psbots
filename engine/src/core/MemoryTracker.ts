@@ -84,11 +84,11 @@ export class MemoryTracker implements IValueTracker, IMemoryTracker {
 
   private readonly _strings: Map<string, number> = new Map();
 
-  private _addStringRef(string: string): void {
-    const refCount = this._strings.get(string) ?? 0;
+  public addStringRef(string: string): Result<number> {
+    let refCount = this._strings.get(string) ?? 0;
     if (refCount === 0) {
       const size = stringSizer(string);
-      this.register(
+      const isMemoryAvailable = this.register(
         {
           bytes: size,
           integers: 1
@@ -96,11 +96,15 @@ export class MemoryTracker implements IValueTracker, IMemoryTracker {
         STRING_MEMORY_TYPE,
         this
       );
+      if (!isMemoryAvailable.success) {
+        return isMemoryAvailable;
+      }
     }
-    this._strings.set(string, refCount + 1);
+    this._strings.set(string, ++refCount);
+    return { success: true, value: refCount };
   }
 
-  private _releaseString(string: string): boolean {
+  public releaseString(string: string): boolean {
     const refCount = this._strings.get(string);
     assert(refCount !== undefined, 'Unable to release string as it is not referenced', string);
     if (refCount === 1) {
@@ -245,11 +249,13 @@ export class MemoryTracker implements IValueTracker, IMemoryTracker {
   // region IValueTracker (for string)
 
   addValueRef(value: Value): void {
-    this._addStringRef((value as Value<ValueType.string>).string);
+    const isMemoryAvailable = this.addStringRef((value as Value<ValueType.string>).string);
+    assert(isMemoryAvailable);
+    assert(isMemoryAvailable.value !== 1, 'addValueRef must not be used to create a new string ref');
   }
 
   releaseValue(value: Value): boolean {
-    return this._releaseString((value as Value<ValueType.string>).string);
+    return this.releaseString((value as Value<ValueType.string>).string);
   }
 
   // endregion IValueTracker (for string)
