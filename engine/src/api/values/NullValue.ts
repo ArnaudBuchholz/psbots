@@ -1,4 +1,5 @@
 import { ValueType } from '@api/values/ValueType.js';
+import type { Value } from '@api/values/Value.js';
 import type { IAbstractValue } from '@api/interfaces/IAbstractValue.js';
 
 export interface INullValue extends IAbstractValue {
@@ -10,7 +11,7 @@ export interface INullValue extends IAbstractValue {
 /** Null */
 export type NullValue = INullValue;
 
-export const nullValue = {
+export const nullValue: Value = {
   type: ValueType.null,
   isReadOnly: true,
   isExecutable: false
