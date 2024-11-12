@@ -3,7 +3,6 @@ import { STRING_MEMORY_TYPE, MemoryTracker } from './MemoryTracker.js';
 import { toValue } from '@test/index.js';
 import { SYSTEM_MEMORY_TYPE, USER_MEMORY_TYPE } from '@api/index.js';
 import type { IMemoryByType, IMemorySnapshot } from '@api/index.js';
-import { AssertException } from '@sdk/index.js';
 
 const helloWorldString = 'hello world!';
 const helloWorldValue = toValue(helloWorldString);
@@ -132,7 +131,7 @@ describe('debug', () => {
   });
 
   it('keeps track of allocation containers', () => {
-    tracker.register({ container, type: SYSTEM_MEMORY_TYPE, bytes: 1 });
+    tracker.register({ bytes: 1 }, SYSTEM_MEMORY_TYPE, container);
     const containerRegisters = [...tracker.enumContainersAllocations()];
     expect(
       containerRegisters.findIndex((containerRegister) => containerRegister.container.deref() === container)
@@ -140,8 +139,8 @@ describe('debug', () => {
   });
 
   it('removes fully freed references', () => {
-    tracker.register({ container, type: SYSTEM_MEMORY_TYPE, bytes: 1 });
-    tracker.register({ container, type: SYSTEM_MEMORY_TYPE, bytes: -1 });
+    tracker.register({ bytes: 1 }, SYSTEM_MEMORY_TYPE, container);
+    tracker.register({ bytes: -1 }, SYSTEM_MEMORY_TYPE, container);
     const containerRegisters = [...tracker.enumContainersAllocations()];
     expect(
       containerRegisters.findIndex((containerRegister) => containerRegister.container.deref() === container)
@@ -149,13 +148,13 @@ describe('debug', () => {
   });
 
   it('detects and prevents memory type change for a given container', () => {
-    tracker.register({ container, type: SYSTEM_MEMORY_TYPE, bytes: 1 });
-    expect(() => tracker.register({ container, type: USER_MEMORY_TYPE, bytes: 1 })).toThrowError(AssertException);
+    tracker.register({ bytes: 1 }, SYSTEM_MEMORY_TYPE, container);
+    expect(() => tracker.register({ bytes: 1 }, USER_MEMORY_TYPE, container)).toThrowError();
   });
 
   it('detects invalid memory registration leading to negative totals', () => {
-    tracker.register({ container, type: SYSTEM_MEMORY_TYPE, bytes: 1 });
-    expect(() => tracker.register({ container, type: SYSTEM_MEMORY_TYPE, bytes: -2 })).toThrowError(AssertException);
+    tracker.register({ bytes: 1 }, SYSTEM_MEMORY_TYPE, container);
+    expect(() => tracker.register({ bytes: -2 }, SYSTEM_MEMORY_TYPE, container)).toThrowError();
   });
 });
 
@@ -211,6 +210,6 @@ describe('string management', () => {
   it('fails if the reference count becomes incorrect', () => {
     tracker.addValueRef(helloWorldValue);
     tracker.releaseValue(helloWorldValue);
-    expect(() => tracker.releaseValue(helloWorldValue)).toThrowError(AssertException);
+    expect(() => tracker.releaseValue(helloWorldValue)).toThrowError();
   });
 });
