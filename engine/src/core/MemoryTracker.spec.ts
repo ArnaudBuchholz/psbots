@@ -2,7 +2,8 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { STRING_MEMORY_TYPE, MemoryTracker } from './MemoryTracker.js';
 import { toValue } from '@test/index.js';
 import { SYSTEM_MEMORY_TYPE, USER_MEMORY_TYPE } from '@api/index.js';
-import type { IMemoryByType, IMemorySnapshot } from '@api/index.js';
+import type { IMemoryByType, IMemorySnapshot, Result } from '@api/index.js';
+import { VmOverflowException } from '@sdk/index.js';
 
 const helloWorldString = 'hello world!';
 const helloWorldValue = toValue(helloWorldString);
@@ -29,9 +30,9 @@ describe('tracking', () => {
   });
 
   it('keeps track of memory used', () => {
-    tracker.register({ container: {}, type: SYSTEM_MEMORY_TYPE, bytes: 50 });
-    tracker.register({ container: {}, type: STRING_MEMORY_TYPE, bytes: 20 });
-    tracker.register({ container: {}, type: USER_MEMORY_TYPE, bytes: 10 });
+    expect(tracker.register({ bytes: 50 }, SYSTEM_MEMORY_TYPE, {}).success).toStrictEqual(true);
+    expect(tracker.register({ bytes: 20 }, STRING_MEMORY_TYPE, {}).success).toStrictEqual(true);
+    expect(tracker.register({ bytes: 10 }, USER_MEMORY_TYPE, {}).success).toStrictEqual(true);
     expect(tracker.used).toStrictEqual(80);
     expect(tracker.byType).toStrictEqual<IMemoryByType>({
       system: 50,
@@ -41,8 +42,8 @@ describe('tracking', () => {
   });
 
   it('provides a minimal snapshot', () => {
-    tracker.register({ container: {}, type: SYSTEM_MEMORY_TYPE, bytes: 50 });
-    tracker.register({ container: {}, type: USER_MEMORY_TYPE, bytes: 20 });
+    tracker.register({ bytes: 50 }, SYSTEM_MEMORY_TYPE, {});
+    tracker.register({ bytes: 20 }, STRING_MEMORY_TYPE, {});
     tracker.addValueRef(helloWorldValue);
     expect(tracker.used).toStrictEqual(87);
     expect(tracker.snapshot()).toMatchObject<IMemorySnapshot>({
@@ -68,7 +69,10 @@ describe('tracking', () => {
   });
 
   it('fails when allocating too much memory', () => {
-    expect(() => tracker.register({ container: {}, type: 'system', bytes: MAX_MEMORY + 1 })).toThrowError();
+    expect(tracker.register({ bytes: MAX_MEMORY + 1 }, SYSTEM_MEMORY_TYPE, {})).toStrictEqual<Result<undefined>>({
+      success: false,
+      error: expect.any(VmOverflowException)
+    });
   });
 
   describe('debugging memory', () => {
@@ -80,8 +84,8 @@ describe('tracking', () => {
     });
 
     it('provides a minimal snapshot', () => {
-      tracker.register({ container: {}, type: SYSTEM_MEMORY_TYPE, bytes: 50 });
-      tracker.register({ container: {}, type: USER_MEMORY_TYPE, bytes: 20 });
+      tracker.register({ bytes: 50 }, SYSTEM_MEMORY_TYPE, {});
+      tracker.register({ bytes: 20 }, STRING_MEMORY_TYPE, {});
       tracker.addValueRef(helloWorldValue);
       expect(tracker.used).toStrictEqual(87);
       expect(tracker.snapshot()).toMatchObject<IMemorySnapshot>({
