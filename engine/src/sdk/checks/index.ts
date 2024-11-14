@@ -1,2 +1,2 @@
-export * from './checkValue.js';
+export * from './isValue.js';
 export * from './isObject.js';
