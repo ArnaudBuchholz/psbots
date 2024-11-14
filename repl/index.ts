@@ -1,7 +1,7 @@
 import type { IDebugSource } from '@psbots/engine';
-import { createState } from '@psbots/engine';
+import { createState, ValueType } from '@psbots/engine';
 import type { IInternalState } from '@psbots/engine/sdk';
-import { checkStringValue, InternalException, toStringValue } from '@psbots/engine/sdk';
+import { assert, InternalException, toStringValue } from '@psbots/engine/sdk';
 import type { IReplIO } from './IReplIO.js';
 import { cyan, green, magenta, red, white, yellow } from './colors.js';
 import { createHostDictionary } from './host/index.js';
@@ -22,7 +22,7 @@ export async function repl(replIO: IReplIO, debug?: boolean): Promise<void> {
 
   [...state.exec(toStringValue('version', { isExecutable: true }))];
   const version = state.operands.at(0);
-  checkStringValue(version);
+  assert(version.type === ValueType.string);
   replIO.output(`${cyan}Welcome to 🤖${magenta}${version.string}${white}\r\n`);
   [...state.exec(toStringValue('pop', { isExecutable: true }))];
 
