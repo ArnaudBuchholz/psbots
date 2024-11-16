@@ -14,7 +14,7 @@ const getShareableObject = (value: Value): ShareableObject => {
 };
 
 export abstract class ShareableObject {
-  static size: MemorySize = {
+  static readonly size: MemorySize = {
     integers: 1
   } as const;
 
@@ -52,5 +52,6 @@ export abstract class ShareableObject {
     return true;
   }
 
+  /** Should not fail */
   protected abstract _dispose(): void;
 }
