@@ -1,17 +1,17 @@
-import type { ArrayValue, IReadOnlyArray, IValuePermissions, MemoryType, Value } from '@api/index.js';
-import { ValueType } from '@api/index.js';
-import { isObject, InternalException } from '@sdk/index.js';
-import type { MemoryTracker } from '@core/index.js';
+import type { ArrayValue, IReadOnlyArray, IValuePermissions, MemoryType, Result, Value } from '@api/index.js';
+import { nullValue, ValueType } from '@api/index.js';
+import { assert, isObject } from '@sdk/index.js';
+import { addMemorySize } from '@core/index.js';
+import type { MemorySize, MemoryTracker } from '@core/MemoryTracker';
 import { ShareableObject } from '@core/objects/ShareableObject.js';
 
-const NO_VALUE = 'No value';
-const NOT_AN_ABSTRACTVALUECONTAINER = 'Not an AbstractValueContainer';
-
 export abstract class AbstractValueContainer extends ShareableObject implements IReadOnlyArray {
-  static check(value: unknown): asserts value is AbstractValueContainer {
-    if (!isObject(value) || !(value instanceof AbstractValueContainer)) {
-      throw new InternalException(NOT_AN_ABSTRACTVALUECONTAINER);
-    }
+  static override readonly size: MemorySize = addMemorySize(ShareableObject.size, {
+    pointers: 1
+  });
+
+  static is(value: unknown): value is AbstractValueContainer {
+    return isObject(value) && !(value instanceof AbstractValueContainer);
   }
 
   protected _toValue({ isReadOnly, isExecutable }: IValuePermissions): ArrayValue {
@@ -26,24 +26,19 @@ export abstract class AbstractValueContainer extends ShareableObject implements 
 
   /** returned value is not addValueRef'ed */
   toValue({ isReadOnly = true, isExecutable = false }: Partial<IValuePermissions> = {}): ArrayValue {
-    if (!isReadOnly || isExecutable) {
-      throw new InternalException('Unsupported permissions');
-    }
+    assert(isReadOnly && !isExecutable, 'Unsupported permissions');
     return this._toValue({ isReadOnly, isExecutable });
   }
 
   protected readonly _values: Value[] = [];
 
-  constructor(
+  protected constructor(
     private readonly _memoryTracker: MemoryTracker,
     private readonly _memoryType: MemoryType
   ) {
     super();
-    this._memoryTracker.register({
-      container: this,
-      type: this._memoryType,
-      pointers: 1
-    });
+    const isMemoryAvailable = this._memoryTracker.allocate(AbstractValueContainer.size, this._memoryType, this);
+    assert(isMemoryAvailable);
   }
 
   protected get memoryTracker(): MemoryTracker {
@@ -64,72 +59,76 @@ export abstract class AbstractValueContainer extends ShareableObject implements 
     return this._values.length;
   }
 
-  at(index: number): Value | null {
-    const value = this._values[index];
-    if (value === undefined) {
-      return null;
-    }
-    return value;
+  at(index: number): Value {
+    return this._values[index] ?? nullValue;
   }
 
   // endregion IReadOnlyArray
 
   /** puts the value in the right place */
-  protected abstract pushImpl(value: Value): void;
+  protected abstract pushImpl(value: Value): Result<void>;
 
-  push(...values: Value[]): void {
-    this._memoryTracker.register({
-      container: this,
-      type: this._memoryType,
-      pointers: values.length,
-      values: values.length
-    });
+  push(...values: Value[]): Result {
+    const isMemoryAvailable = this._memoryTracker.allocate(
+      {
+        pointers: values.length,
+        values: values.length
+      },
+      this._memoryType,
+      this
+    );
+    if (!isMemoryAvailable.success) {
+      return isMemoryAvailable;
+    }
     for (const value of values) {
       value.tracker?.addValueRef(value);
-      this.pushImpl(value);
+      const pushResult = this.pushImpl(value);
+      if (!pushResult.success) {
+        return pushResult;
+      }
     }
+    return { success: true, value: undefined };
   }
 
   /** pops the value from the right place (or return null if none) */
-  protected abstract popImpl(): Value | null;
+  protected abstract popImpl(): Result<Value>;
 
-  pop(): Value | null {
-    const value = this.popImpl();
-    if (value !== null) {
-      this._memoryTracker.register({
-        container: this,
-        type: this._memoryType,
-        pointers: -1,
-        values: -1
-      });
+  pop(): Result<Value> {
+    const popResult = this.popImpl();
+    if (!popResult.success) {
+      return popResult;
+    }
+    const { value } = popResult;
+    if (value.type !== ValueType.null) {
+      this._memoryTracker.release(
+        {
+          pointers: -1,
+          values: -1
+        },
+        this._memoryType,
+        this
+      );
       if (value.tracker?.releaseValue(value) === false) {
-        return null;
+        return { success: true, value: nullValue };
       }
-      return value;
+      return { success: true, value };
     }
-    return null;
+    return { success: true, value: nullValue };
   }
 
-  protected atOrThrow(index: number): Value {
-    const value = this._values.at(index);
-    if (value === undefined) {
-      throw new InternalException(NO_VALUE);
-    }
-    return value;
-  }
-
-  clear(): void {
+  clear(): Result {
     while (this.length > 0) {
-      this.pop();
+      const popResult = this.pop();
+      if (!popResult.success) {
+        return popResult;
+      }
     }
+    return { success: true, value: undefined };
   }
 
   protected _dispose(): void {
-    this.clear();
-    this._memoryTracker.register({
-      container: this,
-      type: this._memoryType,
-      pointers: -1
-    });
+    const clearResult = this.clear();
+    assert(clearResult);
+    this._memoryTracker.release(AbstractValueContainer.size, this._memoryType, this);
   }
 }

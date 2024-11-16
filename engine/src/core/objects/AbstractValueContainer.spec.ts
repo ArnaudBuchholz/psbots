@@ -1,25 +1,30 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import type { MemoryType, Value } from '@api/index.js';
-import { USER_MEMORY_TYPE } from '@api/index.js';
-import { InternalException, checkArrayValue } from '@sdk/index.js';
+import type { MemoryType, Result, Value } from '@api/index.js';
+import { nullValue, USER_MEMORY_TYPE } from '@api/index.js';
+import { isArrayValue } from '@sdk/index.js';
 import { MemoryTracker } from '@core/index.js';
 import { AbstractValueContainer } from './AbstractValueContainer.js';
-import { testCheckFunction, toValue, values } from '@test/index.js';
+import { testIsFunction, toValue, values } from '@test/index.js';
 
 class TestValueArray extends AbstractValueContainer {
-  protected pushImpl(value: Value): void {
+  constructor(memoryTracker: MemoryTracker, memoryType: MemoryType) {
+    super(memoryTracker, memoryType);
+  }
+
+  protected pushImpl(value: Value): Result {
     this._values.push(value);
+    return { success: true, value: undefined };
   }
 
   private _popNull: boolean = false;
 
-  protected popImpl(): Value | null {
+  protected popImpl(): Result<Value> {
     if (this._popNull) {
-      return null;
+      return { success: true, value: nullValue };
     }
-    const value = this.atOrThrow(-1);
+    const value = this.at(-1);
     this._values.pop();
-    return value;
+    return { success: true, value };
   }
 
   public getMemoryTracker(): MemoryTracker {
@@ -51,13 +56,13 @@ beforeEach(() => {
 });
 
 describe('AbstractValueArray.check', () => {
-  // valueArray being set in beforeEach, it can't be used in testCheckFunction
+  // valueArray being set in beforeEach, it can't be used in testIsFunction
   it('validates an AbstractValueArray', () => {
-    expect(() => AbstractValueContainer.check(valueArray)).not.toThrowError();
+    expect(AbstractValueContainer.is(valueArray)).toStrictEqual(true);
   });
 
-  testCheckFunction<AbstractValueContainer>({
-    check: AbstractValueContainer.check,
+  testIsFunction<AbstractValueContainer>({
+    is: AbstractValueContainer.is,
     valid: [],
     invalid: [...values.all]
   });
@@ -78,7 +83,7 @@ describe('toValue', () => {
 
   it('returns a valid array value (default: isReadOnly & !isExecutable)', () => {
     const value = valueArray.toValue();
-    expect(() => checkArrayValue(value)).not.toThrowError();
+    expect(isArrayValue(value)).toStrictEqual(true);
     expect(value.isReadOnly).toStrictEqual(true);
     expect(value.isExecutable).toStrictEqual(false);
   });
@@ -110,14 +115,14 @@ describe('memory', () => {
     });
 
     it('releases memory and tracked values when removing items', () => {
-      expect(valueArray.pop()).toStrictEqual(null);
+      expect(valueArray.pop()).toStrictEqual({ success: true, value: nullValue });
       expect(tracker.used).toBeLessThan(memoryUsedBefore);
       expect(shared.object.refCount).toStrictEqual(0);
     });
 
     it('releases memory when removing items', () => {
       shared.object.addRef();
-      expect(valueArray.pop()).toStrictEqual(shared.value);
+      expect(valueArray.pop()).toStrictEqual({ success: true, value: shared.value });
       expect(tracker.used).toBeLessThan(memoryUsedBefore);
       expect(shared.object.refCount).toStrictEqual(1);
       shared.object.release(); // to fit afterEach checks
@@ -125,14 +130,14 @@ describe('memory', () => {
 
     it('does not release memory if popImpl returns null', () => {
       valueArray.setPopNull();
-      expect(valueArray.pop()).toStrictEqual(null);
+      expect(valueArray.pop()).toStrictEqual({ success: true, value: nullValue });
       expect(tracker.used).toStrictEqual(memoryUsedBefore);
       valueArray.setPopNull(false);
     });
 
     it('fails after all items were removed', () => {
       valueArray.clear();
-      expect(() => valueArray.pop()).toThrowError(InternalException);
+      expect(valueArray.pop()).toStrictEqual({ success: false, error: expect.any(Error) });
     });
   });
 
@@ -157,10 +162,10 @@ describe('IReadOnlyArray', () => {
   });
 
   it('controls boundaries (-1)', () => {
-    expect(valueArray.at(-1)).toStrictEqual(null);
+    expect(valueArray.at(-1)).toStrictEqual(nullValue);
   });
 
   it('controls boundaries (0-based)', () => {
-    expect(valueArray.at(valueArray.length)).toStrictEqual(null);
+    expect(valueArray.at(valueArray.length)).toStrictEqual(nullValue);
   });
 });
