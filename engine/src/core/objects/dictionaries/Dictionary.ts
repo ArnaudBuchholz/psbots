@@ -25,7 +25,7 @@ export class Dictionary extends ShareableObject implements IDictionary {
     private readonly _memoryType: MemoryType
   ) {
     super();
-    const isMemoryAvailable = this._memoryTracker.register(
+    const isMemoryAvailable = this._memoryTracker.allocate(
       addMemorySize(ShareableObject.size, {
         pointers: 1
       }),
@@ -36,7 +36,7 @@ export class Dictionary extends ShareableObject implements IDictionary {
   }
 
   static create(memoryTracker: MemoryTracker, memoryType: MemoryType): Result<Dictionary> {
-    const isMemoryAvailable = memoryTracker.checkIfAvailable(
+    const isMemoryAvailable = memoryTracker.isAvailable(
       addMemorySize(ShareableObject.size, {
         pointers: 1
       })
@@ -71,7 +71,7 @@ export class Dictionary extends ShareableObject implements IDictionary {
         previousValue = nullValue;
       }
       if (value.type === ValueType.null) {
-        const isMemoryReleased = this._memoryTracker.register(
+        this._memoryTracker.release(
           {
             values: -1,
             pointers: -3
@@ -79,9 +79,6 @@ export class Dictionary extends ShareableObject implements IDictionary {
           this._memoryType,
           this
         );
-        if (!isMemoryReleased.success) {
-          return isMemoryReleased;
-        }
         return { success: true, value: previousValue };
       }
     } else if (value.type !== ValueType.null) {
@@ -89,7 +86,7 @@ export class Dictionary extends ShareableObject implements IDictionary {
       if (!isMemoryAvailableForName.success) {
         return isMemoryAvailableForName;
       }
-      const isMemoryAvailableForPlaceholder = this._memoryTracker.register(
+      const isMemoryAvailableForPlaceholder = this._memoryTracker.allocate(
         {
           values: 1,
           pointers: 3
@@ -116,7 +113,7 @@ export class Dictionary extends ShareableObject implements IDictionary {
       const value = this._values[name] ?? nullValue;
       value.tracker?.releaseValue(value);
     }
-    const isMemoryReleased = this._memoryTracker.register(
+    this._memoryTracker.release(
       {
         values: -names.length,
         pointers: -3 * names.length - 1
@@ -124,6 +121,5 @@ export class Dictionary extends ShareableObject implements IDictionary {
       this._memoryType,
       this
     );
-    assert(isMemoryReleased);
   }
 }
