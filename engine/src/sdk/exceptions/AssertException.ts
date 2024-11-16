@@ -9,7 +9,7 @@ class AssertException extends BaseException {
 }
 
 export function assert<T>(result: Result<T>): asserts result is { success: true; value: T };
-export function assert(condition: boolean, message: string, cause?: unknown): asserts condition;
+export function assert(condition: boolean, message?: string, cause?: unknown): asserts condition;
 export function assert(condition: boolean | Result<unknown>, message?: string, cause?: unknown) {
   if (typeof condition !== 'boolean') {
     if (!condition.success) {
