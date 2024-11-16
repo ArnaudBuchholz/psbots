@@ -30,9 +30,9 @@ describe('tracking', () => {
   });
 
   it('keeps track of memory used', () => {
-    expect(tracker.register({ bytes: 50 }, SYSTEM_MEMORY_TYPE, {}).success).toStrictEqual(true);
-    expect(tracker.register({ bytes: 20 }, STRING_MEMORY_TYPE, {}).success).toStrictEqual(true);
-    expect(tracker.register({ bytes: 10 }, USER_MEMORY_TYPE, {}).success).toStrictEqual(true);
+    expect(tracker.allocate({ bytes: 50 }, SYSTEM_MEMORY_TYPE, {}).success).toStrictEqual(true);
+    expect(tracker.allocate({ bytes: 20 }, STRING_MEMORY_TYPE, {}).success).toStrictEqual(true);
+    expect(tracker.allocate({ bytes: 10 }, USER_MEMORY_TYPE, {}).success).toStrictEqual(true);
     expect(tracker.used).toStrictEqual(80);
     expect(tracker.byType).toStrictEqual<IMemoryByType>({
       system: 50,
@@ -42,8 +42,8 @@ describe('tracking', () => {
   });
 
   it('provides a minimal snapshot', () => {
-    tracker.register({ bytes: 50 }, SYSTEM_MEMORY_TYPE, {});
-    tracker.register({ bytes: 20 }, STRING_MEMORY_TYPE, {});
+    tracker.allocate({ bytes: 50 }, SYSTEM_MEMORY_TYPE, {});
+    tracker.allocate({ bytes: 20 }, STRING_MEMORY_TYPE, {});
     tracker.addValueRef(helloWorldValue);
     expect(tracker.used).toStrictEqual(87);
     expect(tracker.snapshot()).toMatchObject<IMemorySnapshot>({
@@ -69,7 +69,7 @@ describe('tracking', () => {
   });
 
   it('fails when allocating too much memory', () => {
-    expect(tracker.register({ bytes: MAX_MEMORY + 1 }, SYSTEM_MEMORY_TYPE, {})).toStrictEqual<Result<undefined>>({
+    expect(tracker.allocate({ bytes: MAX_MEMORY + 1 }, SYSTEM_MEMORY_TYPE, {})).toStrictEqual<Result>({
       success: false,
       error: expect.any(VmOverflowException)
     });
@@ -84,8 +84,8 @@ describe('tracking', () => {
     });
 
     it('provides a minimal snapshot', () => {
-      tracker.register({ bytes: 50 }, SYSTEM_MEMORY_TYPE, {});
-      tracker.register({ bytes: 20 }, STRING_MEMORY_TYPE, {});
+      tracker.allocate({ bytes: 50 }, SYSTEM_MEMORY_TYPE, {});
+      tracker.allocate({ bytes: 20 }, STRING_MEMORY_TYPE, {});
       tracker.addValueRef(helloWorldValue);
       expect(tracker.used).toStrictEqual(87);
       expect(tracker.snapshot()).toMatchObject<IMemorySnapshot>({
@@ -135,7 +135,7 @@ describe('debug', () => {
   });
 
   it('keeps track of allocation containers', () => {
-    tracker.register({ bytes: 1 }, SYSTEM_MEMORY_TYPE, container);
+    tracker.allocate({ bytes: 1 }, SYSTEM_MEMORY_TYPE, container);
     const containerRegisters = [...tracker.enumContainersAllocations()];
     expect(
       containerRegisters.findIndex((containerRegister) => containerRegister.container.deref() === container)
@@ -143,8 +143,8 @@ describe('debug', () => {
   });
 
   it('removes fully freed references', () => {
-    tracker.register({ bytes: 1 }, SYSTEM_MEMORY_TYPE, container);
-    tracker.register({ bytes: -1 }, SYSTEM_MEMORY_TYPE, container);
+    tracker.allocate({ bytes: 1 }, SYSTEM_MEMORY_TYPE, container);
+    tracker.release({ bytes: -1 }, SYSTEM_MEMORY_TYPE, container);
     const containerRegisters = [...tracker.enumContainersAllocations()];
     expect(
       containerRegisters.findIndex((containerRegister) => containerRegister.container.deref() === container)
@@ -152,13 +152,13 @@ describe('debug', () => {
   });
 
   it('detects and prevents memory type change for a given container', () => {
-    tracker.register({ bytes: 1 }, SYSTEM_MEMORY_TYPE, container);
-    expect(() => tracker.register({ bytes: 1 }, USER_MEMORY_TYPE, container)).toThrowError();
+    tracker.allocate({ bytes: 1 }, SYSTEM_MEMORY_TYPE, container);
+    expect(() => tracker.allocate({ bytes: 1 }, USER_MEMORY_TYPE, container)).toThrowError();
   });
 
   it('detects invalid memory registration leading to negative totals', () => {
-    tracker.register({ bytes: 1 }, SYSTEM_MEMORY_TYPE, container);
-    expect(() => tracker.register({ bytes: -2 }, SYSTEM_MEMORY_TYPE, container)).toThrowError();
+    tracker.allocate({ bytes: 1 }, SYSTEM_MEMORY_TYPE, container);
+    expect(() => tracker.release({ bytes: -2 }, SYSTEM_MEMORY_TYPE, container)).toThrowError();
   });
 });
 

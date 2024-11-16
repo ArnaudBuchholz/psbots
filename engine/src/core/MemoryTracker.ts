@@ -124,20 +124,32 @@ export class MemoryTracker implements IValueTracker, IMemoryTracker {
     return true;
   }
 
-  checkIfAvailable(size: MemorySize): Result<undefined, VmOverflowException> {
+  isAvailable(size: MemorySize): Result<undefined, VmOverflowException> {
     // TODO: limit by type ?
     const bytes = toBytes(size);
+    assert(bytes > 0);
     if (this._used + bytes <= this._total) {
       return { success: true, value: undefined };
     }
     return { success: false, error: new VmOverflowException() };
   }
 
-  register(size: MemorySize, type: MemoryType, container: object): Result<undefined, VmOverflowException> {
-    const isAvailable = this.checkIfAvailable(size);
+  allocate(size: MemorySize, type: MemoryType, container: object): Result<undefined, VmOverflowException> {
+    const isAvailable = this.isAvailable(size);
     if (!isAvailable.success) {
       return isAvailable;
     }
+    this.register(size, type, container);
+    return { success: true, value: undefined };
+  }
+
+  release(size: MemorySize, type: MemoryType, container: object): void {
+    const bytes = toBytes(size);
+    assert(bytes < 0);
+    this.register(size, type, container);
+  }
+
+  protected register(size: MemorySize, type: MemoryType, container: object): Result<undefined, VmOverflowException> {
     const bytes = toBytes(size);
     if (this._used + bytes > this._total) {
       return { success: false, error: new VmOverflowException() };
