@@ -1,9 +1,10 @@
 import { describe, it, expect, beforeEach } from 'vitest';
+import type { MemoryPointer } from './MemoryTracker.js';
 import { STRING_MEMORY_TYPE, MemoryTracker } from './MemoryTracker.js';
 import { toValue } from '@test/index.js';
 import { SYSTEM_MEMORY_TYPE, USER_MEMORY_TYPE } from '@api/index.js';
 import type { IMemoryByType, IMemorySnapshot, Result } from '@api/index.js';
-import { VmOverflowException } from '@sdk/index.js';
+import { assert, VmOverflowException } from '@sdk/index.js';
 
 const helloWorldString = 'hello world!';
 const helloWorldValue = toValue(helloWorldString);
@@ -143,8 +144,9 @@ describe('debug', () => {
   });
 
   it('removes fully freed references', () => {
-    tracker.allocate({ bytes: 1 }, SYSTEM_MEMORY_TYPE, container);
-    tracker.release({ bytes: -1 }, SYSTEM_MEMORY_TYPE, container);
+    const result = tracker.allocate({ bytes: 1 }, SYSTEM_MEMORY_TYPE, container);
+    assert(result);
+    tracker.release(result.value, container);
     const containerRegisters = [...tracker.enumContainersAllocations()];
     expect(
       containerRegisters.findIndex((containerRegister) => containerRegister.container.deref() === container)
@@ -158,7 +160,9 @@ describe('debug', () => {
 
   it('detects invalid memory registration leading to negative totals', () => {
     tracker.allocate({ bytes: 1 }, SYSTEM_MEMORY_TYPE, container);
-    expect(() => tracker.release({ bytes: -2 }, SYSTEM_MEMORY_TYPE, container)).toThrowError();
+    expect(() =>
+      tracker.release({ bytes: -2, type: SYSTEM_MEMORY_TYPE } as unknown as MemoryPointer, container)
+    ).toThrowError();
   });
 });
 
