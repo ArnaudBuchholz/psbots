@@ -1,10 +1,10 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import type { Value } from '@api/index.js';
 import { USER_MEMORY_TYPE } from '@api/index.js';
-import { InternalException, RangeCheckException, checkArrayValue } from '@sdk/index.js';
+import { RangeCheckException, assert, isArrayValue } from '@sdk/index.js';
 import { MemoryTracker } from '@core/MemoryTracker.js';
 import { ValueArray } from './ValueArray.js';
-import { testCheckFunction, toValue, values } from '@test/index.js';
+import { testIsFunction, toValue, values } from '@test/index.js';
 
 let tracker: MemoryTracker;
 let valueArray: ValueArray;
@@ -12,7 +12,9 @@ let shared: ReturnType<typeof toValue.createSharedObject>;
 
 beforeEach(() => {
   tracker = new MemoryTracker();
-  valueArray = new ValueArray(tracker, USER_MEMORY_TYPE);
+  const result = ValueArray.create(tracker, USER_MEMORY_TYPE);
+  assert(result);
+  valueArray = result.value;
   shared = toValue.createSharedObject();
   valueArray.push(toValue(123), toValue('abc'), shared.value);
   shared.object.release();
@@ -27,7 +29,7 @@ afterEach(() => {
 describe('ValueArray.check', () => {
   // valueArray being set in beforeEach, it can't be used in testCheckFunction
   it('validates an ValueArray', () => {
-    expect(() => ValueArray.check(valueArray)).not.toThrowError();
+    expect(ValueArray.is(valueArray)).not.toThrowError();
   });
 
   testCheckFunction<ValueArray>({
