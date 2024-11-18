@@ -5,6 +5,7 @@ This document consolidates the different coding guidelines used for the developm
 ## Memory allocation
 
 Even if JavaScript does not require memory handling, the engine keeps track of *allocated* memory through a `MemoryTracker` instance.
+Also, it tries to mimic the allocations (and memory access) that would be needed if developped on a different technology (such as WebAssembly).
 
 Memory size description is based on primitive types :
 
@@ -29,9 +30,12 @@ isAvailable(size: MemorySize, type: MemoryType): Result<undefined, VmOverflowExc
 /** Allocate memory */
 allocate(size: MemorySize, type: MemoryType, container: object): Result<MemoryPointer, VmOverflowException>
 
-/** Release memory */
+/** Release memory (must pass the result of a previous allocation) */
 release(pointer: MemoryPointer, container: object): void
 ```
+
+> [!NOTE]  
+> In these APIs, the `container` is used to track allocations and 'attach' them to a logical object.
 
 For strings, specific methods are available :
 

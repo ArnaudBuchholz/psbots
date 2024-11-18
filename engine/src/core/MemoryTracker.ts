@@ -111,7 +111,7 @@ export class MemoryTracker implements IValueTracker, IMemoryTracker {
     return { success: true, value: { ...size, type } as unknown as MemoryPointer };
   }
 
-  /** Release memory */
+  /** Release memory (must pass the result of a previous allocation) */
   release(pointer: MemoryPointer, container: object): void {
     const { type, ...size } = pointer as unknown as InternalMemoryPointer;
     const bytes = toBytes(size);
