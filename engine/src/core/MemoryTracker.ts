@@ -37,6 +37,12 @@ export type MemorySize = {
   values?: number;
 };
 
+export type MemoryPointer = { __type__: 'pointer' };
+
+type InternalMemoryPointer = MemorySize & {
+  type: MemoryType;
+};
+
 export function addMemorySize(a: MemorySize, b: MemorySize): Required<MemorySize> {
   return {
     bytes: (a.bytes ?? 0) + (b.bytes ?? 0),
@@ -82,49 +88,9 @@ export class MemoryTracker implements IValueTracker, IMemoryTracker {
     }
   }
 
-  private readonly _strings: Map<string, number> = new Map();
-
-  public addStringRef(string: string): Result<number> {
-    let refCount = this._strings.get(string) ?? 0;
-    if (refCount === 0) {
-      const size = stringSizer(string);
-      const isMemoryAvailable = this.register(
-        {
-          bytes: size,
-          integers: 1
-        },
-        STRING_MEMORY_TYPE,
-        this
-      );
-      if (!isMemoryAvailable.success) {
-        return isMemoryAvailable;
-      }
-    }
-    this._strings.set(string, ++refCount);
-    return { success: true, value: refCount };
-  }
-
-  public releaseString(string: string): boolean {
-    const refCount = this._strings.get(string);
-    assert(refCount !== undefined, 'Unable to release string as it is not referenced', string);
-    if (refCount === 1) {
-      const size = stringSizer(string);
-      this.register(
-        {
-          bytes: -size,
-          integers: -1
-        },
-        STRING_MEMORY_TYPE,
-        this
-      );
-      this._strings.delete(string);
-      return false;
-    }
-    this._strings.set(string, refCount - 1);
-    return true;
-  }
-
-  isAvailable(size: MemorySize): Result<undefined, VmOverflowException> {
+  /** Check if the requested memory size can be allocated */
+  isAvailable(size: MemorySize, type: MemoryType): Result<undefined, VmOverflowException> {
+    assert(!!type);
     // TODO: limit by type ?
     const bytes = toBytes(size);
     assert(bytes > 0);
@@ -134,22 +100,26 @@ export class MemoryTracker implements IValueTracker, IMemoryTracker {
     return { success: false, error: new VmOverflowException() };
   }
 
-  allocate(size: MemorySize, type: MemoryType, container: object): Result<undefined, VmOverflowException> {
-    const isAvailable = this.isAvailable(size);
+  /** Allocate memory */
+  allocate(size: MemorySize, type: MemoryType, container: object): Result<MemoryPointer, VmOverflowException> {
+    assert(type !== 'string');
+    const isAvailable = this.isAvailable(size, type);
     if (!isAvailable.success) {
       return isAvailable;
     }
     this.register(size, type, container);
-    return { success: true, value: undefined };
+    return { success: true, value: { ...size, type } as unknown as MemoryPointer };
   }
 
-  release(size: MemorySize, type: MemoryType, container: object): void {
+  /** Release memory */
+  release(pointer: MemoryPointer, container: object): void {
+    const { type, ...size } = pointer as unknown as InternalMemoryPointer;
     const bytes = toBytes(size);
     assert(bytes < 0);
     this.register(size, type, container);
   }
 
-  protected register(size: MemorySize, type: MemoryType, container: object): Result<undefined, VmOverflowException> {
+  private register(size: MemorySize, type: MemoryType, container: object): Result<undefined, VmOverflowException> {
     const bytes = toBytes(size);
     if (this._used + bytes > this._total) {
       return { success: false, error: new VmOverflowException() };
@@ -196,6 +166,48 @@ export class MemoryTracker implements IValueTracker, IMemoryTracker {
         yield this._byContainers.get(containerRef.deref()!)!;
       }
     }
+  }
+
+  private readonly _strings: Map<string, number> = new Map();
+
+  addStringRef(string: string): Result<number, VmOverflowException> {
+    let refCount = this._strings.get(string) ?? 0;
+    if (refCount === 0) {
+      const size = stringSizer(string);
+      const isMemoryAvailable = this.register(
+        {
+          bytes: size,
+          integers: 1
+        },
+        STRING_MEMORY_TYPE,
+        this
+      );
+      if (!isMemoryAvailable.success) {
+        return isMemoryAvailable;
+      }
+    }
+    this._strings.set(string, ++refCount);
+    return { success: true, value: refCount };
+  }
+
+  public releaseString(string: string): boolean {
+    const refCount = this._strings.get(string);
+    assert(refCount !== undefined, 'Unable to release string as it is not referenced', string);
+    if (refCount === 1) {
+      const size = stringSizer(string);
+      this.register(
+        {
+          bytes: -size,
+          integers: -1
+        },
+        STRING_MEMORY_TYPE,
+        this
+      );
+      this._strings.delete(string);
+      return false;
+    }
+    this._strings.set(string, refCount - 1);
+    return true;
   }
 
   // region IMemoryTracker
