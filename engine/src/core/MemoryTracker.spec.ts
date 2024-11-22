@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import type { MemoryPointer } from './MemoryTracker.js';
-import { STRING_MEMORY_TYPE, MemoryTracker } from './MemoryTracker.js';
+import { MemoryTracker } from './MemoryTracker.js';
 import { toValue } from '@test/index.js';
 import { SYSTEM_MEMORY_TYPE, USER_MEMORY_TYPE } from '@api/index.js';
 import type { IMemoryByType, IMemorySnapshot, Result } from '@api/index.js';
@@ -32,20 +32,20 @@ describe('tracking', () => {
 
   it('keeps track of memory used', () => {
     expect(tracker.allocate({ bytes: 50 }, SYSTEM_MEMORY_TYPE, {}).success).toStrictEqual(true);
-    expect(tracker.allocate({ bytes: 20 }, STRING_MEMORY_TYPE, {}).success).toStrictEqual(true);
-    expect(tracker.allocate({ bytes: 10 }, USER_MEMORY_TYPE, {}).success).toStrictEqual(true);
-    expect(tracker.used).toStrictEqual(80);
+    expect(tracker.allocate({ bytes: 20 }, USER_MEMORY_TYPE, {}).success).toStrictEqual(true);
+    expect(tracker.addStringRef(helloWorldString).success).toStrictEqual(true);
+    expect(tracker.used).toStrictEqual(87);
     expect(tracker.byType).toStrictEqual<IMemoryByType>({
       system: 50,
-      string: 20,
-      user: 10
+      string: 17,
+      user: 20
     });
   });
 
   it('provides a minimal snapshot', () => {
     tracker.allocate({ bytes: 50 }, SYSTEM_MEMORY_TYPE, {});
-    tracker.allocate({ bytes: 20 }, STRING_MEMORY_TYPE, {});
-    tracker.addValueRef(helloWorldValue);
+    tracker.allocate({ bytes: 20 }, USER_MEMORY_TYPE, {});
+    tracker.addStringRef(helloWorldString);
     expect(tracker.used).toStrictEqual(87);
     expect(tracker.snapshot()).toMatchObject<IMemorySnapshot>({
       used: 87,
@@ -86,8 +86,8 @@ describe('tracking', () => {
 
     it('provides a minimal snapshot', () => {
       tracker.allocate({ bytes: 50 }, SYSTEM_MEMORY_TYPE, {});
-      tracker.allocate({ bytes: 20 }, STRING_MEMORY_TYPE, {});
-      tracker.addValueRef(helloWorldValue);
+      tracker.allocate({ bytes: 20 }, USER_MEMORY_TYPE, {});
+      tracker.addStringRef(helloWorldString);
       expect(tracker.used).toStrictEqual(87);
       expect(tracker.snapshot()).toMatchObject<IMemorySnapshot>({
         used: 87,
@@ -161,7 +161,7 @@ describe('debug', () => {
   it('detects invalid memory registration leading to negative totals', () => {
     tracker.allocate({ bytes: 1 }, SYSTEM_MEMORY_TYPE, container);
     expect(() =>
-      tracker.release({ bytes: -2, type: SYSTEM_MEMORY_TYPE } as unknown as MemoryPointer, container)
+      tracker.release({ bytes: 2, type: SYSTEM_MEMORY_TYPE } as unknown as MemoryPointer, container)
     ).toThrowError();
   });
 });
@@ -174,25 +174,25 @@ describe('string management', () => {
   });
 
   it('counts string size', () => {
-    tracker.addValueRef(toValue('hello world!'));
+    tracker.addStringRef(helloWorldString);
     expect(tracker.used).toStrictEqual(17);
   });
 
   it('does *not* sums up bytes', () => {
-    tracker.addValueRef(helloWorldValue);
+    tracker.addStringRef(helloWorldString);
     tracker.addValueRef(helloWorldValue);
     expect(tracker.used).toStrictEqual(17);
   });
 
   it('keeps the string valid until fully released', () => {
-    tracker.addValueRef(helloWorldValue);
+    tracker.addStringRef(helloWorldString);
     tracker.addValueRef(helloWorldValue);
     expect(tracker.releaseValue(helloWorldValue)).toStrictEqual(true);
     expect(tracker.used).toStrictEqual(17);
   });
 
   it('frees bytes (one reference)', () => {
-    tracker.addValueRef(helloWorldValue);
+    tracker.addStringRef(helloWorldString);
     expect(tracker.releaseValue(helloWorldValue)).toStrictEqual(false);
     expect(tracker.used).toStrictEqual(0);
     expect(tracker.peak).toStrictEqual(17);
