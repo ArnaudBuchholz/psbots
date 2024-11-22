@@ -173,6 +173,7 @@ export class MemoryTracker implements IValueTracker, IMemoryTracker {
 
   private readonly _strings: Map<string, number> = new Map();
 
+  /** returns the number of reference count */
   addStringRef(string: string): Result<number, VmOverflowException> {
     let refCount = this._strings.get(string) ?? 0;
     if (refCount === 0) {
