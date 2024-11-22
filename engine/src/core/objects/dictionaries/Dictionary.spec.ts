@@ -14,7 +14,7 @@ let shared: ReturnType<typeof toValue.createSharedObject>;
 
 beforeEach(() => {
   tracker = new MemoryTracker();
-  const result = Dictionary.create(tracker, USER_MEMORY_TYPE);
+  const result = Dictionary.create(tracker, USER_MEMORY_TYPE, 0);
   assert(result);
   dictionary = result.value;
   dictionary.def('value1', toValue(1));
