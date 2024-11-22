@@ -199,7 +199,7 @@ describe('string management', () => {
   });
 
   it('frees bytes (two references)', () => {
-    tracker.addValueRef(helloWorldValue);
+    tracker.addStringRef(helloWorldString);
     tracker.addValueRef(helloWorldValue);
     expect(tracker.releaseValue(helloWorldValue)).toStrictEqual(true);
     expect(tracker.releaseValue(helloWorldValue)).toStrictEqual(false);
@@ -208,15 +208,15 @@ describe('string management', () => {
   });
 
   it('resets string reference after release', () => {
-    tracker.addValueRef(helloWorldValue);
+    tracker.addStringRef(helloWorldString);
     tracker.releaseValue(helloWorldValue);
-    tracker.addValueRef(helloWorldValue);
+    tracker.addStringRef(helloWorldString);
     tracker.releaseValue(helloWorldValue);
     expect(tracker.used).toStrictEqual(0);
   });
 
   it('fails if the reference count becomes incorrect', () => {
-    tracker.addValueRef(helloWorldValue);
+    tracker.addStringRef(helloWorldString);
     tracker.releaseValue(helloWorldValue);
     expect(() => tracker.releaseValue(helloWorldValue)).toThrowError();
   });

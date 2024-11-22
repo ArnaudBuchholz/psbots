@@ -201,7 +201,7 @@ export class MemoryTracker implements IValueTracker, IMemoryTracker {
       this.release(
         {
           [memoryPointer]: true,
-          bytes: -toBytes({
+          bytes: toBytes({
             bytes: size,
             integers: 1
           }),
