@@ -1,14 +1,10 @@
 import { nullValue } from '@api/index.js';
 import type { ArrayValue, IArray, IValuePermissions, MemoryType, Result, Value } from '@api/index.js';
-import { assert, isObject, RangeCheckException } from '@sdk/index.js';
+import { assert, RangeCheckException } from '@sdk/index.js';
 import { AbstractValueContainer } from '@core/objects/AbstractValueContainer.js';
 import type { MemoryTracker } from '@core/MemoryTracker.js';
 
 export class ValueArray extends AbstractValueContainer implements IArray {
-  static override is(value: unknown): value is ValueArray {
-    return isObject(value) && value instanceof ValueArray;
-  }
-
   static create(memoryTracker: MemoryTracker, memoryType: MemoryType): Result<ValueArray> {
     const isMemoryAvailable = memoryTracker.isAvailable(ValueArray.size);
     if (!isMemoryAvailable.success) {
