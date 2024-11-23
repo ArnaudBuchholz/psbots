@@ -96,6 +96,7 @@ export class Dictionary extends ShareableObject implements IDictionary {
         if (slot.pointer !== this._pointer) {
           this._memoryTracker.release(slot.pointer, this);
         }
+        this._memoryTracker.releaseString(name);
         delete this._slots[name];
         return { success: true, value: previousValue };
       }
