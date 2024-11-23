@@ -43,10 +43,10 @@ export class Dictionary extends ShareableObject implements IDictionary {
     this._pointer = isMemoryAvailable.value;
   }
 
-  static getSize(initialKeyCount: number): MemorySize {
+  static getSize(initialCapacity: number): MemorySize {
     return addMemorySize(ShareableObject.size, {
-      pointers: 1 + initialKeyCount,
-      values: initialKeyCount,
+      pointers: 1 + initialCapacity,
+      values: initialCapacity,
     });
   }
 
