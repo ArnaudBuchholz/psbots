@@ -32,6 +32,8 @@ export abstract class AbstractValueContainer extends ShareableObject implements 
     private readonly _capacityIncrement = 1
   ) {
     super();
+    assert(this._initialCapacity >= 1);
+    assert(this._capacityIncrement >= 1);
     const isMemoryAvailable = this._memoryTracker.allocate(AbstractValueContainer.getSize(this._initialCapacity), this._memoryType, this);
     assert(isMemoryAvailable);
     this._pointers.push(isMemoryAvailable.value);

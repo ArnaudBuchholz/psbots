@@ -1,10 +1,10 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import type { MemoryType, Result, Value } from '@api/index.js';
 import { nullValue, USER_MEMORY_TYPE } from '@api/index.js';
-import { isArrayValue } from '@sdk/index.js';
+import { isArrayValue, VmOverflowException } from '@sdk/index.js';
 import { MemoryTracker } from '@core/index.js';
 import { AbstractValueContainer } from './AbstractValueContainer.js';
-import { testIsFunction, toValue, values } from '@test/index.js';
+import { toValue } from '@test/index.js';
 
 class TestValueArray extends AbstractValueContainer {
   constructor(memoryTracker: MemoryTracker, memoryType: MemoryType, initialCapacity: number, capacityIncrement: number) {
@@ -19,7 +19,7 @@ class TestValueArray extends AbstractValueContainer {
   private _popNull: boolean = false;
 
   protected popImpl() {
-    const value = this.at(-1);
+    const value = this._values.at(-1) ?? nullValue;
     this._values.pop();
     if (this._popNull) {
       return nullValue;
@@ -34,10 +34,6 @@ class TestValueArray extends AbstractValueContainer {
   public getMemoryType(): MemoryType {
     return this.memoryType;
   }
-
-  public setPopNull(value = true): void {
-    this._popNull = value;
-  }
 }
 
 let tracker: MemoryTracker;
@@ -46,7 +42,7 @@ let shared: ReturnType<typeof toValue.createSharedObject>;
 
 beforeEach(() => {
   tracker = new MemoryTracker();
-  valueArray = new TestValueArray(tracker, USER_MEMORY_TYPE, 10, 1);
+  valueArray = new TestValueArray(tracker, USER_MEMORY_TYPE, 5, 2);
   shared = toValue.createSharedObject();
   expect(shared.object.refCount).toStrictEqual(1);
   valueArray.push(toValue(123), toValue('abc'), shared.value);
@@ -101,30 +97,68 @@ describe('memory', () => {
       memoryUsedBefore = tracker.used;
     });
 
-    it('releases memory and tracked values when removing items', () => {
-      expect(valueArray.pop()).toStrictEqual({ success: true, value: nullValue });
-      expect(tracker.used).toBeLessThan(memoryUsedBefore);
-      expect(shared.object.refCount).toStrictEqual(0);
+    describe('staying in the initial capacity', () => {
+      afterEach(() => {
+        expect(tracker.used).toStrictEqual(memoryUsedBefore); // Initial capacity
+      });
+
+      it('releases tracked values when removing items', () => {
+        expect(valueArray.pop()).toStrictEqual(nullValue);
+        expect(shared.object.refCount).toStrictEqual(0);
+      });
+  
+      it('releases memory when removing items', () => {
+        shared.object.addRef();
+        expect(valueArray.pop()).toStrictEqual(shared.value);
+        expect(shared.object.refCount).toStrictEqual(1);
+        shared.object.release(); // to fit afterEach checks
+      });
     });
 
-    it('releases memory when removing items', () => {
-      shared.object.addRef();
-      expect(valueArray.pop()).toStrictEqual({ success: true, value: shared.value });
-      expect(tracker.used).toBeLessThan(memoryUsedBefore);
-      expect(shared.object.refCount).toStrictEqual(1);
-      shared.object.release(); // to fit afterEach checks
+    describe('going beyond initial capacity', () => {
+      it('handles allocation failure of the increment', () => {
+        const tracker = new MemoryTracker({ total: 100 });
+        const valueArray = new TestValueArray(tracker, USER_MEMORY_TYPE, 1, 10000);
+        valueArray.push(toValue(0));
+        const result = valueArray.push(toValue(1));
+        if (result.success) {
+          expect.unreachable();
+        }
+        expect(result.error).toBeInstanceOf(VmOverflowException);
+      });
+
+      it('allocates an increment when going beyond initial capacity (one value)', () => {
+        valueArray.push(toValue(0), toValue(1), toValue(2));
+        expect(valueArray.length).toStrictEqual(6);
+        expect(tracker.used).toBeGreaterThan(memoryUsedBefore);
+      });
+
+      it('fills the increment (second value)', () => {
+        valueArray.push(toValue(0), toValue(1), toValue(2));
+        const memoryUsed = tracker.used;
+        valueArray.push(toValue(3));
+        expect(valueArray.length).toStrictEqual(7);
+        expect(tracker.used).toStrictEqual(memoryUsed);
+      });
+
+      it('frees the memory when the values count decrease (one value)', () => {
+        valueArray.push(toValue(0), toValue(1), toValue(2));
+        expect(valueArray.pop()).toStrictEqual(toValue(2));
+        expect(tracker.used).toStrictEqual(memoryUsedBefore);
+      })
+
+      it('frees the memory when the values count decrease (two values)', () => {
+        valueArray.push(toValue(0), toValue(1), toValue(2), toValue(3));
+        expect(valueArray.pop()).toStrictEqual(toValue(3));
+        expect(tracker.used).toBeGreaterThan(memoryUsedBefore);
+        expect(valueArray.pop()).toStrictEqual(toValue(2));
+        expect(tracker.used).toStrictEqual(memoryUsedBefore);
+      });
     });
 
-    it('does not release memory if popImpl returns null', () => {
-      valueArray.setPopNull();
-      expect(valueArray.pop()).toStrictEqual({ success: true, value: nullValue });
-      expect(tracker.used).toStrictEqual(memoryUsedBefore);
-      valueArray.setPopNull(false);
-    });
-
-    it('fails after all items were removed', () => {
+    it('does not fail after all items were removed', () => {
       valueArray.clear();
-      expect(valueArray.pop()).toStrictEqual({ success: false, error: expect.any(Error) });
+      expect(valueArray.pop()).toStrictEqual(nullValue);
     });
   });
 
@@ -145,25 +179,14 @@ it('offers a Value[] reference (limited to initial capacity)', () => {
     toValue(1),
     toValue(2),
     toValue(3),
-    toValue(4),
-    toValue(5),
-    toValue(6),
-    toValue(7),
-    toValue(8),
-    toValue(9),
-    toValue(10),
-  )
+    toValue(4)
+  );
   expect(valueArray.ref).toStrictEqual<Value[]>([
     toValue(123),
     toValue('abc'),
     shared.value,
     toValue(0),
-    toValue(1),
-    toValue(2),
-    toValue(3),
-    toValue(4),
-    toValue(5),
-    toValue(6)
+    toValue(1)
   ]);
 });
 
