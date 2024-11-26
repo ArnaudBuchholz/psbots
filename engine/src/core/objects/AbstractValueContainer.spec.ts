@@ -19,11 +19,11 @@ class TestValueArray extends AbstractValueContainer {
   private _popNull: boolean = false;
 
   protected popImpl() {
+    const value = this.at(-1);
+    this._values.pop();
     if (this._popNull) {
       return nullValue;
     }
-    const value = this.at(-1);
-    this._values.pop();
     return value;
   }
 
@@ -137,6 +137,34 @@ describe('memory', () => {
 
 it('offers a Value[] reference', () => {
   expect(valueArray.ref).toStrictEqual<Value[]>([toValue(123), toValue('abc'), shared.value]);
+});
+
+it('offers a Value[] reference (limited to initial capacity)', () => {
+  valueArray.push(
+    toValue(0),
+    toValue(1),
+    toValue(2),
+    toValue(3),
+    toValue(4),
+    toValue(5),
+    toValue(6),
+    toValue(7),
+    toValue(8),
+    toValue(9),
+    toValue(10),
+  )
+  expect(valueArray.ref).toStrictEqual<Value[]>([
+    toValue(123),
+    toValue('abc'),
+    shared.value,
+    toValue(0),
+    toValue(1),
+    toValue(2),
+    toValue(3),
+    toValue(4),
+    toValue(5),
+    toValue(6)
+  ]);
 });
 
 describe('IReadOnlyArray', () => {
