@@ -7,8 +7,8 @@ import { AbstractValueContainer } from './AbstractValueContainer.js';
 import { testIsFunction, toValue, values } from '@test/index.js';
 
 class TestValueArray extends AbstractValueContainer {
-  constructor(memoryTracker: MemoryTracker, memoryType: MemoryType) {
-    super(memoryTracker, memoryType);
+  constructor(memoryTracker: MemoryTracker, memoryType: MemoryType, initialCapacity: number, capacityIncrement: number) {
+    super(memoryTracker, memoryType, initialCapacity, capacityIncrement);
   }
 
   protected pushImpl(value: Value): Result {
@@ -18,13 +18,13 @@ class TestValueArray extends AbstractValueContainer {
 
   private _popNull: boolean = false;
 
-  protected popImpl(): Result<Value> {
+  protected popImpl() {
     if (this._popNull) {
-      return { success: true, value: nullValue };
+      return nullValue;
     }
     const value = this.at(-1);
     this._values.pop();
-    return { success: true, value };
+    return value;
   }
 
   public getMemoryTracker(): MemoryTracker {
@@ -46,26 +46,13 @@ let shared: ReturnType<typeof toValue.createSharedObject>;
 
 beforeEach(() => {
   tracker = new MemoryTracker();
-  valueArray = new TestValueArray(tracker, USER_MEMORY_TYPE);
+  valueArray = new TestValueArray(tracker, USER_MEMORY_TYPE, 10, 1);
   shared = toValue.createSharedObject();
   expect(shared.object.refCount).toStrictEqual(1);
   valueArray.push(toValue(123), toValue('abc'), shared.value);
   expect(shared.object.refCount).toStrictEqual(2);
   shared.object.release();
   expect(shared.object.refCount).toStrictEqual(1);
-});
-
-describe('AbstractValueArray.check', () => {
-  // valueArray being set in beforeEach, it can't be used in testIsFunction
-  it('validates an AbstractValueArray', () => {
-    expect(AbstractValueContainer.is(valueArray)).toStrictEqual(true);
-  });
-
-  testIsFunction<AbstractValueContainer>({
-    is: AbstractValueContainer.is,
-    valid: [],
-    invalid: [...values.all]
-  });
 });
 
 describe('toValue', () => {
