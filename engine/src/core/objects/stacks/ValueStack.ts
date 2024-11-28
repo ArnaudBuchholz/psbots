@@ -1,4 +1,4 @@
-import type { Value } from '@api/index.js';
+import { nullValue, type Value } from '@api/index.js';
 import { StackUnderflowException } from '@sdk/index.js';
 import { AbstractValueContainer } from '@core/objects/AbstractValueContainer.js';
 import type { IStack } from '@sdk/interfaces/IStack';
@@ -17,11 +17,8 @@ export class ValueStack extends AbstractValueContainer implements IStack {
     this._values.unshift(value);
   }
 
-  protected popImpl(): Value | null {
-    if (this._values.length === 0) {
-      throw new StackUnderflowException();
-    }
-    const value = this.at(0);
+  protected popImpl(): Value {
+    const value = this.at(0) ?? nullValue;
     this._values.shift();
     return value;
   }

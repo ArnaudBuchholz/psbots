@@ -8,7 +8,7 @@ import {
   OPERATOR_STATE_POP
 } from '@sdk/index.js';
 import { CallStack } from './CallStack.js';
-import { MemoryTracker } from '@core/index.js';
+import { MemoryTracker } from '@core/MemoryTracker.js';
 import { toValue } from '@test/index.js';
 
 let tracker: MemoryTracker;

@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import type { MemoryType, Result, Value } from '@api/index.js';
 import { nullValue, USER_MEMORY_TYPE } from '@api/index.js';
 import { isArrayValue, VmOverflowException } from '@sdk/index.js';
-import { MemoryTracker } from '@core/index.js';
+import { MemoryTracker } from '@core/MemoryTracker.js';
 import { AbstractValueContainer } from './AbstractValueContainer.js';
 import { toValue } from '@test/index.js';
 
