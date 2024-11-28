@@ -5,14 +5,14 @@ import { AbstractValueContainer } from '@core/objects/AbstractValueContainer.js'
 import type { MemoryTracker } from '@core/MemoryTracker.js';
 
 export class ValueArray extends AbstractValueContainer implements IArray {
-  static create(memoryTracker: MemoryTracker, memoryType: MemoryType): Result<ValueArray> {
-    const isMemoryAvailable = memoryTracker.isAvailable(ValueArray.size);
+  static create(memoryTracker: MemoryTracker, memoryType: MemoryType, initialCapacity: number, capacityIncrement: number): Result<ValueArray> {
+    const isMemoryAvailable = memoryTracker.isAvailable(ValueArray.getSize(initialCapacity), memoryType);
     if (!isMemoryAvailable.success) {
       return isMemoryAvailable;
     }
     return {
       success: true,
-      value: new ValueArray(memoryTracker, memoryType)
+      value: new ValueArray(memoryTracker, memoryType, initialCapacity, capacityIncrement)
     };
   }
 
@@ -27,10 +27,10 @@ export class ValueArray extends AbstractValueContainer implements IArray {
     return { success: true, value: undefined };
   }
 
-  protected popImpl(): Result<Value> {
-    const value = this.at(-1);
+  protected popImpl(): Value {
+    const value = this._values.at(-1) ?? nullValue;
     this._values.pop();
-    return { success: true, value };
+    return value;
   }
 
   // region IArray
@@ -40,22 +40,12 @@ export class ValueArray extends AbstractValueContainer implements IArray {
       return { success: false, error: new RangeCheckException() };
     }
     let previousValue = this._values[index] ?? nullValue;
-    if (previousValue !== null) {
-      if (previousValue.tracker?.releaseValue(previousValue) === false) {
-        previousValue = nullValue;
-      }
-    } else {
-      const isMemoryAvailable = this.memoryTracker.allocate(
-        {
-          pointers: 1,
-          values: 1
-        },
-        this.memoryType,
-        this
-      );
-      if (!isMemoryAvailable) {
-        return isMemoryAvailable;
-      }
+    if (previousValue.tracker?.releaseValue(previousValue) === false) {
+      previousValue = nullValue;
+    }
+    const capacityAdjusted = this.increaseCapacityIfNeeded(index + 1);
+    if (!capacityAdjusted.success) {
+      return capacityAdjusted;
     }
     value.tracker?.addValueRef(value);
     this._values[index] = value;
@@ -63,38 +53,4 @@ export class ValueArray extends AbstractValueContainer implements IArray {
   }
 
   // endregion IArray
-
-  shift(): Value {
-    const value = this._values.shift();
-    assert(value !== undefined, 'Empty array');
-    this.memoryTracker.release(
-      {
-        pointers: -1,
-        values: -1
-      },
-      this.memoryType,
-      this
-    );
-    if (value.tracker?.releaseValue(value) === false) {
-      return nullValue;
-    }
-    return value;
-  }
-
-  unshift(value: Value): Result {
-    const isMemoryAvailable = this.memoryTracker.allocate(
-      {
-        pointers: 1,
-        values: 1
-      },
-      this.memoryType,
-      this
-    );
-    if (!isMemoryAvailable.success) {
-      return isMemoryAvailable;
-    }
-    value.tracker?.addValueRef(value);
-    this._values.unshift(value);
-    return { success: true, value: undefined };
-  }
 }
