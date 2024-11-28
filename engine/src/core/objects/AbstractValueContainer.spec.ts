@@ -121,10 +121,7 @@ describe('memory', () => {
         const valueArray = new TestValueArray(tracker, USER_MEMORY_TYPE, 1, 10000);
         valueArray.push(toValue(0));
         const result = valueArray.push(toValue(1));
-        if (result.success) {
-          expect.unreachable();
-        }
-        expect(result.error).toBeInstanceOf(VmOverflowException);
+        expect(result).toStrictEqual({ success: false, error: expect.any(VmOverflowException) });
       });
 
       it('allocates an increment when going beyond initial capacity (one value)', () => {
