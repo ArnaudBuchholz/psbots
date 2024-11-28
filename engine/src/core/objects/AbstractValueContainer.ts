@@ -1,7 +1,8 @@
 import type { ArrayValue, IReadOnlyArray, IValuePermissions, MemoryType, Result, Value } from '@api/index.js';
 import { nullValue, ValueType } from '@api/index.js';
 import { assert } from '@sdk/index.js';
-import type { addMemorySize, MemoryPointer, MemorySize, MemoryTracker } from '@core/MemoryTracker';
+import type { MemoryPointer, MemorySize, MemoryTracker } from '@core/MemoryTracker';
+import { addMemorySize } from '@core/MemoryTracker';
 import { ShareableObject } from '@core/objects/ShareableObject.js';
 
 export abstract class AbstractValueContainer extends ShareableObject implements IReadOnlyArray {
