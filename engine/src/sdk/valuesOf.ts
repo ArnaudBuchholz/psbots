@@ -2,6 +2,7 @@ import type { Value, ValueOf } from '@api/index.js';
 import { ValueType } from '@api/index.js';
 
 const values: { [type in ValueType]: (value: Value<type>) => unknown } = {
+  [ValueType.null]: () => null,
   [ValueType.boolean]: (value) => value.isSet,
   [ValueType.integer]: (value) => value.integer,
   [ValueType.string]: (value) => value.string,

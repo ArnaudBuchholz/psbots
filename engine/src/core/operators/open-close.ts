@@ -1,6 +1,6 @@
 import type { Value } from '@api/index.js';
-import { USER_MEMORY_TYPE } from '@api/index.js';
-import { findMarkPos, toMarkValue } from '@sdk/index.js';
+import { USER_MEMORY_TYPE, markValue } from '@api/index.js';
+import { findMarkPos } from '@sdk/index.js';
 import type { IInternalState, IStack } from '@sdk/index.js';
 import { ValueArray } from '@core/objects/ValueArray.js';
 import type { MemoryTracker } from '@core/MemoryTracker.js';
@@ -12,11 +12,11 @@ export function openWithMark({ operands, calls }: IInternalState): void {
         {
           debugSource: calls.top.debugSource
         },
-        toMarkValue()
+        markValue
       )
     );
   } else {
-    operands.push(toMarkValue());
+    operands.push(markValue);
   }
 }
 

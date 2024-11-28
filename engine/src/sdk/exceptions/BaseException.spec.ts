@@ -1,7 +1,8 @@
 import { describe, beforeAll, it, expect } from 'vitest';
-import { ExceptionDictionaryName, ExceptionType, SYSTEM_MEMORY_TYPE } from '@api/index.js';
+import type { Value } from '@api/index.js';
+import { ExceptionDictionaryName, ExceptionType, nullValue, SYSTEM_MEMORY_TYPE } from '@api/index.js';
 import { BaseException } from '@sdk/exceptions/BaseException.js';
-import { checkStringValue } from '@sdk/checks/checkValue.js';
+import { isStringValue } from '@sdk/checks/isValue.js';
 
 it('exposes a type', () => {
   const exception = new BaseException('test');
@@ -45,32 +46,36 @@ describe('IReadOnlyDictionary behavior', () => {
     ]);
   });
 
+  function check(value: Value, expectedString: string, exact = true) {
+    if (isStringValue(value, { isExecutable: false })) {
+      if (exact) {
+        expect(value.string).toStrictEqual(expectedString);
+      } else {
+        expect(value.string).toContain(expectedString);
+      }
+    } else {
+      expect.unreachable();
+    }
+  }
+
   it('exposes type', () => {
-    const typeValue = exception.lookup('type');
-    checkStringValue(typeValue, { isExecutable: false });
-    expect(typeValue.string).toStrictEqual(SYSTEM_MEMORY_TYPE);
+    check(exception.lookup('type'), SYSTEM_MEMORY_TYPE);
   });
 
   it('exposes name', () => {
-    const nameValue = exception.lookup('name');
-    checkStringValue(nameValue, { isExecutable: false });
-    expect(nameValue.string).toStrictEqual('BaseException');
+    check(exception.lookup('name'), 'BaseException');
   });
 
   it('exposes message', () => {
-    const messageValue = exception.lookup('message');
-    checkStringValue(messageValue, { isExecutable: false });
-    expect(messageValue.string).toStrictEqual('test');
+    check(exception.lookup('message'), 'test');
   });
 
   it('exposes stack', () => {
-    const stackValue = exception.lookup('stack');
-    checkStringValue(stackValue, { isExecutable: false });
-    expect(stackValue.string).toContain('BaseException.spec.ts');
+    check(exception.lookup('stack'), 'BaseException.spec.ts', false);
   });
 
   it('returns null on any other property', () => {
-    expect(exception.lookup('unknown')).toBeNull();
+    expect(exception.lookup('unknown')).toStrictEqual(nullValue);
   });
 });
 

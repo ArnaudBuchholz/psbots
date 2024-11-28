@@ -1,5 +1,4 @@
-import { ValueType } from '@api/index.js';
-import { toMarkValue } from '@sdk/index.js';
+import { markValue, ValueType } from '@api/index.js';
 import { buildConstantOperator } from '../operators.js';
 
 buildConstantOperator(
@@ -23,5 +22,5 @@ buildConstantOperator(
       }
     ]
   },
-  toMarkValue()
+  markValue
 );

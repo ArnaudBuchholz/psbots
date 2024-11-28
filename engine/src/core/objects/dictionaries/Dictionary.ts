@@ -1,15 +1,21 @@
-import type { Value, IDictionary, MemoryType, DictionaryValue, IValuePermissions } from '@api/index.js';
-import { ValueType } from '@api/index.js';
-import type { MemoryTracker } from '@core/MemoryTracker.js';
+import type { Value, IDictionary, MemoryType, DictionaryValue, IValuePermissions, Result } from '@api/index.js';
+import { ValueType, nullValue } from '@api/index.js';
+import { addMemorySize } from '@core/MemoryTracker.js';
+import type { MemoryPointer, MemorySize, MemoryTracker } from '@core/MemoryTracker.js';
 import { ShareableObject } from '@core/objects/ShareableObject.js';
-import { InternalException } from '@sdk/index.js';
+import { assert } from '@sdk/index.js';
 
+/**
+ * IDictionary implementation
+ * 
+ * NOTE about memory management :
+ * When the dictionary is created with an initial capacity but the initial keys are removed afterward,
+ * the allocated memory is not freed or reclaimed. It will be released only when the object is destroyed.
+ */
 export class Dictionary extends ShareableObject implements IDictionary {
   /** returned value is not addValueRef'ed */
   toValue({ isReadOnly = true, isExecutable }: Partial<IValuePermissions> = {}): DictionaryValue {
-    if (isExecutable === true) {
-      throw new InternalException('Unsupported permissions');
-    }
+    assert(isExecutable !== true, 'Unsupported permissions');
     return {
       type: ValueType.dictionary,
       isReadOnly,
@@ -19,78 +25,127 @@ export class Dictionary extends ShareableObject implements IDictionary {
     } as DictionaryValue;
   }
 
-  private readonly _values: { [key in string]: Value } = {};
+  private readonly _pointer: MemoryPointer;
+  private readonly _slots: { [key in string]: { value: Value; pointer: MemoryPointer } } = {};
 
-  constructor(
+  private constructor(
     private readonly _memoryTracker: MemoryTracker,
-    private readonly _memoryType: MemoryType
+    private readonly _memoryType: MemoryType,
+    private readonly _initialCapacity: number
   ) {
     super();
-    this._memoryTracker.register({
-      container: this,
-      pointers: 1,
-      type: this._memoryType
+    const isMemoryAvailable = this._memoryTracker.allocate(
+      Dictionary.getSize(this._initialCapacity),
+      this._memoryType,
+      this
+    );
+    assert(isMemoryAvailable);
+    this._pointer = isMemoryAvailable.value;
+  }
+
+  static getSize(initialCapacity: number): MemorySize {
+    return addMemorySize(ShareableObject.size, {
+      pointers: 1 + initialCapacity,
+      values: initialCapacity,
     });
+  }
+
+  static create(memoryTracker: MemoryTracker, memoryType: MemoryType, initialKeyCount: number): Result<Dictionary> {
+    const isMemoryAvailable = memoryTracker.isAvailable(Dictionary.getSize(initialKeyCount),memoryType);
+    if (!isMemoryAvailable.success) {
+      return isMemoryAvailable;
+    }
+    return {
+      success: true,
+      value: new Dictionary(memoryTracker, memoryType, initialKeyCount)
+    };
   }
 
   // region IReadOnlyDictionary
 
   get names(): string[] {
-    return Object.keys(this._values);
+    return Object.keys(this._slots);
   }
 
-  lookup(name: string): Value | null {
-    return this._values[name] ?? null;
+  lookup(name: string): Value {
+    return this._slots[name]?.value ?? nullValue;
   }
 
   // endregion IReadOnlyDictionary
 
   // region IDictionary
 
-  def(name: string, value: Value): Value | null {
-    let previousValue = this._values[name] ?? null;
-    if (previousValue !== null) {
-      if (previousValue.tracker?.releaseValue(previousValue) === false) {
-        previousValue = null;
+  private _checkCapacityUsage() {
+    let capacity: number = 0;
+    for (const slot of Object.values(this._slots)) {
+      if (slot.pointer === this._pointer) {
+        ++capacity;
       }
-    } else {
-      this._memoryTracker.addValueRef({
-        type: ValueType.string,
-        isExecutable: false,
-        isReadOnly: true,
-        string: name
-      });
-      this._memoryTracker.register({
-        container: this,
-        values: 1,
-        pointers: 3,
-        type: this._memoryType
-      });
     }
+    return capacity;
+  }
+
+  def(name: string, value: Value): Result<Value> {
+    let slot = this._slots[name];
+    let previousValue = slot?.value ?? nullValue;
+    if (slot !== undefined) {
+      if (previousValue.tracker?.releaseValue(previousValue) === false) {
+        previousValue = nullValue;
+      }
+      if (value.type === ValueType.null) {
+        if (slot.pointer !== this._pointer) {
+          this._memoryTracker.release(slot.pointer, this);
+        }
+        this._memoryTracker.releaseString(name);
+        delete this._slots[name];
+        return { success: true, value: previousValue };
+      }
+    } else if (value.type !== ValueType.null) {
+      const isMemoryAvailableForName = this._memoryTracker.addStringRef(name);
+      if (!isMemoryAvailableForName.success) {
+        return isMemoryAvailableForName;
+      }
+      if (this._checkCapacityUsage() < this._initialCapacity) {
+        slot = {
+          value: nullValue,
+          pointer: this._pointer
+        };
+      } else {
+        const isMemoryAvailableForSlot = this._memoryTracker.allocate(
+          {
+            values: 1,
+            pointers: 3
+          },
+          this._memoryType,
+          this
+        );
+        if (!isMemoryAvailableForSlot.success) {
+          this._memoryTracker.releaseString(name);
+          return isMemoryAvailableForSlot;
+        }
+        slot = {
+          value: nullValue,
+          pointer: isMemoryAvailableForSlot.value
+        };
+      }
+    }
+    assert(slot !== undefined);
+    slot.value = value;
     value.tracker?.addValueRef(value);
-    this._values[name] = value;
-    return previousValue;
+    this._slots[name] = slot; // should not be undefined
+    return { success: true, value: previousValue };
   }
 
   // endregion IWritableDictionary
 
   protected _dispose(): void {
-    const names = Object.keys(this._values);
-    for (const name of names) {
-      this._memoryTracker.releaseValue({
-        type: ValueType.string,
-        isExecutable: false,
-        isReadOnly: true,
-        string: name
-      });
-      const value = this._values[name];
-      value?.tracker?.releaseValue(value);
+    for (const [name, slot] of Object.entries(this._slots)) {
+      this._memoryTracker.releaseString(name);
+      slot.value.tracker?.releaseValue(slot.value);
+      if (slot.pointer !== this._pointer) {
+        this._memoryTracker.release(slot.pointer, this);
+      }
     }
-    this._memoryTracker.register({
-      container: this,
-      values: -names.length,
-      pointers: -3 * names.length - 1,
-      type: this._memoryType
-    });
+    this._memoryTracker.release(this._pointer, this);
   }
 }

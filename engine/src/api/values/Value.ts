@@ -1,4 +1,5 @@
 import type { ValueType } from '@api/values/ValueType.js';
+import type { NullValue } from '@api/values/NullValue';
 import type { BooleanValue } from '@api/values/BooleanValue.js';
 import type { IntegerValue } from '@api/values/IntegerValue.js';
 import type { StringValue } from '@api/values/StringValue.js';
@@ -14,31 +15,34 @@ import type { IReadOnlyDictionary } from '@api/interfaces/IReadOnlyDictionary.js
 import type { IDictionary } from '@api/interfaces/IDictionary.js';
 
 /** Generic Value */
-export type Value<T = unknown> = T extends ValueType.boolean
-  ? BooleanValue
-  : T extends ValueType.integer
-    ? IntegerValue
-    : T extends ValueType.string
-      ? StringValue
-      : T extends ValueType.name
-        ? NameValue
-        : T extends ValueType.mark
-          ? MarkValue
-          : T extends ValueType.operator
-            ? OperatorValue
-            : T extends ValueType.array
-              ? ArrayValue
-              : T extends ValueType.dictionary
-                ? DictionaryValue
-                :
-                    | BooleanValue
-                    | IntegerValue
-                    | StringValue
-                    | NameValue
-                    | MarkValue
-                    | OperatorValue
-                    | ArrayValue
-                    | DictionaryValue;
+export type Value<T = unknown> = T extends ValueType.null
+  ? NullValue
+  : T extends ValueType.boolean
+    ? BooleanValue
+    : T extends ValueType.integer
+      ? IntegerValue
+      : T extends ValueType.string
+        ? StringValue
+        : T extends ValueType.name
+          ? NameValue
+          : T extends ValueType.mark
+            ? MarkValue
+            : T extends ValueType.operator
+              ? OperatorValue
+              : T extends ValueType.array
+                ? ArrayValue
+                : T extends ValueType.dictionary
+                  ? DictionaryValue
+                  :
+                      | NullValue
+                      | BooleanValue
+                      | IntegerValue
+                      | StringValue
+                      | NameValue
+                      | MarkValue
+                      | OperatorValue
+                      | ArrayValue
+                      | DictionaryValue;
 
 export type ValueOf<T> = T extends ValueType.boolean
   ? boolean

@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import type { IDebugSource, Value } from '@api/index.js';
-import { toString, TOSTRING_BEGIN_MARKER, TOSTRING_END_MARKER } from '@sdk/toString.js';
+import { nullValue } from '@api/index.js';
+import { toString, TOSTRING_BEGIN_MARKER, TOSTRING_END_MARKER, TOSTRING_NULL } from '@sdk/toString.js';
 import {
   OPERATOR_STATE_CALL_BEFORE_POP,
   OPERATOR_STATE_FIRST_CALL,
@@ -10,6 +11,10 @@ import {
 import { toValue, values, stringify } from '@test/index.js';
 
 describe('basic conversion', () => {
+  it('converts null', () => {
+    expect(toString(nullValue)).toStrictEqual(TOSTRING_NULL);
+  });
+
   [...values.booleans, ...values.negativeIntegers, ...values.positiveIntegers].forEach((value) => {
     it(`converts a primitive value (${stringify(value)})`, () => {
       expect(toString(toValue(value))).toStrictEqual(value.toString());
@@ -57,7 +62,7 @@ describe('basic conversion', () => {
     const { at } = arrayValue.array;
     arrayValue.array.at = (index) => {
       if (index === 1) {
-        return null;
+        return nullValue;
       }
       return at.call(arrayValue.array, index);
     };

@@ -1,86 +1,100 @@
-import type { ArrayValue, IArray, IValuePermissions, Value } from '@api/index.js';
-import { InternalException, isObject, RangeCheckException } from '@sdk/index.js';
+import { nullValue } from '@api/index.js';
+import type { ArrayValue, IArray, IValuePermissions, MemoryType, Result, Value } from '@api/index.js';
+import { assert, RangeCheckException } from '@sdk/index.js';
 import { AbstractValueContainer } from '@core/objects/AbstractValueContainer.js';
-
-const NOT_A_VALUEARRAY = 'Not a ValueArray';
-const EMPTY_ARRAY = 'Empty array';
+import type { MemoryTracker } from '@core/MemoryTracker.js';
 
 export class ValueArray extends AbstractValueContainer implements IArray {
-  static override check(value: unknown): asserts value is AbstractValueContainer {
-    if (!isObject(value) || !(value instanceof AbstractValueContainer)) {
-      throw new InternalException(NOT_A_VALUEARRAY);
+  static create(memoryTracker: MemoryTracker, memoryType: MemoryType): Result<ValueArray> {
+    const isMemoryAvailable = memoryTracker.isAvailable(ValueArray.size);
+    if (!isMemoryAvailable.success) {
+      return isMemoryAvailable;
     }
+    return {
+      success: true,
+      value: new ValueArray(memoryTracker, memoryType)
+    };
   }
 
   /** returned value is not addValueRef'ed */
   override toValue({ isReadOnly = true, isExecutable = false }: Partial<IValuePermissions> = {}): ArrayValue {
-    if (!isReadOnly && isExecutable) {
-      throw new InternalException('Unsupported permissions');
-    }
+    assert(isReadOnly || !isExecutable, 'Unsupported permissions');
     return this._toValue({ isReadOnly, isExecutable });
   }
 
-  protected pushImpl(value: Value): void {
+  protected pushImpl(value: Value): Result {
     this._values.push(value);
+    return { success: true, value: undefined };
   }
 
-  protected popImpl(): Value {
-    const value = this.atOrThrow(-1);
+  protected popImpl(): Result<Value> {
+    const value = this.at(-1);
     this._values.pop();
-    return value;
+    return { success: true, value };
   }
 
   // region IArray
 
-  public set(index: number, value: Value): Value | null {
+  public set(index: number, value: Value): Result<Value> {
     if (index < 0) {
-      throw new RangeCheckException();
+      return { success: false, error: new RangeCheckException() };
     }
-    let previousValue = this._values[index] ?? null;
+    let previousValue = this._values[index] ?? nullValue;
     if (previousValue !== null) {
       if (previousValue.tracker?.releaseValue(previousValue) === false) {
-        previousValue = null;
+        previousValue = nullValue;
       }
     } else {
-      this.memoryTracker.register({
-        container: this,
-        type: this.memoryType,
-        pointers: 1,
-        values: 1
-      });
+      const isMemoryAvailable = this.memoryTracker.allocate(
+        {
+          pointers: 1,
+          values: 1
+        },
+        this.memoryType,
+        this
+      );
+      if (!isMemoryAvailable) {
+        return isMemoryAvailable;
+      }
     }
     value.tracker?.addValueRef(value);
     this._values[index] = value;
-    return previousValue;
+    return { success: true, value: previousValue };
   }
 
   // endregion IArray
 
-  shift(): Value | null {
+  shift(): Value {
     const value = this._values.shift();
-    if (value === undefined) {
-      throw new InternalException(EMPTY_ARRAY);
-    }
-    this.memoryTracker.register({
-      container: this,
-      type: this.memoryType,
-      pointers: -1,
-      values: -1
-    });
+    assert(value !== undefined, 'Empty array');
+    this.memoryTracker.release(
+      {
+        pointers: -1,
+        values: -1
+      },
+      this.memoryType,
+      this
+    );
     if (value.tracker?.releaseValue(value) === false) {
-      return null;
+      return nullValue;
     }
     return value;
   }
 
-  unshift(value: Value): void {
-    this.memoryTracker.register({
-      container: this,
-      type: this.memoryType,
-      pointers: 1,
-      values: 1
-    });
+  unshift(value: Value): Result {
+    const isMemoryAvailable = this.memoryTracker.allocate(
+      {
+        pointers: 1,
+        values: 1
+      },
+      this.memoryType,
+      this
+    );
+    if (!isMemoryAvailable.success) {
+      return isMemoryAvailable;
+    }
     value.tracker?.addValueRef(value);
     this._values.unshift(value);
+    return { success: true, value: undefined };
   }
 }

@@ -1,5 +1,5 @@
 import type { IException, Value } from '@api/index.js';
-import { ExceptionDictionaryName, ExceptionType, ValueType } from '@api/index.js';
+import { ExceptionDictionaryName, ExceptionType, nullValue, ValueType } from '@api/index.js';
 
 export class BaseException extends Error implements IException {
   private _engineStack: string[] = [];
@@ -27,7 +27,7 @@ export class BaseException extends Error implements IException {
     return Object.keys(ExceptionDictionaryName);
   }
 
-  lookup(name: string): Value | null {
+  lookup(name: string): Value {
     let string: string | undefined;
     if (name === ExceptionDictionaryName.type) {
       string = ExceptionType.system;
@@ -46,7 +46,7 @@ export class BaseException extends Error implements IException {
         string
       };
     }
-    return null;
+    return nullValue;
   }
 
   // endregion IReadOnlyDictionary

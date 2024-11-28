@@ -1,5 +1,4 @@
 import { it, expect } from 'vitest';
-import { InternalException } from '@sdk/index.js';
 import { toValue } from '@test/index.js';
 import { ShareableObject } from './ShareableObject.js';
 
@@ -22,7 +21,7 @@ it('detects invalid use of release', () => {
   const { object } = toValue.createSharedObject();
   expect(object.refCount).toStrictEqual(1);
   object.release();
-  expect(() => object.release()).toThrow(InternalException);
+  expect(() => object.release()).toThrowError();
 });
 
 it('cannot be used to track any value', () => {

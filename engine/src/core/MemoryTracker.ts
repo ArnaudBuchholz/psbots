@@ -6,9 +6,10 @@ import type {
   MemoryType,
   IMemoryByType,
   IMemorySnapshot,
-  ValueType
+  ValueType,
+  Result
 } from '@api/index.js';
-import { InternalException, VmOverflowException } from '@sdk/index.js';
+import { assert, VmOverflowException } from '@sdk/index.js';
 
 export const STRING_MEMORY_TYPE: MemoryType = 'string';
 
@@ -29,20 +30,44 @@ type MemoryTrackerOptions = {
   debug?: boolean;
 };
 
-type ContainerRegisters = {
-  container: WeakRef<object>;
-  type: MemoryType;
-  total: number;
-  calls: (Omit<MemoryRegistrationDetails, 'container'> & { stack?: string })[];
-};
-
-type MemoryRegistrationDetails = {
-  type: MemoryType;
-  container: object;
+export type MemorySize = {
   bytes?: number;
   integers?: number;
   pointers?: number;
   values?: number;
+};
+
+const memoryPointer = Symbol('MemoryTracker::MemoryPointer');
+
+export type MemoryPointer = {
+  [memoryPointer]: true;
+  readonly bytes: number;
+  readonly type: MemoryType;
+};
+
+export function addMemorySize(a: MemorySize, b: MemorySize): Required<MemorySize> {
+  return {
+    bytes: (a.bytes ?? 0) + (b.bytes ?? 0),
+    integers: (a.integers ?? 0) + (b.integers ?? 0),
+    pointers: (a.pointers ?? 0) + (b.pointers ?? 0),
+    values: (a.values ?? 0) + (b.values ?? 0)
+  };
+}
+
+function toBytes(size: MemorySize): number {
+  const { bytes = 0, integers = 0, pointers = 0, values = 0 } = size;
+  return bytes + integers * INTEGER_BYTES + pointers * POINTER_BYTES + values * VALUE_BYTES;
+}
+
+type ContainerRegisters = {
+  container: WeakRef<object>;
+  type: MemoryType;
+  total: number;
+  calls: ({
+    bytes: number;
+    type: MemoryType;
+    stack?: string
+  })[];
 };
 
 export class MemoryTracker implements IValueTracker, IMemoryTracker {
@@ -65,53 +90,47 @@ export class MemoryTracker implements IValueTracker, IMemoryTracker {
     }
   }
 
-  private readonly _strings: Map<string, number> = new Map();
-
-  private _addStringRef(string: string): void {
-    const refCount = this._strings.get(string) ?? 0;
-    if (refCount === 0) {
-      const size = stringSizer(string);
-      this.register({
-        container: this,
-        type: STRING_MEMORY_TYPE,
-        bytes: size,
-        integers: 1
-      });
+  /** Check if the requested memory size can be allocated, returns the equivalent number of bytes */
+  isAvailable(size: MemorySize, type: MemoryType): Result<number, VmOverflowException> {
+    assert(!!type);
+    // TODO: limit by type ?
+    const bytes = toBytes(size);
+    assert(bytes > 0);
+    if (this._used + bytes <= this._total) {
+      return { success: true, value: bytes };
     }
-    this._strings.set(string, refCount + 1);
+    return { success: false, error: new VmOverflowException() };
   }
 
-  private _releaseString(string: string): boolean {
-    const refCount = this._strings.get(string);
-    if (refCount === undefined) {
-      throw new InternalException('Invalid string release', string);
+  /** Allocate memory */
+  allocate(size: MemorySize, type: MemoryType, container: object): Result<MemoryPointer, VmOverflowException> {
+    assert(type !== 'string');
+    const isAvailable = this.isAvailable(size, type);
+    if (!isAvailable.success) {
+      return isAvailable;
     }
-    if (refCount === 1) {
-      const size = stringSizer(string);
-      this.register({
-        container: this,
-        type: STRING_MEMORY_TYPE,
-        bytes: -size,
-        integers: -1
-      });
-      this._strings.delete(string);
-      return false;
-    }
-    this._strings.set(string, refCount - 1);
-    return true;
+    const { value: bytes } = isAvailable;
+    this.register(bytes, type, container);
+    return { success: true, value: { [memoryPointer]: true, bytes, type } };
   }
 
-  register(details: MemoryRegistrationDetails) {
-    const { type, bytes = 0, integers = 0, pointers = 0, values = 0 } = details;
-    const step = bytes + integers * INTEGER_BYTES + pointers * POINTER_BYTES + values * VALUE_BYTES;
-    this._byType[type] += step;
-    this._used += step;
-    if (this._used > this._total) {
-      throw new VmOverflowException();
+  /** Release memory (must pass the result of a previous allocation) */
+  release({ bytes, type }: MemoryPointer, container: object): void {
+    this.register(-bytes, type, container);
+  }
+
+  private register(bytes: number, type: MemoryType, container: object): Result<undefined, VmOverflowException> {
+    if (bytes > 0) {
+      if (this._used + bytes > this._total) {
+        return { success: false, error: new VmOverflowException() };
+      }
+    } else {
+      assert(bytes < this._used);
     }
+    this._byType[type] += bytes;
+    this._used += bytes;
     this._peak = Math.max(this._used, this._peak);
-    if (this._byContainers && details.container !== this /* exclude strings */) {
-      const { container, ...other } = details;
+    if (this._byContainers && container !== this /* exclude strings */) {
       let containerRegisters = this._byContainers.get(container);
       if (containerRegisters === undefined) {
         const containerRef = new WeakRef(container);
@@ -124,13 +143,9 @@ export class MemoryTracker implements IValueTracker, IMemoryTracker {
         this._containers.push(containerRef);
         this._byContainers.set(container, containerRegisters);
       }
-      if (containerRegisters.type !== type) {
-        throw new InternalException('Unexpected memory type change');
-      }
-      containerRegisters.total += step;
-      if (containerRegisters.total < 0) {
-        throw new InternalException('Invalid memory registration');
-      }
+      assert(containerRegisters.type === type, 'Unexpected memory type change', { bytes, type, container });
+      containerRegisters.total += bytes;
+      assert(containerRegisters.total >= 0, 'Invalid memory registration', { bytes, type, container });
       if (containerRegisters.total !== 0) {
         let stack: string | undefined;
         try {
@@ -138,13 +153,14 @@ export class MemoryTracker implements IValueTracker, IMemoryTracker {
         } catch (e) {
           stack = (e as Error).stack;
         }
-        containerRegisters.calls.push({ ...other, stack });
+        containerRegisters.calls.push({ bytes, type, stack });
       } else {
         const index = this._containers.findIndex((containerRef) => containerRef.deref() === container);
         this._containers.splice(index, 1);
         this._byContainers.delete(container);
       }
     }
+    return { success: true, value: undefined };
   }
 
   *enumContainersAllocations(): Generator<ContainerRegisters> {
@@ -153,6 +169,52 @@ export class MemoryTracker implements IValueTracker, IMemoryTracker {
         yield this._byContainers.get(containerRef.deref()!)!;
       }
     }
+  }
+
+  private readonly _strings: Map<string, number> = new Map();
+
+  /** returns the number of reference count */
+  addStringRef(string: string): Result<number, VmOverflowException> {
+    let refCount = this._strings.get(string) ?? 0;
+    if (refCount === 0) {
+      const size = stringSizer(string);
+      const isMemoryAvailable = this.register(
+        toBytes({
+          bytes: size,
+          integers: 1
+        }),
+        STRING_MEMORY_TYPE,
+        this
+      );
+      if (!isMemoryAvailable.success) {
+        return isMemoryAvailable;
+      }
+    }
+    this._strings.set(string, ++refCount);
+    return { success: true, value: refCount };
+  }
+
+  public releaseString(string: string): boolean {
+    const refCount = this._strings.get(string);
+    assert(refCount !== undefined, 'Unable to release string as it is not referenced', string);
+    if (refCount === 1) {
+      const size = stringSizer(string);
+      this.release(
+        {
+          [memoryPointer]: true,
+          bytes: toBytes({
+            bytes: size,
+            integers: 1
+          }),
+          type: STRING_MEMORY_TYPE
+        },
+        this
+      );
+      this._strings.delete(string);
+      return false;
+    }
+    this._strings.set(string, refCount - 1);
+    return true;
   }
 
   // region IMemoryTracker
@@ -218,11 +280,13 @@ export class MemoryTracker implements IValueTracker, IMemoryTracker {
   // region IValueTracker (for string)
 
   addValueRef(value: Value): void {
-    this._addStringRef((value as Value<ValueType.string>).string);
+    const isMemoryAvailable = this.addStringRef((value as Value<ValueType.string>).string);
+    assert(isMemoryAvailable);
+    assert(isMemoryAvailable.value !== 1, 'addValueRef must not be used to create a new string ref');
   }
 
   releaseValue(value: Value): boolean {
-    return this._releaseString((value as Value<ValueType.string>).string);
+    return this.releaseString((value as Value<ValueType.string>).string);
   }
 
   // endregion IValueTracker (for string)

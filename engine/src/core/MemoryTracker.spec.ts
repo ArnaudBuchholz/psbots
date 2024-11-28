@@ -1,9 +1,10 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { STRING_MEMORY_TYPE, MemoryTracker } from './MemoryTracker.js';
+import type { MemoryPointer } from './MemoryTracker.js';
+import { MemoryTracker } from './MemoryTracker.js';
 import { toValue } from '@test/index.js';
 import { SYSTEM_MEMORY_TYPE, USER_MEMORY_TYPE } from '@api/index.js';
-import type { IMemoryByType, IMemorySnapshot } from '@api/index.js';
-import { InternalException } from '@sdk/index.js';
+import type { IMemoryByType, IMemorySnapshot, Result } from '@api/index.js';
+import { assert, VmOverflowException } from '@sdk/index.js';
 
 const helloWorldString = 'hello world!';
 const helloWorldValue = toValue(helloWorldString);
@@ -30,21 +31,21 @@ describe('tracking', () => {
   });
 
   it('keeps track of memory used', () => {
-    tracker.register({ container: {}, type: SYSTEM_MEMORY_TYPE, bytes: 50 });
-    tracker.register({ container: {}, type: STRING_MEMORY_TYPE, bytes: 20 });
-    tracker.register({ container: {}, type: USER_MEMORY_TYPE, bytes: 10 });
-    expect(tracker.used).toStrictEqual(80);
+    expect(tracker.allocate({ bytes: 50 }, SYSTEM_MEMORY_TYPE, {}).success).toStrictEqual(true);
+    expect(tracker.allocate({ bytes: 20 }, USER_MEMORY_TYPE, {}).success).toStrictEqual(true);
+    expect(tracker.addStringRef(helloWorldString).success).toStrictEqual(true);
+    expect(tracker.used).toStrictEqual(87);
     expect(tracker.byType).toStrictEqual<IMemoryByType>({
       system: 50,
-      string: 20,
-      user: 10
+      string: 17,
+      user: 20
     });
   });
 
   it('provides a minimal snapshot', () => {
-    tracker.register({ container: {}, type: SYSTEM_MEMORY_TYPE, bytes: 50 });
-    tracker.register({ container: {}, type: USER_MEMORY_TYPE, bytes: 20 });
-    tracker.addValueRef(helloWorldValue);
+    tracker.allocate({ bytes: 50 }, SYSTEM_MEMORY_TYPE, {});
+    tracker.allocate({ bytes: 20 }, USER_MEMORY_TYPE, {});
+    tracker.addStringRef(helloWorldString);
     expect(tracker.used).toStrictEqual(87);
     expect(tracker.snapshot()).toMatchObject<IMemorySnapshot>({
       used: 87,
@@ -69,7 +70,10 @@ describe('tracking', () => {
   });
 
   it('fails when allocating too much memory', () => {
-    expect(() => tracker.register({ container: {}, type: 'system', bytes: MAX_MEMORY + 1 })).toThrowError();
+    expect(tracker.allocate({ bytes: MAX_MEMORY + 1 }, SYSTEM_MEMORY_TYPE, {})).toStrictEqual<Result>({
+      success: false,
+      error: expect.any(VmOverflowException)
+    });
   });
 
   describe('debugging memory', () => {
@@ -81,9 +85,9 @@ describe('tracking', () => {
     });
 
     it('provides a minimal snapshot', () => {
-      tracker.register({ container: {}, type: SYSTEM_MEMORY_TYPE, bytes: 50 });
-      tracker.register({ container: {}, type: USER_MEMORY_TYPE, bytes: 20 });
-      tracker.addValueRef(helloWorldValue);
+      tracker.allocate({ bytes: 50 }, SYSTEM_MEMORY_TYPE, {});
+      tracker.allocate({ bytes: 20 }, USER_MEMORY_TYPE, {});
+      tracker.addStringRef(helloWorldString);
       expect(tracker.used).toStrictEqual(87);
       expect(tracker.snapshot()).toMatchObject<IMemorySnapshot>({
         used: 87,
@@ -132,7 +136,7 @@ describe('debug', () => {
   });
 
   it('keeps track of allocation containers', () => {
-    tracker.register({ container, type: SYSTEM_MEMORY_TYPE, bytes: 1 });
+    tracker.allocate({ bytes: 1 }, SYSTEM_MEMORY_TYPE, container);
     const containerRegisters = [...tracker.enumContainersAllocations()];
     expect(
       containerRegisters.findIndex((containerRegister) => containerRegister.container.deref() === container)
@@ -140,8 +144,9 @@ describe('debug', () => {
   });
 
   it('removes fully freed references', () => {
-    tracker.register({ container, type: SYSTEM_MEMORY_TYPE, bytes: 1 });
-    tracker.register({ container, type: SYSTEM_MEMORY_TYPE, bytes: -1 });
+    const result = tracker.allocate({ bytes: 1 }, SYSTEM_MEMORY_TYPE, container);
+    assert(result);
+    tracker.release(result.value, container);
     const containerRegisters = [...tracker.enumContainersAllocations()];
     expect(
       containerRegisters.findIndex((containerRegister) => containerRegister.container.deref() === container)
@@ -149,17 +154,15 @@ describe('debug', () => {
   });
 
   it('detects and prevents memory type change for a given container', () => {
-    tracker.register({ container, type: SYSTEM_MEMORY_TYPE, bytes: 1 });
-    expect(() => tracker.register({ container, type: USER_MEMORY_TYPE, bytes: 1 })).toThrowError(
-      'Unexpected memory type change'
-    );
+    tracker.allocate({ bytes: 1 }, SYSTEM_MEMORY_TYPE, container);
+    expect(() => tracker.allocate({ bytes: 1 }, USER_MEMORY_TYPE, container)).toThrowError();
   });
 
   it('detects invalid memory registration leading to negative totals', () => {
-    tracker.register({ container, type: SYSTEM_MEMORY_TYPE, bytes: 1 });
-    expect(() => tracker.register({ container, type: SYSTEM_MEMORY_TYPE, bytes: -2 })).toThrowError(
-      'Invalid memory registration'
-    );
+    tracker.allocate({ bytes: 1 }, SYSTEM_MEMORY_TYPE, container);
+    expect(() =>
+      tracker.release({ bytes: 2, type: SYSTEM_MEMORY_TYPE } as unknown as MemoryPointer, container)
+    ).toThrowError();
   });
 });
 
@@ -171,32 +174,32 @@ describe('string management', () => {
   });
 
   it('counts string size', () => {
-    tracker.addValueRef(toValue('hello world!'));
+    tracker.addStringRef(helloWorldString);
     expect(tracker.used).toStrictEqual(17);
   });
 
   it('does *not* sums up bytes', () => {
-    tracker.addValueRef(helloWorldValue);
+    tracker.addStringRef(helloWorldString);
     tracker.addValueRef(helloWorldValue);
     expect(tracker.used).toStrictEqual(17);
   });
 
   it('keeps the string valid until fully released', () => {
-    tracker.addValueRef(helloWorldValue);
+    tracker.addStringRef(helloWorldString);
     tracker.addValueRef(helloWorldValue);
     expect(tracker.releaseValue(helloWorldValue)).toStrictEqual(true);
     expect(tracker.used).toStrictEqual(17);
   });
 
   it('frees bytes (one reference)', () => {
-    tracker.addValueRef(helloWorldValue);
+    tracker.addStringRef(helloWorldString);
     expect(tracker.releaseValue(helloWorldValue)).toStrictEqual(false);
     expect(tracker.used).toStrictEqual(0);
     expect(tracker.peak).toStrictEqual(17);
   });
 
   it('frees bytes (two references)', () => {
-    tracker.addValueRef(helloWorldValue);
+    tracker.addStringRef(helloWorldString);
     tracker.addValueRef(helloWorldValue);
     expect(tracker.releaseValue(helloWorldValue)).toStrictEqual(true);
     expect(tracker.releaseValue(helloWorldValue)).toStrictEqual(false);
@@ -205,16 +208,16 @@ describe('string management', () => {
   });
 
   it('resets string reference after release', () => {
-    tracker.addValueRef(helloWorldValue);
+    tracker.addStringRef(helloWorldString);
     tracker.releaseValue(helloWorldValue);
-    tracker.addValueRef(helloWorldValue);
+    tracker.addStringRef(helloWorldString);
     tracker.releaseValue(helloWorldValue);
     expect(tracker.used).toStrictEqual(0);
   });
 
   it('fails if the reference count becomes incorrect', () => {
-    tracker.addValueRef(helloWorldValue);
+    tracker.addStringRef(helloWorldString);
     tracker.releaseValue(helloWorldValue);
-    expect(() => tracker.releaseValue(helloWorldValue)).toThrowError(InternalException);
+    expect(() => tracker.releaseValue(helloWorldValue)).toThrowError();
   });
 });

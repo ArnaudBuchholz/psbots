@@ -64,11 +64,3 @@ export function toNameValue(
     name
   };
 }
-
-export function toMarkValue(): Value<ValueType.mark> {
-  return {
-    type: ValueType.mark,
-    isReadOnly: true,
-    isExecutable: false
-  };
-}
