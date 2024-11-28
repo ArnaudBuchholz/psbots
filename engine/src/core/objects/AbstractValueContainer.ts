@@ -78,16 +78,12 @@ export abstract class AbstractValueContainer extends ShareableObject implements 
 
   // endregion IReadOnlyArray
 
-  protected get currentCapacity(): number {
+  protected get capacity(): number {
     return this._initialCapacity + (this._pointers.length - 1) * this._capacityIncrement;
   }
 
-  /** Puts the value in the right place */
-  protected abstract pushImpl(value: Value): void;
-
-  /** Returns the new length property of the object upon which the method was called */
-  push(...values: Value[]): Result<number> {
-    const missingCapacity = this._values.length + values.length - this.currentCapacity;
+  protected increaseCapacityIfNeeded(minCapacity: number): Result<undefined> {
+    const missingCapacity = minCapacity - this.capacity;
     if (missingCapacity > 0) {
       let increments = Math.ceil(missingCapacity / this._capacityIncrement);
       while (increments > 0) {
@@ -99,6 +95,18 @@ export abstract class AbstractValueContainer extends ShareableObject implements 
         --increments;
       }
     }
+    return { success: true, value: undefined }
+  }
+
+  /** Puts the value in the right place */
+  protected abstract pushImpl(value: Value): void;
+
+  /** Returns the new length property of the object upon which the method was called */
+  push(...values: Value[]): Result<number> {
+    const capacityAdjusted = this.increaseCapacityIfNeeded(this._values.length + values.length);
+    if (!capacityAdjusted.success) {
+      return capacityAdjusted;
+    }
     for (const value of values) {
       value.tracker?.addValueRef(value);
       this.pushImpl(value);
@@ -109,6 +117,14 @@ export abstract class AbstractValueContainer extends ShareableObject implements 
   /** pops the value from the right place */
   protected abstract popImpl(): Value;
 
+  protected reduceCapacityIfNeeded(maxCapacity = this._values.length) {
+    while (this._pointers.length > 1 && this.capacity - this._capacityIncrement >= maxCapacity) {
+      const pointer = this._pointers.at(-1)!; // length has been tested
+      this._pointers.pop();
+      this._memoryTracker.release(pointer, this);
+    }
+  }
+
   pop(): Value {
     let value = this.popImpl();
     if (value.type !== ValueType.null) {
@@ -116,11 +132,7 @@ export abstract class AbstractValueContainer extends ShareableObject implements 
         value = nullValue;
       }
     }
-    if (this._pointers.length > 1 && this.currentCapacity - this._capacityIncrement >= this._values.length) {
-      const pointer = this._pointers.at(-1)!; // length has been tested
-      this._pointers.pop();
-      this._memoryTracker.release(pointer, this);
-    }
+    this.reduceCapacityIfNeeded();
     return value;
   }
 
