@@ -1,4 +1,4 @@
-import type { DictionaryValue, IDictionary, IReadOnlyDictionary, Value } from '@api/index.js';
+import type { DictionaryValue, IDictionary, IReadOnlyDictionary, Result, Value } from '@api/index.js';
 import type { IStack } from '@sdk/interfaces/IStack.js';
 
 export type DictionaryStackWhereResult = {
@@ -12,7 +12,7 @@ export interface IDictionaryStack extends IStack {
   readonly system: DictionaryValue;
   readonly global: DictionaryValue;
   readonly user: DictionaryValue;
-  readonly top: DictionaryValue;
+  readonly top: Result<DictionaryValue>;
   begin: (dictionary: DictionaryValue) => void;
   end: () => void;
   where: (name: string) => DictionaryStackWhereResult;
