@@ -6,14 +6,7 @@ import type { MemoryTracker } from '@core/MemoryTracker.js';
 
 export class ValueArray extends AbstractValueContainer implements IArray {
   static create(memoryTracker: MemoryTracker, memoryType: MemoryType, initialCapacity: number, capacityIncrement: number): Result<ValueArray> {
-    const isMemoryAvailable = memoryTracker.isAvailable(ValueArray.getSize(initialCapacity), memoryType);
-    if (!isMemoryAvailable.success) {
-      return isMemoryAvailable;
-    }
-    return {
-      success: true,
-      value: new ValueArray(memoryTracker, memoryType, initialCapacity, capacityIncrement)
-    };
+    return super.createInstance(memoryTracker, memoryType, initialCapacity, capacityIncrement);
   }
 
   /** returned value is not addValueRef'ed */

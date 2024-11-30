@@ -7,15 +7,8 @@ import { MemoryTracker } from '@core/MemoryTracker.js';
 
 /** Makes push & pop manipulate the beginning of the array */
 export class ValueStack extends AbstractValueContainer implements IStack {
-  static create(memoryTracker: MemoryTracker, memoryType: MemoryType, initialCapacity: number, capacityIncrement: number): Result<ValueArray> {
-    const isMemoryAvailable = memoryTracker.isAvailable(ValueStack.getSize(initialCapacity), memoryType);
-    if (!isMemoryAvailable.success) {
-      return isMemoryAvailable;
-    }
-    return {
-      success: true,
-      value: new ValueStack(memoryTracker, memoryType, initialCapacity, capacityIncrement)
-    };
+  static create(memoryTracker: MemoryTracker, memoryType: MemoryType, initialCapacity: number, capacityIncrement: number): Result<ValueStack> {
+    return super.createInstance(memoryTracker, memoryType, initialCapacity, capacityIncrement)
   }
 
   get top(): Result<Value> {

@@ -39,6 +39,19 @@ export abstract class AbstractValueContainer extends ShareableObject implements 
     this._pointers.push(isMemoryAvailable.value);
   }
 
+  protected static createInstance<T>(memoryTracker: MemoryTracker, memoryType: MemoryType, initialCapacity: number, capacityIncrement: number): Result<T> {
+    const isMemoryAvailable = memoryTracker.isAvailable(this.getSize(initialCapacity), memoryType);
+    if (!isMemoryAvailable.success) {
+      return isMemoryAvailable;
+    }
+    // Hack to convert the class into its constructor
+    const Constructor = this as unknown as new (memoryTracker: MemoryTracker, memoryType: MemoryType, initialCapacity: number, capacityIncrement: number) => T;
+    return {
+      success: true,
+      value: new Constructor(memoryTracker, memoryType, initialCapacity, capacityIncrement)
+    };
+  }
+
   static getSize(capacity: number): MemorySize {
     return addMemorySize(ShareableObject.size, {
       pointers: 1,

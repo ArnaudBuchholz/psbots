@@ -1,14 +1,14 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import type { MemoryType, Result, Value } from '@api/index.js';
 import { nullValue, USER_MEMORY_TYPE } from '@api/index.js';
-import { isArrayValue, VmOverflowException } from '@sdk/index.js';
+import { assert, isArrayValue, VmOverflowException } from '@sdk/index.js';
 import { MemoryTracker } from '@core/MemoryTracker.js';
 import { AbstractValueContainer } from './AbstractValueContainer.js';
 import { toValue } from '@test/index.js';
 
 class TestValueArray extends AbstractValueContainer {
-  constructor(memoryTracker: MemoryTracker, memoryType: MemoryType, initialCapacity: number, capacityIncrement: number) {
-    super(memoryTracker, memoryType, initialCapacity, capacityIncrement);
+  static create(memoryTracker: MemoryTracker, memoryType: MemoryType, initialCapacity: number, capacityIncrement: number): Result<TestValueArray> {
+    return super.createInstance(memoryTracker, memoryType, initialCapacity, capacityIncrement);
   }
 
   protected pushImpl(value: Value): Result {
@@ -42,7 +42,9 @@ let shared: ReturnType<typeof toValue.createSharedObject>;
 
 beforeEach(() => {
   tracker = new MemoryTracker();
-  valueArray = new TestValueArray(tracker, USER_MEMORY_TYPE, 5, 2);
+  const result = TestValueArray.create(tracker, USER_MEMORY_TYPE, 5, 2);
+  assert(result);
+  valueArray = result.value;
   shared = toValue.createSharedObject();
   expect(shared.object.refCount).toStrictEqual(1);
   valueArray.push(toValue(123), toValue('abc'), shared.value);
@@ -78,6 +80,12 @@ describe('toValue', () => {
 });
 
 describe('memory', () => {
+  it('handles initial allocation failure', () => {
+    const tracker = new MemoryTracker({ total: 1 });
+    const result = TestValueArray.create(tracker, USER_MEMORY_TYPE, 10000, 10);
+    expect(result).toStrictEqual<Result<TestValueArray>>({ success: false, error: expect.any(VmOverflowException) });
+  });
+
   it('tracks memory used', () => {
     expect(tracker.used).not.toStrictEqual(0);
   });
@@ -118,10 +126,12 @@ describe('memory', () => {
     describe('going beyond initial capacity', () => {
       it('handles allocation failure of the increment', () => {
         const tracker = new MemoryTracker({ total: 100 });
-        const valueArray = new TestValueArray(tracker, USER_MEMORY_TYPE, 1, 10000);
+        const result = TestValueArray.create(tracker, USER_MEMORY_TYPE, 1, 10000);
+        assert(result);
+        const valueArray = result.value;
         valueArray.push(toValue(0));
-        const result = valueArray.push(toValue(1));
-        expect(result).toStrictEqual({ success: false, error: expect.any(VmOverflowException) });
+        const pushResult = valueArray.push(toValue(1));
+        expect(pushResult).toStrictEqual<Result<TestValueArray>>({ success: false, error: expect.any(VmOverflowException) });
       });
 
       it('allocates an increment when going beyond initial capacity (one value)', () => {
