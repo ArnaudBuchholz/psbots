@@ -1,27 +1,50 @@
-import type { IReadOnlyDictionary, Value, DictionaryValue } from '@api/index.js';
+import type { IReadOnlyDictionary, Value, DictionaryValue, Result, IDictionary, MemoryType } from '@api/index.js';
 import { SYSTEM_MEMORY_TYPE, ValueType } from '@api/index.js';
 import type { DictionaryStackWhereResult, IDictionaryStack } from '@sdk/index.js';
-import { DictStackUnderflowException, UndefinedException } from '@sdk/index.js';
+import { assert, DictStackUnderflowException, UndefinedException } from '@sdk/index.js';
 import type { MemoryTracker } from '@core/MemoryTracker.js';
 import { ValueStack } from '@core/objects/stacks/ValueStack.js';
 import { SystemDictionary } from '@core/objects/dictionaries/System.js';
-import { Dictionary } from '@core/objects/dictionaries/Dictionary.js';
 import { EmptyDictionary } from '@core/objects/dictionaries/Empty.js';
+import { ShareableObject } from '../ShareableObject';
 
 const MIN_SIZE = 4;
 
-export class DictionaryStack extends ValueStack implements IDictionaryStack {
-  private readonly _host: IReadOnlyDictionary;
-  private readonly _system: IReadOnlyDictionary;
-  private readonly _global: Dictionary;
-  private readonly _user: Dictionary;
+const _roDictToValue = (dictionary: IReadOnlyDictionary): DictionaryValue => {
+  return {
+    type: ValueType.dictionary,
+    isExecutable: false,
+    isReadOnly: true,
+    dictionary
+  };
+}
 
-  constructor(tracker: MemoryTracker, host?: IReadOnlyDictionary) {
-    super(tracker, SYSTEM_MEMORY_TYPE);
-    this._host = host ?? EmptyDictionary.instance;
+const _dictToValue = (dictionary: IDictionary): DictionaryValue => {
+  return {
+    type: ValueType.dictionary,
+    isExecutable: false,
+    isReadOnly: false,
+    dictionary
+  };
+}
+
+export class DictionaryStack extends ValueStack implements IDictionaryStack {
+  static override create(memoryTracker: MemoryTracker, memoryType: MemoryType, initialCapacity: number, capacityIncrement: number): Result<DictionaryStack> {
+    assert(memoryType === SYSTEM_MEMORY_TYPE);
+    return super.createInstance(memoryTracker, memoryType, initialCapacity, capacityIncrement)
+  }
+
+  private _host: IReadOnlyDictionary;
+  private _system: IReadOnlyDictionary;
+  private _global: IDictionary;
+  private _user: IDictionary;
+
+  protected constructor(tracker: MemoryTracker, memoryType: MemoryType, initialCapacity: number, capacityIncrement: number) {
+    super(tracker, memoryType, initialCapacity, capacityIncrement);
+    this._host = EmptyDictionary.instance;
     this._system = SystemDictionary.instance;
-    this._global = new Dictionary(tracker, SYSTEM_MEMORY_TYPE);
-    this._user = new Dictionary(tracker, SYSTEM_MEMORY_TYPE);
+    this._global = EmptyDictionary.instance;
+    this._user = EmptyDictionary.instance;
     this.begin(this.host);
     this.begin(this.system);
     this.begin(this.global);
@@ -30,38 +53,53 @@ export class DictionaryStack extends ValueStack implements IDictionaryStack {
 
   protected override _dispose(): void {
     super._dispose();
-    this._user.release();
-    this._global.release();
+    if (this._user instanceof ShareableObject) {
+      this._user.release();
+    }
+    if (this._global instanceof ShareableObject) {
+      this._global.release();
+    }
   }
 
-  override get top(): DictionaryValue {
-    return super.top as DictionaryValue;
+  setHost(host: IReadOnlyDictionary) {
+    assert(this._host === EmptyDictionary.instance);
+    this._host = host;
   }
+
+  setGlobal(global: IDictionary) {
+    assert(this._global === EmptyDictionary.instance);
+    assert(global instanceof ShareableObject);
+    this._global = global;
+    global.addRef();
+  }
+
+  setUser(user: IDictionary) {
+    assert(this._user === EmptyDictionary.instance);
+    assert(user instanceof ShareableObject);
+    this._user = user;
+    user.addRef();
+  }
+
+  override get top(): Result<DictionaryValue> {
+    return super.top as Result<DictionaryValue>;
+  }
+
+  // region IDictionaryStack
 
   get host(): DictionaryValue {
-    return {
-      type: ValueType.dictionary,
-      isExecutable: false,
-      isReadOnly: true,
-      dictionary: this._host
-    };
+    return _roDictToValue(this._host);
   }
 
   get system(): DictionaryValue {
-    return {
-      type: ValueType.dictionary,
-      isExecutable: false,
-      isReadOnly: true,
-      dictionary: this._system
-    };
+    return _roDictToValue(this._system);
   }
 
   get global(): DictionaryValue {
-    return this._global.toValue({ isReadOnly: false });
+    return _dictToValue(this._global);
   }
 
   get user(): DictionaryValue {
-    return this._user.toValue({ isReadOnly: false });
+    return _dictToValue(this._user);
   }
 
   begin(dictionary: DictionaryValue): void {
@@ -96,4 +134,6 @@ export class DictionaryStack extends ValueStack implements IDictionaryStack {
     }
     return result.value;
   }
+
+  // endregion IDictionaryStack
 }
