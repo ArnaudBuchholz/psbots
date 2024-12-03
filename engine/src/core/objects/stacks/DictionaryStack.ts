@@ -8,10 +8,10 @@ import { SystemDictionary } from '@core/objects/dictionaries/System.js';
 import { EmptyDictionary } from '@core/objects/dictionaries/Empty.js';
 
 const MIN_SIZE = 4;
-const HOST_INDEX = 0;
-const SYSTEM_INDEX = 1;
-const GLOBAL_INDEX = 2;
-const USER_INDEX = 3;
+const HOST_INDEX_FROM_BOTTOM = -1;
+const SYSTEM_INDEX_FROM_BOTTOM = -2;
+const GLOBAL_INDEX_FROM_BOTTOM = -3;
+const USER_INDEX_FROM_BOTTOM = -4;
 
 export class DictionaryStack extends ValueStack implements IDictionaryStack {
   static override create(memoryTracker: MemoryTracker, memoryType: MemoryType, initialCapacity: number, capacityIncrement: number): Result<DictionaryStack> {
@@ -48,28 +48,28 @@ export class DictionaryStack extends ValueStack implements IDictionaryStack {
     });
   }
 
-  protected getDictionaryValue (index: number): DictionaryValue {
-    const value = this._values[index];
+  protected getDictionaryValue (indexFromBottom: number): DictionaryValue {
+    const value = this._values[this._values.length + indexFromBottom];
     assert(!!value && value.type === ValueType.dictionary);
     return value;
   }
 
   setHost(value: DictionaryValue) {
-    this._values[HOST_INDEX] = value;
+    this._values[MIN_SIZE + HOST_INDEX_FROM_BOTTOM] = value;
     value.tracker?.addValueRef(value);
   }
 
   setGlobal(global: DictionaryValue) {
-    const value = this.getDictionaryValue(GLOBAL_INDEX);
+    const value = this.getDictionaryValue(GLOBAL_INDEX_FROM_BOTTOM);
     assert(value.dictionary === EmptyDictionary.instance);
-    this._values[GLOBAL_INDEX] = global;
+    this._values[MIN_SIZE + GLOBAL_INDEX_FROM_BOTTOM] = global;
     global.tracker?.addValueRef(global);
   }
 
   setUser(user: DictionaryValue) {
-    const value = this.getDictionaryValue(USER_INDEX);
+    const value = this.getDictionaryValue(USER_INDEX_FROM_BOTTOM);
     assert(value.dictionary === EmptyDictionary.instance);
-    this._values[USER_INDEX] = user;
+    this._values[MIN_SIZE + USER_INDEX_FROM_BOTTOM] = user;
     user.tracker?.addValueRef(user);
   }
 
@@ -80,30 +80,31 @@ export class DictionaryStack extends ValueStack implements IDictionaryStack {
   // region IDictionaryStack
 
   get host(): DictionaryValue {
-    return this.getDictionaryValue(HOST_INDEX);
+    return this.getDictionaryValue(HOST_INDEX_FROM_BOTTOM);
   }
 
   get system(): DictionaryValue {
-    return this.getDictionaryValue(SYSTEM_INDEX);
+    return this.getDictionaryValue(SYSTEM_INDEX_FROM_BOTTOM);
   }
 
   get global(): DictionaryValue {
-    return this.getDictionaryValue(GLOBAL_INDEX);
+    return this.getDictionaryValue(GLOBAL_INDEX_FROM_BOTTOM);
   }
 
   get user(): DictionaryValue {
-    return this.getDictionaryValue(USER_INDEX);
+    return this.getDictionaryValue(USER_INDEX_FROM_BOTTOM);
   }
 
-  begin(dictionary: DictionaryValue): void {
-    this.push(dictionary);
+  begin(dictionary: DictionaryValue): Result<number> {
+    return this.push(dictionary);
   }
 
-  end(): void {
+  end(): Result<number> {
     if (this.length === MIN_SIZE) {
-      throw new DictStackUnderflowException();
+      return { success: false, error: new DictStackUnderflowException() };
     }
     this.pop();
+    return { success: true, value: this.length };
   }
 
   where(name: string): DictionaryStackWhereResult {

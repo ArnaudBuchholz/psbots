@@ -76,7 +76,7 @@ it('exposes an empty global dictionary', () => {
   expect(global.dictionary.names.length).toStrictEqual(0);
 });
 
-it.only('exposes first dictionary as top', () => {
+it('exposes first dictionary as top', () => {
   expect(stack.top).toStrictEqual<Result<DictionaryValue>>({ success: true, value: stack.user });
 });
 
