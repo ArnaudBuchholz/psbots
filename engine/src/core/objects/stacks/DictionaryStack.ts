@@ -1,4 +1,4 @@
-import type { IReadOnlyDictionary, Value, DictionaryValue, Result, IDictionary, MemoryType } from '@api/index.js';
+import type { Value, DictionaryValue, Result, MemoryType } from '@api/index.js';
 import { SYSTEM_MEMORY_TYPE, ValueType } from '@api/index.js';
 import type { DictionaryStackWhereResult, IDictionaryStack } from '@sdk/index.js';
 import { assert, DictStackUnderflowException, UndefinedException } from '@sdk/index.js';
@@ -6,78 +6,71 @@ import type { MemoryTracker } from '@core/MemoryTracker.js';
 import { ValueStack } from '@core/objects/stacks/ValueStack.js';
 import { SystemDictionary } from '@core/objects/dictionaries/System.js';
 import { EmptyDictionary } from '@core/objects/dictionaries/Empty.js';
-import { ShareableObject } from '../ShareableObject';
 
 const MIN_SIZE = 4;
-
-const _roDictToValue = (dictionary: IReadOnlyDictionary): DictionaryValue => {
-  return {
-    type: ValueType.dictionary,
-    isExecutable: false,
-    isReadOnly: true,
-    dictionary
-  };
-}
-
-const _dictToValue = (dictionary: IDictionary): DictionaryValue => {
-  return {
-    type: ValueType.dictionary,
-    isExecutable: false,
-    isReadOnly: false,
-    dictionary
-  };
-}
+const HOST_INDEX = 0;
+const SYSTEM_INDEX = 1;
+const GLOBAL_INDEX = 2;
+const USER_INDEX = 3;
 
 export class DictionaryStack extends ValueStack implements IDictionaryStack {
   static override create(memoryTracker: MemoryTracker, memoryType: MemoryType, initialCapacity: number, capacityIncrement: number): Result<DictionaryStack> {
     assert(memoryType === SYSTEM_MEMORY_TYPE);
+    assert(initialCapacity > 4);
     return super.createInstance(memoryTracker, memoryType, initialCapacity, capacityIncrement)
   }
 
-  private _host: IReadOnlyDictionary;
-  private _system: IReadOnlyDictionary;
-  private _global: IDictionary;
-  private _user: IDictionary;
-
   protected constructor(tracker: MemoryTracker, memoryType: MemoryType, initialCapacity: number, capacityIncrement: number) {
     super(tracker, memoryType, initialCapacity, capacityIncrement);
-    this._host = EmptyDictionary.instance;
-    this._system = SystemDictionary.instance;
-    this._global = EmptyDictionary.instance;
-    this._user = EmptyDictionary.instance;
-    this.begin(this.host);
-    this.begin(this.system);
-    this.begin(this.global);
-    this.begin(this.user);
+    this.begin({
+      type: ValueType.dictionary,
+      isExecutable: false,
+      isReadOnly: true,
+      dictionary: EmptyDictionary.instance
+    });
+    this.begin({
+      type: ValueType.dictionary,
+      isExecutable: false,
+      isReadOnly: true,
+      dictionary: SystemDictionary.instance
+    });
+    this.begin({
+      type: ValueType.dictionary,
+      isExecutable: false,
+      isReadOnly: false,
+      dictionary: EmptyDictionary.instance
+    });
+    this.begin({
+      type: ValueType.dictionary,
+      isExecutable: false,
+      isReadOnly: false,
+      dictionary: EmptyDictionary.instance
+    });
   }
 
-  protected override _dispose(): void {
-    super._dispose();
-    if (this._user instanceof ShareableObject) {
-      this._user.release();
-    }
-    if (this._global instanceof ShareableObject) {
-      this._global.release();
-    }
+  protected getDictionaryValue (index: number): DictionaryValue {
+    const value = this._values[index];
+    assert(!!value && value.type === ValueType.dictionary);
+    return value;
   }
 
-  setHost(host: IReadOnlyDictionary) {
-    assert(this._host === EmptyDictionary.instance);
-    this._host = host;
+  setHost(value: DictionaryValue) {
+    this._values[HOST_INDEX] = value;
+    value.tracker?.addValueRef(value);
   }
 
-  setGlobal(global: IDictionary) {
-    assert(this._global === EmptyDictionary.instance);
-    assert(global instanceof ShareableObject);
-    this._global = global;
-    global.addRef();
+  setGlobal(global: DictionaryValue) {
+    const value = this.getDictionaryValue(GLOBAL_INDEX);
+    assert(value.dictionary === EmptyDictionary.instance);
+    this._values[GLOBAL_INDEX] = global;
+    global.tracker?.addValueRef(global);
   }
 
-  setUser(user: IDictionary) {
-    assert(this._user === EmptyDictionary.instance);
-    assert(user instanceof ShareableObject);
-    this._user = user;
-    user.addRef();
+  setUser(user: DictionaryValue) {
+    const value = this.getDictionaryValue(USER_INDEX);
+    assert(value.dictionary === EmptyDictionary.instance);
+    this._values[USER_INDEX] = user;
+    user.tracker?.addValueRef(user);
   }
 
   override get top(): Result<DictionaryValue> {
@@ -87,19 +80,19 @@ export class DictionaryStack extends ValueStack implements IDictionaryStack {
   // region IDictionaryStack
 
   get host(): DictionaryValue {
-    return _roDictToValue(this._host);
+    return this.getDictionaryValue(HOST_INDEX);
   }
 
   get system(): DictionaryValue {
-    return _roDictToValue(this._system);
+    return this.getDictionaryValue(SYSTEM_INDEX);
   }
 
   get global(): DictionaryValue {
-    return _dictToValue(this._global);
+    return this.getDictionaryValue(GLOBAL_INDEX);
   }
 
   get user(): DictionaryValue {
-    return _dictToValue(this._user);
+    return this.getDictionaryValue(USER_INDEX);
   }
 
   begin(dictionary: DictionaryValue): void {

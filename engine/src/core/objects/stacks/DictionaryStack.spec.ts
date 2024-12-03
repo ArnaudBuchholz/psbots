@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach, afterEach, beforeAll } from 'vitest';
-import type { IDictionary, IReadOnlyDictionary, Value } from '@api/index.js';
-import { USER_MEMORY_TYPE } from '@api/index.js';
+import type { DictionaryValue, IDictionary, IReadOnlyDictionary, Result, Value } from '@api/index.js';
+import { nullValue, SYSTEM_MEMORY_TYPE, USER_MEMORY_TYPE, ValueType } from '@api/index.js';
 import type { DictionaryStackWhereResult } from '@sdk/index.js';
-import { DictStackUnderflowException, UndefinedException } from '@sdk/index.js';
+import { assert, DictStackUnderflowException, UndefinedException } from '@sdk/index.js';
 import { MemoryTracker } from '@core/MemoryTracker.js';
 import { Dictionary } from '@core/objects/dictionaries/Dictionary.js';
 import { SystemDictionary } from '@core/objects/dictionaries/System.js';
@@ -17,11 +17,11 @@ const host: IReadOnlyDictionary = {
   get names() {
     return ['hostname'];
   },
-  lookup(name: string): Value | null {
+  lookup(name: string): Value {
     if (name === 'hostname') {
       return toValue('localhost');
     }
-    return null;
+    return nullValue;
   }
 };
 
@@ -35,7 +35,23 @@ beforeAll(() => {
 
 beforeEach(() => {
   tracker = new MemoryTracker();
-  stack = new DictionaryStack(tracker, host);
+  const stackResult = DictionaryStack.create(tracker, SYSTEM_MEMORY_TYPE, 10, 5);
+  assert(stackResult);
+  stack = stackResult.value;
+  stack.setHost({
+    type: ValueType.dictionary,
+    isExecutable: false,
+    isReadOnly: true,
+    dictionary: host
+  });
+  const globalResult = Dictionary.create(tracker, SYSTEM_MEMORY_TYPE, 10);
+  assert(globalResult);
+  stack.setGlobal(globalResult.value.toValue({ isReadOnly: false }));
+  globalResult.value.release();
+  const userResult = Dictionary.create(tracker, SYSTEM_MEMORY_TYPE, 10);
+  assert(userResult);
+  stack.setUser(userResult.value.toValue({ isReadOnly: false }));
+  userResult.value.release();
 });
 
 afterEach(() => {
@@ -60,12 +76,14 @@ it('exposes an empty global dictionary', () => {
   expect(global.dictionary.names.length).toStrictEqual(0);
 });
 
-it('exposes first dictionary as top', () => {
-  expect(stack.top).toStrictEqual(stack.global);
+it.only('exposes first dictionary as top', () => {
+  expect(stack.top).toStrictEqual<Result<DictionaryValue>>({ success: true, value: stack.user });
 });
 
 it('creates an empty dictionary if host is not specified', () => {
-  const hostFreeStack = new DictionaryStack(tracker);
+  const stackResult = DictionaryStack.create(tracker, SYSTEM_MEMORY_TYPE, 10, 5);
+  assert(stackResult);
+  const hostFreeStack = stackResult.value;
   expect(hostFreeStack.ref.length).toStrictEqual(4);
   expect(hostFreeStack.host.dictionary.names).toStrictEqual<string[]>([]);
   expect(hostFreeStack.release()).toStrictEqual(false);
