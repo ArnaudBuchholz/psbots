@@ -114,7 +114,7 @@ export abstract class AbstractValueContainer extends ShareableObject implements 
   /** Puts the value in the right place */
   protected abstract pushImpl(value: Value): void;
 
-  /** Returns the new length property of the object upon which the method was called */
+  /** Returns the new length */
   push(...values: Value[]): Result<number> {
     const capacityAdjusted = this.increaseCapacityIfNeeded(this._values.length + values.length);
     if (!capacityAdjusted.success) {
