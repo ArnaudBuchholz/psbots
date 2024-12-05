@@ -1,14 +1,17 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import type { IState } from '@api/index.js';
+import { nullValue, Result, SYSTEM_MEMORY_TYPE, Value } from '@api/index.js';
 import {
-  InternalException,
+  assert,
   OPERATOR_STATE_UNKNOWN,
   OPERATOR_STATE_FIRST_CALL,
   OPERATOR_STATE_CALL_BEFORE_POP,
-  OPERATOR_STATE_POP
+  OPERATOR_STATE_POP,
+  StackUnderflowException,
+  VmOverflowException
 } from '@sdk/index.js';
 import { CallStack } from './CallStack.js';
-import { MemoryTracker } from '@core/MemoryTracker.js';
+import { memorySizeToBytes, MemoryTracker } from '@core/MemoryTracker.js';
 import { toValue } from '@test/index.js';
 
 let tracker: MemoryTracker;
@@ -16,7 +19,9 @@ let callstack: CallStack;
 
 beforeEach(() => {
   tracker = new MemoryTracker();
-  callstack = new CallStack(tracker);
+  const callstackResult = CallStack.create(tracker, SYSTEM_MEMORY_TYPE, 5, 5);
+  assert(callstackResult);
+  callstack = callstackResult.value;
 });
 
 afterEach(() => {
@@ -25,6 +30,18 @@ afterEach(() => {
 });
 
 describe('callStack', () => {
+  it('increases memory when going beyond the initial capacity', () => {
+    const { used: memoryBefore } = tracker;
+    expect(callstack.push(toValue(0))).toStrictEqual<Result<number>>({ success: true, value: 1 });
+    expect(callstack.push(toValue(1))).toStrictEqual<Result<number>>({ success: true, value: 2 });
+    expect(callstack.push(toValue(2))).toStrictEqual<Result<number>>({ success: true, value: 3 });
+    expect(callstack.push(toValue(3))).toStrictEqual<Result<number>>({ success: true, value: 4 });
+    expect(callstack.push(toValue(4))).toStrictEqual<Result<number>>({ success: true, value: 5 });
+    expect(tracker.used).toStrictEqual(memoryBefore);
+    expect(callstack.push(toValue(5))).toStrictEqual<Result<number>>({ success: true, value: 6 });
+    expect(tracker.used).toBeGreaterThan(memoryBefore);
+  });
+
   it('returns empty array when empty', () => {
     expect(callstack.callStack()).toStrictEqual([]);
   });
@@ -61,18 +78,27 @@ describe('callStack', () => {
 describe('IDictionary', () => {
   it('implements IDictionary interface', () => {
     expect(callstack.names).toStrictEqual([]);
-    expect(callstack.lookup('')).toStrictEqual(null);
+    expect(callstack.lookup('')).toStrictEqual(nullValue);
     expect(typeof callstack.def).toStrictEqual('function');
   });
 
   it('fails if no item exists in the stack', () => {
-    expect(() => callstack.def('test', toValue(123))).toThrowError(InternalException);
+    expect(callstack.def('test', toValue(123))).toStrictEqual<Result<Value>>({ success: false, error: expect.any(StackUnderflowException) });
+  });
+
+  it('fails if no more memory', () => {
+    const tracker = new MemoryTracker({ total: memorySizeToBytes(CallStack.getSize(1)) });
+    const callstackResult = CallStack.create(tracker, SYSTEM_MEMORY_TYPE, 1, 1);
+    assert(callstackResult);
+    const callstack = callstackResult.value;
+    expect(callstack.push(toValue(0))).toStrictEqual<Result<number>>({ success: true, value: 1 });
+    expect(callstack.def('test', toValue('abc'))).toStrictEqual<Result<Value>>({ success: false, error:expect.any(VmOverflowException) });
   });
 
   it('associates a dictionary on the current item', () => {
     callstack.push(toValue(123));
     const { used: memoryBefore } = tracker;
-    expect(callstack.def('test', toValue('abc'))).toStrictEqual(null);
+    expect(callstack.def('test', toValue('abc'))).toStrictEqual<Result<Value>>({ success: true, value: nullValue });
     expect(tracker.used).toBeGreaterThan(memoryBefore);
     expect(callstack.lookup('test')).toStrictEqual(toValue('abc'));
   });
@@ -80,7 +106,7 @@ describe('IDictionary', () => {
   it('destroys the dictionary when popping the item', () => {
     const { used: initialMemory } = tracker;
     callstack.push(toValue(123));
-    expect(callstack.def('test', toValue('abc'))).toStrictEqual(null);
+    expect(callstack.def('test', toValue('abc'))).toStrictEqual<Result<Value>>({ success: true, value: nullValue });
     callstack.pop();
     expect(tracker.used).toStrictEqual(initialMemory);
   });
@@ -90,7 +116,7 @@ describe('topOperatorState', () => {
   it('fails if no item exists in the stack', () => {
     expect(() => {
       callstack.topOperatorState = 0;
-    }).toThrowError(InternalException);
+    }).toThrowError();
   });
 
   it('allocates a state on the current item', () => {

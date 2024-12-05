@@ -6,7 +6,8 @@ import {
   OPERATOR_STATE_FIRST_CALL,
   OPERATOR_STATE_POP,
   OPERATOR_STATE_CALL_BEFORE_POP,
-  assert
+  assert,
+  StackUnderflowException
 } from '@sdk/index.js';
 import { addMemorySize, type MemorySize, type MemoryTracker } from '@core/MemoryTracker.js';
 import { ValueStack } from '@core/objects/stacks/ValueStack.js';
@@ -76,11 +77,17 @@ export class CallStack extends ValueStack implements ICallStack {
   }
 
   def(name: string, value: Value): Result<Value> {
-    assert(this.length !== 0);
+    if (this.length === 0) {
+      return { success: false, error: new StackUnderflowException() }
+    }
     let dictionary = this._dictionaries[0];
     if (dictionary === undefined) {
-      // TODO: what should be the strategy
-      dictionary = new Dictionary(this.memoryTracker, SYSTEM_MEMORY_TYPE);
+      // TODO: what should be the strategy ?
+      const dictionaryResult = Dictionary.create(this.memoryTracker, SYSTEM_MEMORY_TYPE, 1);
+      if (!dictionaryResult.success) {
+        return dictionaryResult;
+      }
+      dictionary = dictionaryResult.value;
       this._dictionaries[0] = dictionary;
     }
     return dictionary.def(name, value);
@@ -91,9 +98,7 @@ export class CallStack extends ValueStack implements ICallStack {
   // region ICallStack
 
   get topOperatorState(): number {
-    if (this.length === 0) {
-      throw new InternalException(EMPTY_STACK);
-    }
+    assert(this.length > 0);
     return this._steps[0]!; // Because length has been tested
   }
 
@@ -110,7 +115,7 @@ export class CallStack extends ValueStack implements ICallStack {
           (current < OPERATOR_STATE_FIRST_CALL && value >= OPERATOR_STATE_FIRST_CALL) ||
           (current === OPERATOR_STATE_FIRST_CALL && value < OPERATOR_STATE_CALL_BEFORE_POP)))
     ) {
-      throw new InternalException(OPERATOR_STATE_INVALID);
+      assert(false, OPERATOR_STATE_INVALID);
     }
     this._steps[0] = value;
   }
