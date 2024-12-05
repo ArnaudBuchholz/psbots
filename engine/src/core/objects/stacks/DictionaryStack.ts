@@ -99,7 +99,7 @@ export class DictionaryStack extends ValueStack implements IDictionaryStack {
     return this.push(dictionary);
   }
 
-  end(): Result<number> {
+  end(): Result<number, DictStackUnderflowException> {
     if (this.length === MIN_SIZE) {
       return { success: false, error: new DictStackUnderflowException() };
     }
@@ -111,7 +111,7 @@ export class DictionaryStack extends ValueStack implements IDictionaryStack {
     for (const dictionaryValue of this._values) {
       const { dictionary } = dictionaryValue as DictionaryValue;
       const value = dictionary.lookup(name);
-      if (value !== null) {
+      if (value.type !== ValueType.null) {
         return {
           dictionary,
           value
@@ -121,12 +121,12 @@ export class DictionaryStack extends ValueStack implements IDictionaryStack {
     return null;
   }
 
-  lookup(name: string): Value {
+  lookup(name: string): Result<Value, UndefinedException> {
     const result = this.where(name);
     if (result === null) {
-      throw new UndefinedException();
+      return { success: false, error: new UndefinedException() };
     }
-    return result.value;
+    return { success: true, value: result.value };
   }
 
   // endregion IDictionaryStack

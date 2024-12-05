@@ -1,4 +1,5 @@
 import type { DictionaryValue, IDictionary, IReadOnlyDictionary, Result, Value } from '@api/index.js';
+import { DictStackUnderflowException, UndefinedException } from '@sdk/exceptions';
 import type { IStack } from '@sdk/interfaces/IStack.js';
 
 export type DictionaryStackWhereResult = {
@@ -13,9 +14,10 @@ export interface IDictionaryStack extends IStack {
   readonly global: DictionaryValue;
   readonly user: DictionaryValue;
   readonly top: Result<DictionaryValue>;
-  begin: (dictionary: DictionaryValue) => void;
-  end: () => void;
+  /** Returns the new length */
+  begin: (dictionary: DictionaryValue) => Result<number>;
+  /** Returns the new length */
+  end: () => Result<number, DictStackUnderflowException>;
   where: (name: string) => DictionaryStackWhereResult;
-  /** throws UndefinedException if not found */
-  lookup: (name: string) => Value;
+  lookup: (name: string) => Result<Value, UndefinedException>;
 }
