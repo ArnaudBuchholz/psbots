@@ -3,6 +3,7 @@ export * from './BaseException.js';
 export * from './BusyException.js';
 export * from './DictStackUnderflowException.js';
 export * from './InvalidAccessException.js';
+export * from './LimitcheckException.js';
 export * from './RangeCheckException.js';
 export * from './StackUnderflowException.js';
 export * from './StopException.js';
