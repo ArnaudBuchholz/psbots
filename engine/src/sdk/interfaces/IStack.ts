@@ -5,6 +5,7 @@ export interface IStack extends IReadOnlyArray {
   readonly top: Result<Value>;
   /** As memory is possibly fragmented, the only contiguous items are based on the initial capacity */
   readonly ref: readonly Value[];
-  push: (value: Value) => void;
+  /** Returns the new length */
+  push: (value: Value) => Result<number>;
   pop: () => void;
 }
