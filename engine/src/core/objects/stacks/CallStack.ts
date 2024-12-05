@@ -1,48 +1,50 @@
-import type { IState, Value } from '@api/index.js';
-import { SYSTEM_MEMORY_TYPE } from '@api/index.js';
+import type { IState, MemoryType, Result, Value } from '@api/index.js';
+import { nullValue, SYSTEM_MEMORY_TYPE } from '@api/index.js';
 import type { ICallStack } from '@sdk/index.js';
 import {
-  InternalException,
   OPERATOR_STATE_UNKNOWN,
   OPERATOR_STATE_FIRST_CALL,
   OPERATOR_STATE_POP,
-  OPERATOR_STATE_CALL_BEFORE_POP
+  OPERATOR_STATE_CALL_BEFORE_POP,
+  assert
 } from '@sdk/index.js';
-import type { MemoryTracker } from '@core/MemoryTracker.js';
+import { addMemorySize, type MemorySize, type MemoryTracker } from '@core/MemoryTracker.js';
 import { ValueStack } from '@core/objects/stacks/ValueStack.js';
 import { Dictionary } from '@core/objects/dictionaries/Dictionary.js';
 
-const EMPTY_STACK = 'Empty stack';
 const OPERATOR_STATE_INVALID = 'Invalid operator state change';
 
 export class CallStack extends ValueStack implements ICallStack {
-  constructor(tracker: MemoryTracker) {
-    super(tracker, SYSTEM_MEMORY_TYPE);
+  static override create(memoryTracker: MemoryTracker, memoryType: MemoryType, initialCapacity: number, capacityIncrement: number): Result<CallStack> {
+    assert(memoryType === SYSTEM_MEMORY_TYPE);
+    return super.createInstance(memoryTracker, memoryType, initialCapacity, capacityIncrement)
   }
 
   private _dictionaries: (Dictionary | undefined)[] = [];
   private _steps: (number | undefined)[] = [];
 
+  static override getSize(capacity: number): MemorySize {
+    return addMemorySize(super.getSize(capacity), {
+      integers: capacity,
+      pointers: capacity
+    });
+  }
+
+  protected override getIncrementSize(capacity: number): MemorySize {
+    return addMemorySize(super.getIncrementSize(capacity), {
+      integers: capacity,
+      pointers: capacity
+    });
+  }
+
   protected override pushImpl(value: Value): void {
     super.pushImpl(value);
-    this.memoryTracker.register({
-      container: this,
-      type: SYSTEM_MEMORY_TYPE,
-      pointers: 1,
-      integers: 1
-    });
     this._dictionaries.unshift(undefined);
     this._steps.unshift(OPERATOR_STATE_UNKNOWN);
   }
 
-  protected override popImpl(): Value | null {
+  protected override popImpl(): Value {
     const result = super.popImpl();
-    this.memoryTracker.register({
-      container: this,
-      type: SYSTEM_MEMORY_TYPE,
-      pointers: -1,
-      integers: -1
-    });
     const dictionary = this._dictionaries[0];
     if (dictionary !== undefined) {
       dictionary.release();
@@ -65,20 +67,19 @@ export class CallStack extends ValueStack implements ICallStack {
     return [];
   }
 
-  lookup(name: string): Value | null {
+  lookup(name: string): Value {
     const dictionary = this._dictionaries[0];
     if (dictionary === undefined) {
-      return null;
+      return nullValue;
     }
     return dictionary.lookup(name);
   }
 
-  def(name: string, value: Value): Value | null {
-    if (this.length === 0) {
-      throw new InternalException(EMPTY_STACK);
-    }
+  def(name: string, value: Value): Result<Value> {
+    assert(this.length !== 0);
     let dictionary = this._dictionaries[0];
     if (dictionary === undefined) {
+      // TODO: what should be the strategy
       dictionary = new Dictionary(this.memoryTracker, SYSTEM_MEMORY_TYPE);
       this._dictionaries[0] = dictionary;
     }
