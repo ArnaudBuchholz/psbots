@@ -1,6 +1,6 @@
 import type { ArrayValue, IReadOnlyArray, IValuePermissions, MemoryType, Result, Value } from '@api/index.js';
 import { nullValue, ValueType } from '@api/index.js';
-import { assert } from '@sdk/index.js';
+import { assert, LimitcheckException } from '@sdk/index.js';
 import type { MemoryPointer, MemorySize, MemoryTracker } from '@core/MemoryTracker';
 import { addMemorySize } from '@core/MemoryTracker';
 import { ShareableObject } from '@core/objects/ShareableObject.js';
@@ -32,14 +32,16 @@ export abstract class AbstractValueContainer extends ShareableObject implements 
     private readonly _capacityIncrement = 1
   ) {
     super();
-    assert(this._initialCapacity >= 1);
-    assert(this._capacityIncrement >= 1);
+    assert(this._initialCapacity > 0);
+    assert(this._capacityIncrement >= 0);
     const isMemoryAvailable = this._memoryTracker.allocate(AbstractValueContainer.getSize(this._initialCapacity), this._memoryType, this);
     assert(isMemoryAvailable);
     this._pointers.push(isMemoryAvailable.value);
   }
 
   protected static createInstance<T>(memoryTracker: MemoryTracker, memoryType: MemoryType, initialCapacity: number, capacityIncrement: number): Result<T> {
+    assert(initialCapacity > 0);
+    assert(capacityIncrement >= 0);
     const isMemoryAvailable = memoryTracker.isAvailable(this.getSize(initialCapacity), memoryType);
     if (!isMemoryAvailable.success) {
       return isMemoryAvailable;
@@ -98,6 +100,9 @@ export abstract class AbstractValueContainer extends ShareableObject implements 
   protected increaseCapacityIfNeeded(minCapacity: number): Result<undefined> {
     const missingCapacity = minCapacity - this.capacity;
     if (missingCapacity > 0) {
+      if (this._capacityIncrement === 0) {
+        return { success: false, error: new LimitcheckException() };
+      }
       let increments = Math.ceil(missingCapacity / this._capacityIncrement);
       while (increments > 0) {
         const isMemoryAvailable = this._memoryTracker.allocate(this.getIncrementSize(this._capacityIncrement), this._memoryType, this);
