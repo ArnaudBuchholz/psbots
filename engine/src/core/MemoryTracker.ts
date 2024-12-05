@@ -54,7 +54,7 @@ export function addMemorySize(a: MemorySize, b: MemorySize): Required<MemorySize
   };
 }
 
-function toBytes(size: MemorySize): number {
+export function memorySizeToBytes(size: MemorySize): number {
   const { bytes = 0, integers = 0, pointers = 0, values = 0 } = size;
   return bytes + integers * INTEGER_BYTES + pointers * POINTER_BYTES + values * VALUE_BYTES;
 }
@@ -94,7 +94,7 @@ export class MemoryTracker implements IValueTracker, IMemoryTracker {
   isAvailable(size: MemorySize, type: MemoryType): Result<number, VmOverflowException> {
     assert(!!type);
     // TODO: limit by type ?
-    const bytes = toBytes(size);
+    const bytes = memorySizeToBytes(size);
     assert(bytes > 0);
     if (this._used + bytes <= this._total) {
       return { success: true, value: bytes };
@@ -179,7 +179,7 @@ export class MemoryTracker implements IValueTracker, IMemoryTracker {
     if (refCount === 0) {
       const size = stringSizer(string);
       const isMemoryAvailable = this.register(
-        toBytes({
+        memorySizeToBytes({
           bytes: size,
           integers: 1
         }),
@@ -202,7 +202,7 @@ export class MemoryTracker implements IValueTracker, IMemoryTracker {
       this.release(
         {
           [memoryPointer]: true,
-          bytes: toBytes({
+          bytes: memorySizeToBytes({
             bytes: size,
             integers: 1
           }),
