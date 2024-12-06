@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import type { IDebugSource, Value } from '@api/index.js';
-import { nullValue } from '@api/index.js';
+import { markValue, nullValue } from '@api/index.js';
 import { toString, TOSTRING_BEGIN_MARKER, TOSTRING_END_MARKER, TOSTRING_NULL } from '@sdk/toString.js';
 import {
   OPERATOR_STATE_CALL_BEFORE_POP,
@@ -46,7 +46,7 @@ describe('basic conversion', () => {
   });
 
   it('converts a mark', () => {
-    expect(toString(toValue.mark)).toStrictEqual('--mark--');
+    expect(toString(markValue)).toStrictEqual('--mark--');
   });
 
   it('converts an operator', () => {
