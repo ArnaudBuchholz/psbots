@@ -1,5 +1,5 @@
 import { it, expect, beforeEach, afterEach, beforeAll } from 'vitest';
-import { ExceptionDictionaryName } from '@api/index.js';
+import { ExceptionDictionaryName, markValue } from '@api/index.js';
 import type { IDebugSource, IDictionary, Value } from '@api/index.js';
 import { toValue, waitForGenerator } from '@test/index.js';
 import { State } from './State.js';
@@ -36,10 +36,10 @@ it('is popped once the corresponding value has been processed', () => {
   state.cycle();
   state.cycle();
   expect(state.calls.length).toStrictEqual(1);
-  expect(state.operands.ref).toStrictEqual([toValue.mark]);
+  expect(state.operands.ref).toStrictEqual([markValue]);
   state.cycle();
   expect(state.calls.length).toStrictEqual(0);
-  expect(state.operands.ref).toStrictEqual([toValue.mark]);
+  expect(state.operands.ref).toStrictEqual([markValue]);
 });
 
 it("throws an exception if the value can't be found", () => {
