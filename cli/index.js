@@ -5,8 +5,12 @@ stdin.setRawMode(true);
 
 await repl(
   {
-    get width() { return  process.stdout.columns },
-    get height() { return process.stdout.rows },
+    get width() {
+      return process.stdout.columns;
+    },
+    get height() {
+      return process.stdout.rows;
+    },
     input: (callback) => {
       stdin.on('data', (chunk) => callback(chunk.toString()));
     },
