@@ -5,8 +5,8 @@ import { State } from './State.js';
 import { toValue, waitForGenerator } from '@test/index.js';
 import type { IFunctionOperator } from '@sdk/index.js';
 import {
+  assert,
   BusyException,
-  InternalException,
   InvalidAccessException,
   OPERATOR_STATE_FIRST_CALL,
   OperatorType,
@@ -17,9 +17,9 @@ import { STRING_MEMORY_TYPE } from '@core/MemoryTracker.js';
 let state: State;
 
 beforeEach(() => {
-  state = new State({
-    debugMemory: true
-  });
+  const stateResult = State.create({ debugMemory: true });
+  assert(stateResult);
+  state = stateResult.value;
 });
 
 afterEach(() => {
@@ -60,8 +60,8 @@ describe('IState', () => {
       expect(() => state.idle).toThrowError();
     });
 
-    it('fails on memoryTracker', () => {
-      expect(() => state.memoryTracker).toThrowError();
+    it('does not fail on memoryTracker', () => {
+      expect(() => state.memoryTracker).not.toThrowError();
     });
 
     it('fails on operands', () => {
@@ -128,7 +128,9 @@ describe('memory', () => {
   });
 
   it('detects memory leaks', () => {
-    const productionState = new State();
+    const stateResult = State.create();
+    assert(stateResult);
+    const productionState = stateResult.value;
     waitForGenerator(productionState.exec(toValue('"123"', { isExecutable: true })));
     const value = productionState.operands.top;
     value.tracker?.addValueRef(value); // will leak
@@ -145,12 +147,10 @@ describe('exception handling', () => {
       isSet: true
     } as unknown as Value;
     state.calls.push(invalidValue);
-    state.cycle();
-    expect(state.exception).toBeInstanceOf(InternalException);
-    expect((state.exception as InternalException).reason).toStrictEqual(invalidValue);
+    expect(() => state.cycle()).toThrowError();
   });
 
-  it('converts any error into a BaseException', () => {
+  it('fails on any error', () => {
     const error = new Error('KO');
     state.calls.push({
       type: ValueType.operator,
@@ -164,10 +164,7 @@ describe('exception handling', () => {
         }
       }
     });
-    state.cycle();
-    expect(state.exception).not.toBeUndefined();
-    expect(state.exception).toBeInstanceOf(InternalException);
-    expect((state.exception as InternalException).reason).toStrictEqual(error);
+    expect(() => state.cycle()).toThrowError(error);
   });
 
   it('adds call stack information', () => {

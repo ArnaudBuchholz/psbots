@@ -18,7 +18,9 @@ beforeAll(() => {
 });
 
 beforeEach(() => {
-  state = new State({ debugMemory: true });
+  const stateResult = State.create({ debugMemory: true });
+  assert(stateResult);
+  state = stateResult.value;
 });
 
 afterEach(() => {

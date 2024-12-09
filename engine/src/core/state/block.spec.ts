@@ -1,12 +1,15 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { toValue } from '@test/index.js';
 import { State } from './State.js';
+import { assert } from '@sdk/index.js';
 
 let state: State;
 
 describe('simple code block', () => {
   beforeEach(() => {
-    state = new State({ debugMemory: true });
+    const stateResult = State.create({ debugMemory: true });
+    assert(stateResult);
+    state = stateResult.value;
     state.calls.push(toValue([1, 2, 3], { isExecutable: true }));
   });
 
@@ -50,7 +53,9 @@ describe('simple code block', () => {
 
 describe('code block with a call', () => {
   beforeEach(() => {
-    state = new State({ debugMemory: true });
+    const stateResult = State.create({ debugMemory: true });
+    assert(stateResult);
+    state = stateResult.value;
     state.calls.push(toValue([1, toValue('test', { isExecutable: true })], { isExecutable: true }));
   });
 
@@ -76,7 +81,9 @@ describe('code block with a call', () => {
 describe('code block with code block', () => {
   const subCodeBlock = toValue([2], { isExecutable: true });
   beforeEach(() => {
-    state = new State({ debugMemory: true });
+    const stateResult = State.create({ debugMemory: true });
+    assert(stateResult);
+    state = stateResult.value;
     state.calls.push(toValue([1, subCodeBlock], { isExecutable: true }));
   });
 

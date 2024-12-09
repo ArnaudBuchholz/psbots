@@ -9,7 +9,8 @@ import {
   OperatorType,
   StackUnderflowException,
   TypeCheckException,
-  BaseException
+  BaseException,
+  assert
 } from '@sdk/index.js';
 import { toValue } from '@test/index.js';
 import { State } from './State.js';
@@ -18,7 +19,9 @@ import type { ShareableObject } from '@core/objects/ShareableObject.js';
 let state: State;
 
 beforeEach(() => {
-  state = new State({ debugMemory: true });
+  const stateResult = State.create({ debugMemory: true });
+  assert(stateResult);
+  state = stateResult.value;
 });
 
 afterEach(() => {

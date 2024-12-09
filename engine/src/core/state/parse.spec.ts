@@ -2,11 +2,14 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import type { IDebugSource, Value } from '@api/index.js';
 import { toValue } from '@test/index.js';
 import { State } from './State.js';
+import { assert } from '@sdk/index.js';
 
 let state: State;
 
 beforeEach(() => {
-  state = new State({ debugMemory: true });
+  const stateResult = State.create({ debugMemory: true });
+  assert(stateResult);
+  state = stateResult.value;
 });
 
 afterEach(() => {

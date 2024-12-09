@@ -1,12 +1,10 @@
-import type { Value, IReadOnlyDictionary } from '@api/index.js';
+import type { Value, IReadOnlyDictionary, Result } from '@api/index.js';
 import { SYSTEM_MEMORY_TYPE, ValueType } from '@api/index.js';
 import type { IInternalState } from '@sdk/index.js';
 import {
+  assert,
   BaseException,
   BusyException,
-  InternalException,
-  OPERATOR_STATE_FIRST_CALL,
-  OPERATOR_STATE_POP,
   toString
 } from '@sdk/index.js';
 import { MemoryTracker } from '@core/MemoryTracker.js';
@@ -28,21 +26,40 @@ export interface StateFactorySettings {
 }
 
 export class State implements IInternalState {
-  private readonly _memoryTracker: MemoryTracker;
-  private readonly _dictionaries: DictionaryStack;
-  private readonly _operands: ValueStack;
-  private readonly _calls: CallStack;
   private _exception: BaseException | undefined;
   private _destroyed = false;
 
-  constructor(settings: StateFactorySettings = {}) {
-    this._memoryTracker = new MemoryTracker({
+  private constructor(
+    private readonly _memoryTracker: MemoryTracker,
+    private readonly _dictionaries: DictionaryStack,
+    private readonly _operands: ValueStack,
+    private readonly _calls: CallStack
+  ) {}
+
+  static create(settings: StateFactorySettings = {}): Result<State> {
+    const memoryTracker = new MemoryTracker({
       total: settings.maxMemoryBytes,
       debug: settings.debugMemory
     });
-    this._dictionaries = new DictionaryStack(this._memoryTracker, settings.hostDictionary);
-    this._operands = new ValueStack(this._memoryTracker, SYSTEM_MEMORY_TYPE);
-    this._calls = new CallStack(this._memoryTracker);
+    /** TODO: allocation scheme is dynamic */
+    const dictionariesResult = DictionaryStack.create(memoryTracker, SYSTEM_MEMORY_TYPE, 10, 1);
+    if (!dictionariesResult.success) {
+      return dictionariesResult;
+    }
+    const operandsResult = ValueStack.create(memoryTracker, SYSTEM_MEMORY_TYPE, 10, 5);
+    if (!operandsResult.success) {
+      return operandsResult;
+    }
+    const callsResult = CallStack.create(memoryTracker, SYSTEM_MEMORY_TYPE, 10, 5);
+    if (!callsResult.success) {
+      return callsResult;
+    }
+    return { success: true, value: new State(
+      memoryTracker,
+      dictionariesResult.value,
+      operandsResult.value,
+      callsResult.value
+    )}
   }
 
   get destroyed() {
@@ -50,9 +67,7 @@ export class State implements IInternalState {
   }
 
   protected _checkIfDestroyed() {
-    if (this._destroyed) {
-      throw new InternalException('State instance destroyed');
-    }
+    assert(!this._destroyed, 'State instance destroyed');
   }
 
   protected _resetException() {
@@ -70,7 +85,6 @@ export class State implements IInternalState {
   }
 
   get memoryTracker() {
-    this._checkIfDestroyed();
     return this._memoryTracker;
   }
 
@@ -117,9 +131,7 @@ export class State implements IInternalState {
     this._dictionaries.release();
     this._destroyed = true;
     const { used } = this._memoryTracker;
-    if (used !== 0) {
-      throw new InternalException('Memory leaks detected', this._memoryTracker.snapshot());
-    }
+    assert(used === 0);
   }
 
   // endregion IState
@@ -162,29 +174,19 @@ export class State implements IInternalState {
         calls.pop();
       }
     } else if (top.isExecutable) {
-      try {
-        if (top.type === ValueType.operator) {
-          operatorCycle(this, top);
-        } else if (top.type === ValueType.name) {
-          callCycle(this, top);
-        } else if (top.type === ValueType.array) {
-          blockCycle(this, top);
-        } else if (top.type === ValueType.string) {
-          parseCycle(this, top);
-        } else {
-          calls.topOperatorState = OPERATOR_STATE_FIRST_CALL;
-          throw new InternalException('Unsupported executable value', top);
-        }
-      } catch (e) {
-        calls.topOperatorState = OPERATOR_STATE_POP;
-        let exception: BaseException;
-        if (!(e instanceof BaseException)) {
-          exception = new InternalException('An unexpected error occurred', e);
-        } else {
-          exception = e;
-        }
-        this.exception = exception;
-        exception.engineStack = this.callStack.map(({ value, operatorState }) =>
+      if (top.type === ValueType.operator) {
+        operatorCycle(this, top);
+      } else if (top.type === ValueType.name) {
+        callCycle(this, top);
+      } else if (top.type === ValueType.array) {
+        blockCycle(this, top);
+      } else if (top.type === ValueType.string) {
+        parseCycle(this, top);
+      } else {
+        assert(false, 'Unsupported executable value');
+      }
+      if (this.exception !== undefined) {
+        this.exception.engineStack = this.callStack.map(({ value, operatorState }) =>
           toString(value, { operatorState, includeDebugSource: true })
         );
       }
