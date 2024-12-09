@@ -1,5 +1,5 @@
-import { USER_MEMORY_TYPE, ValueType } from '@api/index.js';
-import { checkNameValue, findMarkPos, TypeCheckException, valuesOf } from '@sdk/index.js';
+import { NameValue, USER_MEMORY_TYPE, ValueType } from '@api/index.js';
+import { assert, findMarkPos, TypeCheckException, valuesOf } from '@sdk/index.js';
 import type { IInternalState } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 import { pushOpenClosedValueWithDebugInfo } from '@core/operators/open-close.js';
@@ -68,37 +68,45 @@ buildFunctionOperator(
     const { operands, memoryTracker, calls } = state;
     const markPos = findMarkPos(operands);
     if (markPos % 2 !== 0) {
-      throw new TypeCheckException();
+      state.exception = new TypeCheckException();
+      return;
     }
     for (let operandIndex = 1; operandIndex < markPos; operandIndex += 2) {
       const name = operands.ref[operandIndex]!; // markPos was verified
       if (name.type !== ValueType.name) {
-        throw new TypeCheckException();
+        state.exception = new TypeCheckException();
+        return;
       }
     }
     const { top: closeOp } = calls;
-    const dictionary = new Dictionary(memoryTracker as MemoryTracker, USER_MEMORY_TYPE);
-    try {
-      for (let operandIndex = 0; operandIndex < markPos; operandIndex += 2) {
-        const value = operands.top;
-        value.tracker?.addValueRef(value);
-        operands.pop();
-        checkNameValue(operands.top);
-        const [name] = valuesOf<ValueType.name>(operands.top);
-        operands.pop();
-        dictionary.def(name, value);
-        value.tracker?.releaseValue(value);
-      }
-      const { top: mark } = operands;
+    const dictionaryResult = Dictionary.create(memoryTracker as MemoryTracker, USER_MEMORY_TYPE, markPos / 2);
+    if (!dictionaryResult.success) {
+      // TODO: supports Error but throws if not BaseException
+      state.exception = dictionaryResult.error;
+      return;
+    }
+    const dictionary = dictionaryResult.value;
+    for (let operandIndex = 0; operandIndex < markPos; operandIndex += 2) {
+      const value = operands.top;
+      value.tracker?.addValueRef(value);
       operands.pop();
-      pushOpenClosedValueWithDebugInfo({
-        operands,
-        value: dictionary.toValue({ isReadOnly: false }),
-        mark,
-        closeOp
-      });
-    } finally {
-      dictionary.release();
+      const [name] = valuesOf<ValueType.name>(operands.top as NameValue); // checked before
+      operands.pop();
+      const defResult = dictionary.def(name, value);
+      assert(defResult);
+      value.tracker?.releaseValue(value);
+    }
+    const { top: mark } = operands;
+    operands.pop();
+    const pushResult = pushOpenClosedValueWithDebugInfo({
+      operands,
+      value: dictionary.toValue({ isReadOnly: false }),
+      mark,
+      closeOp
+    });
+    dictionary.release();
+    if (!pushResult.success) {
+      state.exception = pushResult.error;
     }
   }
 );

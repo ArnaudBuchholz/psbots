@@ -1,9 +1,10 @@
-import type { Value } from '@api/index.js';
+import type { Result, Value } from '@api/index.js';
 import { USER_MEMORY_TYPE, markValue } from '@api/index.js';
 import { findMarkPos } from '@sdk/index.js';
 import type { IInternalState, IStack } from '@sdk/index.js';
 import { ValueArray } from '@core/objects/ValueArray.js';
 import type { MemoryTracker } from '@core/MemoryTracker.js';
+import { State } from '@core/state';
 
 export function openWithMark({ operands, calls }: IInternalState): void {
   if (calls.top.debugSource) {
@@ -30,9 +31,9 @@ export function pushOpenClosedValueWithDebugInfo({
   value: Value;
   mark: Value;
   closeOp: Value;
-}): void {
+}): Result<number> {
   if (mark.debugSource && closeOp.debugSource) {
-    operands.push(
+    return operands.push(
       Object.assign(
         {
           debugSource: {
@@ -43,33 +44,36 @@ export function pushOpenClosedValueWithDebugInfo({
         value
       )
     );
-  } else {
-    operands.push(value);
   }
+  return operands.push(value);
 }
 
 export function closeToMark(
-  { operands, memoryTracker, calls }: IInternalState,
+  state: IInternalState,
   { isExecutable }: { isExecutable: boolean }
 ): void {
+  const { operands, memoryTracker, calls } = state;
   const { top: closeOp } = calls;
   const markPos = findMarkPos(operands);
-  const array = new ValueArray(memoryTracker as MemoryTracker, USER_MEMORY_TYPE);
-  try {
-    let index: number;
-    for (index = 0; index < markPos; ++index) {
-      array.unshift(operands.top);
-      operands.pop();
-    }
-    const { top: mark } = operands;
-    operands.pop();
-    pushOpenClosedValueWithDebugInfo({
-      operands,
-      value: array.toValue({ isReadOnly: isExecutable, isExecutable }),
-      mark,
-      closeOp
-    });
-  } finally {
-    array.release();
+  // TODO: apply allocation scheme for increment
+  const arrayResult = ValueArray.create(memoryTracker as MemoryTracker, USER_MEMORY_TYPE, Math.max(markPos, 1), 1);
+  if (!arrayResult.success) {
+    state.exception = arrayResult.error;
+    return;
   }
+  const array = arrayResult.value;
+  let index: number;
+  for (index = 0; index < markPos; ++index) {
+    array.unshift(operands.top);
+    operands.pop();
+  }
+  const { top: mark } = operands;
+  operands.pop();
+  pushOpenClosedValueWithDebugInfo({
+    operands,
+    value: array.toValue({ isReadOnly: isExecutable, isExecutable }),
+    mark,
+    closeOp
+  });
+  array.release();
 }
