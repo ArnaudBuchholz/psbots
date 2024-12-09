@@ -1,4 +1,4 @@
-import type { Value, DictionaryValue, Result, MemoryType } from '@api/index.js';
+import type { Value, DictionaryValue, Result, MemoryType, NullValue } from '@api/index.js';
 import { SYSTEM_MEMORY_TYPE, ValueType } from '@api/index.js';
 import type { DictionaryStackWhereResult, IDictionaryStack } from '@sdk/index.js';
 import { assert, DictStackUnderflowException, UndefinedException } from '@sdk/index.js';
@@ -73,8 +73,8 @@ export class DictionaryStack extends ValueStack implements IDictionaryStack {
     user.tracker?.addValueRef(user);
   }
 
-  override get top(): Result<DictionaryValue> {
-    return super.top as Result<DictionaryValue>;
+  override get top(): DictionaryValue | NullValue {
+    return super.top as DictionaryValue | NullValue;
   }
 
   // region IDictionaryStack

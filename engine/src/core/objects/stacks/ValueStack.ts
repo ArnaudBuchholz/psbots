@@ -1,6 +1,5 @@
 import type { MemoryType, Value } from '@api/index.js';
 import { nullValue, Result } from '@api/index.js';
-import { StackUnderflowException } from '@sdk/index.js';
 import { AbstractValueContainer } from '@core/objects/AbstractValueContainer.js';
 import type { IStack } from '@sdk/interfaces/IStack';
 import { MemoryTracker } from '@core/MemoryTracker.js';
@@ -11,12 +10,12 @@ export class ValueStack extends AbstractValueContainer implements IStack {
     return super.createInstance(memoryTracker, memoryType, initialCapacity, capacityIncrement)
   }
 
-  get top(): Result<Value> {
+  get top(): Value {
     const value = this._values[0];
     if (value === undefined) {
-      return { success: false, error: new StackUnderflowException() };
+      return nullValue;
     }
-    return { success: true, value };
+    return value;
   }
 
   protected pushImpl(value: Value): void {
@@ -24,7 +23,7 @@ export class ValueStack extends AbstractValueContainer implements IStack {
   }
 
   protected popImpl(): Value {
-    const value = this.at(0) ?? nullValue;
+    const value = this.at(0);
     this._values.shift();
     return value;
   }

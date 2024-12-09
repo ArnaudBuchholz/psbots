@@ -65,7 +65,7 @@ it('exposes an empty global dictionary', () => {
 });
 
 it('exposes first dictionary as top', () => {
-  expect(stack.top).toStrictEqual<Result<DictionaryValue>>({ success: true, value: stack.user });
+  expect(stack.top).toStrictEqual(stack.user);
 });
 
 it('creates an empty dictionary if host is not specified', () => {

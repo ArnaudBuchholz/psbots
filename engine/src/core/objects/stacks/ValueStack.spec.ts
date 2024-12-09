@@ -24,19 +24,19 @@ afterEach(() => {
 
 describe('top', () => {
   it('returns first item', () => {
-    expect(stack.top).toStrictEqual<Result<Value>>({ success: true, value: toValue(123) });
+    expect(stack.top).toStrictEqual(toValue(123));
   });
 
-  it('fails pop with StackUnderflow after all items were removed', () => {
+  it('returns nullValue after all items were removed', () => {
     stack.clear();
-    expect(stack.top).toStrictEqual<Result<Value>>({ success: false, error: expect.any(StackUnderflowException) });
+    expect(stack.top).toStrictEqual(nullValue);
   });
 
   it('does not addValueRef on top', () => {
     const { object, value } = toValue.createSharedObject();
     stack.clear();
     stack.push(value);
-    expect(stack.top).toStrictEqual<Result<Value>>({ success: true, value });
+    expect(stack.top).toStrictEqual(value);
     expect(object.refCount).toStrictEqual(2);
   });
 });
