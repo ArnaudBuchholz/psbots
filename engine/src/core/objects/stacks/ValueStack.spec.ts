@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { nullValue, USER_MEMORY_TYPE } from '@api/index.js';
-import type { Result, Value } from '@api/index.js';
-import { assert, StackUnderflowException } from '@sdk/index.js';
+import type { Value } from '@api/index.js';
+import { assert } from '@sdk/index.js';
 import { MemoryTracker } from '@core/MemoryTracker.js';
 import { ValueStack } from './ValueStack.js';
 import { toValue } from '@test/index.js';

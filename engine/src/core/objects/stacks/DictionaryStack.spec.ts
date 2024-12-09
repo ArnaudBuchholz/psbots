@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, beforeAll } from 'vitest';
-import type { DictionaryValue, IDictionary, Result, Value } from '@api/index.js';
+import type { IDictionary, Result, Value } from '@api/index.js';
 import { SYSTEM_MEMORY_TYPE, USER_MEMORY_TYPE } from '@api/index.js';
 import type { DictionaryStackWhereResult } from '@sdk/index.js';
 import { assert, DictStackUnderflowException, UndefinedException } from '@sdk/index.js';
