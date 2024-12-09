@@ -1,9 +1,10 @@
 import { it, expect, beforeEach, afterEach, beforeAll } from 'vitest';
-import { ExceptionDictionaryName, markValue } from '@api/index.js';
+import { ExceptionDictionaryName, markValue, ValueType } from '@api/index.js';
 import type { IDebugSource, IDictionary, Value } from '@api/index.js';
 import { toValue, waitForGenerator } from '@test/index.js';
 import { State } from './State.js';
 import { SystemDictionary } from '@core/objects/dictionaries/System.js';
+import { assert } from '@sdk/index.js';
 
 let state: State;
 let markOp: Value;
@@ -98,7 +99,9 @@ it('does not forward debug info to the resolved value if it already contains som
   const value = Object.assign(toValue('test'), {
     debugSource: debugSourceOfValue
   });
-  (state.dictionaries.top.dictionary as IDictionary).def('test', value);
+  const dictionariesTop = state.dictionaries.top;
+  assert(dictionariesTop.type === ValueType.dictionary);
+  (dictionariesTop.dictionary as IDictionary).def('test', value);
   const call = toValue(Symbol.for('test'), { isExecutable: true });
   const debugSource: IDebugSource = {
     filename: 'filename',
