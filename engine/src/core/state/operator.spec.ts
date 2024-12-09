@@ -1,15 +1,15 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import type { Value } from '@api/index.js';
-import { ValueType } from '@api/index.js';
+import { markValue, ValueType } from '@api/index.js';
 import type { IFunctionOperator, IInternalState, IOperator } from '@sdk/index.js';
 import {
-  InternalException,
   OPERATOR_STATE_FIRST_CALL,
   OPERATOR_STATE_POP,
   OPERATOR_STATE_CALL_BEFORE_POP,
   OperatorType,
   StackUnderflowException,
-  TypeCheckException
+  TypeCheckException,
+  BaseException
 } from '@sdk/index.js';
 import { toValue } from '@test/index.js';
 import { State } from './State.js';
@@ -122,7 +122,7 @@ describe('With parameters', () => {
     it('supports boolean', () => state.operands.push(toValue(true)));
     it('supports integer', () => state.operands.push(toValue(123)));
     it('supports string', () => state.operands.push(toValue('abc')));
-    it('supports mark', () => state.operands.push(toValue.mark));
+    it('supports mark', () => state.operands.push(markValue));
     it('supports operator', () => state.operands.push(toValue(() => {})));
     it('supports array', () => state.operands.push(toValue([])));
     it('supports dictionary', () => state.operands.push(toValue({})));
@@ -373,10 +373,10 @@ describe('operator lifecycle', () => {
           operands.push(toValue(2));
           calls.topOperatorState = OPERATOR_STATE_CALL_BEFORE_POP;
           pushFunctionOperatorToCallStack({
-            implementation(/* state: IInternalState, parameters: readonly Value[]*/) {
+            implementation(state: IInternalState /*, parameters: readonly Value[]*/) {
               operands.pop();
               operands.push(toValue(3));
-              throw new InternalException('STOP');
+              state.exception = new BaseException('STOP');
             }
           });
         } else if (calls.topOperatorState === OPERATOR_STATE_CALL_BEFORE_POP) {
