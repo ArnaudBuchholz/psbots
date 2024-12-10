@@ -6,10 +6,9 @@ import type {
   MemoryType,
   IMemoryByType,
   IMemorySnapshot,
-  ValueType,
   Result
 } from '@api/index.js';
-import { assert, VmOverflowException } from '@sdk/index.js';
+import { assert, valuesOf, VmOverflowException } from '@sdk/index.js';
 
 export const STRING_MEMORY_TYPE: MemoryType = 'string';
 
@@ -280,13 +279,17 @@ export class MemoryTracker implements IValueTracker, IMemoryTracker {
   // region IValueTracker (for string)
 
   addValueRef(value: Value): void {
-    const isMemoryAvailable = this.addStringRef((value as Value<ValueType.string>).string);
+    const string = valuesOf(value)[0];
+    assert(typeof string === 'string');
+    const isMemoryAvailable = this.addStringRef(string);
     assert(isMemoryAvailable);
     assert(isMemoryAvailable.value !== 1, 'addValueRef must not be used to create a new string ref');
   }
 
   releaseValue(value: Value): boolean {
-    return this.releaseString((value as Value<ValueType.string>).string);
+    const string = valuesOf(value)[0];
+    assert(typeof string === 'string');
+    return this.releaseString(string);
   }
 
   // endregion IValueTracker (for string)
