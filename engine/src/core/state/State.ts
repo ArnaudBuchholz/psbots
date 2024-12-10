@@ -138,6 +138,23 @@ export class State implements IInternalState {
 
   // region IInternalState
 
+  private _releaseException() {
+    // TODO check if exception must be released for memory
+    this._exception = undefined;
+  }
+
+  raiseException(error: Error) {
+    this._releaseException();
+    if (!(error instanceof BaseException)) {
+      throw error; // fail the engine
+    }
+    this._exception = error
+  }
+
+  clearException() {
+    this._releaseException();
+  }
+
   set exception(value: BaseException | undefined) {
     // TODO check if exception must be released for memory
     this._exception = value;
