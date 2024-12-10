@@ -379,7 +379,7 @@ describe('operator lifecycle', () => {
             implementation(state: IInternalState /*, parameters: readonly Value[]*/) {
               operands.pop();
               operands.push(toValue(3));
-              state.exception = new BaseException('STOP');
+              state.raiseException(new BaseException('STOP'));
             }
           });
         } else if (calls.topOperatorState === OPERATOR_STATE_CALL_BEFORE_POP) {

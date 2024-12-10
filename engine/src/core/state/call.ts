@@ -10,7 +10,7 @@ export function callCycle(state: IInternalState, value: Value<ValueType.name>): 
     calls.topOperatorState = OPERATOR_STATE_FIRST_CALL;
     const result = dictionaries.lookup(value.name);
     if (!result.success) {
-      state.exception = result.error;
+      state.raiseException(result.error);
       return;
     }
     const entry = result.value;

@@ -1,5 +1,4 @@
 import { ValueType } from '@api/index.js';
-import type { BaseException } from '@sdk/index.js';
 import {
   TypeCheckException,
   OPERATOR_STATE_POP,
@@ -66,7 +65,7 @@ buildFunctionOperator(
           isReadOnly: true,
           dictionary: state.exception
         });
-        state.exception = undefined;
+        state.clearException();
       }
       const finalBlock = calls.lookup(CALLS_BLOCK);
       if (finalBlock) {
@@ -80,7 +79,7 @@ buildFunctionOperator(
     } else {
       const exception = calls.lookup(CALLS_EXCEPTION);
       if (exception && exception.type === ValueType.dictionary && !state.exception) {
-        state.exception = exception.dictionary as BaseException;
+        state.raiseException(exception.dictionary);
       }
       calls.topOperatorState = OPERATOR_STATE_POP;
     }

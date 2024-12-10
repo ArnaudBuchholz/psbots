@@ -63,11 +63,11 @@ type ContainerRegisters = {
   container: WeakRef<object>;
   type: MemoryType;
   total: number;
-  calls: ({
+  calls: {
     bytes: number;
     type: MemoryType;
-    stack?: string
-  })[];
+    stack?: string;
+  }[];
 };
 
 export class MemoryTracker implements IValueTracker, IMemoryTracker {

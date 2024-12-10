@@ -1,7 +1,7 @@
 import type { IOperatorValue, OperatorValue, Value } from '@api/index.js';
 import { ValueType } from '@api/index.js';
 import type { IInternalState, IFunctionOperator } from '@sdk/index.js';
-import { OperatorType, InternalException, valuesOf } from '@sdk/index.js';
+import { assert, OperatorType, valuesOf } from '@sdk/index.js';
 
 export type OperatorDefinition = {
   name: string;
@@ -51,11 +51,7 @@ export function buildFunctionOperator(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   implementation: (state: IInternalState, ...values: any[]) => void
 ): OperatorValue {
-  /* c8 ignore start */ // Should NOT happen
-  if (registry[definition.name] !== undefined) {
-    throw new InternalException(`Operator ${definition.name} already defined`);
-  }
-  /* c8 ignore stop */
+  assert(!registry[definition.name], `Operator ${definition.name} is not defined`);
   Object.freeze(definition); // Can't be altered
   let operator: IFunctionOperator;
   if (definition.signature.input.length > 0) {

@@ -1,5 +1,5 @@
 import { ValueType } from '@api/index.js';
-import { checkArrayValue, OPERATOR_STATE_POP, TypeCheckException, valuesOf } from '@sdk/index.js';
+import { assert, isArrayValue, OPERATOR_STATE_POP, TypeCheckException, valuesOf } from '@sdk/index.js';
 import { ValueArray } from '@core/objects/ValueArray.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 import { pop } from '@core/operators/stacks/operand/pop.js';
@@ -37,7 +37,7 @@ const bind = buildFunctionOperator(
   },
   ({ operands, calls, dictionaries }) => {
     const { topOperatorState: step } = calls;
-    checkArrayValue(operands.top); // Already validated with signature but for TypeScript
+    assert(isArrayValue(operands.top)); // Already validated with signature but for TypeScript
     const [array] = valuesOf<ValueType.array>(operands.top);
     if (!operands.top.isExecutable || !(array instanceof ValueArray)) {
       throw new TypeCheckException();

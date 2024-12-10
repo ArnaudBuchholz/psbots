@@ -143,7 +143,7 @@ export class State implements IInternalState {
     this._exception = undefined;
   }
 
-  raiseException(error: Error) {
+  raiseException(error: unknown) {
     this._releaseException();
     if (!(error instanceof BaseException)) {
       throw error; // fail the engine

@@ -8,7 +8,7 @@ export interface IInternalState extends IState {
   readonly dictionaries: IDictionaryStack;
   readonly calls: ICallStack;
   /** Throws if not a BaseException */
-  raiseException: (error: Error) => void;
+  raiseException: (error: unknown) => void;
   clearException: () => void;
   allowCall: () => void;
   preventCall: () => void;

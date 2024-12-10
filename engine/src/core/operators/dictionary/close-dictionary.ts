@@ -68,21 +68,20 @@ buildFunctionOperator(
     const { operands, memoryTracker, calls } = state;
     const markPos = findMarkPos(operands);
     if (markPos % 2 !== 0) {
-      state.exception = new TypeCheckException();
+      state.raiseException(new TypeCheckException());
       return;
     }
     for (let operandIndex = 1; operandIndex < markPos; operandIndex += 2) {
       const name = operands.ref[operandIndex]!; // markPos was verified
       if (name.type !== ValueType.name) {
-        state.exception = new TypeCheckException();
+        state.raiseException(new TypeCheckException());
         return;
       }
     }
     const { top: closeOp } = calls;
     const dictionaryResult = Dictionary.create(memoryTracker as MemoryTracker, USER_MEMORY_TYPE, markPos / 2);
     if (!dictionaryResult.success) {
-      // TODO: supports Error but throws if not BaseException
-      state.exception = dictionaryResult.error;
+      state.raiseException(dictionaryResult.error);
       return;
     }
     const dictionary = dictionaryResult.value;
@@ -106,7 +105,7 @@ buildFunctionOperator(
     });
     dictionary.release();
     if (!pushResult.success) {
-      state.exception = pushResult.error;
+      state.raiseException(pushResult.error);
     }
   }
 );

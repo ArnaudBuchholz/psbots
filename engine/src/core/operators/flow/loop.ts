@@ -52,7 +52,7 @@ buildFunctionOperator(
     } else if (topOperatorState === OPERATOR_STATE_CALL_BEFORE_POP) {
       if (state.exception) {
         if (state.exception instanceof StopException) {
-          state.exception = undefined;
+          state.clearException();
         }
         calls.topOperatorState = OPERATOR_STATE_POP;
       } else {

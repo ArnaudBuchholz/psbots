@@ -4,6 +4,7 @@ import type { OperatorDefinition } from './operators.js';
 import { registry } from './operators.js';
 import { State } from '@core/state/State.js';
 import { toValue, waitForGenerator } from '@test/index.js';
+import { assert } from '@sdk/index.js';
 
 const nullDefinition: OperatorDefinition = {
   name: 'null',
@@ -31,8 +32,12 @@ describe('executing in & out using debug', () => {
         let expectedState: State;
 
         beforeEach(() => {
-          state = new State({ debugMemory: true });
-          expectedState = new State({ debugMemory: true });
+          const stateResult = State.create({ debugMemory: true });
+          assert(stateResult);
+          state = stateResult.value;
+          const expectedStateResult = State.create({ debugMemory: true });
+          assert(expectedStateResult);
+          expectedState = expectedStateResult.value;
         });
 
         afterEach(() => {
@@ -100,7 +105,9 @@ describe.runIf(!failed)('executing in only (performance)', () => {
         let state: State;
 
         beforeEach(() => {
-          state = new State();
+          const stateResult = State.create();
+          assert(stateResult);
+          state = stateResult.value;
         });
 
         afterEach(() => {

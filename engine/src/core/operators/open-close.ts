@@ -4,7 +4,6 @@ import { findMarkPos } from '@sdk/index.js';
 import type { IInternalState, IStack } from '@sdk/index.js';
 import { ValueArray } from '@core/objects/ValueArray.js';
 import type { MemoryTracker } from '@core/MemoryTracker.js';
-import { State } from '@core/state';
 
 export function openWithMark({ operands, calls }: IInternalState): void {
   if (calls.top.debugSource) {
@@ -58,13 +57,13 @@ export function closeToMark(
   // TODO: apply allocation scheme for increment
   const arrayResult = ValueArray.create(memoryTracker as MemoryTracker, USER_MEMORY_TYPE, Math.max(markPos, 1), 1);
   if (!arrayResult.success) {
-    state.exception = arrayResult.error;
+    state.raiseException(arrayResult.error);
     return;
   }
   const array = arrayResult.value;
   let index: number;
   for (index = 0; index < markPos; ++index) {
-    array.unshift(operands.top);
+    array.set(markPos - index - 1, operands.top);
     operands.pop();
   }
   const { top: mark } = operands;

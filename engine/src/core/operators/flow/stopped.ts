@@ -42,7 +42,7 @@ buildFunctionOperator(
       if (!state.exception) {
         operands.push(toBooleanValue(false));
       } else if (state.exception instanceof StopException) {
-        state.exception = undefined;
+        state.clearException();
         operands.push(toBooleanValue(true));
       }
       calls.topOperatorState = OPERATOR_STATE_POP;
