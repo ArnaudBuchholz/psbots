@@ -1,12 +1,15 @@
-import type { Value } from '@api/index.js';
+import type { Result, Value } from '@api/index.js';
 import { ValueType } from '@api/index.js';
 import { parse } from '@api/index.js';
-import { OPERATOR_STATE_FIRST_CALL, OPERATOR_STATE_UNKNOWN } from '@sdk/index.js';
+import { MemoryTracker } from '@core/MemoryTracker';
+import { OPERATOR_STATE_FIRST_CALL, OPERATOR_STATE_UNKNOWN, valuesOf } from '@sdk/index.js';
 import type { IInternalState } from '@sdk/index.js';
 
 const UNKNOWN_FILENAME = 'unknown';
 
-export function parseCycle({ calls, operands, memoryTracker }: IInternalState, value: Value<ValueType.string>): void {
+export function parseCycle(state: IInternalState, value: Value<ValueType.string>): void {
+  const { calls, operands } = state;
+  const memoryTracker = state.memoryTracker as MemoryTracker;
   let token: Value | undefined;
   if (calls.topOperatorState === OPERATOR_STATE_UNKNOWN) {
     calls.topOperatorState = OPERATOR_STATE_FIRST_CALL;
@@ -28,13 +31,27 @@ export function parseCycle({ calls, operands, memoryTracker }: IInternalState, v
       const { debugSource, ...tokenWithoutDebugSource } = token;
       token = tokenWithoutDebugSource;
     }
+    let string: string | undefined;
     if (token.type === ValueType.string || token.type === ValueType.name) {
+      string = valuesOf(token)[0];
+      const result = memoryTracker.addStringRef(string);
+      if (!result.success) {
+        state.raiseException(result.error);
+        return;
+      }
       Object.assign(token, { tracker: memoryTracker });
     }
+    let pushResult: Result<number>;
     if (token.isExecutable) {
-      calls.push(token);
+      pushResult = calls.push(token);
     } else {
-      operands.push(token);
+      pushResult = operands.push(token);
+    }
+    if (string !== undefined) {
+      memoryTracker.releaseString(string);
+    }
+    if (!pushResult.success) {
+      state.raiseException(pushResult.error);
     }
   }
 }
