@@ -39,26 +39,29 @@ export function operatorCycle(state: IInternalState, value: Value<ValueType.oper
     if (operator.typeCheck !== undefined && isFirstCall) {
       let { length } = operator.typeCheck;
       if (operands.length < length) {
-        throw new StackUnderflowException();
+        state.raiseException(new StackUnderflowException());
+        return;
       }
       for (const valueType of operator.typeCheck) {
         const value = operands.ref[--length]!; // length has been verified before
         if (valueType === null || valueType === value.type) {
           parameters.push(value);
         } else {
-          throw new TypeCheckException();
+          state.raiseException(new TypeCheckException());
+          return;
         }
       }
       for (const value of parameters) {
         value.tracker?.addValueRef(value);
       }
     }
-    try {
-      operator.implementation(state, parameters);
-    } finally {
-      for (const value of parameters) {
-        value.tracker?.releaseValue(value);
-      }
+    let exceptionBefore = state.exception;
+    operator.implementation(state, parameters);
+    for (const value of parameters) {
+      value.tracker?.releaseValue(value);
+    }
+    if (state.exception !== exceptionBefore) {
+      return;
     }
     if (
       calls.length &&
