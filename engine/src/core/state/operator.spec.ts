@@ -30,7 +30,7 @@ afterEach(() => {
 
 describe('Constant operator', () => {
   beforeEach(() => {
-    state.calls.push({
+    assert(state.calls.push({
       type: ValueType.operator,
       isExecutable: true,
       isReadOnly: true,
@@ -39,7 +39,7 @@ describe('Constant operator', () => {
         type: OperatorType.constant,
         constant: toValue(true)
       }
-    });
+    }));
   });
 
   it('push the value on the first cycle and pops the call', () => {
@@ -50,7 +50,7 @@ describe('Constant operator', () => {
 });
 
 function pushFunctionOperatorToCallStack(operator: Partial<IFunctionOperator>) {
-  state.calls.push({
+  assert(state.calls.push({
     type: ValueType.operator,
     isExecutable: true,
     isReadOnly: true,
@@ -59,14 +59,14 @@ function pushFunctionOperatorToCallStack(operator: Partial<IFunctionOperator>) {
       type: OperatorType.implementation,
       ...operator
     }
-  });
+  }));
 }
 
 describe('No parameters', () => {
   it('executes the implementation on the first cycle', () => {
     pushFunctionOperatorToCallStack({
       implementation({ operands }: IInternalState) {
-        operands.push(toValue(true));
+        assert(operands.push(toValue(true)));
       }
     });
     state.cycle();
@@ -79,11 +79,11 @@ describe('With parameters', () => {
     beforeEach(() => {
       pushFunctionOperatorToCallStack({
         implementation({ operands }: IInternalState, parameters: readonly Value[]) {
-          operands.push(
+          assert(operands.push(
             toValue(
               parameters.length === 1 && parameters[0]?.type === ValueType.integer && parameters[0]?.integer === 123
             )
-          );
+          ));
         },
         typeCheck: [ValueType.integer]
       });
@@ -95,13 +95,13 @@ describe('With parameters', () => {
     });
 
     it('fails with TypeCheck if the operand stack does not contain the right values', () => {
-      state.operands.push(toValue(false));
+      assert(state.operands.push(toValue(false)));
       state.cycle();
       expect(state.exception).toBeInstanceOf(TypeCheckException);
     });
 
     it("builds the list of parameters and pass them to the operator's implementation", () => {
-      state.operands.push(toValue(123));
+      assert(state.operands.push(toValue(123)));
       state.cycle();
       expect(state.operands.ref).toStrictEqual([toValue(true), toValue(123)]);
     });
@@ -111,7 +111,7 @@ describe('With parameters', () => {
     beforeEach(() => {
       pushFunctionOperatorToCallStack({
         implementation({ operands }: IInternalState, parameters: readonly Value[]) {
-          operands.push(toValue(parameters.length === 1));
+          assert(operands.push(toValue(parameters.length === 1)));
         },
         typeCheck: [null]
       });
@@ -135,7 +135,7 @@ describe('With parameters', () => {
     beforeEach(() => {
       pushFunctionOperatorToCallStack({
         implementation({ operands }: IInternalState, parameters: readonly Value[]) {
-          operands.push(
+          assert(operands.push(
             toValue(
               parameters.length === 2 &&
                 parameters[0]?.type === ValueType.integer &&
@@ -143,7 +143,7 @@ describe('With parameters', () => {
                 parameters[1]?.type === ValueType.boolean &&
                 parameters[1]?.isSet === true
             )
-          );
+          ));
         },
         typeCheck: [ValueType.integer, ValueType.boolean]
       });
@@ -155,14 +155,14 @@ describe('With parameters', () => {
     });
 
     it('fails with StackUnderflow if the operand stack does not contain enough values (only one passed)', () => {
-      state.operands.push(toValue('abc'));
+      assert(state.operands.push(toValue('abc')));
       state.cycle();
       expect(state.exception).toBeInstanceOf(StackUnderflowException);
     });
 
     it("builds the list of parameters and pass them to the operator's implementation", () => {
-      state.operands.push(toValue(123));
-      state.operands.push(toValue(true));
+      assert(state.operands.push(toValue(123)));
+      assert(state.operands.push(toValue(true)));
       state.cycle();
       expect(state.exception).toBeUndefined();
       expect(state.operands.ref).toStrictEqual([toValue(true), toValue(true), toValue(123)]);
@@ -177,11 +177,11 @@ describe('With parameters', () => {
       sharedObject = object;
       pushFunctionOperatorToCallStack({
         implementation({ operands }: IInternalState /*, parameters: Value[]*/) {
-          operands.push(toValue(sharedObject.refCount === 3));
+          assert(operands.push(toValue(sharedObject.refCount === 3)));
         },
         typeCheck: [value.type]
       });
-      state.operands.push(value);
+      assert(state.operands.push(value));
       expect(sharedObject.refCount).toStrictEqual(2);
     });
 
@@ -204,13 +204,13 @@ describe('With parameters', () => {
             operands.pop(); // remove 123 from the stack
             calls.topOperatorState = 1;
           } else {
-            operands.push(toValue(parameters.length === 0));
+            assert(operands.push(toValue(parameters.length === 0)));
             calls.topOperatorState = OPERATOR_STATE_POP;
           }
         },
         typeCheck: [null]
       });
-      state.operands.push(toValue(123));
+      assert(state.operands.push(toValue(123)));
     });
 
     it('uses step to control the parameters passing', () => {
@@ -228,7 +228,7 @@ describe('operator lifecycle', () => {
   it('is immediately removed from call stack if topOperatorState is not used and no subsequent call', () => {
     pushFunctionOperatorToCallStack({
       implementation({ operands }: IInternalState /*, parameters: readonly Value[]*/) {
-        operands.push(toValue(true));
+        assert(operands.push(toValue(true)));
       }
     });
     state.cycle();
@@ -241,10 +241,10 @@ describe('operator lifecycle', () => {
       implementation({ calls, operands }: IInternalState /*, parameters: readonly Value[]*/) {
         if (calls.topOperatorState === OPERATOR_STATE_FIRST_CALL) {
           calls.topOperatorState = 1;
-          operands.push(toValue(1));
+          assert(operands.push(toValue(1)));
         } else {
           calls.topOperatorState = OPERATOR_STATE_POP;
-          operands.push(toValue(2));
+          assert(operands.push(toValue(2)));
         }
       }
     });
@@ -262,7 +262,7 @@ describe('operator lifecycle', () => {
         operands.push(toValue(1));
         pushFunctionOperatorToCallStack({
           implementation({ operands }: IInternalState /*, parameters: readonly Value[]*/) {
-            operands.push(toValue(2));
+            assert(operands.push(toValue(2)));
           }
         });
       }
@@ -283,18 +283,18 @@ describe('operator lifecycle', () => {
       implementation({ calls, operands }: IInternalState /*, parameters: readonly Value[]*/) {
         if (calls.topOperatorState === OPERATOR_STATE_FIRST_CALL) {
           calls.topOperatorState = 1;
-          operands.push(toValue(1));
+          assert(operands.push(toValue(1)));
           pushFunctionOperatorToCallStack({
             implementation({ operands }: IInternalState /*, parameters: readonly Value[]*/) {
-              operands.push(toValue(2));
+              assert(operands.push(toValue(2)));
             }
           });
         } else {
           calls.topOperatorState = OPERATOR_STATE_POP;
-          operands.push(toValue(3));
+          assert(operands.push(toValue(3)));
           pushFunctionOperatorToCallStack({
             implementation({ operands }: IInternalState /*, parameters: readonly Value[]*/) {
-              operands.push(toValue(4));
+              assert(operands.push(toValue(4)));
             }
           });
         }
@@ -321,9 +321,9 @@ describe('operator lifecycle', () => {
       implementation({ calls, operands }: IInternalState /*, parameters: readonly Value[]*/) {
         if (calls.topOperatorState === OPERATOR_STATE_FIRST_CALL) {
           calls.topOperatorState = OPERATOR_STATE_CALL_BEFORE_POP;
-          operands.push(toValue(1));
+          assert(operands.push(toValue(1)));
         } else {
-          operands.push(toValue(2));
+          assert(operands.push(toValue(2)));
           calls.topOperatorState = OPERATOR_STATE_POP;
         }
       }
@@ -343,12 +343,12 @@ describe('operator lifecycle', () => {
     pushFunctionOperatorToCallStack({
       implementation({ calls, operands }: IInternalState /*, parameters: readonly Value[]*/) {
         if (calls.topOperatorState === OPERATOR_STATE_FIRST_CALL) {
-          operands.push(toValue(1));
+          assert(operands.push(toValue(1)));
           calls.topOperatorState = OPERATOR_STATE_CALL_BEFORE_POP;
         } else {
-          operands.push(toValue(2));
+          assert(operands.push(toValue(2)));
           calls.topOperatorState = OPERATOR_STATE_POP;
-          calls.push(toValue(3));
+          assert(calls.push(toValue(3)));
         }
       }
     });
@@ -369,26 +369,26 @@ describe('operator lifecycle', () => {
     pushFunctionOperatorToCallStack({
       implementation({ calls, operands }: IInternalState /*, parameters: readonly Value[]*/) {
         if (calls.topOperatorState === OPERATOR_STATE_FIRST_CALL) {
-          operands.push(toValue(1));
+          assert(operands.push(toValue(1)));
           calls.topOperatorState = 1;
         } else if (calls.topOperatorState === 1) {
           operands.pop();
-          operands.push(toValue(2));
+          assert(operands.push(toValue(2)));
           calls.topOperatorState = OPERATOR_STATE_CALL_BEFORE_POP;
           pushFunctionOperatorToCallStack({
             implementation(state: IInternalState /*, parameters: readonly Value[]*/) {
               operands.pop();
-              operands.push(toValue(3));
+              assert(operands.push(toValue(3)));
               state.raiseException(new BaseException('STOP'));
             }
           });
         } else if (calls.topOperatorState === OPERATOR_STATE_CALL_BEFORE_POP) {
           operands.pop();
-          operands.push(toValue(4));
+          assert(operands.push(toValue(4)));
           calls.topOperatorState = -100;
         } else {
           operands.pop();
-          operands.push(toValue(5));
+          assert(operands.push(toValue(5)));
           calls.topOperatorState = OPERATOR_STATE_POP;
         }
       }
