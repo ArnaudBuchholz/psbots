@@ -103,7 +103,7 @@ it('does not forward debug info to the resolved value if it already contains som
   });
   const dictionariesTop = state.dictionaries.top;
   assert(dictionariesTop.type === ValueType.dictionary);
-  (dictionariesTop.dictionary as IDictionary).def('test', value);
+  assert((dictionariesTop.dictionary as IDictionary).def('test', value));
   const call = toValue(Symbol.for('test'), { isExecutable: true });
   const debugSource: IDebugSource = {
     filename: 'filename',
