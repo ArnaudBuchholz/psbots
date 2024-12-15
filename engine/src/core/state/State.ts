@@ -171,6 +171,9 @@ export class State implements IInternalState {
       throw error; // fail the engine
     }
     this._exception = error
+    error.engineStack = this.callStack.map(({ value, operatorState }) =>
+      toString(value, { operatorState, includeDebugSource: true })
+    );
   }
 
   clearException() {
@@ -223,11 +226,6 @@ export class State implements IInternalState {
         parseCycle(this, top);
       } else {
         assert(false, 'Unsupported executable value');
-      }
-      if (this.exception !== undefined) {
-        this.exception.engineStack = this.callStack.map(({ value, operatorState }) =>
-          toString(value, { operatorState, includeDebugSource: true })
-        );
       }
     } else {
       this._operands.push(top);
