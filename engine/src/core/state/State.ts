@@ -9,6 +9,7 @@ import {
 } from '@sdk/index.js';
 import { MemoryTracker } from '@core/MemoryTracker.js';
 import { DictionaryStack } from '@core/objects/stacks/DictionaryStack.js';
+import { Dictionary } from '@core/objects/dictionaries/Dictionary.js';
 import { ValueStack } from '@core/objects/stacks/ValueStack.js';
 import { CallStack } from '@core/objects/stacks/CallStack.js';
 import { operatorPop, operatorCycle } from './operator.js';
@@ -46,6 +47,27 @@ export class State implements IInternalState {
     if (!dictionariesResult.success) {
       return dictionariesResult;
     }
+    const dictionaries = dictionariesResult.value;
+    if (settings.hostDictionary) {
+      dictionaries.setHost({
+        type: ValueType.dictionary,
+        isReadOnly: true,
+        isExecutable: false,
+        dictionary: settings.hostDictionary
+      });
+    }
+    const globalResult = Dictionary.create(memoryTracker, SYSTEM_MEMORY_TYPE, 10);
+    if (!globalResult.success) {
+      return globalResult;
+    }
+    dictionaries.setGlobal(globalResult.value.toValue({ isReadOnly: false }));
+    globalResult.value.release();
+    const userResult = Dictionary.create(memoryTracker, SYSTEM_MEMORY_TYPE, 10);
+    if (!userResult.success) {
+      return userResult;
+    }
+    dictionaries.setUser(userResult.value.toValue({ isReadOnly: false }));
+    userResult.value.release();
     const operandsResult = ValueStack.create(memoryTracker, SYSTEM_MEMORY_TYPE, 10, 5);
     if (!operandsResult.success) {
       return operandsResult;
@@ -56,7 +78,7 @@ export class State implements IInternalState {
     }
     return { success: true, value: new State(
       memoryTracker,
-      dictionariesResult.value,
+      dictionaries,
       operandsResult.value,
       callsResult.value
     )}
