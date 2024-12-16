@@ -1,4 +1,4 @@
-import { StopException } from '@sdk/index.js';
+import { IInternalState, StopException } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 
 buildFunctionOperator(
@@ -18,7 +18,7 @@ buildFunctionOperator(
       }
     ]
   },
-  () => {
-    throw new StopException();
+  (state: IInternalState) => {
+    state.raiseException(new StopException());
   }
 );

@@ -1,4 +1,4 @@
-import { LimitcheckException } from '@sdk/index.js';
+import { IInternalState, LimitcheckException } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 
 buildFunctionOperator(
@@ -18,7 +18,7 @@ buildFunctionOperator(
       }
     ]
   },
-  () => {
-    throw new LimitcheckException();
+  (state: IInternalState) => {
+    state.raiseException(new LimitcheckException());
   }
 );

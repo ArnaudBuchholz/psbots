@@ -1,4 +1,4 @@
-import { DictStackUnderflowException } from '@sdk/index.js';
+import { IInternalState, DictStackUnderflowException } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 
 buildFunctionOperator(
@@ -18,7 +18,7 @@ buildFunctionOperator(
       }
     ]
   },
-  () => {
-    throw new DictStackUnderflowException();
+  (state: IInternalState) => {
+    state.raiseException(new DictStackUnderflowException());
   }
 );

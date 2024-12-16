@@ -1,4 +1,4 @@
-import { VmOverflowException } from '@sdk/index.js';
+import { IInternalState, VmOverflowException } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 
 buildFunctionOperator(
@@ -18,7 +18,7 @@ buildFunctionOperator(
       }
     ]
   },
-  () => {
-    throw new VmOverflowException();
+  (state: IInternalState) => {
+    state.raiseException(new VmOverflowException());
   }
 );

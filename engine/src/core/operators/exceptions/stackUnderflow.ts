@@ -1,4 +1,4 @@
-import { StackUnderflowException } from '@sdk/index.js';
+import { IInternalState, StackUnderflowException } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 
 buildFunctionOperator(
@@ -18,7 +18,7 @@ buildFunctionOperator(
       }
     ]
   },
-  () => {
-    throw new StackUnderflowException();
+  (state: IInternalState) => {
+    state.raiseException(new StackUnderflowException());
   }
 );

@@ -1,4 +1,4 @@
-import { UndefinedResultException } from '@sdk/index.js';
+import { IInternalState, UndefinedResultException } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 
 buildFunctionOperator(
@@ -18,7 +18,7 @@ buildFunctionOperator(
       }
     ]
   },
-  () => {
-    throw new UndefinedResultException();
+  (state: IInternalState) => {
+    state.raiseException(new UndefinedResultException());
   }
 );

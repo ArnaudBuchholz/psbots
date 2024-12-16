@@ -1,4 +1,4 @@
-import { TypeCheckException } from '@sdk/index.js';
+import { IInternalState, TypeCheckException } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 
 buildFunctionOperator(
@@ -18,7 +18,7 @@ buildFunctionOperator(
       }
     ]
   },
-  () => {
-    throw new TypeCheckException();
+  (state: IInternalState) => {
+    state.raiseException(new TypeCheckException());
   }
 );

@@ -1,4 +1,4 @@
-import { InvalidAccessException } from '@sdk/index.js';
+import { IInternalState, InvalidAccessException } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 
 buildFunctionOperator(
@@ -18,7 +18,7 @@ buildFunctionOperator(
       }
     ]
   },
-  () => {
-    throw new InvalidAccessException();
+  (state: IInternalState) => {
+    state.raiseException(new InvalidAccessException());
   }
 );

@@ -1,4 +1,4 @@
-import { RangeCheckException } from '@sdk/index.js';
+import { IInternalState, RangeCheckException } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 
 buildFunctionOperator(
@@ -18,7 +18,7 @@ buildFunctionOperator(
       }
     ]
   },
-  () => {
-    throw new RangeCheckException();
+  (state: IInternalState) => {
+    state.raiseException(new RangeCheckException());
   }
 );

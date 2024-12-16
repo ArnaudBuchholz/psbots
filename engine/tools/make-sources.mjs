@@ -80,8 +80,8 @@ buildFunctionOperator(
       }
     ]
   },
-  () => {
-    throw new ${uppercasedName}Exception();
+  (state) => {
+    state.raiseException(new ${uppercasedName}Exception());
   }
 );
 `
