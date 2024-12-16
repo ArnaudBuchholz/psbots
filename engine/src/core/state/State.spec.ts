@@ -3,14 +3,13 @@ import { ValueType } from '@api/index.js';
 import type { Value } from '@api/index.js';
 import { State } from './State.js';
 import { toValue, waitForGenerator } from '@test/index.js';
-import type { IFunctionOperator } from '@sdk/index.js';
+import type { IFunctionOperator, IInternalState } from '@sdk/index.js';
 import {
   assert,
   BusyException,
   InvalidAccessException,
   OPERATOR_STATE_FIRST_CALL,
-  OperatorType,
-  TOSTRING_END_MARKER
+  OperatorType
 } from '@sdk/index.js';
 import { STRING_MEMORY_TYPE } from '@core/MemoryTracker.js';
 
@@ -146,13 +145,13 @@ describe('exception handling', () => {
       isReadOnly: true,
       isSet: true
     } as unknown as Value;
-    state.calls.push(invalidValue);
+    assert(state.calls.push(invalidValue));
     expect(() => state.cycle()).toThrowError();
   });
 
   it('fails on any error', () => {
     const error = new Error('KO');
-    state.calls.push({
+    assert(state.calls.push({
       type: ValueType.operator,
       isExecutable: true,
       isReadOnly: true,
@@ -163,41 +162,41 @@ describe('exception handling', () => {
           throw error;
         }
       }
-    });
+    }));
     expect(() => state.cycle()).toThrowError(error);
   });
 
   it('adds call stack information', () => {
-    state.calls.push({
+    assert(state.calls.push({
       type: ValueType.string,
       isExecutable: true,
       isReadOnly: true,
       string: 'step1'
-    });
-    state.calls.push({
+    }));
+    assert(state.calls.push({
       type: ValueType.string,
       isExecutable: true,
       isReadOnly: true,
       string: 'step2'
-    });
+    }));
     state.calls.topOperatorState = OPERATOR_STATE_FIRST_CALL;
     state.calls.topOperatorState = 5;
-    state.calls.push({
+    assert(state.calls.push({
       type: ValueType.operator,
       isExecutable: true,
       isReadOnly: true,
       operator: <IFunctionOperator>{
         name: 'invalidaccess',
         type: OperatorType.implementation,
-        implementation: () => {
-          throw new InvalidAccessException();
+        implementation: (state: IInternalState) => {
+          state.raiseException(new InvalidAccessException());
         }
       }
-    });
+    }));
     state.cycle();
     expect(state.exception).toBeInstanceOf(InvalidAccessException);
     expect(state.exception?.engineStack).toStrictEqual([
-      `-invalidaccess-${TOSTRING_END_MARKER}${TOSTRING_END_MARKER}`,
+      `-invalidaccess-`,
       'step2',
       'step1'
     ]);
