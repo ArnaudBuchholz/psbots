@@ -1,4 +1,4 @@
-import { IInternalState, UnmatchedMarkException } from '@sdk/index.js';
+import { UnmatchedMarkException } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 
 buildFunctionOperator(
@@ -18,7 +18,7 @@ buildFunctionOperator(
       }
     ]
   },
-  (state: IInternalState) => {
+  (state) => {
     state.raiseException(new UnmatchedMarkException());
   }
 );

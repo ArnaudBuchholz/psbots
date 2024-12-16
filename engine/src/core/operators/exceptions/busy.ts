@@ -1,4 +1,4 @@
-import { IInternalState, BusyException } from '@sdk/index.js';
+import { BusyException } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 
 buildFunctionOperator(
@@ -18,7 +18,7 @@ buildFunctionOperator(
       }
     ]
   },
-  (state: IInternalState) => {
+  (state) => {
     state.raiseException(new BusyException());
   }
 );
