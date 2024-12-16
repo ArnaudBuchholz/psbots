@@ -50,9 +50,11 @@ buildFunctionOperator(
       }
     ]
   },
-  ({ operands }, count, shift) => {
+  (state, count, shift) => {
+    const { operands } = state;
     if (count <= 0 || count > operands.length - 2) {
-      throw new RangeCheckException();
+      state.raiseException(new RangeCheckException());
+      return;
     }
     operands.pop();
     operands.pop();
@@ -69,10 +71,12 @@ buildFunctionOperator(
         const value = operands.top;
         values.unshift(value);
         value.tracker?.addValueRef(value);
+        // TODO: do not pop until all pushes succeeded
         operands.pop();
       }
       for (let from = 0; from < count; ++from) {
         const value = values[(from + shift) % count]!;
+        // TODO: do not pop until all pushes succeeded
         operands.push(value);
       }
     } finally {

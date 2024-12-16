@@ -56,12 +56,18 @@ buildFunctionOperator(
       }
     ]
   },
-  ({ operands }, value: Value) => {
+  (state, value: Value) => {
+    const { operands } = state;
     const implementation = implementations[value.type];
     if (implementation === undefined) {
-      throw new TypeCheckException();
+      state.raiseException(new TypeCheckException());
+      return;
     }
+    // TODO: push before pop
     operands.pop();
-    operands.push(toIntegerValue(implementation(value as never)));
+    const pushResult = operands.push(toIntegerValue(implementation(value as never)));
+    if (!pushResult.success) {
+      state.raiseException(pushResult.error);
+    }
   }
 );

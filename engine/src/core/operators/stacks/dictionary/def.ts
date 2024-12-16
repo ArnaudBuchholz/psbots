@@ -22,12 +22,18 @@ buildFunctionOperator(
       }
     ]
   },
-  ({ operands, dictionaries }, name, value) => {
+  (state, name, value) => {
+    const { operands, dictionaries } = state;
     if (dictionaries.top.isReadOnly) {
-      throw new InvalidAccessException();
+      state.raiseException(new InvalidAccessException());
+      return;
     }
     const { dictionary } = dictionaries.top;
-    dictionary.def(name, value);
+    const defResult = dictionary.def(name, value);
+    if (!defResult.success) {
+      state.raiseException(defResult.error);
+      return;
+    }
     operands.pop();
     operands.pop();
   }

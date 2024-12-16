@@ -43,7 +43,8 @@ buildFunctionOperator(
     if (topOperatorState === OPERATOR_STATE_FIRST_CALL) {
       calls.topOperatorState = OPERATOR_STATE_CALL_BEFORE_POP;
       if (!operands.top.isExecutable) {
-        throw new TypeCheckException();
+        state.raiseException(new TypeCheckException());
+        return;
       }
       const codeBlock = operands.top;
       calls.def(CALLS_BLOCK, codeBlock);

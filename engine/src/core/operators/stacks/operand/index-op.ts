@@ -23,12 +23,17 @@ buildFunctionOperator(
       }
     ]
   },
-  ({ operands }, offset: number) => {
+  (state, offset: number) => {
+    const { operands } = state;
     if (offset > operands.length) {
-      throw new StackUnderflowException();
+      state.raiseException(new StackUnderflowException());
+      return;
     }
     operands.pop();
     const value = operands.at(offset)!;
-    operands.push(value);
+    const pushResult = operands.push(value);
+    if (!pushResult.success) {
+      state.raiseException(pushResult.error);
+    }
   }
 );

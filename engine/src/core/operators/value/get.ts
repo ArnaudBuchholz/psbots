@@ -1,34 +1,46 @@
-import type { Value } from '@api/index.js';
+import type { Result, Value } from '@api/index.js';
 import { ValueType } from '@api/index.js';
 import { RangeCheckException, toStringValue, TypeCheckException, UndefinedException } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 
-function checkPos(index: Value, length: number): number {
+function checkPos(index: Value, length: number): Result<number> {
   if (index.type !== ValueType.integer) {
-    throw new TypeCheckException();
+    return { success: false, error: new TypeCheckException() };
   }
   const { integer: pos } = index;
   if (pos < 0 || pos >= length) {
-    throw new RangeCheckException();
+    return { success: false, error: new RangeCheckException() };
   }
-  return pos;
+  return { success: true, value: pos };
 }
 
-const implementations: { [type in ValueType]?: (container: Value<type>, index: Value) => Value } = {
-  [ValueType.string]: ({ string, tracker }, index) =>
-    Object.assign(toStringValue(string.charAt(checkPos(index, string.length)), { tracker })),
+const implementations: { [type in ValueType]?: (container: Value<type>, index: Value) => Result<Value> } = {
+  [ValueType.string]: ({ string, tracker }, index) => {
+    const posResult = checkPos(index, string.length);
+    if (!posResult.success) {
+      return posResult;
+    }
+    // TODO: need to allocate string first !
+    return { success: true, value: Object.assign(toStringValue(string.charAt(posResult.value), { tracker })) }
+  },
 
-  [ValueType.array]: ({ array }, index) => array.at(checkPos(index, array.length))!, // length is validated
+  [ValueType.array]: ({ array }, index) => {
+    const posResult = checkPos(index, array.length);
+    if (!posResult.success) {
+      return posResult;
+    }
+    return { success: true, value: array.at(posResult.value) }
+  },
 
   [ValueType.dictionary]: ({ dictionary }, index) => {
     if (index.type !== ValueType.name) {
-      throw new TypeCheckException();
+      return { success: false, error: new TypeCheckException() };
     }
     const { name } = index;
     if (!dictionary.names.includes(name)) {
-      throw new UndefinedException();
+      return { success: false, error: new UndefinedException() };
     }
-    return dictionary.lookup(name)!; // name is validated
+    return { success: true, value: dictionary.lookup(name) };
   }
 };
 
@@ -119,19 +131,24 @@ buildFunctionOperator(
       }
     ]
   },
-  ({ operands }, container: Value, index: Value) => {
+  (state, container: Value, index: Value) => {
+    const { operands } = state;
     const implementation = implementations[container.type];
     if (implementation === undefined) {
-      throw new TypeCheckException();
+      state.raiseException(new TypeCheckException());
+      return;
     }
-    const output = implementation(container as never, index);
+    const result = implementation(container as never, index);
+    if (!result.success) {
+      state.raiseException(result.error);
+      return;
+    }
+    const output = result.value;
     output.tracker?.addValueRef(output);
-    try {
-      operands.pop();
-      operands.pop();
-      operands.push(output);
-    } finally {
-      output.tracker?.releaseValue(output);
-    }
+    // TODO: find a way to push first in case pop fails
+    operands.pop();
+    operands.pop();
+    operands.push(output);
+    output.tracker?.releaseValue(output);
   }
 );

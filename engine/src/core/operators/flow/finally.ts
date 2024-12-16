@@ -48,7 +48,8 @@ buildFunctionOperator(
     if (topOperatorState === OPERATOR_STATE_FIRST_CALL) {
       const [finalBlock, codeBlock] = operands.ref;
       if (finalBlock === undefined || !finalBlock.isExecutable || codeBlock === undefined || !codeBlock.isExecutable) {
-        throw new TypeCheckException();
+        state.raiseException(new TypeCheckException());
+        return;
       }
       calls.topOperatorState = OPERATOR_STATE_CALL_BEFORE_POP;
       // Since both operands are declared in the signature, their value remains valid during this call
