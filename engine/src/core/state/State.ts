@@ -138,7 +138,7 @@ export class State implements IInternalState {
   exec(value: Value): Generator {
     this._checkIfDestroyed();
     if (!this.idle) {
-      throw new BusyException();
+      throw new BusyException(); // Since external to the engine
     }
     this._resetException();
     this.calls.push(value);
