@@ -170,7 +170,8 @@ buildFunctionOperator(
     const { operands } = state;
     const implementation = implementations[container.type];
     if (implementation === undefined) {
-      throw new TypeCheckException();
+      state.raiseException(new TypeCheckException());
+      return;
     }
     const result = implementation(container as never, index, value);
     if (!result.success) {
