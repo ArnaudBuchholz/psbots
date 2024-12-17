@@ -1,53 +1,65 @@
-import type { IArray, IDictionary, Value } from '@api/index.js';
+import type { IArray, IDictionary, Result, Value } from '@api/index.js';
 import { ValueType } from '@api/index.js';
-import { InvalidAccessException, RangeCheckException, toStringValue, TypeCheckException } from '@sdk/index.js';
+import { assert, InvalidAccessException, RangeCheckException, toStringValue, TypeCheckException } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
+import { checkPos } from './tools.js';
+import { MemoryTracker } from '@core/MemoryTracker.js';
 
-function checkPos(index: Value, length: number): number {
-  if (index.type !== ValueType.integer) {
-    throw new TypeCheckException();
-  }
-  const { integer: pos } = index;
-  if (pos < 0 || pos >= length) {
-    throw new RangeCheckException();
-  }
-  return pos;
-}
-
-const implementations: { [type in ValueType]?: (container: Value<type>, index: Value, value: Value) => Value } = {
+/** Returned value is addRef'ed */
+const implementations: { [type in ValueType]?: (container: Value<type>, index: Value, value: Value) => Result<Value> } = {
   [ValueType.string]: ({ string, tracker }, index, value) => {
-    const pos = checkPos(index, string.length);
+    assert(tracker instanceof MemoryTracker);
     if (value.type !== ValueType.integer) {
-      throw new TypeCheckException();
+      return { success: false, error: new TypeCheckException() };
     }
     const { integer: charCode } = value;
     if (charCode < 0 || charCode > 65535) {
-      throw new RangeCheckException();
+      return { success: false, error: new RangeCheckException() };
     }
-    const newString = string.substring(0, pos) + String.fromCharCode(charCode) + string.substring(pos + 1);
-    return Object.assign({ tracker }, toStringValue(newString, { tracker }));
+    const posResult = checkPos(index, string.length);
+    if (!posResult.success) {
+      return posResult
+    }
+    const stringResult = string.substring(0, posResult.value) + String.fromCharCode(charCode) + string.substring(posResult.value + 1);
+    const refResult = tracker.addStringRef(stringResult);
+    if (!refResult.success) {
+      return refResult;
+    }
+    return { success: true, value: toStringValue(stringResult, { tracker }) };
   },
 
   [ValueType.array]: (container, index, value) => {
     const { array, isReadOnly } = container;
     if (isReadOnly) {
-      throw new InvalidAccessException();
+      return { success: false, error: new InvalidAccessException() };
     }
-    (array as IArray).set(checkPos(index, array.length), value);
-    return container;
+    const posResult = checkPos(index, array.length);
+    if (!posResult.success) {
+      return posResult
+    }
+    const setResult = (array as IArray).set(posResult.value, value);
+    if (!setResult.success) {
+      return setResult;
+    }
+    container.tracker?.addValueRef(container);
+    return { success: true, value: container };
   },
 
   [ValueType.dictionary]: (container, index, value) => {
     const { dictionary, isReadOnly } = container;
     if (isReadOnly) {
-      throw new InvalidAccessException();
+      return { success: false, error: new InvalidAccessException() };
     }
     if (index.type !== ValueType.name) {
-      throw new TypeCheckException();
+      return { success: false, error: new TypeCheckException() };
     }
     const { name } = index;
-    (dictionary as IDictionary).def(name, value);
-    return container;
+    const defResult = (dictionary as IDictionary).def(name, value);
+    if (!defResult.success) {
+      return defResult;
+    }
+    container.tracker?.addValueRef(container);
+    return { success: true, value: container };
   }
 };
 
@@ -154,20 +166,23 @@ buildFunctionOperator(
       }
     ]
   },
-  ({ operands }, container: Value, index: Value, value: Value) => {
+  (state, container: Value, index: Value, value: Value) => {
+    const { operands } = state;
     const implementation = implementations[container.type];
     if (implementation === undefined) {
       throw new TypeCheckException();
     }
-    const output = implementation(container as never, index, value);
-    output.tracker?.addValueRef(output);
-    try {
-      operands.pop();
-      operands.pop();
-      operands.pop();
-      operands.push(output);
-    } finally {
-      output.tracker?.releaseValue(output);
+    const result = implementation(container as never, index, value);
+    if (!result.success) {
+      state.raiseException(result.error);
+      return;
     }
+    const { value: output } = result;
+    operands.pop();
+    operands.pop();
+    operands.pop();
+    // TODO: is it OK to assume that it can't fail since we popped two values
+    operands.push(output);
+    container.tracker?.releaseValue(output);
   }
 );

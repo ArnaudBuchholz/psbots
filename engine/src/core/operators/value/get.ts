@@ -1,27 +1,24 @@
 import type { Result, Value } from '@api/index.js';
 import { ValueType } from '@api/index.js';
-import { RangeCheckException, toStringValue, TypeCheckException, UndefinedException } from '@sdk/index.js';
+import { assert, toStringValue, TypeCheckException, UndefinedException } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
+import { checkPos } from './tools.js';
+import { MemoryTracker } from '@core/MemoryTracker.js';
 
-function checkPos(index: Value, length: number): Result<number> {
-  if (index.type !== ValueType.integer) {
-    return { success: false, error: new TypeCheckException() };
-  }
-  const { integer: pos } = index;
-  if (pos < 0 || pos >= length) {
-    return { success: false, error: new RangeCheckException() };
-  }
-  return { success: true, value: pos };
-}
-
+/** Returned value is addRef'ed */
 const implementations: { [type in ValueType]?: (container: Value<type>, index: Value) => Result<Value> } = {
   [ValueType.string]: ({ string, tracker }, index) => {
+    assert(tracker instanceof MemoryTracker);
     const posResult = checkPos(index, string.length);
     if (!posResult.success) {
       return posResult;
     }
-    // TODO: need to allocate string first !
-    return { success: true, value: Object.assign(toStringValue(string.charAt(posResult.value), { tracker })) }
+    const stringResult = string.charAt(posResult.value);
+    const refResult = tracker.addStringRef(stringResult);
+    if (!refResult.success) {
+      return refResult;
+    }
+    return { success: true, value: toStringValue(stringResult, { tracker }) }
   },
 
   [ValueType.array]: ({ array }, index) => {
@@ -29,7 +26,9 @@ const implementations: { [type in ValueType]?: (container: Value<type>, index: V
     if (!posResult.success) {
       return posResult;
     }
-    return { success: true, value: array.at(posResult.value) }
+    const value = array.at(posResult.value);
+    value.tracker?.addValueRef(value);
+    return { success: true, value }
   },
 
   [ValueType.dictionary]: ({ dictionary }, index) => {
@@ -40,7 +39,9 @@ const implementations: { [type in ValueType]?: (container: Value<type>, index: V
     if (!dictionary.names.includes(name)) {
       return { success: false, error: new UndefinedException() };
     }
-    return { success: true, value: dictionary.lookup(name) };
+    const value = dictionary.lookup(name);
+    value.tracker?.addValueRef(value);
+    return { success: true, value };
   }
 };
 
@@ -143,12 +144,11 @@ buildFunctionOperator(
       state.raiseException(result.error);
       return;
     }
-    const output = result.value;
-    output.tracker?.addValueRef(output);
-    // TODO: find a way to push first in case pop fails
+    const { value } = result;
     operands.pop();
     operands.pop();
-    operands.push(output);
-    output.tracker?.releaseValue(output);
+    // TODO: is it OK to assume that it can't fail since we popped two values
+    operands.push(value);
+    value.tracker?.releaseValue(value);
   }
 );

@@ -22,12 +22,16 @@ async function generateIndexes(path, generate) {
             name += '/index.js';
           }
           if (path.includes('operators') && name !== 'operators.ts') {
+            if (name.endsWith('tools.ts')) {
+              return;
+            }
             return `import './${name.replace('.ts', '.js')}';`;
           }
           return `export * from './${name.replace('.ts', '.js')}';`;
         })
         .sort()
-        .join('\n') + '\n'
+        .join('\n')
+        .trim() + '\n'
     );
   }
   for (const [name, stat] of Object.entries(files)) {
