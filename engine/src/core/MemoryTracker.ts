@@ -148,7 +148,7 @@ export class MemoryTracker implements IValueTracker, IMemoryTracker {
       if (containerRegisters.total !== 0) {
         let stack: string | undefined;
         try {
-          throw new Error();
+          throw new Error(); // Capture call stack
         } catch (e) {
           stack = (e as Error).stack;
         }
