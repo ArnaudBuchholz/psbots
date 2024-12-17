@@ -36,14 +36,21 @@ buildFunctionOperator(
       }
     ]
   },
-  ({ operands }, value: Value) => {
+  (state, value: Value) => {
+    const { operands } = state;
     if (value.type !== ValueType.integer) {
       if (value.type === ValueType.string) {
         const integer = parseInt(value.string, 10);
+        const integerValueResult = toIntegerValue(integer);
+        if (!integerValueResult.success) {
+          state.raiseException(integerValueResult.error);
+          return;
+        }
+        // TODO: is it acceptable to not test push result ?
         operands.pop();
-        operands.push(toIntegerValue(integer));
+        operands.push(integerValueResult.value);
       } else {
-        throw new TypeCheckException();
+        state.raiseException(new TypeCheckException());
       }
     }
   }
