@@ -8,4 +8,7 @@ export interface IStack extends IReadOnlyArray {
   /** Returns the new length */
   push: (value: Value) => Result<number>;
   pop: () => void;
+  /** Atomic pop then push to reduce memory fragmentation */
+  // TODO: ?
+  // popush: (count: number, ...values: Value[]) => Result<number>
 }
