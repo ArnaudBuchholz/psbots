@@ -1,8 +1,7 @@
 import type { IArray, IDictionary, Result, Value } from '@api/index.js';
 import { ValueType } from '@api/index.js';
-import { assert, InvalidAccessException, RangeCheckException, toStringValue, TypeCheckException } from '@sdk/index.js';
+import { assert, checkPos, InvalidAccessException, RangeCheckException, toStringValue, TypeCheckException } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
-import { checkPos } from './tools.js';
 import { MemoryTracker } from '@core/MemoryTracker.js';
 
 /** Returned value is addRef'ed */

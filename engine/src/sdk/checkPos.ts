@@ -1,5 +1,6 @@
 import { Result, Value, ValueType } from '@api/index.js';
-import { RangeCheckException, TypeCheckException } from '@sdk/index';
+import { RangeCheckException } from '@sdk/exceptions/RangeCheckException.js';
+import { TypeCheckException } from '@sdk/exceptions/TypeCheckException.js';
 
 export function checkPos(index: Value, length: number): Result<number> {
   if (index.type !== ValueType.integer) {

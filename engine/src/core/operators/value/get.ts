@@ -1,8 +1,7 @@
 import type { Result, Value } from '@api/index.js';
 import { ValueType } from '@api/index.js';
-import { assert, toStringValue, TypeCheckException, UndefinedException } from '@sdk/index.js';
+import { assert, checkPos, toStringValue, TypeCheckException, UndefinedException } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
-import { checkPos } from './tools.js';
 import { MemoryTracker } from '@core/MemoryTracker.js';
 
 /** Returned value is addRef'ed */
