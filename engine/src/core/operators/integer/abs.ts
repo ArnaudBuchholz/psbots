@@ -22,10 +22,16 @@ buildFunctionOperator(
       }
     ]
   },
-  ({ operands }, value: number) => {
+  (state, value: number) => {
+    const { operands } = state;
     if (value < 0) {
+      const integerResult = toIntegerValue(-value);
+      if (!integerResult.success) {
+        state.raiseException(integerResult.error);
+        return;
+      }
       operands.pop();
-      operands.push(toIntegerValue(-value));
+      operands.push(integerResult.value);
     }
   }
 );

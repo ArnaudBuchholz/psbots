@@ -24,5 +24,18 @@ buildFunctionOperator(
     ]
   },
 
-  ({ operands }) => operands.push(toIntegerValue(findMarkPos(operands)))
+  (state) => {
+    const { operands } = state;
+    const posResult = findMarkPos(operands);
+    if (!posResult.success) {
+      state.raiseException(posResult.error);
+      return;
+    }
+    const integerResult = toIntegerValue(posResult.value);
+    if (!integerResult.success) {
+      state.raiseException(integerResult.error);
+      return;
+    }
+    operands.push(integerResult.value);
+  }
 );

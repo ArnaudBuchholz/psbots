@@ -132,7 +132,11 @@ export function toValue(
     if (value % 1 !== 0) {
       throw new Error('Only integers are supported');
     }
-    return toIntegerValue(value);
+    const integerResult = toIntegerValue(value);
+    if (!integerResult.success) {
+      throw integerResult.error;
+    }
+    return integerResult.value;
   }
   if (typeof value === 'function') {
     return {

@@ -18,9 +18,15 @@ buildFunctionOperator(
       }
     ]
   },
-  ({ operands }, value1: number, value2: number) => {
+  (state, value1: number, value2: number) => {
+    const { operands } = state;
+    const integerResult = toIntegerValue(value1 * value2);
+    if (!integerResult.success) {
+      state.raiseException(integerResult.error);
+      return;
+    }
     operands.pop();
     operands.pop();
-    operands.push(toIntegerValue(value1 * value2));
+    operands.push(integerResult.value);
   }
 );

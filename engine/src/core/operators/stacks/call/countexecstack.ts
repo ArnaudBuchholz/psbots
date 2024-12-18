@@ -18,5 +18,13 @@ buildFunctionOperator(
       }
     ]
   },
-  ({ operands, calls }) => operands.push(toIntegerValue(calls.length))
+  (state) => {
+    const { operands, calls } = state;
+    const integerResult = toIntegerValue(calls.length);
+    if (!integerResult.success) {
+      state.raiseException(integerResult.error);
+      return;
+    }
+    operands.push(integerResult.value);
+  }
 );

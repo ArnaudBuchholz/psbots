@@ -18,12 +18,23 @@ buildFunctionOperator(
       }
     ]
   },
-  ({ operands }, value1: number, value2: number) => {
-    operands.pop();
-    operands.pop();
+  (state, value1: number, value2: number) => {
+    const { operands } = state;
     // TODO: divide by 0
     const reminder = value1 % value2;
-    operands.push(toIntegerValue((value1 - reminder) / value2));
-    operands.push(toIntegerValue(reminder));
+    const reminderResult = toIntegerValue(reminder);
+    if (!reminderResult.success) {
+      state.raiseException(reminderResult.error);
+      return;
+    }
+    const dividendResult = toIntegerValue((value1 - reminder) / value2);
+    if (!dividendResult.success) {
+      state.raiseException(dividendResult.error);
+      return;
+    }
+    operands.pop();
+    operands.pop();
+    operands.push(dividendResult.value);
+    operands.push(reminderResult.value);
   }
 );

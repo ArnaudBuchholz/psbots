@@ -63,9 +63,14 @@ buildFunctionOperator(
       state.raiseException(new TypeCheckException());
       return;
     }
-    // TODO: push before pop
+    const integerResult = toIntegerValue(implementation(value as never));
+    if (!integerResult.success) {
+      state.raiseException(integerResult.error);
+      return;
+    }
+    // TODO: popush
     operands.pop();
-    const pushResult = operands.push(toIntegerValue(implementation(value as never)));
+    const pushResult = operands.push(integerResult.value);
     if (!pushResult.success) {
       state.raiseException(pushResult.error);
     }

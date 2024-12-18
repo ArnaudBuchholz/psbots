@@ -18,5 +18,13 @@ buildFunctionOperator(
       }
     ]
   },
-  ({ operands, dictionaries }) => operands.push(toIntegerValue(dictionaries.length))
+  (state) => {
+    const { operands, dictionaries } = state;
+    const integerResult = toIntegerValue(dictionaries.length);
+    if (!integerResult.success) {
+      state.raiseException(integerResult.error);
+      return;
+    }
+    operands.push(integerResult.value);
+  }
 );

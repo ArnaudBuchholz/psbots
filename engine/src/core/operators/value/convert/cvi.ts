@@ -46,7 +46,7 @@ buildFunctionOperator(
           state.raiseException(integerValueResult.error);
           return;
         }
-        // TODO: is it acceptable to not test push result ?
+        // TODO: popush
         operands.pop();
         operands.push(integerValueResult.value);
       } else {
