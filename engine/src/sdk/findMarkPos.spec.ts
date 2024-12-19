@@ -1,5 +1,6 @@
 import { it, expect, beforeEach } from 'vitest';
-import { markValue, Result, USER_MEMORY_TYPE } from '@api/index.js';
+import type { Result } from '@api/index.js';
+import { markValue, USER_MEMORY_TYPE } from '@api/index.js';
 import { UnmatchedMarkException } from '@sdk/exceptions/UnmatchedMarkException.js';
 import { MemoryTracker } from '@core/MemoryTracker.js';
 import { ValueStack } from '@core/objects/stacks/ValueStack.js';
