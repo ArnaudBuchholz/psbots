@@ -1,6 +1,7 @@
 import { ValueType } from '@api/index.js';
-import { toNameValue } from '@sdk/index.js';
+import { assert, toNameValue } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
+import { MemoryTracker } from '@core/MemoryTracker.js';
 
 buildFunctionOperator(
   {
@@ -26,9 +27,18 @@ buildFunctionOperator(
       }
     ]
   },
-  ({ operands }, string: string) => {
-    const { tracker } = operands.top;
-    operands.pop();
-    operands.push(toNameValue(string, { tracker }));
+  (state, string: string) => {
+    const { operands, memoryTracker } = state;
+    assert(memoryTracker instanceof MemoryTracker);
+    const refResult = memoryTracker.addStringRef(string);
+    if (!refResult.success) {
+      state.raiseException(refResult);
+      return;
+    }
+    const popushResult = operands.popush(1, toNameValue(string, { tracker: memoryTracker }));
+    memoryTracker.releaseString(string);
+    if (!popushResult.success) {
+      state.raiseException(popushResult);
+    }
   }
 );
