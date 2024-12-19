@@ -11,6 +11,7 @@ import {
   isNameValue
 } from '@sdk/checks/isValue.js';
 import { toIntegerValue, toNameValue, toStringValue } from '@sdk/toValue';
+import { assert } from '@sdk/exceptions';
 
 function testFlags(
   is: (value: unknown, flags?: Partial<IValuePermissions>) => void,
@@ -44,7 +45,9 @@ function testFlags(
 }
 
 describe('isIntegerValue', () => {
-  const integerValue = toIntegerValue(123);
+  const integerValueResult = toIntegerValue(123);
+  assert(integerValueResult);
+  const integerValue = integerValueResult.value;
 
   testIsFunction<IntegerValue>({
     is: isIntegerValue,

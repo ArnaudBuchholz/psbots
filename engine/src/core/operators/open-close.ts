@@ -53,7 +53,12 @@ export function closeToMark(
 ): void {
   const { operands, memoryTracker, calls } = state;
   const { top: closeOp } = calls;
-  const markPos = findMarkPos(operands);
+  const markPosResult = findMarkPos(operands);
+  if (!markPosResult.success) {
+    state.raiseException(markPosResult.error);
+    return;
+  }
+  const markPos = markPosResult.value;
   // TODO: apply allocation scheme for increment
   const arrayResult = ValueArray.create(memoryTracker as MemoryTracker, USER_MEMORY_TYPE, Math.max(markPos, 1), 1);
   if (!arrayResult.success) {

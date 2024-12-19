@@ -66,7 +66,12 @@ buildFunctionOperator(
   },
   (state: IInternalState) => {
     const { operands, memoryTracker, calls } = state;
-    const markPos = findMarkPos(operands);
+    const markPosResult = findMarkPos(operands);
+    if (!markPosResult.success) {
+      state.raiseException(markPosResult.error);
+      return;
+    }
+    const markPos = markPosResult.value;
     if (markPos % 2 !== 0) {
       state.raiseException(new TypeCheckException());
       return;

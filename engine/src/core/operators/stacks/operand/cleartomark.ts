@@ -23,8 +23,14 @@ buildFunctionOperator(
     ]
   },
 
-  ({ operands }) => {
-    let markPos = findMarkPos(operands);
+  (state) => {
+    const { operands } = state;
+    const markPosResult = findMarkPos(operands);
+    if (!markPosResult.success) {
+      state.raiseException(markPosResult.error);
+      return;
+    }
+    let markPos = markPosResult.value;
     while (markPos-- > 0) {
       operands.pop();
     }
