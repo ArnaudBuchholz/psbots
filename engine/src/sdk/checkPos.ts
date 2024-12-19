@@ -1,4 +1,5 @@
-import { Result, Value, ValueType } from '@api/index.js';
+import type { Result, Value } from '@api/index.js';
+import { ValueType } from '@api/index.js';
 import { RangeCheckException } from '@sdk/exceptions/RangeCheckException.js';
 import { TypeCheckException } from '@sdk/exceptions/TypeCheckException.js';
 

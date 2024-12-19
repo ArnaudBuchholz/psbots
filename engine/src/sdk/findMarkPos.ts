@@ -1,4 +1,5 @@
-import { Result, ValueType } from '@api/index.js';
+import type { Result } from '@api/index.js';
+import { ValueType } from '@api/index.js';
 import type { IStack } from '@sdk/interfaces/IStack.js';
 import { UnmatchedMarkException } from '@sdk/exceptions/UnmatchedMarkException.js';
 
