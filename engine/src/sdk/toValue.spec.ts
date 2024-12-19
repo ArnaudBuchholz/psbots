@@ -1,9 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import type { Value } from '@api/index.js';
+import type { Result, Value } from '@api/index.js';
 import { ValueType } from '@api/index.js';
 import { toBooleanValue, toIntegerValue, toNameValue, toStringValue } from './toValue.js';
 import { MemoryTracker } from '@core/MemoryTracker.js';
 import { UndefinedResultException } from '@sdk/exceptions/UndefinedResultException.js';
+import { assert } from './exceptions/AssertException.js';
 
 it('converts a boolean', () => {
   const value = toBooleanValue(true);
@@ -17,7 +18,9 @@ it('converts a boolean', () => {
 
 describe('toIntegerValue', () => {
   it('converts an integer', () => {
-    const value = toIntegerValue(1);
+    const valueResult = toIntegerValue(1);
+    assert(valueResult);
+    const { value } = valueResult;
     expect(value).toStrictEqual<Value<ValueType.integer>>({
       type: ValueType.integer,
       isExecutable: false,
@@ -28,23 +31,43 @@ describe('toIntegerValue', () => {
 
   describe('UndefinedResultException', () => {
     it('fails on non-integer', () => {
-      expect(() => toIntegerValue(1.2)).toThrowError(UndefinedResultException);
+      const integerResult = toIntegerValue(1.2);
+      expect(integerResult).toStrictEqual<Result<number>>({
+        success: false,
+        error: expect.any(UndefinedResultException)
+      });
     });
 
     it('fails on POSITIVE_INFINITY', () => {
-      expect(() => toIntegerValue(Number.POSITIVE_INFINITY)).toThrowError(UndefinedResultException);
+      const integerResult = toIntegerValue(Number.POSITIVE_INFINITY);
+      expect(integerResult).toStrictEqual<Result<number>>({
+        success: false,
+        error: expect.any(UndefinedResultException)
+      });
     });
 
     it('fails on NEGATIVE_INFINITY', () => {
-      expect(() => toIntegerValue(Number.NEGATIVE_INFINITY)).toThrowError(UndefinedResultException);
+      const integerResult = toIntegerValue(Number.NEGATIVE_INFINITY);
+      expect(integerResult).toStrictEqual<Result<number>>({
+        success: false,
+        error: expect.any(UndefinedResultException)
+      });
     });
 
     it('if bigger than MAX_SAFE_INTEGER', () => {
-      expect(() => toIntegerValue(Number.MAX_SAFE_INTEGER + 1)).toThrowError(UndefinedResultException);
+      const integerResult = toIntegerValue(Number.MAX_SAFE_INTEGER + 1);
+      expect(integerResult).toStrictEqual<Result<number>>({
+        success: false,
+        error: expect.any(UndefinedResultException)
+      });
     });
 
     it('if smaller than MAX_SAFE_INTEGER', () => {
-      expect(() => toIntegerValue(Number.MIN_SAFE_INTEGER - 1)).toThrowError(UndefinedResultException);
+      const integerResult = toIntegerValue(Number.MIN_SAFE_INTEGER - 1);
+      expect(integerResult).toStrictEqual<Result<number>>({
+        success: false,
+        error: expect.any(UndefinedResultException)
+      });
     });
   });
 });
