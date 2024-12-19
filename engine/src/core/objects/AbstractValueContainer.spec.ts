@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi, MockInstance } from 'vitest';
 import type { MemoryType, Result, Value } from '@api/index.js';
 import { nullValue, USER_MEMORY_TYPE } from '@api/index.js';
 import { assert, isArrayValue, LimitcheckException, VmOverflowException } from '@sdk/index.js';
@@ -175,6 +175,66 @@ describe('memory', () => {
     it('does not fail after all items were removed', () => {
       valueArray.clear();
       expect(valueArray.pop()).toStrictEqual(nullValue);
+    });
+  });
+
+  describe('atomic popush', () => {
+    let allocate: MockInstance;
+    let release: MockInstance;
+
+    beforeEach(() => {
+      allocate = vi.spyOn(MemoryTracker.prototype, 'allocate');
+      release = vi.spyOn(MemoryTracker.prototype, 'release');
+      // Increase array size to 7 (5 + 2)
+      valueArray.push(toValue(4), toValue(5), toValue(6), toValue(7));
+      expect(valueArray.length).toStrictEqual(7);
+      expect(allocate).toHaveBeenCalled();
+      allocate.mockClear();
+      release.mockClear();
+    });
+
+    afterEach(() => {
+      allocate.mockRestore();
+      release.mockRestore();
+    });
+
+    it('does not resize if the final length is the same', () => {
+      const result = valueArray.popush(3, toValue(10), toValue(11), toValue(12));
+      assert(result);
+      expect(result.value).toStrictEqual(7);
+      expect(valueArray.length).toStrictEqual(7);
+      expect(valueArray.at(5)).toStrictEqual(toValue(11));
+      expect(valueArray.at(6)).toStrictEqual(toValue(12));
+      expect(allocate).not.toHaveBeenCalled();
+      expect(release).not.toHaveBeenCalled();
+    });
+
+    it('releases memory if the final size is smaller', () => {
+      const result = valueArray.popush(4, toValue(10), toValue(11));
+      assert(result);
+      expect(result.value).toStrictEqual(5);
+      expect(valueArray.length).toStrictEqual(5);
+      expect(valueArray.at(3)).toStrictEqual(toValue(10));
+      expect(valueArray.at(4)).toStrictEqual(toValue(11));
+      expect(allocate).not.toHaveBeenCalled();
+      expect(release).toHaveBeenCalled();
+    });
+
+    it('increases memory if the final size is bigger', () => {
+      const result = valueArray.popush(3, toValue(10), toValue(11), toValue(12), toValue(13));
+      assert(result);
+      expect(valueArray.length).toStrictEqual(8);
+      expect(valueArray.at(7)).toStrictEqual(toValue(13));
+      expect(allocate).toHaveBeenCalled();
+      expect(release).not.toHaveBeenCalled();
+    });
+
+    it('fails if memory allocation fails without removing items', () => {
+      const expectedResult: Result<number> = { success: false, error: new Error() };
+      allocate.mockImplementation(() => expectedResult);
+      const result = valueArray.popush(3, toValue(10), toValue(11), toValue(12), toValue(13));
+      expect(result).toStrictEqual(expectedResult);
+      expect(valueArray.length).toStrictEqual(7);
     });
   });
 

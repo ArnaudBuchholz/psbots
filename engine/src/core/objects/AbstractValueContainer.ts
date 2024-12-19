@@ -119,16 +119,20 @@ export abstract class AbstractValueContainer extends ShareableObject implements 
   /** Puts the value in the right place */
   protected abstract pushImpl(value: Value): void;
 
+  private _push(values: Value[]): void {
+    for (const value of values) {
+      value.tracker?.addValueRef(value);
+      this.pushImpl(value);
+    }
+  }
+
   /** Returns the new length */
   push(...values: Value[]): Result<number> {
     const capacityAdjusted = this.increaseCapacityIfNeeded(this._values.length + values.length);
     if (!capacityAdjusted.success) {
       return capacityAdjusted;
     }
-    for (const value of values) {
-      value.tracker?.addValueRef(value);
-      this.pushImpl(value);
-    }
+    this._push(values);
     return { success: true, value: this._values.length };
   }
 
@@ -143,15 +147,38 @@ export abstract class AbstractValueContainer extends ShareableObject implements 
     }
   }
 
-  pop(): Value {
+  private _pop(): Value {
     let value = this.popImpl();
     if (value.type !== ValueType.null) {
       if (value.tracker?.releaseValue(value) === false) {
         value = nullValue;
       }
     }
+    return value;
+  }
+
+  pop(): Value {
+    const value = this._pop();
     this.reduceCapacityIfNeeded();
     return value;
+  }
+
+  popush(count: number, ...values: Value[]): Result<number> {
+    const { capacity } = this;
+    const finalLength = this.length - count + values.length;
+    if (finalLength > capacity) {
+      const increaseResult = this.increaseCapacityIfNeeded(finalLength);
+      if (!increaseResult.success) {
+        return increaseResult;
+      }
+    }
+    while (count > 0) {
+      this._pop();
+      --count;
+    }
+    this._push(values);
+    this.reduceCapacityIfNeeded();
+    return { success: true, value: this.length };
   }
 
   clear(): void {
