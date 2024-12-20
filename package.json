@@ -32,7 +32,7 @@
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-prettier": "^5.2.1",
-    "npm-check-updates": "^17.1.11",
+    "npm-check-updates": "^17.1.12",
     "typescript": "^5.7.2",
     "typescript-eslint": "^7.16.1"
   }
