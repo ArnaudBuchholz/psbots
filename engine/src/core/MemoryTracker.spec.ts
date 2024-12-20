@@ -1,6 +1,13 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import type { MemoryPointer } from './MemoryTracker.js';
-import { MemoryTracker } from './MemoryTracker.js';
+import type { MemoryPointer, MemorySize } from './MemoryTracker.js';
+import {
+  addMemorySize,
+  INTEGER_BYTES,
+  memorySizeToBytes,
+  MemoryTracker,
+  POINTER_BYTES,
+  VALUE_BYTES
+} from './MemoryTracker.js';
 import { toValue } from '@test/index.js';
 import { SYSTEM_MEMORY_TYPE, USER_MEMORY_TYPE } from '@api/index.js';
 import type { IMemoryByType, IMemorySnapshot, Result } from '@api/index.js';
@@ -13,6 +20,29 @@ describe('initial state', () => {
   it('starts with used being 0', () => {
     const tracker = new MemoryTracker();
     expect(tracker.used).toStrictEqual(0);
+  });
+});
+
+describe('MemorySize', () => {
+  const tests: { a: MemorySize; b: MemorySize; total: number }[] = [
+    { a: {}, b: {}, total: 0 },
+    { a: { bytes: 1 }, b: {}, total: 1 },
+    { a: { integers: 1 }, b: {}, total: INTEGER_BYTES },
+    { a: { pointers: 1 }, b: {}, total: POINTER_BYTES },
+    { a: { values: 1 }, b: {}, total: VALUE_BYTES },
+    { b: { bytes: 1 }, a: {}, total: 1 },
+    { b: { integers: 1 }, a: {}, total: INTEGER_BYTES },
+    { b: { pointers: 1 }, a: {}, total: POINTER_BYTES },
+    { b: { values: 1 }, a: {}, total: VALUE_BYTES },
+    { a: { bytes: 1 }, b: { bytes: 2 }, total: 3 },
+    { a: { integers: 1 }, b: { integers: 2 }, total: 3 * INTEGER_BYTES },
+    { a: { pointers: 1 }, b: { pointers: 2 }, total: 3 * POINTER_BYTES },
+    { a: { values: 1 }, b: { values: 2 }, total: 3 * VALUE_BYTES }
+  ];
+  tests.forEach(({ a, b, total }) => {
+    it(`${JSON.stringify(a)} + ${JSON.stringify(b)} = ${total}`, () => {
+      expect(memorySizeToBytes(addMemorySize(a, b))).toStrictEqual(total);
+    });
   });
 });
 

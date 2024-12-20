@@ -12,9 +12,9 @@ import { assert, valuesOf, VmOverflowException } from '@sdk/index.js';
 
 export const STRING_MEMORY_TYPE: MemoryType = 'string';
 
-const INTEGER_BYTES = 4;
-const POINTER_BYTES = 4;
-const VALUE_BYTES = 32;
+export const INTEGER_BYTES = 4;
+export const POINTER_BYTES = 4;
+export const VALUE_BYTES = 32;
 
 const stringSizer = (data: string): number => {
   const encoder = new TextEncoder();
