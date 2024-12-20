@@ -56,9 +56,12 @@ export function operatorCycle(state: IInternalState, value: Value<ValueType.oper
       }
     }
     let exceptionBefore = state.exception;
-    operator.implementation(state, parameters);
+    const result = operator.implementation(state, parameters);
     for (const value of parameters) {
       value.tracker?.releaseValue(value);
+    }
+    if (result && result.success === false) {
+      state.raiseException(result.error);
     }
     if (state.exception !== exceptionBefore) {
       return;

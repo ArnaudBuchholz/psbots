@@ -1,4 +1,4 @@
-import type { IOperatorValue, OperatorValue, Value } from '@api/index.js';
+import type { IOperatorValue, OperatorValue, Result, Value } from '@api/index.js';
 import { ValueType } from '@api/index.js';
 import type { IInternalState, IFunctionOperator } from '@sdk/index.js';
 import { assert, OperatorType, valuesOf } from '@sdk/index.js';
@@ -49,7 +49,7 @@ export const registry: {
 export function buildFunctionOperator(
   definition: OperatorDefinition,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  implementation: (state: IInternalState, ...values: any[]) => void
+  implementation: (state: IInternalState, ...values: any[]) => Result<unknown> | void
 ): OperatorValue {
   assert(!registry[definition.name], `Operator ${definition.name} is not defined`);
   Object.freeze(definition); // Can't be altered

@@ -1,4 +1,4 @@
-import type { IAbstractOperator, Value, ValueType } from '@api/index.js';
+import type { IAbstractOperator, Result, Value, ValueType } from '@api/index.js';
 import type { IInternalState } from '@sdk/interfaces/IInternalState.js';
 
 export enum OperatorType {
@@ -25,7 +25,7 @@ export interface IFunctionOperator extends IAbstractOperator {
    * Operator implementation
    * parameters are given in the order indicated by typeCheck
    */
-  readonly implementation: (state: IInternalState, parameters: readonly Value[]) => void;
+  readonly implementation: (state: IInternalState, parameters: readonly Value[]) => Result<unknown> | void;
 }
 
 /** Operator */
