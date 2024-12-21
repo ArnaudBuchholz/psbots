@@ -163,15 +163,18 @@ export abstract class AbstractValueContainer extends ShareableObject implements 
     return value;
   }
 
+  popush(count: number): { success: true, value: number }
   popush(count: number, valueArray: Value[], ...values: Value[]): Result<number>
   popush(count: number, ...values: Value[]): Result<number>
-  popush(count: number, valueOrArray: Value | Value[], ...values: Value[]): Result<number> {
+  popush(count: number, valueOrArray?: Value | Value[], ...values: Value[]): Result<number> {
     const { capacity } = this;
     let arrayOfValues: Value[];
     if (Array.isArray(valueOrArray)) {
       arrayOfValues = valueOrArray.concat(values);
-    } else {
+    } else if (valueOrArray) {
       arrayOfValues = [valueOrArray].concat(values);
+    } else {
+      arrayOfValues = [];
     }
     const finalLength = this.length - count + arrayOfValues.length;
     if (finalLength > capacity) {

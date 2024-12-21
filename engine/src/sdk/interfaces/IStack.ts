@@ -9,5 +9,9 @@ export interface IStack extends IReadOnlyArray {
   push: (value: Value) => Result<number>;
   pop: () => void;
   /** Atomic pop then push to reduce memory fragmentation */
-  popush: (((count: number, valueArray: Value[], ...values: Value[]) => Result<number>) & ((count: number, ...values: Value[]) => Result<number>))
+  popush: (
+    ((count: number) => { success: true, value: number }) &
+    ((count: number, valueArray: Value[], ...values: Value[]) => Result<number>) &
+    ((count: number, ...values: Value[]) => Result<number>)
+  )
 }
