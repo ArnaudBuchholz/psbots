@@ -21,17 +21,20 @@ export function openWithMark({ operands, calls }: IInternalState): Result<number
 
 export function pushOpenClosedValueWithDebugInfo({
   operands,
+  popCount,
   value,
   mark,
   closeOp
 }: {
   operands: IStack;
+  popCount: number;
   value: Value;
   mark: Value;
   closeOp: Value;
 }): Result<number> {
   if (mark.debugSource && closeOp.debugSource) {
-    return operands.push(
+    return operands.popush(
+      popCount,
       Object.assign(
         {
           debugSource: {
@@ -43,7 +46,7 @@ export function pushOpenClosedValueWithDebugInfo({
       )
     );
   }
-  return operands.push(value);
+  return operands.popush(popCount, value);
 }
 
 export function closeToMark(
@@ -69,9 +72,9 @@ export function closeToMark(
     operands.pop();
   }
   const { top: mark } = operands;
-  operands.pop();
   const result = pushOpenClosedValueWithDebugInfo({
     operands,
+    popCount: 1,
     value: array.toValue({ isReadOnly: isExecutable, isExecutable }),
     mark,
     closeOp
