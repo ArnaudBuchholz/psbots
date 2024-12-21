@@ -1,5 +1,5 @@
 import { NameValue, USER_MEMORY_TYPE, ValueType } from '@api/index.js';
-import { assert, findMarkPos, TypeCheckException, valuesOf } from '@sdk/index.js';
+import { findMarkPos, TypeCheckException, valuesOf } from '@sdk/index.js';
 import type { IInternalState } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 import { pushOpenClosedValueWithDebugInfo } from '@core/operators/open-close.js';
@@ -68,49 +68,41 @@ buildFunctionOperator(
     const { operands, memoryTracker, calls } = state;
     const markPosResult = findMarkPos(operands);
     if (!markPosResult.success) {
-      state.raiseException(markPosResult.error);
-      return;
+      return markPosResult;
     }
     const markPos = markPosResult.value;
     if (markPos % 2 !== 0) {
-      state.raiseException(new TypeCheckException());
-      return;
+      return { success: false, error: new TypeCheckException() };
     }
     for (let operandIndex = 1; operandIndex < markPos; operandIndex += 2) {
       const name = operands.ref[operandIndex]!; // markPos was verified
       if (name.type !== ValueType.name) {
-        state.raiseException(new TypeCheckException());
-        return;
+        return { success: false, error: new TypeCheckException() };
       }
     }
     const { top: closeOp } = calls;
     const dictionaryResult = Dictionary.create(memoryTracker as MemoryTracker, USER_MEMORY_TYPE, markPos / 2);
     if (!dictionaryResult.success) {
-      state.raiseException(dictionaryResult.error);
-      return;
+      return dictionaryResult;
     }
     const dictionary = dictionaryResult.value;
     for (let operandIndex = 0; operandIndex < markPos; operandIndex += 2) {
-      const value = operands.top;
-      value.tracker?.addValueRef(value);
-      operands.pop();
-      const [name] = valuesOf<ValueType.name>(operands.top as NameValue); // checked before
-      operands.pop();
+      const value = operands.at(operandIndex);
+      const nameValue = operands.at(operandIndex + 1);
+      const [name] = valuesOf<ValueType.name>(nameValue as NameValue); // checked before
       const defResult = dictionary.def(name, value);
-      assert(defResult);
-      value.tracker?.releaseValue(value);
+      if (!defResult.success) {
+        return defResult;
+      }
     }
-    const { top: mark } = operands;
-    operands.pop();
     const pushResult = pushOpenClosedValueWithDebugInfo({
       operands,
+      popCount: markPos + 1,
       value: dictionary.toValue({ isReadOnly: false }),
-      mark,
+      mark: operands.at(markPos),
       closeOp
     });
     dictionary.release();
-    if (!pushResult.success) {
-      state.raiseException(pushResult.error);
-    }
+    return pushResult;
   }
 );
