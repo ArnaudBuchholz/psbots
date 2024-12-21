@@ -163,9 +163,17 @@ export abstract class AbstractValueContainer extends ShareableObject implements 
     return value;
   }
 
-  popush(count: number, ...values: Value[]): Result<number> {
+  popush(count: number, valueArray: Value[], ...values: Value[]): Result<number>
+  popush(count: number, ...values: Value[]): Result<number>
+  popush(count: number, valueOrArray: Value | Value[], ...values: Value[]): Result<number> {
     const { capacity } = this;
-    const finalLength = this.length - count + values.length;
+    let arrayOfValues: Value[];
+    if (Array.isArray(valueOrArray)) {
+      arrayOfValues = valueOrArray.concat(values);
+    } else {
+      arrayOfValues = [valueOrArray].concat(values);
+    }
+    const finalLength = this.length - count + arrayOfValues.length;
     if (finalLength > capacity) {
       const increaseResult = this.increaseCapacityIfNeeded(finalLength);
       if (!increaseResult.success) {
@@ -176,15 +184,16 @@ export abstract class AbstractValueContainer extends ShareableObject implements 
       this._pop();
       --count;
     }
-    this._push(values);
+    this._push(arrayOfValues);
     this.reduceCapacityIfNeeded();
     return { success: true, value: this.length };
   }
 
   clear(): void {
     while (this.length > 0) {
-      this.pop();
+      this._pop();
     }
+    this.reduceCapacityIfNeeded();
   }
 
   protected _dispose(): void {

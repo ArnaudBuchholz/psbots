@@ -199,7 +199,7 @@ describe('memory', () => {
     });
 
     it('does not resize if the final length is the same', () => {
-      const result = valueArray.popush(3, toValue(10), toValue(11), toValue(12));
+      const result = valueArray.popush(3, [toValue(10), toValue(11)], toValue(12));
       assert(result);
       expect(result.value).toStrictEqual(7);
       expect(valueArray.length).toStrictEqual(7);
@@ -221,7 +221,7 @@ describe('memory', () => {
     });
 
     it('increases memory if the final size is bigger', () => {
-      const result = valueArray.popush(3, toValue(10), toValue(11), toValue(12), toValue(13));
+      const result = valueArray.popush(3, [toValue(10), toValue(11)], toValue(12), toValue(13));
       assert(result);
       expect(valueArray.length).toStrictEqual(8);
       expect(valueArray.at(7)).toStrictEqual(toValue(13));
@@ -232,7 +232,7 @@ describe('memory', () => {
     it('fails if memory allocation fails without removing items', () => {
       const expectedResult: Result<number> = { success: false, error: new Error() };
       allocate.mockImplementation(() => expectedResult);
-      const result = valueArray.popush(3, toValue(10), toValue(11), toValue(12), toValue(13));
+      const result = valueArray.popush(3, [toValue(10), toValue(11), toValue(12), toValue(13)]);
       expect(result).toStrictEqual(expectedResult);
       expect(valueArray.length).toStrictEqual(7);
     });
