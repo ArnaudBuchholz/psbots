@@ -30,9 +30,5 @@ buildFunctionOperator(
       }
     ]
   },
-  ({ operands }, value1: boolean, value2: boolean) => {
-    operands.pop();
-    operands.pop();
-    operands.push(toBooleanValue(value1 && value2));
-  }
+  ({ operands }, value1: boolean, value2: boolean) => operands.popush(2, toBooleanValue(value1 && value2))
 );
