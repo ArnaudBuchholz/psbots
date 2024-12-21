@@ -5,9 +5,9 @@ import type { IInternalState, IStack } from '@sdk/index.js';
 import { ValueArray } from '@core/objects/ValueArray.js';
 import type { MemoryTracker } from '@core/MemoryTracker.js';
 
-export function openWithMark({ operands, calls }: IInternalState): void {
+export function openWithMark({ operands, calls }: IInternalState): Result<number> {
   if (calls.top.debugSource) {
-    operands.push(
+    return operands.push(
       Object.assign(
         {
           debugSource: calls.top.debugSource
@@ -15,9 +15,8 @@ export function openWithMark({ operands, calls }: IInternalState): void {
         markValue
       )
     );
-  } else {
-    operands.push(markValue);
   }
+  return operands.push(markValue);
 }
 
 export function pushOpenClosedValueWithDebugInfo({
@@ -50,20 +49,18 @@ export function pushOpenClosedValueWithDebugInfo({
 export function closeToMark(
   state: IInternalState,
   { isExecutable }: { isExecutable: boolean }
-): void {
+): Result<unknown> {
   const { operands, memoryTracker, calls } = state;
   const { top: closeOp } = calls;
   const markPosResult = findMarkPos(operands);
   if (!markPosResult.success) {
-    state.raiseException(markPosResult.error);
-    return;
+    return markPosResult;
   }
   const markPos = markPosResult.value;
   // TODO: apply allocation scheme for increment
   const arrayResult = ValueArray.create(memoryTracker as MemoryTracker, USER_MEMORY_TYPE, Math.max(markPos, 1), 1);
   if (!arrayResult.success) {
-    state.raiseException(arrayResult.error);
-    return;
+    return arrayResult;
   }
   const array = arrayResult.value;
   let index: number;
@@ -73,11 +70,12 @@ export function closeToMark(
   }
   const { top: mark } = operands;
   operands.pop();
-  pushOpenClosedValueWithDebugInfo({
+  const result = pushOpenClosedValueWithDebugInfo({
     operands,
     value: array.toValue({ isReadOnly: isExecutable, isExecutable }),
     mark,
     closeOp
   });
   array.release();
+  return result;
 }

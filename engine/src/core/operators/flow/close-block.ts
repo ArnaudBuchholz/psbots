@@ -24,13 +24,13 @@ buildFunctionOperator(
       },
       {
         description: 'fails if the corresponding block start does not exist',
-        in: ' 1 2 3 }',
+        in: '1 2 3 }',
         out: '1 2 3 unmatchedmark'
       }
     ]
   },
   (state: IInternalState) => {
     state.allowCall();
-    closeToMark(state, { isExecutable: true });
+    return closeToMark(state, { isExecutable: true });
   }
 );

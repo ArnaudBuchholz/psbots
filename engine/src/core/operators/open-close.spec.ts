@@ -1,8 +1,9 @@
-import { it, expect, beforeEach, afterEach } from 'vitest';
+import { it, expect, beforeEach, afterEach, vi } from 'vitest';
 import type { IDebugSource } from '@api/index.js';
 import { State } from '@core/state/State.js';
 import { toValue, waitForGenerator } from '@test/index.js';
-import { assert } from '@sdk/exceptions';
+import { assert, LimitcheckException } from '@sdk/exceptions';
+import { ValueArray } from '@core/objects/ValueArray.js';
 
 let state: State;
 
@@ -33,4 +34,13 @@ it('forwards debug info', async () => {
     )
   );
   expect(state.operands.top.debugSource).toStrictEqual<IDebugSource>(debugSource);
+});
+
+it('forwards error if the array cannot be created', async () => {
+  const stateResult = State.create();
+  assert(stateResult);
+  const { value: state } = stateResult;
+  vi.spyOn(ValueArray, 'create').mockImplementation(() => ({ success: false, error: new LimitcheckException() }));
+  await waitForGenerator(state.exec(toValue('[ ]', { isExecutable: true })));
+  expect(state.exception).toBeInstanceOf(LimitcheckException);
 });
