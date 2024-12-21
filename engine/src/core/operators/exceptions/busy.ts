@@ -18,7 +18,5 @@ buildFunctionOperator(
       }
     ]
   },
-  (state) => {
-    state.raiseException(new BusyException());
-  }
+  () => ({ success: false, error: new BusyException() })
 );

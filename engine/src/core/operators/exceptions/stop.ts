@@ -18,7 +18,5 @@ buildFunctionOperator(
       }
     ]
   },
-  (state) => {
-    state.raiseException(new StopException());
-  }
+  () => ({ success: false, error: new StopException() })
 );

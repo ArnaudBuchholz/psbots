@@ -18,7 +18,5 @@ buildFunctionOperator(
       }
     ]
   },
-  (state) => {
-    state.raiseException(new DictStackUnderflowException());
-  }
+  () => ({ success: false, error: new DictStackUnderflowException() })
 );

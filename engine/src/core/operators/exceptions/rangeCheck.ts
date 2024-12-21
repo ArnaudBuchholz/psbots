@@ -18,7 +18,5 @@ buildFunctionOperator(
       }
     ]
   },
-  (state) => {
-    state.raiseException(new RangeCheckException());
-  }
+  () => ({ success: false, error: new RangeCheckException() })
 );

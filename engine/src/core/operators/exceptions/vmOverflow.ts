@@ -18,7 +18,5 @@ buildFunctionOperator(
       }
     ]
   },
-  (state) => {
-    state.raiseException(new VmOverflowException());
-  }
+  () => ({ success: false, error: new VmOverflowException() })
 );

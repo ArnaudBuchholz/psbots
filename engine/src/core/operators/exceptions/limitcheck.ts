@@ -18,7 +18,5 @@ buildFunctionOperator(
       }
     ]
   },
-  (state) => {
-    state.raiseException(new LimitcheckException());
-  }
+  () => ({ success: false, error: new LimitcheckException() })
 );

@@ -18,7 +18,5 @@ buildFunctionOperator(
       }
     ]
   },
-  (state) => {
-    state.raiseException(new UnmatchedMarkException());
-  }
+  () => ({ success: false, error: new UnmatchedMarkException() })
 );

@@ -18,7 +18,5 @@ buildFunctionOperator(
       }
     ]
   },
-  (state) => {
-    state.raiseException(new StackUnderflowException());
-  }
+  () => ({ success: false, error: new StackUnderflowException() })
 );

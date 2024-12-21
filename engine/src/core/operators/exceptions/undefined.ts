@@ -18,7 +18,5 @@ buildFunctionOperator(
       }
     ]
   },
-  (state) => {
-    state.raiseException(new UndefinedException());
-  }
+  () => ({ success: false, error: new UndefinedException() })
 );

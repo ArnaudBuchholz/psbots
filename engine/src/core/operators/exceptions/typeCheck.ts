@@ -18,7 +18,5 @@ buildFunctionOperator(
       }
     ]
   },
-  (state) => {
-    state.raiseException(new TypeCheckException());
-  }
+  () => ({ success: false, error: new TypeCheckException() })
 );

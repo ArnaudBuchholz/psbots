@@ -80,9 +80,7 @@ buildFunctionOperator(
       }
     ]
   },
-  (state) => {
-    state.raiseException(new ${uppercasedName}Exception());
-  }
+  () => ({ success: false, error: new ${uppercasedName}Exception() })
 );
 `
     );
