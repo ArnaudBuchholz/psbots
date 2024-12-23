@@ -76,11 +76,6 @@ export abstract class AbstractValueContainer extends ShareableObject implements 
     return this._memoryType;
   }
 
-  /** As memory is possibly fragmented, the only contiguous items are based on the initial capacity */
-  get ref(): readonly Value[] {
-    return this._values.slice(0, this._initialCapacity);
-  }
-
   // region IReadOnlyArray
 
   get length(): number {

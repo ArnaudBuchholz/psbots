@@ -245,27 +245,6 @@ describe('memory', () => {
   });
 });
 
-it('offers a Value[] reference', () => {
-  expect(valueArray.ref).toStrictEqual<Value[]>([toValue(123), toValue('abc'), shared.value]);
-});
-
-it('offers a Value[] reference (limited to initial capacity)', () => {
-  valueArray.push(
-    toValue(0),
-    toValue(1),
-    toValue(2),
-    toValue(3),
-    toValue(4)
-  );
-  expect(valueArray.ref).toStrictEqual<Value[]>([
-    toValue(123),
-    toValue('abc'),
-    shared.value,
-    toValue(0),
-    toValue(1)
-  ]);
-});
-
 describe('IReadOnlyArray', () => {
   it('exposes length', () => {
     expect(valueArray.length).toStrictEqual(3);
