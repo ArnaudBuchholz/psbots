@@ -7,8 +7,6 @@ buildFunctionOperator(
     description: 'throws the exception : Operand is too big or too small',
     labels: ['exception'],
     signature: {
-      input: [],
-      output: [],
       exceptions: ['rangecheck']
     },
     samples: [

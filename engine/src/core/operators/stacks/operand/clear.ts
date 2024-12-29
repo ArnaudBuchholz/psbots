@@ -5,10 +5,6 @@ buildFunctionOperator(
     name: 'clear',
     description: 'clears the operand stack',
     labels: ['operand'],
-    signature: {
-      input: [],
-      output: []
-    },
     samples: [
       {
         in: '1 2 3 clear',

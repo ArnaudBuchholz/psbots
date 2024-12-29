@@ -13,8 +13,7 @@ buildFunctionOperator(
     description: 'finalizes a dictionary',
     labels: ['dictionary', 'mark'],
     signature: {
-      input: [],
-      output: []
+      output: [{ type: ValueType.dictionary, permissions: { isExecutable: false, isReadOnly: false } }]
     },
     samples: [
       {
@@ -75,7 +74,7 @@ buildFunctionOperator(
       return { success: false, error: new TypeCheckException() };
     }
     for (let operandIndex = 1; operandIndex < markPos; operandIndex += 2) {
-      const name = operands.ref[operandIndex]!; // markPos was verified
+      const name = operands.at(operandIndex);
       if (name.type !== ValueType.name) {
         return { success: false, error: new TypeCheckException() };
       }

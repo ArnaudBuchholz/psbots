@@ -9,8 +9,8 @@ buildFunctionOperator(
     description: 'converts to name',
     labels: ['value', 'generic', 'conversion'],
     signature: {
-      input: [ValueType.string],
-      output: [ValueType.name]
+      input: [{ type: ValueType.string }],
+      output: [{ type: ValueType.name }]
     },
     samples: [
       {
@@ -27,18 +27,14 @@ buildFunctionOperator(
       }
     ]
   },
-  (state, string: string) => {
-    const { operands, memoryTracker } = state;
+  ({ operands, memoryTracker }, { string }) => {
     assert(memoryTracker instanceof MemoryTracker);
-    const refResult = memoryTracker.addStringRef(string);
+    const refResult = memoryTracker.addStringRef(string); // might be untracked
     if (!refResult.success) {
-      state.raiseException(refResult);
-      return;
+      return refResult;
     }
     const popushResult = operands.popush(1, toNameValue(string, { tracker: memoryTracker }));
     memoryTracker.releaseString(string);
-    if (!popushResult.success) {
-      state.raiseException(popushResult);
-    }
+    return popushResult;
   }
 );

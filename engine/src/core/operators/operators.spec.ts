@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, onTestFailed } from 'vitest';
-import { parse } from '@api/index.js';
+import { enumIArrayValues, parse } from '@api/index.js';
 import type { OperatorDefinition } from './operators.js';
 import { registry } from './operators.js';
 import { State } from '@core/state/State.js';
@@ -10,10 +10,6 @@ const nullDefinition: OperatorDefinition = {
   name: 'null',
   description: '',
   labels: [],
-  signature: {
-    input: [],
-    output: []
-  },
   samples: []
 };
 
@@ -74,12 +70,12 @@ describe('executing in & out using debug', () => {
                 expect(state.exception).toBeInstanceOf(expectedState.exception.constructor);
               } else {
                 expect(state.exception).toBeUndefined();
-                expect(state.operands.ref.length).toStrictEqual(expectedState.operands.ref.length);
+                expect(state.operands.length).toStrictEqual(expectedState.operands.length);
                 // flatten differences between the two memory trackers
                 Object.assign(state.memoryTracker, { _peak: 0 });
                 Object.assign(expectedState.memoryTracker, { _peak: 0 });
                 expect(state.memoryTracker.byType).toStrictEqual(expectedState.memoryTracker.byType);
-                expect(state.operands.ref).toStrictEqual(expectedState.operands.ref);
+                expect([...enumIArrayValues(state.operands)]).toStrictEqual([...enumIArrayValues(expectedState.operands)]);
               }
             });
           }

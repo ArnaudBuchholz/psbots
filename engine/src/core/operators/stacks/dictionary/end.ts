@@ -6,10 +6,6 @@ buildFunctionOperator(
     description:
       'pops the current dictionary off the dictionary stack, making the dictionary below it the current dictionary',
     labels: ['dictstack'],
-    signature: {
-      input: [],
-      output: []
-    },
     samples: [
       {
         in: '<< /test 1 >> begin end test',

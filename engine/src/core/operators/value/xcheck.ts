@@ -1,5 +1,4 @@
 import { ValueType } from '@api/index.js';
-import type { Value } from '@api/index.js';
 import { toBooleanValue } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 
@@ -9,8 +8,8 @@ buildFunctionOperator(
     description: 'checks if value is executable',
     labels: ['value', 'generic', 'permission'],
     signature: {
-      input: [null],
-      output: [ValueType.boolean]
+      input: [{ type: ValueType.null }],
+      output: [{ type: ValueType.boolean }]
     },
     samples: [
       {
@@ -25,8 +24,5 @@ buildFunctionOperator(
       }
     ]
   },
-  ({ operands }, value: Value) => {
-    operands.pop();
-    operands.push(toBooleanValue(value.isExecutable));
-  }
+  ({ operands }, value) => operands.popush(1, toBooleanValue(value.isExecutable))
 );

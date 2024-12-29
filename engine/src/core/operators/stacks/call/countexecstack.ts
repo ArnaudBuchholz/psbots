@@ -8,8 +8,7 @@ buildFunctionOperator(
     description: 'retrieves the number of dictionaries in the dictionary stack',
     labels: ['callstack'],
     signature: {
-      input: [],
-      output: [ValueType.integer]
+      output: [{ type: ValueType.integer }]
     },
     samples: [
       {
@@ -18,13 +17,11 @@ buildFunctionOperator(
       }
     ]
   },
-  (state) => {
-    const { operands, calls } = state;
+  ({ operands, calls }) => {
     const integerResult = toIntegerValue(calls.length);
     if (!integerResult.success) {
-      state.raiseException(integerResult.error);
-      return;
+      return integerResult;
     }
-    operands.push(integerResult.value);
+    return operands.push(integerResult.value);
   }
 );

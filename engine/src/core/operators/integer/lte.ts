@@ -8,8 +8,8 @@ buildFunctionOperator(
     description: 'compares two integers to see if lower than or equal',
     labels: ['integer', 'math', 'comparison'],
     signature: {
-      input: [ValueType.integer, ValueType.integer],
-      output: [ValueType.boolean]
+      input: [{ type: ValueType.integer }, { type: ValueType.integer }],
+      output: [{ type: ValueType.boolean }]
     },
     samples: [
       {
@@ -26,9 +26,5 @@ buildFunctionOperator(
       }
     ]
   },
-  ({ operands }, value1: number, value2: number) => {
-    operands.pop();
-    operands.pop();
-    operands.push(toBooleanValue(value1 <= value2));
-  }
+  ({ operands }, { integer: value1 }, { integer: value2 }) => operands.popush(2, toBooleanValue(value1 <= value2))
 );

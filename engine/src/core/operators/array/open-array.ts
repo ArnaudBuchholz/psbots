@@ -1,3 +1,4 @@
+import { ValueType } from '@api/index';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 import { openWithMark } from '@core/operators/open-close.js';
 
@@ -7,8 +8,7 @@ buildFunctionOperator(
     description: 'marks the beginning of an array',
     labels: ['array', 'mark'],
     signature: {
-      input: [],
-      output: []
+      output: [{ type: ValueType.mark }]
     },
     samples: [
       {

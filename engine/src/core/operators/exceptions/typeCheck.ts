@@ -7,8 +7,6 @@ buildFunctionOperator(
     description: 'throws the exception : Operand is of the wrong type',
     labels: ['exception'],
     signature: {
-      input: [],
-      output: [],
       exceptions: ['typecheck']
     },
     samples: [

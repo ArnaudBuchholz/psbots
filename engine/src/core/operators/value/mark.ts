@@ -7,8 +7,7 @@ buildConstantOperator(
     description: 'pushes a mark in the operand stack',
     labels: ['value', 'mark'],
     signature: {
-      input: [],
-      output: [ValueType.mark]
+      output: [{ type: ValueType.mark }]
     },
     samples: [
       {

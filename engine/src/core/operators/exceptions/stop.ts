@@ -7,8 +7,6 @@ buildFunctionOperator(
     description: 'throws the exception : Execution stopped',
     labels: ['exception'],
     signature: {
-      input: [],
-      output: [],
       exceptions: ['stop']
     },
     samples: [

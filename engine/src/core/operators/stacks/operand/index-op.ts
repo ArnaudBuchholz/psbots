@@ -8,8 +8,8 @@ buildFunctionOperator(
     description: 'duplicates the Nth item of the operand stack',
     labels: ['operand'],
     signature: {
-      input: [ValueType.integer],
-      output: [null]
+      input: [{ type: ValueType.integer }],
+      output: [{ type: ValueType.null }]
     },
     samples: [
       {
@@ -23,17 +23,10 @@ buildFunctionOperator(
       }
     ]
   },
-  (state, offset: number) => {
-    const { operands } = state;
+  ({ operands }, { integer: offset }) => {
     if (offset > operands.length) {
-      state.raiseException(new StackUnderflowException());
-      return;
+      return { success: false, error: new StackUnderflowException() };
     }
-    operands.pop();
-    const value = operands.at(offset)!;
-    const pushResult = operands.push(value);
-    if (!pushResult.success) {
-      state.raiseException(pushResult.error);
-    }
+    return operands.popush(1, operands.at(offset + 1));
   }
 );

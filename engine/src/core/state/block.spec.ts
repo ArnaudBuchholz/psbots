@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { toValue } from '@test/index.js';
 import { State } from './State.js';
 import { assert } from '@sdk/index.js';
+import { enumIArrayValues } from '@api/index.js';
 
 let state: State;
 
@@ -19,7 +20,7 @@ describe('simple code block', () => {
 
   it('pushes the first operand (cycle 1)', () => {
     state.cycle();
-    expect(state.operands.ref).toStrictEqual([toValue(1)]);
+    expect([...enumIArrayValues(state.operands)]).toStrictEqual([toValue(1)]);
     expect(state.calls.length).toStrictEqual(1);
     expect(state.calls.topOperatorState).toStrictEqual(0);
   });
@@ -27,7 +28,7 @@ describe('simple code block', () => {
   it('pushes the second operand (cycle 2)', () => {
     state.cycle();
     state.cycle();
-    expect(state.operands.ref).toStrictEqual([toValue(2), toValue(1)]);
+    expect([...enumIArrayValues(state.operands)]).toStrictEqual([toValue(2), toValue(1)]);
     expect(state.calls.length).toStrictEqual(1);
     expect(state.calls.topOperatorState).toStrictEqual(1);
   });
@@ -36,7 +37,7 @@ describe('simple code block', () => {
     state.cycle();
     state.cycle();
     state.cycle();
-    expect(state.operands.ref).toStrictEqual([toValue(3), toValue(2), toValue(1)]);
+    expect([...enumIArrayValues(state.operands)]).toStrictEqual([toValue(3), toValue(2), toValue(1)]);
     expect(state.calls.length).toStrictEqual(1);
     expect(state.calls.topOperatorState).toStrictEqual(2);
   });
@@ -46,7 +47,7 @@ describe('simple code block', () => {
     state.cycle();
     state.cycle();
     state.cycle();
-    expect(state.operands.ref).toStrictEqual([toValue(3), toValue(2), toValue(1)]);
+    expect([...enumIArrayValues(state.operands)]).toStrictEqual([toValue(3), toValue(2), toValue(1)]);
     expect(state.calls.length).toStrictEqual(0);
   });
 });
@@ -65,14 +66,14 @@ describe('code block with a call', () => {
 
   it('pushes the first operand (cycle 1)', () => {
     state.cycle();
-    expect(state.operands.ref).toStrictEqual([toValue(1)]);
+    expect([...enumIArrayValues(state.operands)]).toStrictEqual([toValue(1)]);
     expect(state.calls.length).toStrictEqual(1);
   });
 
   it('pushes the call (2)', () => {
     state.cycle();
     state.cycle();
-    expect(state.operands.ref).toStrictEqual([toValue(1)]);
+    expect([...enumIArrayValues(state.operands)]).toStrictEqual([toValue(1)]);
     expect(state.calls.length).toStrictEqual(2);
     expect(state.calls.top).toStrictEqual(toValue('test', { isExecutable: true }));
   });
@@ -93,14 +94,14 @@ describe('code block with code block', () => {
 
   it('pushes the first operand (cycle 1)', () => {
     state.cycle();
-    expect(state.operands.ref).toStrictEqual([toValue(1)]);
+    expect([...enumIArrayValues(state.operands)]).toStrictEqual([toValue(1)]);
     expect(state.calls.length).toStrictEqual(1);
   });
 
   it('considers the code block as an operand (cycle 2)', () => {
     state.cycle();
     state.cycle();
-    expect(state.operands.ref).toStrictEqual([subCodeBlock, toValue(1)]);
+    expect([...enumIArrayValues(state.operands)]).toStrictEqual([subCodeBlock, toValue(1)]);
     expect(state.calls.length).toStrictEqual(1);
   });
 });

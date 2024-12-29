@@ -15,8 +15,8 @@ buildFunctionOperator(
     description: 'returns the length of the value',
     labels: ['generic'],
     signature: {
-      input: [null],
-      output: [ValueType.integer]
+      input: [{ type: ValueType.null }],
+      output: [{ type: ValueType.integer }]
     },
     samples: [
       {
@@ -56,23 +56,15 @@ buildFunctionOperator(
       }
     ]
   },
-  (state, value: Value) => {
-    const { operands } = state;
+  ({ operands }, value) => {
     const implementation = implementations[value.type];
     if (implementation === undefined) {
-      state.raiseException(new TypeCheckException());
-      return;
+      return { success: false, error: new TypeCheckException() };
     }
     const integerResult = toIntegerValue(implementation(value as never));
     if (!integerResult.success) {
-      state.raiseException(integerResult.error);
-      return;
+      return integerResult;
     }
-    // TODO: popush
-    operands.pop();
-    const pushResult = operands.push(integerResult.value);
-    if (!pushResult.success) {
-      state.raiseException(pushResult.error);
-    }
+    return operands.popush(1, integerResult.value);
   }
 );

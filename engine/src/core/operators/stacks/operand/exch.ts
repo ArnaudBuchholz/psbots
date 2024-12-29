@@ -1,4 +1,4 @@
-import type { Value } from '@api/index.js';
+import { ValueType } from '@api/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 
 buildFunctionOperator(
@@ -7,8 +7,8 @@ buildFunctionOperator(
     description: 'swaps the first two items of the operand stack',
     labels: ['operand'],
     signature: {
-      input: [null, null],
-      output: [null, null]
+      input: [{ type: ValueType.null }, { type: ValueType.null }],
+      output: [{ type: ValueType.null }, { type: ValueType.null }]
     },
     samples: [
       {
@@ -17,10 +17,5 @@ buildFunctionOperator(
       }
     ]
   },
-  ({ operands }, value1: Value, value2: Value) => {
-    operands.pop();
-    operands.pop();
-    operands.push(value2);
-    operands.push(value1);
-  }
+  ({ operands }, value1, value2) => operands.popush(2, value2, value1)
 );

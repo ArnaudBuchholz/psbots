@@ -1,9 +1,11 @@
+import { ValueType } from '@api/index.js';
 import {
   OPERATOR_STATE_POP,
   OPERATOR_STATE_FIRST_CALL,
   OPERATOR_STATE_CALL_BEFORE_POP,
   toBooleanValue,
-  StopException
+  StopException,
+  assert
 } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 
@@ -13,8 +15,7 @@ buildFunctionOperator(
     description: 'executes the value. If execution was interrupted with stop, return true, return false otherwise',
     labels: ['flow'],
     signature: {
-      input: [null],
-      output: []
+      input: [{ type: ValueType.null }]
     },
     samples: [
       {
@@ -31,21 +32,28 @@ buildFunctionOperator(
       }
     ]
   },
-  (state) => {
+  (state, value) => {
     const { operands, calls } = state;
     const { topOperatorState } = calls;
     if (topOperatorState === OPERATOR_STATE_FIRST_CALL) {
       calls.topOperatorState = OPERATOR_STATE_CALL_BEFORE_POP;
-      calls.push(operands.top);
-      operands.pop();
-    } else if (topOperatorState === OPERATOR_STATE_CALL_BEFORE_POP) {
-      if (!state.exception) {
-        operands.push(toBooleanValue(false));
-      } else if (state.exception instanceof StopException) {
-        state.clearException();
-        operands.push(toBooleanValue(true));
+      const result = calls.push(value);
+      if (result.success) {
+        operands.pop();
       }
+      return result;
+    } else if (topOperatorState === OPERATOR_STATE_CALL_BEFORE_POP) {
       calls.topOperatorState = OPERATOR_STATE_POP;
+      if (!state.exception) {
+        return operands.push(toBooleanValue(false));
+      }
+      if (state.exception instanceof StopException) {
+        state.clearException();
+        return operands.push(toBooleanValue(true));
+      }
+      // Unexpected exception
+      return { success: true, value: undefined };
     }
+    assert(false);
   }
 );

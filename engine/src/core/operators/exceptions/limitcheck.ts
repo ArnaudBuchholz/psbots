@@ -7,8 +7,6 @@ buildFunctionOperator(
     description: 'throws the exception : An implementation limit has been exceeded',
     labels: ['exception'],
     signature: {
-      input: [],
-      output: [],
       exceptions: ['limitcheck']
     },
     samples: [

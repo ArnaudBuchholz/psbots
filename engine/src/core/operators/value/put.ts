@@ -69,8 +69,8 @@ buildFunctionOperator(
     postScriptDeviation: 'returns the modified object or a new string',
     labels: ['generic'],
     signature: {
-      input: [null, null, null],
-      output: [null]
+      input: [{ type: ValueType.null }, { type: ValueType.null }, { type: ValueType.null }],
+      output: [{ type: ValueType.null }]
     },
     samples: [
       {
@@ -165,24 +165,18 @@ buildFunctionOperator(
       }
     ]
   },
-  (state, container: Value, index: Value, value: Value) => {
-    const { operands } = state;
+  ({ operands }, container, index, value) => {
     const implementation = implementations[container.type];
     if (implementation === undefined) {
-      state.raiseException(new TypeCheckException());
-      return;
+      return { success: false, error: new TypeCheckException() };
     }
-    const result = implementation(container as never, index, value);
-    if (!result.success) {
-      state.raiseException(result.error);
-      return;
+    const putResult = implementation(container as never, index, value);
+    if (!putResult.success) {
+      return putResult;
     }
-    const { value: output } = result;
-    operands.pop();
-    operands.pop();
-    operands.pop();
-    // TODO: is it OK to assume that it can't fail since we popped two values
-    operands.push(output);
+    const { value: output } = putResult;
+    const popushResult = operands.popush(3, output);
     container.tracker?.releaseValue(output);
+    return popushResult;
   }
 );

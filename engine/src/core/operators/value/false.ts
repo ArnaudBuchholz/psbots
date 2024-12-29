@@ -8,8 +8,7 @@ buildConstantOperator(
     description: 'pushes false in the operand stack',
     labels: ['value'],
     signature: {
-      input: [],
-      output: [ValueType.boolean]
+      output: [{ type: ValueType.boolean }]
     },
     samples: [
       {

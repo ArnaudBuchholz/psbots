@@ -8,8 +8,8 @@ buildFunctionOperator(
     description: 'returns absolute values of an integer',
     labels: ['integer', 'math'],
     signature: {
-      input: [ValueType.integer],
-      output: [ValueType.integer]
+      input: [{ type: ValueType.integer }],
+      output: [{ type: ValueType.integer }]
     },
     samples: [
       {
@@ -22,16 +22,15 @@ buildFunctionOperator(
       }
     ]
   },
-  (state, value: number) => {
+  (state, { integer: value }) => {
     const { operands } = state;
     if (value < 0) {
       const integerResult = toIntegerValue(-value);
       if (!integerResult.success) {
-        state.raiseException(integerResult.error);
-        return;
+        return integerResult;
       }
-      operands.pop();
-      operands.push(integerResult.value);
+      return operands.popush(1, integerResult.value);
     }
+    return { success: true, value: undefined };
   }
 );

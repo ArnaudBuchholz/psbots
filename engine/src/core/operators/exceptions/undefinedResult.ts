@@ -7,8 +7,6 @@ buildFunctionOperator(
     description: 'throws the exception : Result cannot be represented as a number',
     labels: ['exception'],
     signature: {
-      input: [],
-      output: [],
       exceptions: ['undefinedresult']
     },
     samples: [

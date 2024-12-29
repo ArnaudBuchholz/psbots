@@ -7,8 +7,6 @@ buildFunctionOperator(
     description: 'throws the exception : No custom dictionary left to unstack',
     labels: ['exception'],
     signature: {
-      input: [],
-      output: [],
       exceptions: ['dictstackunderflow']
     },
     samples: [

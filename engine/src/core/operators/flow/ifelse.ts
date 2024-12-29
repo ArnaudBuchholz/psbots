@@ -1,5 +1,4 @@
 import { ValueType } from '@api/index.js';
-import type { Value } from '@api/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 
 buildFunctionOperator(
@@ -8,8 +7,7 @@ buildFunctionOperator(
     description: 'executes the operands based on a condition',
     labels: ['flow'],
     signature: {
-      input: [ValueType.boolean, null, null],
-      output: []
+      input: [{ type: ValueType.boolean }, { type: ValueType.null }, { type: ValueType.null }]
     },
     samples: [
       {
@@ -27,14 +25,11 @@ buildFunctionOperator(
       }
     ]
   },
-  ({ operands, calls }, condition: boolean, ifValue: Value, elseValue: Value) => {
-    operands.pop();
-    operands.pop();
-    operands.pop();
+  ({ operands, calls }, { isSet: condition }, ifValue, elseValue) => {
+    operands.popush(3);
     if (condition) {
-      calls.push(ifValue);
-    } else {
-      calls.push(elseValue);
+      return calls.push(ifValue);
     }
+    return calls.push(elseValue);
   }
 );

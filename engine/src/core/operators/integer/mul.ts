@@ -8,8 +8,8 @@ buildFunctionOperator(
     description: 'multiplies two integers',
     labels: ['integer', 'math'],
     signature: {
-      input: [ValueType.integer, ValueType.integer],
-      output: [ValueType.integer]
+      input: [{ type: ValueType.integer }, { type: ValueType.integer }],
+      output: [{ type: ValueType.boolean }]
     },
     samples: [
       {
@@ -18,15 +18,12 @@ buildFunctionOperator(
       }
     ]
   },
-  (state, value1: number, value2: number) => {
+  (state, { integer: value1 }, { integer: value2 }) => {
     const { operands } = state;
     const integerResult = toIntegerValue(value1 * value2);
     if (!integerResult.success) {
-      state.raiseException(integerResult.error);
-      return;
+      return integerResult;
     }
-    operands.pop();
-    operands.pop();
-    operands.push(integerResult.value);
+    return operands.popush(2, integerResult.value);
   }
 );

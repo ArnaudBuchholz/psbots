@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { ValueType } from '@api/index.js';
+import { enumIArrayValues, ValueType } from '@api/index.js';
 import type { Value } from '@api/index.js';
 import { State } from './State.js';
 import { toValue, waitForGenerator } from '@test/index.js';
@@ -84,7 +84,7 @@ describe('exec', () => {
     expect(state.idle).toStrictEqual(false);
     waitForGenerator(generator);
     expect(state.idle).toStrictEqual(true);
-    expect(state.operands.ref).toStrictEqual<Value[]>([toValue(123)]);
+    expect([...enumIArrayValues(state.operands)]).toStrictEqual<Value[]>([toValue(123)]);
   });
 
   it('fails if already busy', () => {
@@ -114,7 +114,7 @@ describe('memory', () => {
   it('ensures memory is handled for strings', () => {
     expect(state.memoryTracker.byType[STRING_MEMORY_TYPE]).toStrictEqual(0);
     waitForGenerator(state.exec(toValue('"123"', { isExecutable: true })));
-    const value = state.operands.ref[0];
+    const value = state.operands.at(0);
     expect(value?.type).toStrictEqual(ValueType.string);
     expect(value?.tracker).not.toBeUndefined();
     expect(state.memoryTracker.byType[STRING_MEMORY_TYPE]).not.toStrictEqual(0);

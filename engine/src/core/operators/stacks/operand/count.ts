@@ -8,8 +8,7 @@ buildFunctionOperator(
     description: 'gives back the size of the operand stack',
     labels: ['operand'],
     signature: {
-      input: [],
-      output: [ValueType.integer]
+      output: [{ type: ValueType.integer }]
     },
     samples: [
       {
@@ -18,13 +17,11 @@ buildFunctionOperator(
       }
     ]
   },
-  (state) => {
-    const { operands } = state;
+  ({ operands }) => {
     const integerResult = toIntegerValue(operands.length);
     if (!integerResult.success) {
-      state.raiseException(integerResult.error);
-      return;
+      return integerResult;
     }
-    operands.push(integerResult.value);
+    return operands.push(integerResult.value);
   }
 );

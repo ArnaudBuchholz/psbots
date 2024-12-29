@@ -1,5 +1,4 @@
 import { ValueType } from '@api/index.js';
-import type { Value } from '@api/index.js';
 import { toBooleanValue, valuesOf } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 
@@ -9,8 +8,8 @@ buildFunctionOperator(
     description: 'compares two values and return true if they are strictly different',
     labels: ['generic', 'comparison'],
     signature: {
-      input: [null, null],
-      output: [ValueType.boolean]
+      input: [{ type: ValueType.null }, { type: ValueType.null }],
+      output: [{ type: ValueType.boolean }]
     },
     samples: [
       {
@@ -35,14 +34,14 @@ buildFunctionOperator(
       }
     ]
   },
-  ({ operands }, value1: Value, value2: Value) => {
-    operands.pop();
-    operands.pop();
+  ({ operands }, value1, value2) => {
+    let eq: boolean;
     if (value1.type !== value2.type) {
-      operands.push(toBooleanValue(true));
+      eq = true;
     } else {
       const [raw1, raw2] = valuesOf(value1, value2);
-      operands.push(toBooleanValue(raw1 !== raw2));
+      eq = raw1 !== raw2;
     }
+    return operands.popush(2, toBooleanValue(eq));
   }
 );

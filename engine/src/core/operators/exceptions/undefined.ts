@@ -7,8 +7,6 @@ buildFunctionOperator(
     description: 'throws the exception : Name is not defined in the dictionary stack',
     labels: ['exception'],
     signature: {
-      input: [],
-      output: [],
       exceptions: ['undefined']
     },
     samples: [

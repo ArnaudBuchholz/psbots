@@ -7,8 +7,6 @@ buildFunctionOperator(
     description: 'throws the exception : Virtual memory exceeded',
     labels: ['exception'],
     signature: {
-      input: [],
-      output: [],
       exceptions: ['vmoverflow']
     },
     samples: [

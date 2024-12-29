@@ -7,8 +7,6 @@ buildFunctionOperator(
     description: 'throws the exception : Engine is already busy',
     labels: ['exception'],
     signature: {
-      input: [],
-      output: [],
       exceptions: ['busy']
     },
     samples: [

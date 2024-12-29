@@ -7,10 +7,6 @@ buildFunctionOperator(
     name: '{',
     description: 'marks the beginning of a block',
     labels: ['flow', 'mark'],
-    signature: {
-      input: [],
-      output: []
-    },
     samples: [
       {
         description: 'builds a block and check length and type',
@@ -20,7 +16,10 @@ buildFunctionOperator(
     ]
   },
   (state: IInternalState) => {
-    openWithMark(state);
-    state.preventCall();
+    const result = openWithMark(state);
+    if (result.success) {
+      state.preventCall();
+    }
+    return result;
   }
 );

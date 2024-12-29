@@ -1,5 +1,5 @@
 import { it, expect, beforeEach, afterEach, beforeAll } from 'vitest';
-import { ExceptionDictionaryName, markValue, ValueType } from '@api/index.js';
+import { enumIArrayValues, ExceptionDictionaryName, markValue, ValueType } from '@api/index.js';
 import type { IDebugSource, IDictionary, Value } from '@api/index.js';
 import { toValue, waitForGenerator } from '@test/index.js';
 import { State } from './State.js';
@@ -31,7 +31,7 @@ it('searches for the corresponding value', () => {
   state.calls.push(toValue(Symbol.for('mark'), { isExecutable: true }));
   state.cycle();
   expect(state.calls.length).toStrictEqual(2);
-  expect(state.calls.ref[0]).toStrictEqual(markOp);
+  expect(state.calls.at(0)).toStrictEqual(markOp);
 });
 
 it('is popped once the corresponding value has been processed', () => {
@@ -39,10 +39,10 @@ it('is popped once the corresponding value has been processed', () => {
   state.cycle();
   state.cycle();
   expect(state.calls.length).toStrictEqual(1);
-  expect(state.operands.ref).toStrictEqual([markValue]);
+  expect([...enumIArrayValues(state.operands)]).toStrictEqual([markValue]);
   state.cycle();
   expect(state.calls.length).toStrictEqual(0);
-  expect(state.operands.ref).toStrictEqual([markValue]);
+  expect([...enumIArrayValues(state.operands)]).toStrictEqual([markValue]);
 });
 
 it("throws an exception if the value can't be found", () => {
@@ -58,7 +58,7 @@ it('puts the call in the operand stack when calls are prevented', () => {
   state.calls.push(markCall);
   state.cycle();
   expect(state.calls.length).toStrictEqual(0);
-  expect(state.operands.ref).toStrictEqual([markCall]);
+  expect([...enumIArrayValues(state.operands)]).toStrictEqual([markCall]);
 });
 
 it('*always* execute { and } even if it changes callEnabled', () => {

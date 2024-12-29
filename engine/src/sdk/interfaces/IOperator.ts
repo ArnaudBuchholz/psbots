@@ -1,4 +1,4 @@
-import type { IAbstractOperator, Result, Value, ValueType } from '@api/index.js';
+import type { IAbstractOperator, IValuePermissions, Result, Value, ValueType } from '@api/index.js';
 import type { IInternalState } from '@sdk/interfaces/IInternalState.js';
 
 export enum OperatorType {
@@ -12,20 +12,29 @@ export interface IConstantOperator extends IAbstractOperator {
   readonly constant: Value;
 }
 
+export interface IOperatorTypeCheck<Type = ValueType> {
+  /**
+   * * ValueType.null indicates any value
+   * * ValutType.mark indicates mark should be found on the operand stack
+   */
+  type: Type;
+  permissions?: Partial<IValuePermissions>;
+};
+
 /** Other operators are implemented with functions */
 export interface IFunctionOperator extends IAbstractOperator {
   readonly type: OperatorType.implementation;
   /**
    * When specified, the collected values are kept valid during the operator lifetime
    * Order is significant, for instance :
-   * [ValueType.boolean, null] means top of the stack can be anything but next item must be a boolean
+   * [{ type: ValueType.boolean }, { type: ValueType.null }] means top of the stack can be anything but next item must be a boolean
    */
-  readonly typeCheck?: (ValueType | null)[];
+  readonly typeCheck?: IOperatorTypeCheck[];
   /**
-   * Operator implementation
-   * parameters are given in the order indicated by typeCheck
+   * Values are given in the same order as typeCheck, for instance :
+   * [{ type: ValueType.boolean }, { type: ValueType.null }] means values is [Value<ValueType.boolean>, Value]
    */
-  readonly implementation: (state: IInternalState, parameters: readonly Value[]) => Result<unknown> | void;
+  readonly implementation: (state: IInternalState, ...values: readonly Value[]) => Result<unknown> | void;
 }
 
 /** Operator */

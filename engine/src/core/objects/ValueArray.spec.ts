@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import type { Value } from '@api/index.js';
-import { nullValue, USER_MEMORY_TYPE } from '@api/index.js';
+import { enumIArrayValues, nullValue, USER_MEMORY_TYPE } from '@api/index.js';
 import { RangeCheckException, VmOverflowException, assert, isArrayValue } from '@sdk/index.js';
 import { MemoryTracker } from '@core/MemoryTracker.js';
 import { ValueArray } from './ValueArray.js';
@@ -48,12 +48,12 @@ describe('toValue', () => {
 
 it('implements a LIFO array (pop)', () => {
   valueArray.pop();
-  expect(valueArray.ref).toStrictEqual<Value[]>([toValue(123), toValue('abc')]);
+  expect([...enumIArrayValues(valueArray)]).toStrictEqual<Value[]>([toValue(123), toValue('abc')]);
 });
 
 it('implements a LIFO array (push)', () => {
   valueArray.push(toValue(0));
-  expect(valueArray.ref).toStrictEqual<Value[]>([toValue(123), toValue('abc'), shared.value, toValue(0)]);
+  expect([...enumIArrayValues(valueArray)]).toStrictEqual<Value[]>([toValue(123), toValue('abc'), shared.value, toValue(0)]);
 });
 
 describe('memory', () => {
@@ -89,13 +89,13 @@ describe('IArray', () => {
 
   it('allows setting a new item', () => {
     expect(valueArray.set(3, toValue(456))).toStrictEqual({ success: true, value: nullValue });
-    expect(valueArray.ref).toStrictEqual<Value[]>([toValue(123), toValue('abc'), shared.value, toValue(456)]);
+    expect([...enumIArrayValues(valueArray)]).toStrictEqual<Value[]>([toValue(123), toValue('abc'), shared.value, toValue(456)]);
   });
 
   it('allows overriding an item', () => {
     const { used: memoryUsedBefore } = tracker;
     expect(valueArray.set(0, toValue(-1))).toStrictEqual({ success: true, value: toValue(123) });
-    expect(valueArray.ref).toStrictEqual<Value[]>([toValue(-1), toValue('abc'), shared.value]);
+    expect([...enumIArrayValues(valueArray)]).toStrictEqual<Value[]>([toValue(-1), toValue('abc'), shared.value]);
     expect(tracker.used).toStrictEqual(memoryUsedBefore);
   });
 

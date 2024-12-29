@@ -1,5 +1,5 @@
 import { ValueType } from '@api/index.js';
-import { toIntegerValue } from '@sdk/index.js';
+import { toIntegerValue, UndefinedResultException } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 
 buildFunctionOperator(
@@ -8,33 +8,34 @@ buildFunctionOperator(
     description: 'realizes an euclidean division with two integers',
     labels: ['integer', 'math'],
     signature: {
-      input: [ValueType.integer, ValueType.integer],
-      output: [ValueType.integer, ValueType.integer]
+      input: [{ type: ValueType.integer }, { type: ValueType.integer }],
+      output: [{ type: ValueType.integer }, { type: ValueType.integer }],
     },
     samples: [
       {
         in: '5 3 div',
         out: '1 2'
+      },
+      {
+        in: '5 0 div',
+        out: 'undefinedresult'
       }
     ]
   },
-  (state, value1: number, value2: number) => {
+  (state, { integer: divisor }, { integer: quotient }) => {
     const { operands } = state;
-    // TODO: divide by 0
-    const reminder = value1 % value2;
+    if (quotient === 0) {
+      return { success: false, error: new UndefinedResultException() };
+    }
+    const reminder = divisor % quotient;
     const reminderResult = toIntegerValue(reminder);
     if (!reminderResult.success) {
-      state.raiseException(reminderResult.error);
-      return;
+      return reminderResult;
     }
-    const dividendResult = toIntegerValue((value1 - reminder) / value2);
+    const dividendResult = toIntegerValue((divisor - reminder) / quotient);
     if (!dividendResult.success) {
-      state.raiseException(dividendResult.error);
-      return;
+      return dividendResult;
     }
-    operands.pop();
-    operands.pop();
-    operands.push(dividendResult.value);
-    operands.push(reminderResult.value);
+    return operands.popush(2, dividendResult.value, reminderResult.value);
   }
 );

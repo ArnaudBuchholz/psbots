@@ -1,13 +1,15 @@
-import type { Value, ValueType } from '@api/index.js';
+import { SYSTEM_MEMORY_TYPE, Value, ValueType } from '@api/index.js';
 import {
   OPERATOR_STATE_UNKNOWN,
   OPERATOR_STATE_FIRST_CALL,
   OPERATOR_STATE_POP,
   OperatorType,
   StackUnderflowException,
-  TypeCheckException
+  TypeCheckException,
+  assert
 } from '@sdk/index.js';
 import type { IFunctionOperator, IInternalState, IOperator } from '@sdk/index.js';
+import { MemoryPointer, MemoryTracker } from '@core/MemoryTracker.js';
 
 export function operatorPop(state: IInternalState, value: Value<ValueType.operator>): void {
   const { calls } = state;
@@ -15,12 +17,13 @@ export function operatorPop(state: IInternalState, value: Value<ValueType.operat
   if (calls.topOperatorState === OPERATOR_STATE_FIRST_CALL || calls.topOperatorState === OPERATOR_STATE_POP) {
     calls.pop();
   } else {
-    operator.implementation(state, []);
+    operator.implementation(state);
   }
 }
 
 export function operatorCycle(state: IInternalState, value: Value<ValueType.operator>): void {
-  const { operands, calls } = state;
+  const { operands, calls, memoryTracker } = state;
+  assert(memoryTracker instanceof MemoryTracker);
   if (calls.topOperatorState <= OPERATOR_STATE_FIRST_CALL) {
     operatorPop(state, value);
     return;
@@ -35,30 +38,45 @@ export function operatorCycle(state: IInternalState, value: Value<ValueType.oper
     operands.push(operator.constant);
     calls.pop();
   } else {
-    const parameters: Value[] = [];
+    let memory: MemoryPointer | undefined;
+    const values: Value[] = [];
     if (operator.typeCheck !== undefined && isFirstCall) {
       let { length } = operator.typeCheck;
       if (operands.length < length) {
         state.raiseException(new StackUnderflowException());
         return;
       }
-      for (const valueType of operator.typeCheck) {
-        const value = operands.ref[--length]!; // length has been verified before
-        if (valueType === null || valueType === value.type) {
-          parameters.push(value);
+      const isAvailable = memoryTracker.allocate({ values: length }, SYSTEM_MEMORY_TYPE, state);
+      if (!isAvailable.success) {
+        state.raiseException(isAvailable.error);
+        return;
+      }
+      memory = isAvailable.value;
+      for (const { type, permissions} of operator.typeCheck) {
+        const value = operands.at(--length);
+        const { isReadOnly, isExecutable } = permissions ?? {};
+        if ((type === ValueType.null || type === value.type)
+          && (isReadOnly === undefined || isReadOnly === value.isReadOnly)
+          && (isExecutable === undefined || isExecutable === value.isExecutable)
+        ) {
+          values.push(value);
         } else {
           state.raiseException(new TypeCheckException());
+          memoryTracker.release(memory, state);
           return;
         }
       }
-      for (const value of parameters) {
+      for (const value of values) {
         value.tracker?.addValueRef(value);
       }
     }
     let exceptionBefore = state.exception;
-    const result = operator.implementation(state, parameters);
-    for (const value of parameters) {
+    const result = operator.implementation(state, ...values);
+    for (const value of values) {
       value.tracker?.releaseValue(value);
+    }
+    if (memory !== undefined) {
+      memoryTracker.release(memory, state);
     }
     if (result && result.success === false) {
       state.raiseException(result.error);

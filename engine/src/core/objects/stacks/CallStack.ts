@@ -1,5 +1,5 @@
 import type { IState, MemoryType, Result, Value } from '@api/index.js';
-import { nullValue, SYSTEM_MEMORY_TYPE } from '@api/index.js';
+import { enumIArrayValues, nullValue, SYSTEM_MEMORY_TYPE } from '@api/index.js';
 import type { ICallStack } from '@sdk/index.js';
 import {
   OPERATOR_STATE_UNKNOWN,
@@ -56,7 +56,7 @@ export class CallStack extends ValueStack implements ICallStack {
   }
 
   callStack(): IState['callStack'] {
-    return this.ref.map((value, index) => ({
+    return [...enumIArrayValues(this)].map((value, index) => ({
       value,
       operatorState: this._steps[index]!
     }));

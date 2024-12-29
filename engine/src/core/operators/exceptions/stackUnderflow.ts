@@ -7,8 +7,6 @@ buildFunctionOperator(
     description: 'throws the exception : Not enough operands on the stack to perform the operation',
     labels: ['exception'],
     signature: {
-      input: [],
-      output: [],
       exceptions: ['stackunderflow']
     },
     samples: [

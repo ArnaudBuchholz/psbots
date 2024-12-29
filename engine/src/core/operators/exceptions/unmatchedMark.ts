@@ -7,8 +7,6 @@ buildFunctionOperator(
     description: 'throws the exception : Unmatched mark in the operand stack',
     labels: ['exception'],
     signature: {
-      input: [],
-      output: [],
       exceptions: ['unmatchedmark']
     },
     samples: [

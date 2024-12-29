@@ -8,8 +8,7 @@ buildFunctionOperator(
     description: 'performs a circular shift of the values on the operand stack by a given amount',
     labels: ['operand'],
     signature: {
-      input: [ValueType.integer, ValueType.integer],
-      output: []
+      input: [{ type: ValueType.integer }, { type: ValueType.integer }]
     },
     samples: [
       {
@@ -50,11 +49,11 @@ buildFunctionOperator(
       }
     ]
   },
-  (state, count, shift) => {
-    const { operands } = state;
+  ({ operands }, { integer: count }, { integer: shift }) => {
+    // TODO: rewrite to pop and push only once
+    // Intermediate value array *must* be allocated
     if (count <= 0 || count > operands.length - 2) {
-      state.raiseException(new RangeCheckException());
-      return;
+      return { success: false, error: new RangeCheckException() };
     }
     operands.pop();
     operands.pop();
@@ -84,5 +83,6 @@ buildFunctionOperator(
         value.tracker?.releaseValue(value);
       }
     }
+    return { success: true, value: undefined };
   }
 );

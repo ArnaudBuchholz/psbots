@@ -1,6 +1,5 @@
 import { ValueType } from '@api/index.js';
 import {
-  TypeCheckException,
   OPERATOR_STATE_POP,
   OPERATOR_STATE_FIRST_CALL,
   OPERATOR_STATE_CALL_BEFORE_POP
@@ -16,8 +15,10 @@ buildFunctionOperator(
     description: 'executes the final block whenever the command block is unstacked',
     labels: ['flow'],
     signature: {
-      input: [ValueType.array, ValueType.array], // TODO: how to identify executable code blocks
-      output: []
+      input: [
+        { type: ValueType.array, permissions: { isExecutable: true } },
+        { type: ValueType.array, permissions: { isExecutable: true } }
+      ]
     },
     samples: [
       {
@@ -42,21 +43,17 @@ buildFunctionOperator(
       }
     ]
   },
-  (state) => {
+  (state, codeBlock, finalBlock) => {
     const { operands, calls } = state;
     const { topOperatorState } = calls;
     if (topOperatorState === OPERATOR_STATE_FIRST_CALL) {
-      const [finalBlock, codeBlock] = operands.ref;
-      if (finalBlock === undefined || !finalBlock.isExecutable || codeBlock === undefined || !codeBlock.isExecutable) {
-        state.raiseException(new TypeCheckException());
-        return;
-      }
       calls.topOperatorState = OPERATOR_STATE_CALL_BEFORE_POP;
-      // Since both operands are declared in the signature, their value remains valid during this call
-      operands.pop();
-      operands.pop();
-      calls.def(CALLS_BLOCK, finalBlock);
-      calls.push(codeBlock);
+      const defResult = calls.def(CALLS_BLOCK, finalBlock);
+      if (!defResult.success) {
+        return defResult;
+      }
+      operands.popush(2);
+      return calls.push(codeBlock);
     } else if (topOperatorState === OPERATOR_STATE_CALL_BEFORE_POP) {
       calls.topOperatorState = -2;
       if (state.exception) {
@@ -69,20 +66,14 @@ buildFunctionOperator(
         state.clearException();
       }
       const finalBlock = calls.lookup(CALLS_BLOCK);
-      if (finalBlock) {
-        finalBlock.tracker?.addValueRef(finalBlock);
-        try {
-          calls.push(finalBlock);
-        } finally {
-          finalBlock.tracker?.releaseValue(finalBlock);
-        }
-      }
+      return calls.push(finalBlock);
     } else {
       const exception = calls.lookup(CALLS_EXCEPTION);
-      if (exception && exception.type === ValueType.dictionary && !state.exception) {
+      if (exception.type === ValueType.dictionary && !state.exception) {
         state.raiseException(exception.dictionary);
       }
       calls.topOperatorState = OPERATOR_STATE_POP;
+      return { success: true, value: undefined };
     }
   }
 );

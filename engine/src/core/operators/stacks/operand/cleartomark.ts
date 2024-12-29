@@ -6,10 +6,6 @@ buildFunctionOperator(
     name: 'cleartomark',
     description: 'clears the operand stack up to the first mark',
     labels: ['operand', 'mark'],
-    signature: {
-      input: [],
-      output: []
-    },
     samples: [
       {
         in: '1 mark 2 3 cleartomark',
@@ -23,17 +19,16 @@ buildFunctionOperator(
     ]
   },
 
-  (state) => {
-    const { operands } = state;
+  ({ operands }) => {
     const markPosResult = findMarkPos(operands);
     if (!markPosResult.success) {
-      state.raiseException(markPosResult.error);
-      return;
+      return markPosResult;
     }
     let markPos = markPosResult.value;
     while (markPos-- > 0) {
       operands.pop();
     }
     operands.pop();
+    return { success: true, value: undefined };
   }
 );

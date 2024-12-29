@@ -69,8 +69,6 @@ buildFunctionOperator(
     description: 'throws the exception : ${message}',
     labels: ['exception'],
     signature: {
-      input: [],
-      output: [],
       exceptions: ['${lowercasedName}']
     },
     samples: [

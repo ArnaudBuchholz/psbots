@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { nullValue, USER_MEMORY_TYPE } from '@api/index.js';
+import { enumIArrayValues, nullValue, USER_MEMORY_TYPE } from '@api/index.js';
 import type { Value } from '@api/index.js';
 import { assert } from '@sdk/index.js';
 import { MemoryTracker } from '@core/MemoryTracker.js';
@@ -42,12 +42,12 @@ describe('top', () => {
 });
 
 it('stacks item to the beginning of the array', () => {
-  expect(stack.ref).toStrictEqual<Value[]>([toValue(123), toValue('abc')]);
+  expect([...enumIArrayValues(stack)]).toStrictEqual<Value[]>([toValue(123), toValue('abc')]);
 });
 
 it('implements a LIFO stack (pop)', () => {
   stack.pop();
-  expect(stack.ref).toStrictEqual<Value[]>([toValue('abc')]);
+  expect([...enumIArrayValues(stack)]).toStrictEqual<Value[]>([toValue('abc')]);
 });
 
 it('does not fail pop after all items were removed', () => {

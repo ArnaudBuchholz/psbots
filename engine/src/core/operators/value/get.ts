@@ -50,8 +50,8 @@ buildFunctionOperator(
     description: 'returns an indexed item from the value',
     labels: ['generic'],
     signature: {
-      input: [null, null],
-      output: [null]
+      input: [{ type: ValueType.null }, { type: ValueType.null }],
+      output: [{ type: ValueType.null }]
     },
     samples: [
       {
@@ -131,23 +131,18 @@ buildFunctionOperator(
       }
     ]
   },
-  (state, container: Value, index: Value) => {
-    const { operands } = state;
+  ({ operands }, container, index) => {
     const implementation = implementations[container.type];
     if (implementation === undefined) {
-      state.raiseException(new TypeCheckException());
-      return;
+      return { success: false, error: new TypeCheckException() };
     }
-    const result = implementation(container as never, index);
-    if (!result.success) {
-      state.raiseException(result.error);
-      return;
+    const getResult = implementation(container as never, index);
+    if (!getResult.success) {
+      return getResult;
     }
-    const { value } = result;
-    operands.pop();
-    operands.pop();
-    // TODO: is it OK to assume that it can't fail since we popped two values
-    operands.push(value);
+    const { value } = getResult;
+    const popushResult = operands.popush(2, value);
     value.tracker?.releaseValue(value);
+    return popushResult;
   }
 );

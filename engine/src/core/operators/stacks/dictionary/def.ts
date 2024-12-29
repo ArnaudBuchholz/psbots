@@ -8,8 +8,7 @@ buildFunctionOperator(
     description: 'associates key with value in the current dictionary, the one on the top of the dictionary stack',
     labels: ['dictstack'],
     signature: {
-      input: [ValueType.name, null],
-      output: []
+      input: [{ type: ValueType.name }, { type: ValueType.null }]
     },
     samples: [
       {
@@ -22,19 +21,15 @@ buildFunctionOperator(
       }
     ]
   },
-  (state, name, value) => {
-    const { operands, dictionaries } = state;
+  ({ operands, dictionaries }, { name }, value) => {
     if (dictionaries.top.isReadOnly) {
-      state.raiseException(new InvalidAccessException());
-      return;
+      return { success: false, error: new InvalidAccessException() };
     }
     const { dictionary } = dictionaries.top;
     const defResult = dictionary.def(name, value);
     if (!defResult.success) {
-      state.raiseException(defResult.error);
-      return;
+      return defResult;
     }
-    operands.pop();
-    operands.pop();
+    return operands.popush(2);
   }
 );

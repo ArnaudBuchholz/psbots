@@ -8,8 +8,7 @@ buildFunctionOperator(
     description: 'count the number of items in the operand stack up to the first mark',
     labels: ['operand'],
     signature: {
-      input: [],
-      output: [ValueType.integer]
+      output: [{ type: ValueType.integer }]
     },
     samples: [
       {
@@ -24,18 +23,15 @@ buildFunctionOperator(
     ]
   },
 
-  (state) => {
-    const { operands } = state;
+  ({ operands }) => {
     const posResult = findMarkPos(operands);
     if (!posResult.success) {
-      state.raiseException(posResult.error);
-      return;
+      return posResult;
     }
     const integerResult = toIntegerValue(posResult.value);
     if (!integerResult.success) {
-      state.raiseException(integerResult.error);
-      return;
+      return integerResult;
     }
-    operands.push(integerResult.value);
+    return operands.push(integerResult.value);
   }
 );

@@ -47,7 +47,7 @@ afterEach(() => {
 });
 
 it('starts with four dictionaries', () => {
-  expect(stack.ref.length).toStrictEqual(4);
+  expect(stack.length).toStrictEqual(4);
 });
 
 it('exposes the host dictionary', () => {
@@ -72,7 +72,7 @@ it('creates an empty dictionary if host is not specified', () => {
   const stackResult = DictionaryStack.create(tracker, SYSTEM_MEMORY_TYPE, 10, 5);
   assert(stackResult);
   const hostFreeStack = stackResult.value;
-  expect(hostFreeStack.ref.length).toStrictEqual(4);
+  expect(hostFreeStack.length).toStrictEqual(4);
   expect(hostFreeStack.host.dictionary.names).toStrictEqual<string[]>([]);
   expect(hostFreeStack.release()).toStrictEqual(false);
 });

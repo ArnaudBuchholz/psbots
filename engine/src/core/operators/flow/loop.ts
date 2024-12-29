@@ -1,10 +1,10 @@
 import { ValueType } from '@api/index.js';
 import {
-  TypeCheckException,
   OPERATOR_STATE_POP,
   OPERATOR_STATE_FIRST_CALL,
   OPERATOR_STATE_CALL_BEFORE_POP,
-  StopException
+  StopException,
+  assert
 } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 
@@ -16,8 +16,7 @@ buildFunctionOperator(
     description: 'repeatedly executes proc until proc executes the stop operator',
     labels: ['flow', 'loop'],
     signature: {
-      input: [ValueType.array], // TODO: how to identify executable code blocks
-      output: []
+      input: [{ type: ValueType.array, permissions: { isExecutable: true } }]
     },
     samples: [
       {
@@ -37,29 +36,25 @@ buildFunctionOperator(
       }
     ]
   },
-  (state) => {
+  (state, codeBlock) => {
     const { operands, calls } = state;
     const { topOperatorState } = calls;
     if (topOperatorState === OPERATOR_STATE_FIRST_CALL) {
       calls.topOperatorState = OPERATOR_STATE_CALL_BEFORE_POP;
-      if (!operands.top.isExecutable) {
-        state.raiseException(new TypeCheckException());
-        return;
-      }
-      const codeBlock = operands.top;
       calls.def(CALLS_BLOCK, codeBlock);
       operands.pop();
-      calls.push(codeBlock);
+      return calls.push(codeBlock);
     } else if (topOperatorState === OPERATOR_STATE_CALL_BEFORE_POP) {
       if (state.exception) {
         if (state.exception instanceof StopException) {
           state.clearException();
         }
         calls.topOperatorState = OPERATOR_STATE_POP;
-      } else {
-        const codeBlock = calls.lookup(CALLS_BLOCK)!; // Should exist
-        calls.push(codeBlock);
+        return { success: true, value: undefined };
       }
+      const codeBlock = calls.lookup(CALLS_BLOCK);
+      return calls.push(codeBlock);
     }
+    assert(false);
   }
 );

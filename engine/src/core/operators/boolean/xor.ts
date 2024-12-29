@@ -8,8 +8,8 @@ buildFunctionOperator(
     description: 'combines two booleans with exclusive or',
     labels: ['boolean'],
     signature: {
-      input: [ValueType.boolean, ValueType.boolean],
-      output: [ValueType.boolean]
+      input: [{ type: ValueType.boolean }, { type: ValueType.boolean }],
+      output: [{ type: ValueType.boolean }]
     },
     samples: [
       {
@@ -30,5 +30,5 @@ buildFunctionOperator(
       }
     ]
   },
-  ({ operands }, value1: boolean, value2: boolean) => operands.popush(2, toBooleanValue((value1 && !value2) || (!value1 && value2)))
+  ({ operands }, { isSet: value1 }, { isSet: value2 }) => operands.popush(2, toBooleanValue((value1 && !value2) || (!value1 && value2)))
 );

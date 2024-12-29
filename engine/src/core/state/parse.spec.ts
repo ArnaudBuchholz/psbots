@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import type { IDebugSource, Value } from '@api/index.js';
+import { enumIArrayValues, type IDebugSource, type Value } from '@api/index.js';
 import { toValue } from '@test/index.js';
 import { State } from './State.js';
 import { assert } from '@sdk/index.js';
@@ -19,14 +19,14 @@ afterEach(() => {
 it('parses and stacks tokens', () => {
   state.calls.push(toValue('123 456 789', { isExecutable: true }));
   state.cycle();
-  expect(state.operands.ref).toStrictEqual<Value[]>([toValue(123)]);
+  expect([...enumIArrayValues(state.operands)]).toStrictEqual<Value[]>([toValue(123)]);
   state.cycle();
-  expect(state.operands.ref).toStrictEqual<Value[]>([toValue(456), toValue(123)]);
+  expect([...enumIArrayValues(state.operands)]).toStrictEqual<Value[]>([toValue(456), toValue(123)]);
   state.cycle();
-  expect(state.operands.ref).toStrictEqual<Value[]>([toValue(789), toValue(456), toValue(123)]);
+  expect([...enumIArrayValues(state.operands)]).toStrictEqual<Value[]>([toValue(789), toValue(456), toValue(123)]);
   expect(state.calls.length).toStrictEqual(1);
   state.cycle();
-  expect(state.operands.ref).toStrictEqual<Value[]>([toValue(789), toValue(456), toValue(123)]);
+  expect([...enumIArrayValues(state.operands)]).toStrictEqual<Value[]>([toValue(789), toValue(456), toValue(123)]);
   expect(state.calls.length).toStrictEqual(0);
 });
 
@@ -50,7 +50,7 @@ it('forwards debugging information', () => {
   state.cycle();
   state.cycle();
   state.cycle();
-  expect(state.operands.ref).toStrictEqual<Value[]>([
+  expect([...enumIArrayValues(state.operands)]).toStrictEqual<Value[]>([
     Object.assign(
       {
         debugSource: {
@@ -93,7 +93,7 @@ describe('memory tracker', () => {
     state.calls.push(toValue('/abc', { isExecutable: true }));
     state.cycle();
     state.cycle();
-    expect(state.operands.ref).toStrictEqual<Value[]>([
+    expect([...enumIArrayValues(state.operands)]).toStrictEqual<Value[]>([
       Object.assign({ tracker: state.memoryTracker }, toValue(Symbol.for('abc')))
     ]);
     expect(state.calls.length).toStrictEqual(0);
@@ -103,7 +103,7 @@ describe('memory tracker', () => {
     state.calls.push(toValue('"abc"', { isExecutable: true }));
     state.cycle();
     state.cycle();
-    expect(state.operands.ref).toStrictEqual<Value[]>([
+    expect([...enumIArrayValues(state.operands)]).toStrictEqual<Value[]>([
       Object.assign({ tracker: state.memoryTracker }, toValue('abc'))
     ]);
     expect(state.calls.length).toStrictEqual(0);

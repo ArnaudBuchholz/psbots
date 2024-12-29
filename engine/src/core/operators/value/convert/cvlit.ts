@@ -1,4 +1,4 @@
-import type { Value } from '@api/index.js';
+import { Value, ValueType } from '@api/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 
 buildFunctionOperator(
@@ -7,8 +7,8 @@ buildFunctionOperator(
     description: 'removes executable flag',
     labels: ['value', 'generic', 'conversion'],
     signature: {
-      input: [null],
-      output: [null]
+      input: [{ type: ValueType.null }],
+      output: [{ type: ValueType.null, permissions: { isExecutable: false } }]
     },
     samples: [
       {
@@ -29,12 +29,8 @@ buildFunctionOperator(
   },
   ({ operands }, value: Value) => {
     if (value.isExecutable) {
-      const newValue = {
-        ...value,
-        isExecutable: false
-      } as Value;
-      operands.pop();
-      operands.push(newValue);
+      return operands.popush(1, { ...value, isExecutable: false } as Value);
     }
+    return { success: true, value: undefined };
   }
 );

@@ -1,3 +1,4 @@
+import { ValueType } from '@api/index';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 
 export const pop = buildFunctionOperator(
@@ -6,8 +7,7 @@ export const pop = buildFunctionOperator(
     description: 'removes the top item of the operand stack',
     labels: ['operand'],
     signature: {
-      input: [null],
-      output: []
+      input: [{ type: ValueType.null }]
     },
     samples: [
       {

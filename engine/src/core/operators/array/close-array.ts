@@ -1,6 +1,7 @@
 import type { IInternalState } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 import { closeToMark } from '@core/operators/open-close.js';
+import { ValueType } from '@api/values';
 
 buildFunctionOperator(
   {
@@ -8,8 +9,7 @@ buildFunctionOperator(
     description: 'finalizes an array',
     labels: ['array', 'mark'],
     signature: {
-      input: [],
-      output: []
+      output: [{ type: ValueType.array, permissions: { isReadOnly: false, isExecutable: false }}]
     },
     samples: [
       {

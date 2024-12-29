@@ -1,5 +1,4 @@
 import { ValueType } from '@api/index.js';
-import type { Value } from '@api/index.js';
 import { assert, toNameValue } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 import { MemoryTracker } from '@core/MemoryTracker.js';
@@ -10,8 +9,8 @@ buildFunctionOperator(
     description: 'pushes the type of the value in the operand stack',
     labels: ['value', 'generic'],
     signature: {
-      input: [null],
-      output: [ValueType.name]
+      input: [{ type: ValueType.null }],
+      output: [{ type: ValueType.name }]
     },
     samples: [
       {
@@ -32,19 +31,15 @@ buildFunctionOperator(
       }
     ]
   },
-  (state, value: Value) => {
-    const { operands, memoryTracker } = state;
+  ({ operands, memoryTracker }, value) => {
     assert(memoryTracker instanceof MemoryTracker);
     const { type } = value;
     const refResult = memoryTracker.addStringRef(type);
     if (!refResult.success) {
-      state.raiseException(refResult);
-      return;
+      return refResult;
     }
     const popushResult = operands.popush(1, toNameValue(type, { tracker: memoryTracker }));
     memoryTracker.releaseString(type);
-    if (!popushResult.success) {
-      state.raiseException(popushResult);
-    }
+    return popushResult;
   }
 );

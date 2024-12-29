@@ -1,5 +1,4 @@
 import { enumIArrayValues, ValueType } from '@api/index.js';
-import type { IReadOnlyArray } from '@api/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 
 buildFunctionOperator(
@@ -8,8 +7,7 @@ buildFunctionOperator(
     description: 'loads all items of the array in the operand stack',
     labels: ['array'],
     signature: {
-      input: [ValueType.array],
-      output: []
+      input: [{ type: ValueType.array }]
     },
     samples: [
       {
@@ -18,8 +16,8 @@ buildFunctionOperator(
       }
     ]
   },
-  ({ operands }, array: IReadOnlyArray) => {
-    const arrayValue = operands.top;
+  ({ operands }, arrayValue) => {
+    const { array } = arrayValue;
     return operands.popush(1, [...enumIArrayValues(array)], arrayValue);
   }
 );

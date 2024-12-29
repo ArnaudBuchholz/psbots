@@ -1,9 +1,9 @@
 import type { IOperatorValue, OperatorValue, Result, Value } from '@api/index.js';
 import { ValueType } from '@api/index.js';
-import type { IInternalState, IFunctionOperator } from '@sdk/index.js';
-import { assert, OperatorType, valuesOf } from '@sdk/index.js';
+import type { IInternalState, IFunctionOperator, IOperatorTypeCheck } from '@sdk/index.js';
+import { assert, OperatorType } from '@sdk/index.js';
 
-export type OperatorDefinition = {
+export type OperatorDefinition<Input = IOperatorTypeCheck[]> = {
   name: string;
   aliases?: string[];
   description: string;
@@ -27,10 +27,10 @@ export type OperatorDefinition = {
     | 'permission'
     | 'value'
   )[];
-  signature: {
-    input: (ValueType | null)[];
-    output: (ValueType | null)[];
-    exceptions?: string[];
+  signature?: {
+    input?: Input;
+    output?: [IOperatorTypeCheck] | [IOperatorTypeCheck, IOperatorTypeCheck];
+    exceptions?: [string];
   };
   samples: {
     description?: string;
@@ -41,42 +41,35 @@ export type OperatorDefinition = {
 
 export const registry: {
   [key in string]: {
-    definition: OperatorDefinition;
+    definition: OperatorDefinition<IOperatorTypeCheck[]>;
     value: Value<ValueType.operator>;
   };
 } = {};
 
+export function buildFunctionOperator<T1 extends ValueType>(
+  definition: OperatorDefinition<[IOperatorTypeCheck<T1>]>,
+  implementation: (state: IInternalState, value: Value<T1>) => Result<unknown> | void
+): OperatorValue
+export function buildFunctionOperator<T1 extends ValueType, T2 extends ValueType>(
+  definition: OperatorDefinition<[IOperatorTypeCheck<T1>, IOperatorTypeCheck<T2>]>,
+  implementation: (state: IInternalState, value1: Value<T1>, value2: Value<T2>) => Result<unknown> | void
+): OperatorValue
+export function buildFunctionOperator<T1 extends ValueType, T2 extends ValueType, T3 extends ValueType>(
+  definition: OperatorDefinition<[IOperatorTypeCheck<T1>, IOperatorTypeCheck<T2>, IOperatorTypeCheck<T3>]>,
+  implementation: (state: IInternalState, value1: Value<T1>, value2: Value<T2>, value3: Value<T3>) => Result<unknown> | void
+): OperatorValue
 export function buildFunctionOperator(
   definition: OperatorDefinition,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  implementation: (state: IInternalState, ...values: any[]) => Result<unknown> | void
+  implementation: (state: IInternalState, ...values: Value[]) => Result<unknown> | void
 ): OperatorValue {
   assert(!registry[definition.name], `Operator ${definition.name} is not defined`);
   Object.freeze(definition); // Can't be altered
-  let operator: IFunctionOperator;
-  if (definition.signature.input.length > 0) {
-    const { input: typeCheck } = definition.signature;
-    operator = {
-      type: OperatorType.implementation,
-      name: definition.name,
-      typeCheck,
-      implementation: function (state, parameters) {
-        const values: unknown[] = parameters.map((value, index) => {
-          if (typeCheck[index] === null) {
-            return value;
-          }
-          return valuesOf(value)[0];
-        });
-        implementation(state, ...values);
-      }
-    };
-  } else {
-    operator = {
-      type: OperatorType.implementation,
-      name: definition.name,
-      implementation
-    };
-  }
+  const operator: IFunctionOperator = {
+    type: OperatorType.implementation,
+    name: definition.name,
+    typeCheck: definition.signature?.input,
+    implementation
+  };
   const value = {
     type: ValueType.operator,
     isExecutable: true,
@@ -104,7 +97,7 @@ export function buildFunctionOperator(
   return value;
 }
 
-export function buildConstantOperator(definition: OperatorDefinition, value: Value): void {
+export function buildConstantOperator(definition: OperatorDefinition<IOperatorTypeCheck[]>, value: Value): void {
   const operator = {
     type: OperatorType.constant,
     name: definition.name,

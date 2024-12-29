@@ -7,8 +7,7 @@ buildFunctionOperator(
     description: 'pushes the dictionary on the dictionary stack, making it the current one',
     labels: ['dictstack'],
     signature: {
-      input: [ValueType.dictionary], // TODO: pass as Value
-      output: []
+      input: [{ type: ValueType.dictionary }]
     },
     samples: [
       {
@@ -17,8 +16,11 @@ buildFunctionOperator(
       }
     ]
   },
-  ({ operands, dictionaries }) => {
-    dictionaries.push(operands.top);
-    operands.pop();
+  ({ operands, dictionaries }, value) => {
+    const result = dictionaries.push(value);
+    if (result.success) {
+      operands.pop();
+    }
+    return result;
   }
 );

@@ -7,8 +7,7 @@ buildFunctionOperator(
     description: 'retrieves the global dictionary from the dictionary stack',
     labels: ['dictstack'],
     signature: {
-      input: [],
-      output: [ValueType.dictionary]
+      output: [{ type: ValueType.dictionary }]
     },
     samples: [
       {

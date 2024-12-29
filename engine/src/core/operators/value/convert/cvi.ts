@@ -1,5 +1,5 @@
-import { ValueType } from '@api/index.js';
 import type { Value } from '@api/index.js';
+import { ValueType } from '@api/index.js';
 import { toIntegerValue, TypeCheckException } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 
@@ -9,8 +9,8 @@ buildFunctionOperator(
     description: 'converts to integer',
     labels: ['value', 'generic', 'conversion'],
     signature: {
-      input: [null],
-      output: [ValueType.integer]
+      input: [{ type: ValueType.null }],
+      output: [{ type: ValueType.integer }]
     },
     samples: [
       {
@@ -36,22 +36,19 @@ buildFunctionOperator(
       }
     ]
   },
-  (state, value: Value) => {
-    const { operands } = state;
+  ({ operands }, value: Value) => {
     if (value.type !== ValueType.integer) {
       if (value.type === ValueType.string) {
         const integer = parseInt(value.string, 10);
         const integerValueResult = toIntegerValue(integer);
         if (!integerValueResult.success) {
-          state.raiseException(integerValueResult.error);
-          return;
+          return integerValueResult;
         }
-        // TODO: popush
-        operands.pop();
-        operands.push(integerValueResult.value);
+        return operands.popush(1, integerValueResult.value);
       } else {
-        state.raiseException(new TypeCheckException());
+        return { success: false, error: new TypeCheckException() };
       }
     }
+    return { success: true, value: undefined };
   }
 );

@@ -7,8 +7,7 @@ buildFunctionOperator(
     description: 'retrieves the top of the dictionary stack',
     labels: ['dictstack'],
     signature: {
-      input: [],
-      output: [ValueType.dictionary]
+      output: [{ type: ValueType.dictionary }]
     },
     samples: [
       {

@@ -10,8 +10,7 @@ buildConstantOperator(
     description: 'returns a string that identifies the version of the engine',
     labels: ['value'],
     signature: {
-      input: [],
-      output: [ValueType.string]
+      output: [{ type: ValueType.string }]
     },
     samples: [
       {
