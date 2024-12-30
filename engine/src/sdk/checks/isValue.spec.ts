@@ -8,10 +8,8 @@ import {
   isOperatorValue,
   isArrayValue,
   isDictionaryValue,
-  isNameValue
-} from '@sdk/checks/isValue.js';
-import { toIntegerValue, toNameValue, toStringValue } from '@sdk/toValue';
-import { assert } from '@sdk/exceptions';
+  isNameValue,
+  assert, toIntegerValue, toNameValue, toStringValue } from '@sdk/index.js';
 
 function testFlags(
   is: (value: unknown, flags?: Partial<IValuePermissions>) => void,

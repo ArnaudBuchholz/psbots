@@ -1,5 +1,5 @@
 import type { Value } from '@api/values/Value.js';
-import type { IReadOnlyDictionary } from '@api/interfaces/IReadOnlyDictionary';
+import type { IReadOnlyDictionary } from '@api/interfaces/IReadOnlyDictionary.js';
 import type { Result } from '@api/Result.js';
 
 /** A collection of values indexed by a name */

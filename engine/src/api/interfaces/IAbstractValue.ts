@@ -1,5 +1,5 @@
 import type { ValueType } from '@api/values/ValueType.js';
-import type { IValueTracker } from '@api/interfaces/IValueTracker';
+import type { IValueTracker } from '@api/interfaces/IValueTracker.js';
 import type { IDebugSource } from '@api/interfaces/IDebugSource.js';
 
 export interface IValuePermissions {

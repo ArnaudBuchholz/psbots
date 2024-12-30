@@ -97,10 +97,41 @@ async function updateVersion() {
   );
 }
 
+async function checkSources(path) {
+  const names = await readdir(path);
+  const files = {};
+  for (const name of names) {
+    files[name] = await stat(join(path, name));
+  }
+  let errors = 0;
+  for (const [name, stat] of Object.entries(files)) {
+    const fullPath = join(path, name);
+    if (stat.isDirectory()) {
+      errors += await checkSources(fullPath);
+    } else {
+      const source = await readFile(fullPath, 'utf-8');
+      const lines = [];
+      source.replace(/import (?:type )?\{[^}]+\} from '((?:@|\.)[^']+)';/g, (line, src) => {
+        if (!src.endsWith('.js')) {
+          lines.push(line);
+        }
+      });
+      if (lines.length) {
+        errors += lines.length;
+        console.error('⚠️', fullPath, ': check imports');
+        lines.forEach(line => console.error('\t', line));
+      }
+    }
+  }
+  return errors;
+}
+
 async function main() {
-  generateExceptions();
-  generateIndexes('src', false);
-  updateVersion();
+  await generateExceptions();
+  await generateIndexes('src', false);
+  await updateVersion();
+  process.exitCode = 0;
+  process.exitCode += await checkSources('src');
 }
 
 main().catch((reason) => {

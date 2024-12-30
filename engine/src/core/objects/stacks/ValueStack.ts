@@ -1,7 +1,7 @@
 import type { MemoryType, Value } from '@api/index.js';
 import { nullValue, Result } from '@api/index.js';
+import type { IStack } from '@sdk/index.js';
 import { AbstractValueContainer } from '@core/objects/AbstractValueContainer.js';
-import type { IStack } from '@sdk/interfaces/IStack';
 import { MemoryTracker } from '@core/MemoryTracker.js';
 
 /** Makes push & pop manipulate the beginning of the array */

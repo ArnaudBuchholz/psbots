@@ -1,7 +1,7 @@
 import type { Value, IValueTracker } from '@api/index.js';
 import { ValueType } from '@api/index.js';
-import type { MemorySize } from '@core/MemoryTracker';
 import { assert } from '@sdk/index.js';
+import type { MemorySize } from '@core/MemoryTracker.js';
 
 const getShareableObject = (value: Value): ShareableObject => {
   if (value.type === ValueType.array) {

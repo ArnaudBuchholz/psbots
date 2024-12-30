@@ -1,8 +1,8 @@
 import { it, expect, beforeEach, afterEach, vi } from 'vitest';
 import type { IDebugSource } from '@api/index.js';
+import { assert, LimitcheckException } from '@sdk/index.js';
 import { State } from '@core/state/State.js';
 import { toValue, waitForGenerator } from '@test/index.js';
-import { assert, LimitcheckException } from '@sdk/exceptions';
 import { ValueArray } from '@core/objects/ValueArray.js';
 
 let state: State;

@@ -1,6 +1,6 @@
 import type { DictionaryValue, IDictionary, IReadOnlyDictionary, NullValue, Result, Value } from '@api/index.js';
-import { DictStackUnderflowException, UndefinedException } from '@sdk/exceptions';
-import type { IStack } from '@sdk/interfaces/IStack.js';
+import type { IStack } from '@sdk/index.js';
+import { DictStackUnderflowException, UndefinedException } from '@sdk/index.js';
 
 export type DictionaryStackWhereResult = {
   dictionary: IReadOnlyDictionary | IDictionary;

@@ -1,5 +1,5 @@
 import type { ValueType } from '@api/values/ValueType.js';
-import type { NullValue } from '@api/values/NullValue';
+import type { NullValue } from '@api/values/NullValue.js';
 import type { BooleanValue } from '@api/values/BooleanValue.js';
 import type { IntegerValue } from '@api/values/IntegerValue.js';
 import type { StringValue } from '@api/values/StringValue.js';

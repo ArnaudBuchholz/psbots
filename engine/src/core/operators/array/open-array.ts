@@ -1,4 +1,4 @@
-import { ValueType } from '@api/index';
+import { ValueType } from '@api/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 import { openWithMark } from '@core/operators/open-close.js';
 
