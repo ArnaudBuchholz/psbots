@@ -1,9 +1,13 @@
 import { ValueType } from '@psbots/engine';
 import type { Value } from '@psbots/engine';
-import { OperatorType } from '@psbots/engine/sdk';
+import { OperatorType, BaseException } from '@psbots/engine/sdk';
 import type { IFunctionOperator } from '@psbots/engine/sdk';
 
-export class ExitError extends Error {}
+export class ExitError extends BaseException {
+  constructor() {
+    super('exit');
+  }
+}
 
 export const exit: Value<ValueType.operator> = {
   type: ValueType.operator,

@@ -1,4 +1,4 @@
-import type { Value, IReadOnlyDictionary } from '@psbots/engine';
+import { type Value, type IReadOnlyDictionary, nullValue } from '@psbots/engine';
 import type { IReplIO } from '../IReplIO.js';
 import { exit } from './exit.js';
 import { createStateOperator } from './state.js';
@@ -20,8 +20,8 @@ export function createHostDictionary(replIO: IReplIO): IReadOnlyDictionary {
       return Object.keys(hostMappings);
     },
 
-    lookup(name: string): Value | null {
-      return hostMappings[name] ?? null;
+    lookup(name: string): Value {
+      return hostMappings[name] ?? nullValue;
     }
   };
 }

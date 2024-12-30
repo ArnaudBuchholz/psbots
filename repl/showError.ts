@@ -1,6 +1,6 @@
 import type { IReplIO } from './IReplIO.js';
 import { red, white } from './colors.js';
-import { BaseException, InternalException } from '@psbots/engine/sdk';
+import { BaseException } from '@psbots/engine/sdk';
 
 export function showError(replIO: IReplIO, e: unknown) {
   if (!(e instanceof BaseException)) {
@@ -20,8 +20,5 @@ export function showError(replIO: IReplIO, e: unknown) {
   } else {
     replIO.output(`${red}❌ ${e.message}${white}\r\n`);
     e.engineStack.forEach((line) => replIO.output(`${red}${line}${white}\r\n`));
-    if (e instanceof InternalException && typeof e.reason === 'object') {
-      replIO.output(`${red}${JSON.stringify(e.reason, undefined, 2)}${white}\r\n`);
-    }
   }
 }
