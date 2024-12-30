@@ -1,5 +1,5 @@
 import { ValueType } from '@api/index.js';
-import { findMarkPos, toIntegerValue } from '@sdk/index.js';
+import { assert, findMarkPos, toIntegerValue } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 
 buildFunctionOperator(
@@ -29,9 +29,7 @@ buildFunctionOperator(
       return posResult;
     }
     const integerResult = toIntegerValue(posResult.value);
-    if (!integerResult.success) {
-      return integerResult;
-    }
+    assert(integerResult.success); // cannot exceed limit
     return operands.push(integerResult.value);
   }
 );

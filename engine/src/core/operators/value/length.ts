@@ -1,6 +1,6 @@
 import type { Value } from '@api/index.js';
 import { ValueType } from '@api/index.js';
-import { toIntegerValue, TypeCheckException } from '@sdk/index.js';
+import { assert, toIntegerValue, TypeCheckException } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 
 const implementations: { [type in ValueType]?: (container: Value<type>) => number } = {
@@ -62,9 +62,7 @@ buildFunctionOperator(
       return { success: false, error: new TypeCheckException() };
     }
     const integerResult = toIntegerValue(implementation(value as never));
-    if (!integerResult.success) {
-      return integerResult;
-    }
+    assert(integerResult.success); // cannot exceed limit
     return operands.popush(1, integerResult.value);
   }
 );
