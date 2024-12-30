@@ -42,18 +42,17 @@ buildFunctionOperator(
         operands.pop();
       }
       return result;
-    } else if (topOperatorState === OPERATOR_STATE_CALL_BEFORE_POP) {
-      calls.topOperatorState = OPERATOR_STATE_POP;
-      if (!state.exception) {
-        return operands.push(toBooleanValue(false));
-      }
-      if (state.exception instanceof StopException) {
-        state.clearException();
-        return operands.push(toBooleanValue(true));
-      }
-      // Unexpected exception
-      return { success: true, value: undefined };
     }
-    assert(false);
+    assert(topOperatorState === OPERATOR_STATE_CALL_BEFORE_POP);
+    calls.topOperatorState = OPERATOR_STATE_POP;
+    if (!state.exception) {
+      return operands.push(toBooleanValue(false));
+    }
+    if (state.exception instanceof StopException) {
+      state.clearException();
+      return operands.push(toBooleanValue(true));
+    }
+    // Unexpected exception
+    return { success: true, value: undefined };
   }
 );
