@@ -73,6 +73,11 @@ describe('callStack', () => {
       }
     ]);
   });
+
+  it('supports popush', () => {
+    const result = callstack.popush(0, toValue(1));
+    expect(result).toStrictEqual<Result<number>>({ success: true, value: 1 });
+  });
 });
 
 describe('IDictionary', () => {
