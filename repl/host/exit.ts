@@ -16,8 +16,6 @@ export const exit: Value<ValueType.operator> = {
   operator: <IFunctionOperator>{
     name: 'exit',
     type: OperatorType.implementation,
-    implementation: () => {
-      throw new ExitError();
-    }
+    implementation: () => ({ success: false, error: new ExitError() })
   }
 };

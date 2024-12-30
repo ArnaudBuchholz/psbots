@@ -16,8 +16,6 @@ export const debug: Value<ValueType.operator> = {
   operator: <IFunctionOperator>{
     name: 'debug',
     type: OperatorType.implementation,
-    implementation: () => {
-      throw new DebugError();
-    }
+    implementation: () => ({ success: false, error: new DebugError() })
   }
 };
