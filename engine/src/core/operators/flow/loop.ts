@@ -8,7 +8,7 @@ import {
 } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 
-const CALLS_BLOCK = 'block';
+const LOOP_BLOCK = 'block';
 
 buildFunctionOperator(
   {
@@ -41,20 +41,19 @@ buildFunctionOperator(
     const { topOperatorState } = calls;
     if (topOperatorState === OPERATOR_STATE_FIRST_CALL) {
       calls.topOperatorState = OPERATOR_STATE_CALL_BEFORE_POP;
-      calls.def(CALLS_BLOCK, codeBlock);
+      calls.def(LOOP_BLOCK, codeBlock);
       operands.pop();
       return calls.push(codeBlock);
-    } else if (topOperatorState === OPERATOR_STATE_CALL_BEFORE_POP) {
-      if (state.exception) {
-        if (state.exception instanceof StopException) {
-          state.clearException();
-        }
-        calls.topOperatorState = OPERATOR_STATE_POP;
-        return { success: true, value: undefined };
-      }
-      const codeBlock = calls.lookup(CALLS_BLOCK);
-      return calls.push(codeBlock);
     }
-    assert(false);
+    assert(topOperatorState === OPERATOR_STATE_CALL_BEFORE_POP);
+    if (state.exception) {
+      if (state.exception instanceof StopException) {
+        state.clearException();
+      }
+      calls.topOperatorState = OPERATOR_STATE_POP;
+      return { success: true, value: undefined };
+    }
+    const loopBlock = calls.lookup(LOOP_BLOCK);
+    return calls.push(loopBlock);
   }
 );
