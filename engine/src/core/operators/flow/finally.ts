@@ -57,12 +57,15 @@ buildFunctionOperator(
     } else if (topOperatorState === OPERATOR_STATE_CALL_BEFORE_POP) {
       calls.topOperatorState = -2;
       if (state.exception) {
-        calls.def(CALLS_EXCEPTION, {
+        const defResult = calls.def(CALLS_EXCEPTION, {
           type: ValueType.dictionary,
           isExecutable: false,
           isReadOnly: true,
           dictionary: state.exception
         });
+        if (!defResult.success) {
+          return defResult;
+        }
         state.clearException();
       }
       const finalBlock = calls.lookup(CALLS_BLOCK);
