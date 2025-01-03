@@ -119,7 +119,7 @@ async function checkSources(path) {
       if (lines.length) {
         errors += lines.length;
         console.error('⚠️', fullPath, ': check imports');
-        lines.forEach(line => console.error('\t', line));
+        lines.forEach((line) => console.error('\t', line));
       }
     }
   }
