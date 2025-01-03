@@ -24,11 +24,6 @@ buildFunctionOperator(
     if (!markPosResult.success) {
       return markPosResult;
     }
-    let markPos = markPosResult.value;
-    while (markPos-- > 0) {
-      operands.pop();
-    }
-    operands.pop();
-    return { success: true, value: undefined };
+    return operands.popush(markPosResult.value + 1);
   }
 );
