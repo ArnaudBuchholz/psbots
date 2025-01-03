@@ -63,6 +63,18 @@ for (const definition of Object.values(registry)) {
 console.log(`Version   :${magenta}`, version, white);
 console.log('Samples   :', sampleCount);
 console.log('Cycles    :', cycles);
-console.log(`Duration  :${yellow}`, timeSpent.toLocaleString(), `${white}nanoseconds`);
+console.log(`Duration  :${yellow}`, timeSpent.toLocaleString(), `${white}ns`);
 console.log('Cycles/ms :', Math.floor((10 ** 9) * cycles / timeSpent) / 1000);
-// console.log(operators);
+
+const operatorNames = Object.keys(operators).sort();
+const operatorStatistics = {};
+for(const operator of operatorNames) {
+  const durations = operators[operator];
+  const totalDuration = durations.reduce((total, duration) => duration + total);
+  const mean = Math.floor(totalDuration / durations.length);
+  operatorStatistics[operator] = {
+    count: durations.length,
+    'mean (ns)': mean.toLocaleString().padStart(6, ' ')
+  }
+}
+console.table(operatorStatistics);
