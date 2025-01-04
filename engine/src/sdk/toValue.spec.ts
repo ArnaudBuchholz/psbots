@@ -4,7 +4,7 @@ import { ValueType } from '@api/index.js';
 import { toBooleanValue, toIntegerValue, toNameValue, toStringValue } from './toValue.js';
 import { MemoryTracker } from '@core/MemoryTracker.js';
 import { UndefinedResultException } from '@sdk/exceptions/UndefinedResultException.js';
-import { assert } from './exceptions/AssertException.js';
+import { assert } from './assert.js';
 
 it('converts a boolean', () => {
   const value = toBooleanValue(true);

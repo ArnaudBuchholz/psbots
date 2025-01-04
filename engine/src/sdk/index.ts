@@ -1,3 +1,4 @@
+export * from './assert.js';
 export * from './checkPos.js';
 export * from './checks/index.js';
 export * from './exceptions/index.js';

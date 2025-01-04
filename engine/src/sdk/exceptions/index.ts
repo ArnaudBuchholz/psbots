@@ -1,4 +1,3 @@
-export * from './AssertException.js';
 export * from './BaseException.js';
 export * from './BusyException.js';
 export * from './DictStackUnderflowException.js';

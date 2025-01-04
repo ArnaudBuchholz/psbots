@@ -6,7 +6,7 @@ import { MemoryTracker } from '@core/MemoryTracker.js';
 import { ValueStack } from '@core/objects/stacks/ValueStack.js';
 import { findMarkPos } from './findMarkPos.js';
 import { toValue } from '@test/index.js';
-import { assert } from './exceptions/AssertException.js';
+import { assert } from './assert.js';
 
 let tracker: MemoryTracker;
 let stack: ValueStack;
