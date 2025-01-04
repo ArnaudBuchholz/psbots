@@ -38,7 +38,7 @@ export function operatorCycle(state: IInternalState, value: Value<ValueType.oper
     operands.push(operator.constant);
     calls.pop();
   } else {
-    let memory: MemoryPointer | undefined;
+    let valuesMemory: MemoryPointer | undefined;
     const values: Value[] = [];
     if (operator.typeCheck !== undefined && isFirstCall) {
       let { length } = operator.typeCheck;
@@ -51,7 +51,7 @@ export function operatorCycle(state: IInternalState, value: Value<ValueType.oper
         state.raiseException(isAvailable.error);
         return;
       }
-      memory = isAvailable.value;
+      valuesMemory = isAvailable.value;
       for (const { type, permissions} of operator.typeCheck) {
         const value = operands.at(--length);
         const { isReadOnly, isExecutable } = permissions ?? {};
@@ -62,7 +62,7 @@ export function operatorCycle(state: IInternalState, value: Value<ValueType.oper
           values.push(value);
         } else {
           state.raiseException(new TypeCheckException());
-          memoryTracker.release(memory, state);
+          memoryTracker.release(valuesMemory, state);
           return;
         }
       }
@@ -72,11 +72,11 @@ export function operatorCycle(state: IInternalState, value: Value<ValueType.oper
     }
     let exceptionBefore = state.exception;
     const result = operator.implementation(state, ...values);
-    for (const value of values) {
-      value.tracker?.releaseValue(value);
-    }
-    if (memory !== undefined) {
-      memoryTracker.release(memory, state);
+    if (valuesMemory !== undefined) {
+      for (const value of values) {
+        value.tracker?.releaseValue(value);
+      }
+      memoryTracker.release(valuesMemory, state);
     }
     if (result && result.success === false) {
       state.raiseException(result.error);
