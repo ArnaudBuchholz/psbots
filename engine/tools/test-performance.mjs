@@ -28,9 +28,11 @@ function execute(source) {
   while (++cycles < MAX_CYCLES) {
     const { callStack } = state;
     let instruction;
-
     if (callStack[0]?.value.type === ValueType.operator) {
       instruction = callStack[0].value.operator.name;
+      if (state.exception !== undefined) {
+        instruction += '!';
+      }
     }
     const start = hrtime();
     const { done } = iterator.next();
