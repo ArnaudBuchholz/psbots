@@ -20,9 +20,9 @@ let timeSpent = 0; // nanoseconds
 const measurements = {};
 
 function execute(source) {
-  const { value: state, error } = createState();
-  if (error) {
-    throw error;
+  const { value: state, exception } = createState();
+  if (exception) {
+    throw exception;
   }
   const iterator = state.exec(toStringValue(source, { isExecutable: true }));
   while (++cycles < MAX_CYCLES) {

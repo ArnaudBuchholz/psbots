@@ -6,8 +6,6 @@ import { toValue, waitForGenerator } from '@test/index.js';
 import type { IFunctionOperator, IInternalState } from '@sdk/index.js';
 import {
   assert,
-  BusyException,
-  InvalidAccessException,
   OPERATOR_STATE_FIRST_CALL,
   OperatorType
 } from '@sdk/index.js';

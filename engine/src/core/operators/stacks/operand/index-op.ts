@@ -1,5 +1,4 @@
 import { ValueType } from '@api/index.js';
-import { StackUnderflowException } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 
 buildFunctionOperator(
@@ -25,7 +24,7 @@ buildFunctionOperator(
   },
   ({ operands }, { integer: offset }) => {
     if (offset > operands.length) {
-      return { success: false, error: new StackUnderflowException() };
+      return { success: false, exception: 'stackUnderflow' };
     }
     return operands.popush(1, operands.at(offset + 1));
   }

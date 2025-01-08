@@ -6,8 +6,7 @@ import {
   OPERATOR_STATE_FIRST_CALL,
   OPERATOR_STATE_POP,
   OPERATOR_STATE_CALL_BEFORE_POP,
-  assert,
-  StackUnderflowException
+  assert
 } from '@sdk/index.js';
 import { addMemorySize, type MemorySize, type MemoryTracker } from '@core/MemoryTracker.js';
 import { ValueStack } from '@core/objects/stacks/ValueStack.js';
@@ -78,7 +77,7 @@ export class CallStack extends ValueStack implements ICallStack {
 
   def(name: string, value: Value): Result<Value> {
     if (this.length === 0) {
-      return { success: false, error: new StackUnderflowException() }
+      return { success: false, exception: 'stackUnderflow' }
     }
     let dictionary = this._dictionaries[0];
     if (dictionary === undefined) {

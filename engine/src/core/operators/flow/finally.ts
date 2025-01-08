@@ -1,13 +1,17 @@
-import { ValueType } from '@api/index.js';
+import { Exception, IReadOnlyCallStack, nullValue, ValueType } from '@api/index.js';
 import {
   OPERATOR_STATE_POP,
   OPERATOR_STATE_FIRST_CALL,
-  OPERATOR_STATE_CALL_BEFORE_POP
+  OPERATOR_STATE_CALL_BEFORE_POP,
+  toStringValue,
+  assert
 } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
+import { CallStack } from '@core/objects/stacks/CallStack.js';
 
 const CALLS_BLOCK = 'block';
 const CALLS_EXCEPTION = 'exception';
+const CALLS_EXCEPTION_STACK = 'exception';
 
 buildFunctionOperator(
   {
@@ -54,29 +58,33 @@ buildFunctionOperator(
       }
       operands.popush(2);
       return calls.push(codeBlock);
-    } else if (topOperatorState === OPERATOR_STATE_CALL_BEFORE_POP) {
+    }
+    if (topOperatorState === OPERATOR_STATE_CALL_BEFORE_POP) {
       calls.topOperatorState = -2;
       if (state.exception) {
-        const defResult = calls.def(CALLS_EXCEPTION, {
-          type: ValueType.dictionary,
-          isExecutable: false,
-          isReadOnly: true,
-          dictionary: state.exception
-        });
-        if (!defResult.success) {
-          return defResult;
+        const defExceptionResult = calls.def(CALLS_EXCEPTION, toStringValue(state.exception));
+        if (!defExceptionResult.success) {
+          return defExceptionResult;
+        }
+        assert(state.exceptionStack instanceof CallStack);
+        const defExceptionStackResult = calls.def(CALLS_EXCEPTION_STACK, state.exceptionStack.toValue());
+        if (!defExceptionStackResult.success) {
+          return defExceptionResult;
         }
         state.clearException();
       }
       const finalBlock = calls.lookup(CALLS_BLOCK);
       return calls.push(finalBlock);
-    } else {
-      const exception = calls.lookup(CALLS_EXCEPTION);
-      if (exception.type === ValueType.dictionary && !state.exception) {
-        state.raiseException(exception.dictionary);
-      }
-      calls.topOperatorState = OPERATOR_STATE_POP;
-      return { success: true, value: undefined };
     }
+    assert(topOperatorState === -2);
+    const exception = calls.lookup(CALLS_EXCEPTION);
+    if (exception !== nullValue) {
+      assert(exception.type === ValueType.string);
+      const exceptionStack = calls.lookup(CALLS_EXCEPTION_STACK);
+      assert(exceptionStack.type === ValueType.array);
+      state.raiseException(exception.string as Exception, exceptionStack.array as IReadOnlyCallStack);
+    }
+    calls.topOperatorState = OPERATOR_STATE_POP;
+    return { success: true, value: undefined };
   }
 );

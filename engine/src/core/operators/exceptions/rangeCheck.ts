@@ -1,4 +1,3 @@
-import { RangeCheckException } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 
 buildFunctionOperator(
@@ -16,5 +15,5 @@ buildFunctionOperator(
       }
     ]
   },
-  () => ({ success: false, error: new RangeCheckException() })
+  () => ({ success: false, exception: 'rangeCheck' })
 );

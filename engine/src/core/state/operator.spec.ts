@@ -6,8 +6,6 @@ import {
   OPERATOR_STATE_POP,
   OPERATOR_STATE_CALL_BEFORE_POP,
   OperatorType,
-  StackUnderflowException,
-  TypeCheckException,
   BaseException,
   assert
 } from '@sdk/index.js';
@@ -378,6 +376,7 @@ describe('operator lifecycle', () => {
             implementation(state) {
               operands.pop();
               assert(operands.push(toValue(3)));
+              // TODO: custom or what ?
               state.raiseException(new BaseException('STOP'));
             }
           });

@@ -1,12 +1,7 @@
-import type { Value, IReadOnlyDictionary, Result } from '@api/index.js';
+import type { Value, IReadOnlyDictionary, Result, IException } from '@api/index.js';
 import { SYSTEM_MEMORY_TYPE, ValueType } from '@api/index.js';
 import type { IInternalState } from '@sdk/index.js';
-import {
-  assert,
-  BaseException,
-  BusyException,
-  toString
-} from '@sdk/index.js';
+import { assert, BaseException } from '@sdk/index.js';
 import { MemoryTracker } from '@core/MemoryTracker.js';
 import { DictionaryStack } from '@core/objects/stacks/DictionaryStack.js';
 import { Dictionary } from '@core/objects/dictionaries/Dictionary.js';
@@ -165,15 +160,14 @@ export class State implements IInternalState {
     this._exception = undefined;
   }
 
-  raiseException(error: unknown) {
+  raiseException(exception: IException) {
     this._releaseException();
-    if (!(error instanceof BaseException)) {
-      throw error; // fail the engine
-    }
-    this._exception = error
-    error.engineStack = this.callStack.map(({ value, operatorState }) =>
-      toString(value, { operatorState, includeDebugSource: true })
-    );
+    assert(exception instanceof BaseException);
+    this._exception = exception;
+    // TODO see for stack
+    // error.engineStack = this.callStack.map(({ value, operatorState }) =>
+    //   toString(value, { operatorState, includeDebugSource: true })
+    // );
   }
 
   clearException() {

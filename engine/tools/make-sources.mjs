@@ -38,30 +38,28 @@ async function generateIndexes(path, generate) {
 }
 
 async function generateExceptions() {
-  const exceptions = JSON.parse(await readFile('src/sdk/exceptions/exceptions.json', 'utf-8'));
-  for (const [name, message] of Object.entries(exceptions)) {
-    const uppercasedName = name.charAt(0).toUpperCase() + name.substring(1);
+  const exceptions = JSON.parse(await readFile('tools/system-exceptions.json', 'utf-8'));
 
-    writeFile(
-      `src/sdk/exceptions/${uppercasedName}Exception.ts`,
-      `import { BaseException } from '@sdk/exceptions/BaseException.js';
+  writeFile(
+    `src/api/Exception.ts`,
+    `export type Exception =
+${Object.keys(exceptions).map(name => `  | '${name}'`).join('\n')}
+;
 
-const MESSAGE = '${message}';
-
-export class ${uppercasedName}Exception extends BaseException {
-  constructor() {
-    super(MESSAGE);
-  }
+const messages: { [key in Exception]: string } = {
+${Object.entries(exceptions).map(([name, message]) => `  '${name}': '${message}'`).join(',\n')}
 }
-`
-    );
 
+export const getExceptionMessage = (exception: Exception): string => messages[exception];
+`
+  );
+
+  for (const [name, message] of Object.entries(exceptions)) {
     const lowercasedName = name.toLowerCase();
 
     writeFile(
       `src/core/operators/exceptions/${name}.ts`,
-      `import { ${uppercasedName}Exception } from '@sdk/index.js';
-import { buildFunctionOperator } from '@core/operators/operators.js';
+      `import { buildFunctionOperator } from '@core/operators/operators.js';
 
 buildFunctionOperator(
   {
@@ -78,7 +76,7 @@ buildFunctionOperator(
       }
     ]
   },
-  () => ({ success: false, error: new ${uppercasedName}Exception() })
+  () => ({ success: false, exception: '${name}' })
 );
 `
     );

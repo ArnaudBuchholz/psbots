@@ -134,7 +134,7 @@ export function toValue(
     }
     const integerResult = toIntegerValue(value);
     if (!integerResult.success) {
-      throw integerResult.error;
+      throw integerResult.exception;
     }
     return integerResult.value;
   }

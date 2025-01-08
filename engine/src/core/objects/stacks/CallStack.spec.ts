@@ -6,9 +6,7 @@ import {
   OPERATOR_STATE_UNKNOWN,
   OPERATOR_STATE_FIRST_CALL,
   OPERATOR_STATE_CALL_BEFORE_POP,
-  OPERATOR_STATE_POP,
-  StackUnderflowException,
-  VmOverflowException
+  OPERATOR_STATE_POP
 } from '@sdk/index.js';
 import { CallStack } from './CallStack.js';
 import { memorySizeToBytes, MemoryTracker } from '@core/MemoryTracker.js';
@@ -88,7 +86,7 @@ describe('IDictionary', () => {
   });
 
   it('fails if no item exists in the stack', () => {
-    expect(callstack.def('test', toValue(123))).toStrictEqual<Result<Value>>({ success: false, error: expect.any(StackUnderflowException) });
+    expect(callstack.def('test', toValue(123))).toStrictEqual<Result<Value>>({ success: false, exception: 'stackUnderflow' });
   });
 
   it('fails if no more memory', () => {
@@ -97,7 +95,7 @@ describe('IDictionary', () => {
     assert(callstackResult);
     const callstack = callstackResult.value;
     expect(callstack.push(toValue(0))).toStrictEqual<Result<number>>({ success: true, value: 1 });
-    expect(callstack.def('test', toValue('abc'))).toStrictEqual<Result<Value>>({ success: false, error:expect.any(VmOverflowException) });
+    expect(callstack.def('test', toValue('abc'))).toStrictEqual<Result<Value>>({ success: false, exception: 'vmOverflow' });
   });
 
   it('associates a dictionary on the current item', () => {

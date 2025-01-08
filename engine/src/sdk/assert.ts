@@ -13,7 +13,7 @@ export function assert(condition: boolean, message?: string, cause?: unknown): a
 export function assert(condition: boolean | Result<unknown>, message?: string, cause?: unknown) {
   if (typeof condition !== 'boolean') {
     if (!condition.success) {
-      throw new AssertionFailed('Unexpected failed result', condition.error);
+      throw new AssertionFailed('Unexpected failed result', condition.exception);
     }
   } else if (!condition) {
     throw new AssertionFailed(message ?? 'assertion failed', cause);

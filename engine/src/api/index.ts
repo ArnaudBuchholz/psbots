@@ -1,3 +1,4 @@
+export * from './Exception.js';
 export * from './Result.js';
 export * from './interfaces/index.js';
 export * from './parser.js';

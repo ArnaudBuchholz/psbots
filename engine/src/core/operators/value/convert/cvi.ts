@@ -1,6 +1,6 @@
 import type { Value } from '@api/index.js';
 import { ValueType } from '@api/index.js';
-import { toIntegerValue, TypeCheckException } from '@sdk/index.js';
+import { toIntegerValue } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 
 buildFunctionOperator(
@@ -46,7 +46,7 @@ buildFunctionOperator(
         }
         return operands.popush(1, integerValueResult.value);
       } else {
-        return { success: false, error: new TypeCheckException() };
+        return { success: false, exception: 'typeCheck' };
       }
     }
     return { success: true, value: undefined };

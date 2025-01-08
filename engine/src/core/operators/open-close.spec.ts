@@ -1,6 +1,6 @@
 import { it, expect, beforeEach, afterEach, vi } from 'vitest';
 import type { IDebugSource } from '@api/index.js';
-import { assert, LimitcheckException } from '@sdk/index.js';
+import { assert } from '@sdk/index.js';
 import { State } from '@core/state/State.js';
 import { toValue, waitForGenerator } from '@test/index.js';
 import { ValueArray } from '@core/objects/ValueArray.js';
@@ -40,7 +40,7 @@ it('forwards error if the array cannot be created', async () => {
   const stateResult = State.create();
   assert(stateResult);
   const { value: state } = stateResult;
-  vi.spyOn(ValueArray, 'create').mockImplementation(() => ({ success: false, error: new LimitcheckException() }));
+  vi.spyOn(ValueArray, 'create').mockImplementation(() => ({ success: false, exception: 'limitcheck' }));
   await waitForGenerator(state.exec(toValue('[ ]', { isExecutable: true })));
-  expect(state.exception).toBeInstanceOf(LimitcheckException);
+  expect(state.exception).toStrictEqual('limitcheck');
 });

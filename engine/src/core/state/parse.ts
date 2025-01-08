@@ -35,7 +35,7 @@ export function parseCycle(state: IInternalState, value: Value<ValueType.string>
       string = valuesOf(token)[0];
       const result = memoryTracker.addStringRef(string);
       if (!result.success) {
-        state.raiseException(result.error);
+        state.raiseException(result.exception);
         return;
       }
       Object.assign(token, { tracker: memoryTracker });
@@ -50,7 +50,7 @@ export function parseCycle(state: IInternalState, value: Value<ValueType.string>
       memoryTracker.releaseString(string);
     }
     if (!pushResult.success) {
-      state.raiseException(pushResult.error);
+      state.raiseException(pushResult.exception);
     }
   }
 }

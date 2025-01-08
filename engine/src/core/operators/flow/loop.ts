@@ -3,7 +3,6 @@ import {
   OPERATOR_STATE_POP,
   OPERATOR_STATE_FIRST_CALL,
   OPERATOR_STATE_CALL_BEFORE_POP,
-  StopException,
   assert
 } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
@@ -47,7 +46,7 @@ buildFunctionOperator(
     }
     assert(topOperatorState === OPERATOR_STATE_CALL_BEFORE_POP);
     if (state.exception) {
-      if (state.exception instanceof StopException) {
+      if (state.exception === 'stop') {
         state.clearException();
       }
       calls.topOperatorState = OPERATOR_STATE_POP;

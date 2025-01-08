@@ -11,7 +11,7 @@ import {
 import { toValue } from '@test/index.js';
 import { SYSTEM_MEMORY_TYPE, USER_MEMORY_TYPE } from '@api/index.js';
 import type { IMemoryByType, IMemorySnapshot, Result } from '@api/index.js';
-import { assert, VmOverflowException } from '@sdk/index.js';
+import { assert } from '@sdk/index.js';
 
 const helloWorldString = 'hello world!';
 const helloWorldValue = toValue(helloWorldString);
@@ -102,7 +102,7 @@ describe('tracking', () => {
   it('fails when allocating too much memory', () => {
     expect(tracker.allocate({ bytes: MAX_MEMORY + 1 }, SYSTEM_MEMORY_TYPE, {})).toStrictEqual<Result>({
       success: false,
-      error: expect.any(VmOverflowException)
+      exception: 'vmOverflow'
     });
   });
 

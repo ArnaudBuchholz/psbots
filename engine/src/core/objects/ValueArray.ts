@@ -1,6 +1,6 @@
 import { nullValue } from '@api/index.js';
 import type { ArrayValue, IArray, IValuePermissions, MemoryType, Result, Value } from '@api/index.js';
-import { assert, RangeCheckException } from '@sdk/index.js';
+import { assert } from '@sdk/index.js';
 import { AbstractValueContainer } from '@core/objects/AbstractValueContainer.js';
 import type { MemoryTracker } from '@core/MemoryTracker.js';
 
@@ -30,7 +30,7 @@ export class ValueArray extends AbstractValueContainer implements IArray {
 
   public set(index: number, value: Value): Result<Value> {
     if (index < 0) {
-      return { success: false, error: new RangeCheckException() };
+      return { success: false, exception: 'rangeCheck' };
     }
     let previousValue = this._values[index] ?? nullValue;
     if (previousValue.tracker?.releaseValue(previousValue) === false) {

@@ -1,5 +1,5 @@
 import { NameValue, USER_MEMORY_TYPE, ValueType } from '@api/index.js';
-import { findMarkPos, TypeCheckException, valuesOf } from '@sdk/index.js';
+import { findMarkPos, valuesOf } from '@sdk/index.js';
 import type { IInternalState } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 import { pushOpenClosedValueWithDebugInfo } from '@core/operators/open-close.js';
@@ -71,12 +71,12 @@ buildFunctionOperator(
     }
     const markPos = markPosResult.value;
     if (markPos % 2 !== 0) {
-      return { success: false, error: new TypeCheckException() };
+      return { success: false, exception: 'typeCheck' };
     }
     for (let operandIndex = 1; operandIndex < markPos; operandIndex += 2) {
       const name = operands.at(operandIndex);
       if (name.type !== ValueType.name) {
-        return { success: false, error: new TypeCheckException() };
+        return { success: false, exception: 'typeCheck' };
       }
     }
     const { top: closeOp } = calls;

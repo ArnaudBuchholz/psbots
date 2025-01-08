@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach, beforeAll } from 'vitest';
 import type { IDictionary, Result, Value } from '@api/index.js';
 import { SYSTEM_MEMORY_TYPE, USER_MEMORY_TYPE } from '@api/index.js';
 import type { DictionaryStackWhereResult } from '@sdk/index.js';
-import { assert, DictStackUnderflowException, UndefinedException } from '@sdk/index.js';
+import { assert } from '@sdk/index.js';
 import { MemoryTracker } from '@core/MemoryTracker.js';
 import { Dictionary } from '@core/objects/dictionaries/Dictionary.js';
 import { SystemDictionary } from '@core/objects/dictionaries/System.js';
@@ -122,7 +122,7 @@ describe('lookup', () => {
   });
 
   it('fails with Undefined if the name is not found in the stack', () => {
-    expect(stack.lookup('unknown')).toStrictEqual<Result<Value>>({ success: false, error: expect.any(UndefinedException) });
+    expect(stack.lookup('unknown')).toStrictEqual<Result<Value>>({ success: false, exception: 'undefined' });
   });
 });
 
@@ -153,7 +153,7 @@ describe('begin', () => {
     });
 
     it('fails when attempting to remove pre-installed dictionaries', () => {
-      expect(stack.end()).toStrictEqual<Result<number, DictStackUnderflowException>>({ success: false, error: expect.any(DictStackUnderflowException) });
+      expect(stack.end()).toStrictEqual<Result<number>>({ success: false, exception: 'dictStackUnderflow' });
     });
   });
 });

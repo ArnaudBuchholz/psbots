@@ -4,8 +4,6 @@ import {
   OPERATOR_STATE_FIRST_CALL,
   OPERATOR_STATE_POP,
   OperatorType,
-  StackUnderflowException,
-  TypeCheckException,
   assert
 } from '@sdk/index.js';
 import type { IFunctionOperator, IInternalState, IOperator } from '@sdk/index.js';
@@ -43,12 +41,12 @@ export function operatorCycle(state: IInternalState, value: Value<ValueType.oper
     if (operator.typeCheck !== undefined && isFirstCall) {
       let { length } = operator.typeCheck;
       if (operands.length < length) {
-        state.raiseException(new StackUnderflowException());
+        state.raiseException('stackUnderflow');
         return;
       }
       const isAvailable = memoryTracker.allocate({ values: length }, SYSTEM_MEMORY_TYPE, state);
       if (!isAvailable.success) {
-        state.raiseException(isAvailable.error);
+        state.raiseException(isAvailable.exception);
         return;
       }
       valuesMemory = isAvailable.value;
@@ -61,7 +59,7 @@ export function operatorCycle(state: IInternalState, value: Value<ValueType.oper
         ) {
           values.push(value);
         } else {
-          state.raiseException(new TypeCheckException());
+          state.raiseException('typeCheck');
           memoryTracker.release(valuesMemory, state);
           return;
         }
@@ -79,7 +77,7 @@ export function operatorCycle(state: IInternalState, value: Value<ValueType.oper
       memoryTracker.release(valuesMemory, state);
     }
     if (result && result.success === false) {
-      state.raiseException(result.error);
+      state.raiseException(result.exception);
     }
     if (state.exception !== exceptionBefore) {
       return;

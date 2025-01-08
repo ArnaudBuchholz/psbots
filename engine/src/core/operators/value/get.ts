@@ -1,6 +1,6 @@
 import type { Result, Value } from '@api/index.js';
 import { ValueType } from '@api/index.js';
-import { assert, checkPos, toStringValue, TypeCheckException, UndefinedException } from '@sdk/index.js';
+import { assert, checkPos, toStringValue } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 import { MemoryTracker } from '@core/MemoryTracker.js';
 
@@ -32,11 +32,11 @@ const implementations: { [type in ValueType]?: (container: Value<type>, index: V
 
   [ValueType.dictionary]: ({ dictionary }, index) => {
     if (index.type !== ValueType.name) {
-      return { success: false, error: new TypeCheckException() };
+      return { success: false, exception: 'typeCheck' };
     }
     const { name } = index;
     if (!dictionary.names.includes(name)) {
-      return { success: false, error: new UndefinedException() };
+      return { success: false, exception: 'undefined' };
     }
     const value = dictionary.lookup(name);
     value.tracker?.addValueRef(value);
@@ -134,7 +134,7 @@ buildFunctionOperator(
   ({ operands }, container, index) => {
     const implementation = implementations[container.type];
     if (implementation === undefined) {
-      return { success: false, error: new TypeCheckException() };
+      return { success: false, exception: 'typeCheck' };
     }
     const getResult = implementation(container as never, index);
     if (!getResult.success) {

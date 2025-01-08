@@ -8,7 +8,7 @@ import type {
   IMemorySnapshot,
   Result
 } from '@api/index.js';
-import { assert, valuesOf, VmOverflowException } from '@sdk/index.js';
+import { assert, valuesOf } from '@sdk/index.js';
 
 export const STRING_MEMORY_TYPE: MemoryType = 'string';
 
@@ -90,7 +90,7 @@ export class MemoryTracker implements IValueTracker, IMemoryTracker {
   }
 
   /** Check if the requested memory size can be allocated, returns the equivalent number of bytes */
-  isAvailable(size: MemorySize, type: MemoryType): Result<number, VmOverflowException> {
+  isAvailable(size: MemorySize, type: MemoryType): Result<number> {
     assert(!!type);
     // TODO: limit by type ?
     const bytes = memorySizeToBytes(size);
@@ -98,11 +98,11 @@ export class MemoryTracker implements IValueTracker, IMemoryTracker {
     if (this._used + bytes <= this._total) {
       return { success: true, value: bytes };
     }
-    return { success: false, error: new VmOverflowException() };
+    return { success: false, exception: 'vmOverflow' };
   }
 
   /** Allocate memory */
-  allocate(size: MemorySize, type: MemoryType, container: object): Result<MemoryPointer, VmOverflowException> {
+  allocate(size: MemorySize, type: MemoryType, container: object): Result<MemoryPointer> {
     assert(type !== 'string');
     const isAvailable = this.isAvailable(size, type);
     if (!isAvailable.success) {
@@ -118,10 +118,10 @@ export class MemoryTracker implements IValueTracker, IMemoryTracker {
     this.register(-bytes, type, container);
   }
 
-  private register(bytes: number, type: MemoryType, container: object): Result<undefined, VmOverflowException> {
+  private register(bytes: number, type: MemoryType, container: object): Result<undefined> {
     if (bytes > 0) {
       if (this._used + bytes > this._total) {
-        return { success: false, error: new VmOverflowException() };
+        return { success: false, exception: 'vmOverflow' };
       }
     } else {
       assert(bytes < this._used);
@@ -173,7 +173,7 @@ export class MemoryTracker implements IValueTracker, IMemoryTracker {
   private readonly _strings: Map<string, number> = new Map();
 
   /** returns the number of reference count */
-  addStringRef(string: string): Result<number, VmOverflowException> {
+  addStringRef(string: string): Result<number> {
     let refCount = this._strings.get(string) ?? 0;
     if (refCount === 0) {
       const size = stringSizer(string);

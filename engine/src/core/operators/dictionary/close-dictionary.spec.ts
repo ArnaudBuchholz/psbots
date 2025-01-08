@@ -1,5 +1,5 @@
 import { it, expect, vi } from 'vitest';
-import { assert, LimitcheckException } from '@sdk/index.js';
+import { assert } from '@sdk/index.js';
 import { State } from '@core/state/State.js';
 import { Dictionary } from '@core/objects/dictionaries/Dictionary.js';
 import { toValue, waitForGenerator } from '@test/index.js';
@@ -9,10 +9,10 @@ it('forwards Dictionary.create error', async () => {
   assert(stateResult);
   const { value: state } = stateResult;
   const dictCreate = vi.spyOn(Dictionary, 'create');
-  dictCreate.mockImplementation(() => ({ success: false, error: new LimitcheckException() }));
+  dictCreate.mockImplementation(() => ({ success: false, exception: 'limitcheck' }));
   await waitForGenerator(state.exec(toValue('<< /a 1 >>', { isExecutable: true })));
   dictCreate.mockRestore();
-  expect(state.exception).toBeInstanceOf(LimitcheckException);
+  expect(state.exception).toStrictEqual('limitcheck');
 });
 
 it('forwards Dictionary::def error', async () => {
@@ -20,8 +20,8 @@ it('forwards Dictionary::def error', async () => {
   assert(stateResult);
   const { value: state } = stateResult;
   const dictDef = vi.spyOn(Dictionary.prototype, 'def');
-  dictDef.mockImplementation(() => ({ success: false, error: new LimitcheckException() }));
+  dictDef.mockImplementation(() => ({ success: false, exception: 'limitcheck' }));
   await waitForGenerator(state.exec(toValue('<< /a 1 >>', { isExecutable: true })));
   dictDef.mockRestore();
-  expect(state.exception).toBeInstanceOf(LimitcheckException);
+  expect(state.exception).toStrictEqual('limitcheck');
 });
