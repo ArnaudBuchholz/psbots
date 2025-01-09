@@ -11,7 +11,7 @@ import { CallStack } from '@core/objects/stacks/CallStack.js';
 
 const CALLS_BLOCK = 'block';
 const CALLS_EXCEPTION = 'exception';
-const CALLS_EXCEPTION_STACK = 'exception';
+const CALLS_EXCEPTION_STACK = 'stack';
 
 buildFunctionOperator(
   {
@@ -77,12 +77,14 @@ buildFunctionOperator(
       return calls.push(finalBlock);
     }
     assert(topOperatorState === -2);
-    const exception = calls.lookup(CALLS_EXCEPTION);
-    if (exception !== nullValue) {
-      assert(exception.type === ValueType.string);
-      const exceptionStack = calls.lookup(CALLS_EXCEPTION_STACK);
-      assert(exceptionStack.type === ValueType.array);
-      state.raiseException(exception.string as Exception, exceptionStack.array as IReadOnlyCallStack);
+    if (state.exception === undefined) {
+      const exception = calls.lookup(CALLS_EXCEPTION);
+      if (exception !== nullValue) {
+        assert(exception.type === ValueType.string);
+        const exceptionStack = calls.lookup(CALLS_EXCEPTION_STACK);
+        assert(exceptionStack.type === ValueType.array);
+        state.raiseException(exception.string as Exception, exceptionStack.array as IReadOnlyCallStack);
+      }
     }
     calls.topOperatorState = OPERATOR_STATE_POP;
     return { success: true, value: undefined };

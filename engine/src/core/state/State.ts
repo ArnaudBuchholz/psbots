@@ -164,25 +164,23 @@ export class State implements IInternalState {
 
   // region IInternalState
 
-  private _releaseException() {
-    // TODO check if exception must be released for memory
-    this._exception = undefined;
-  }
-
   raiseException(exception: Exception, stack?: IReadOnlyCallStack) {
-    this._releaseException();
+    this._resetException();
     this._exception = exception;
     if (stack !== undefined) {
       assert(stack instanceof CallStack);
       this._exceptionStack = stack;
       this._exceptionStack.addRef();
     } else {
-      // TODO: create a snapshot of current stack
+      const snapshotResult = this._calls.snapshot();
+      // TODO: halt engine because if vmOverflow
+      assert(snapshotResult);
+      this._exceptionStack = snapshotResult.value;
     }
   }
 
   clearException() {
-    this._releaseException();
+    this._resetException();
   }
 
   get calls() {
