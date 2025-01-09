@@ -20,16 +20,19 @@ let timeSpent = 0; // nanoseconds
 const measurements = {};
 
 function execute(source) {
-  const { value: state, exception } = createState();
-  if (exception) {
-    throw exception;
+  const { value: state, exception: stateFailed } = createState();
+  if (stateFailed) {
+    throw new Error(stateFailed);
   }
-  const iterator = state.exec(toStringValue(source, { isExecutable: true }));
+  const { value: iterator, exception: execFailed } = state.exec(toStringValue(source, { isExecutable: true }));
+  if (execFailed) {
+    throw new Error(execFailed);
+  }
   while (++cycles < MAX_CYCLES) {
     const { callStack } = state;
     let instruction;
-    if (callStack[0]?.value.type === ValueType.operator) {
-      instruction = callStack[0].value.operator.name;
+    if (callStack.at(0).type === ValueType.operator) {
+      instruction = callStack.at(0).operator.name;
       if (state.exception !== undefined) {
         instruction += '!';
       }
