@@ -1,4 +1,9 @@
-export function waitForGenerator(iterator: Generator): unknown[] {
+import type { Result } from '@api/index.js';
+import { assert } from '@sdk/index.js';
+
+export function waitForExec(execResult: Result<Generator>): unknown[] {
+  assert(execResult);
+  const iterator = execResult.value;
   const result = [];
   // eslint-disable-next-line no-constant-condition
   while (true) {

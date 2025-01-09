@@ -1,5 +1,4 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import type { IState } from '@api/index.js';
 import { nullValue, Result, SYSTEM_MEMORY_TYPE, Value } from '@api/index.js';
 import {
   assert,
@@ -40,18 +39,15 @@ describe('callStack', () => {
     expect(tracker.used).toBeGreaterThan(memoryBefore);
   });
 
-  it('returns empty array when empty', () => {
-    expect(callstack.callStack()).toStrictEqual([]);
-  });
+  for (let index = -1; index < 2; ++index) {
+    it(`returns default value for operator state when out of range (${index})`, () => {
+      expect(callstack.operatorStateAt(index)).toStrictEqual(0);
+    });
+  }
 
   it('returns default value for operatorState', () => {
     callstack.push(toValue(1));
-    expect(callstack.callStack()).toStrictEqual<IState['callStack']>([
-      {
-        value: toValue(1),
-        operatorState: OPERATOR_STATE_UNKNOWN
-      }
-    ]);
+    expect(callstack.topOperatorState).toStrictEqual(0);
   });
 
   it('returns value set for operatorState', () => {
@@ -60,16 +56,10 @@ describe('callStack', () => {
     callstack.push(toValue(2));
     callstack.topOperatorState = OPERATOR_STATE_FIRST_CALL;
     callstack.topOperatorState = 123;
-    expect(callstack.callStack()).toStrictEqual<IState['callStack']>([
-      {
-        value: toValue(2),
-        operatorState: 123
-      },
-      {
-        value: toValue(1),
-        operatorState: OPERATOR_STATE_FIRST_CALL
-      }
-    ]);
+    expect(callstack.at(0)).toStrictEqual(toValue(2));
+    expect(callstack.operatorStateAt(0)).toStrictEqual(123);
+    expect(callstack.at(1)).toStrictEqual(toValue(1));
+    expect(callstack.operatorStateAt(1)).toStrictEqual(OPERATOR_STATE_FIRST_CALL);
   });
 
   it('supports popush', () => {

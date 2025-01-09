@@ -1,5 +1,5 @@
-import type { IState, MemoryType, Result, Value } from '@api/index.js';
-import { enumIArrayValues, nullValue, SYSTEM_MEMORY_TYPE } from '@api/index.js';
+import type { MemoryType, Result, Value } from '@api/index.js';
+import { nullValue, SYSTEM_MEMORY_TYPE } from '@api/index.js';
 import type { ICallStack } from '@sdk/index.js';
 import {
   OPERATOR_STATE_UNKNOWN,
@@ -54,12 +54,13 @@ export class CallStack extends ValueStack implements ICallStack {
     return result;
   }
 
-  callStack(): IState['callStack'] {
-    return [...enumIArrayValues(this)].map((value, index) => ({
-      value,
-      operatorState: this._steps[index]!
-    }));
+  // region IReadOnlyCallStack
+
+  operatorStateAt(index: number): number {
+    return this._steps[index] ?? 0;
   }
+
+  // endregion IReadOnlyCallStack
 
   // region IDictionary
 

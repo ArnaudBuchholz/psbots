@@ -43,12 +43,15 @@ async function generateExceptions() {
   writeFile(
     `src/api/Exception.ts`,
     `export type Exception =
-${Object.keys(exceptions).map(name => `  | '${name}'`).join('\n')}
-;
+${Object.keys(exceptions)
+  .map((name) => `  | '${name}'`)
+  .join('\n')};
 
 const messages: { [key in Exception]: string } = {
-${Object.entries(exceptions).map(([name, message]) => `  '${name}': '${message}'`).join(',\n')}
-}
+${Object.entries(exceptions)
+  .map(([name, message]) => `  ${name}: '${message}'`)
+  .join(',\n')}
+};
 
 export const getExceptionMessage = (exception: Exception): string => messages[exception];
 `

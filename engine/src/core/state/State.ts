@@ -1,7 +1,7 @@
-import type { Value, IReadOnlyDictionary, Result, IException } from '@api/index.js';
+import type { Value, IReadOnlyDictionary, Result, IReadOnlyCallStack, Exception } from '@api/index.js';
 import { SYSTEM_MEMORY_TYPE, ValueType } from '@api/index.js';
 import type { IInternalState } from '@sdk/index.js';
-import { assert, BaseException } from '@sdk/index.js';
+import { assert } from '@sdk/index.js';
 import { MemoryTracker } from '@core/MemoryTracker.js';
 import { DictionaryStack } from '@core/objects/stacks/DictionaryStack.js';
 import { Dictionary } from '@core/objects/dictionaries/Dictionary.js';
@@ -22,7 +22,8 @@ export interface StateFactorySettings {
 }
 
 export class State implements IInternalState {
-  private _exception: BaseException | undefined;
+  private _exception: Exception | undefined;
+  private _exceptionStack: CallStack | undefined;
   private _destroyed = false;
 
   private constructor(
@@ -89,8 +90,11 @@ export class State implements IInternalState {
 
   protected _resetException() {
     if (this._exception !== undefined) {
-      // TODO: release exception
       this._exception = undefined;
+    }
+    if (this._exceptionStack !== undefined) {
+      this._exceptionStack.release();
+      this._exceptionStack = undefined;
     }
   }
 
@@ -116,7 +120,7 @@ export class State implements IInternalState {
   }
 
   get callStack() {
-    return this.calls.callStack();
+    return this.calls;
   }
 
   private _callDisablingCount = 0;
@@ -130,14 +134,19 @@ export class State implements IInternalState {
     return this._exception;
   }
 
-  exec(value: Value): Generator {
+  get exceptionStack() {
+    this._checkIfDestroyed();
+    return this._exceptionStack;
+  }
+
+  exec(value: Value): Result<Generator, 'invalidAccess'> {
     this._checkIfDestroyed();
     if (!this.idle) {
-      throw new BusyException(); // Since external to the engine
+      return { success: false, exception: 'invalidAccess' };
     }
     this._resetException();
     this.calls.push(value);
-    return this.run();
+    return { success: true, value: this.run() };
   }
 
   destroy() {
@@ -160,23 +169,20 @@ export class State implements IInternalState {
     this._exception = undefined;
   }
 
-  raiseException(exception: IException) {
+  raiseException(exception: Exception, stack?: IReadOnlyCallStack) {
     this._releaseException();
-    assert(exception instanceof BaseException);
     this._exception = exception;
-    // TODO see for stack
-    // error.engineStack = this.callStack.map(({ value, operatorState }) =>
-    //   toString(value, { operatorState, includeDebugSource: true })
-    // );
+    if (stack !== undefined) {
+      assert(stack instanceof CallStack);
+      this._exceptionStack = stack;
+      this._exceptionStack.addRef();
+    } else {
+      // TODO: create a snapshot of current stack
+    }
   }
 
   clearException() {
     this._releaseException();
-  }
-
-  set exception(value: BaseException | undefined) {
-    // TODO check if exception must be released for memory
-    this._exception = value;
   }
 
   get calls() {
