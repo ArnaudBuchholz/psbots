@@ -1,6 +1,6 @@
 import { it, expect, beforeEach, afterEach, beforeAll } from 'vitest';
 import { enumIArrayValues, markValue, ValueType } from '@api/index.js';
-import type { IDebugSource, IDictionary, Value } from '@api/index.js';
+import type { Exception, IDebugSource, IDictionary, Value } from '@api/index.js';
 import { toValue, waitForExec } from '@test/index.js';
 import { State } from './State.js';
 import { SystemDictionary } from '@core/objects/dictionaries/System.js';
@@ -48,7 +48,7 @@ it('is popped once the corresponding value has been processed', () => {
 it("throws an exception if the value can't be found", () => {
   state.calls.push(toValue(Symbol.for('unknown call'), { isExecutable: true }));
   state.cycle();
-  expect(state.exception).toStrictEqual('undefined');
+  expect(state.exception).toStrictEqual<Exception>('undefined');
 });
 
 it('puts the call in the operand stack when calls are prevented', () => {

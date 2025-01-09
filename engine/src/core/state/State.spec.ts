@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { enumIArrayValues, ValueType } from '@api/index.js';
+import { enumIArrayValues, Exception, ValueType } from '@api/index.js';
 import type { Result, Value } from '@api/index.js';
 import { State } from './State.js';
 import { toValue, waitForExec } from '@test/index.js';
@@ -192,7 +192,7 @@ describe('exception handling', () => {
       }
     }));
     state.cycle();
-    expect(state.exception).toStrictEqual('invalidaccess');
+    expect(state.exception).toStrictEqual<Exception>('invalidAccess');
     // TODO: validate stack
     // expect(state.exception?.engineStack).toStrictEqual([
     //   `-invalidaccess-`,

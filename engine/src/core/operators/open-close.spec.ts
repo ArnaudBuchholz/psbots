@@ -1,5 +1,5 @@
 import { it, expect, beforeEach, afterEach, vi } from 'vitest';
-import type { IDebugSource } from '@api/index.js';
+import type { Exception, IDebugSource } from '@api/index.js';
 import { assert } from '@sdk/index.js';
 import { State } from '@core/state/State.js';
 import { toValue, waitForExec } from '@test/index.js';
@@ -42,5 +42,5 @@ it('forwards error if the array cannot be created', async () => {
   const { value: state } = stateResult;
   vi.spyOn(ValueArray, 'create').mockImplementation(() => ({ success: false, exception: 'limitcheck' }));
   await waitForExec(state.exec(toValue('[ ]', { isExecutable: true })));
-  expect(state.exception).toStrictEqual('limitcheck');
+  expect(state.exception).toStrictEqual<Exception>('limitcheck');
 });

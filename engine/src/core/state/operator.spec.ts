@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { enumIArrayValues, markValue, ValueType } from '@api/index.js';
+import { enumIArrayValues, Exception, markValue, ValueType } from '@api/index.js';
 import type { IFunctionOperator, IInternalState, IOperator } from '@sdk/index.js';
 import {
   OPERATOR_STATE_FIRST_CALL,
@@ -87,13 +87,13 @@ describe('With parameters', () => {
 
     it('fails with StackUnderflow if the operand stack does not contain enough values', () => {
       state.cycle();
-      expect(state.exception).toStrictEqual('stackUnderflow');
+      expect(state.exception).toStrictEqual<Exception>('stackUnderflow');
     });
 
     it('fails with TypeCheck if the operand stack does not contain the right values', () => {
       assert(state.operands.push(toValue(false)));
       state.cycle();
-      expect(state.exception).toStrictEqual('typeCheck');
+      expect(state.exception).toStrictEqual<Exception>('typeCheck');
     });
 
     it("builds the list of parameters and pass them to the operator's implementation", () => {
@@ -147,13 +147,13 @@ describe('With parameters', () => {
 
     it('fails with StackUnderflow if the operand stack does not contain enough values', () => {
       state.cycle();
-      expect(state.exception).toStrictEqual('stackUnderflow');
+      expect(state.exception).toStrictEqual<Exception>('stackUnderflow');
     });
 
     it('fails with StackUnderflow if the operand stack does not contain enough values (only one passed)', () => {
       assert(state.operands.push(toValue('abc')));
       state.cycle();
-      expect(state.exception).toStrictEqual('stackUnderflow');
+      expect(state.exception).toStrictEqual<Exception>('stackUnderflow');
     });
 
     it("builds the list of parameters and pass them to the operator's implementation", () => {
