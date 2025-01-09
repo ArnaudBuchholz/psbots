@@ -54,6 +54,22 @@ export class CallStack extends ValueStack implements ICallStack {
     return result;
   }
 
+  /** Does not copy dictionary values */
+  snapshot(): Result<CallStack> {
+    const allocationResult = CallStack.create(this.memoryTracker, this.memoryType, this.length, 0);
+    if (!allocationResult.success) {
+      return allocationResult;
+    }
+    const snapshot = allocationResult.value;
+    let index = this.length;
+    while (--index >= 0) {
+      snapshot.push(this.at(index));
+      // Bypass validation
+      snapshot._steps[0] = this.operatorStateAt(index);
+    }
+    return { success: true, value: snapshot };
+  }
+
   // region IReadOnlyCallStack
 
   operatorStateAt(index: number): number {

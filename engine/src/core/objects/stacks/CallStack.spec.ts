@@ -208,3 +208,21 @@ describe('topOperatorState', () => {
     }
   });
 });
+
+describe('snapshot', () => {
+  it('copies most important info from the callstack', () => {
+    callstack.push(toValue(1));
+    callstack.topOperatorState = OPERATOR_STATE_FIRST_CALL;
+    callstack.push(toValue(2));
+    callstack.topOperatorState = OPERATOR_STATE_FIRST_CALL;
+    callstack.topOperatorState = 123;
+    const snapshotResult = callstack.snapshot();
+    assert(snapshotResult);
+    const snapshot = snapshotResult.value;
+    expect(snapshot.at(0)).toStrictEqual(toValue(2));
+    expect(snapshot.operatorStateAt(0)).toStrictEqual(123);
+    expect(snapshot.at(1)).toStrictEqual(toValue(1));
+    expect(snapshot.operatorStateAt(1)).toStrictEqual(OPERATOR_STATE_FIRST_CALL);
+    snapshot.release();
+  });
+});
