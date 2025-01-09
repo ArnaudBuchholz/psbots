@@ -67,7 +67,7 @@ describe('executing in & out using debug', () => {
               debugMilliseconds += Math.ceil(performance.now() - start);
               if (expectedState.exception) {
                 expect(state.exception).not.toBeUndefined();
-                expect(state.exception).toBeInstanceOf(expectedState.exception.constructor);
+                expect(state.exception).toStrictEqual(expectedState.exception);
               } else {
                 expect(state.exception).toBeUndefined();
                 expect(state.operands.length).toStrictEqual(expectedState.operands.length);

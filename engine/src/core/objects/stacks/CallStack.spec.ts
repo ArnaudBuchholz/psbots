@@ -41,13 +41,13 @@ describe('callStack', () => {
 
   for (let index = -1; index < 2; ++index) {
     it(`returns default value for operator state when out of range (${index})`, () => {
-      expect(callstack.operatorStateAt(index)).toStrictEqual(0);
+      expect(callstack.operatorStateAt(index)).toStrictEqual(OPERATOR_STATE_UNKNOWN);
     });
   }
 
   it('returns default value for operatorState', () => {
     callstack.push(toValue(1));
-    expect(callstack.topOperatorState).toStrictEqual(0);
+    expect(callstack.topOperatorState).toStrictEqual(OPERATOR_STATE_UNKNOWN);
   });
 
   it('returns value set for operatorState', () => {

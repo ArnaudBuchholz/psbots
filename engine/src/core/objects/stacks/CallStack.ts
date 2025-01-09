@@ -57,7 +57,7 @@ export class CallStack extends ValueStack implements ICallStack {
   // region IReadOnlyCallStack
 
   operatorStateAt(index: number): number {
-    return this._steps[index] ?? 0;
+    return this._steps[index] ?? OPERATOR_STATE_UNKNOWN;
   }
 
   // endregion IReadOnlyCallStack
