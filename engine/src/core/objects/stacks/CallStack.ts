@@ -1,13 +1,12 @@
-import type { IState, MemoryType, Result, Value } from '@api/index.js';
-import { enumIArrayValues, nullValue, SYSTEM_MEMORY_TYPE } from '@api/index.js';
+import type { MemoryType, Result, Value } from '@api/index.js';
+import { nullValue, SYSTEM_MEMORY_TYPE } from '@api/index.js';
 import type { ICallStack } from '@sdk/index.js';
 import {
   OPERATOR_STATE_UNKNOWN,
   OPERATOR_STATE_FIRST_CALL,
   OPERATOR_STATE_POP,
   OPERATOR_STATE_CALL_BEFORE_POP,
-  assert,
-  StackUnderflowException
+  assert
 } from '@sdk/index.js';
 import { addMemorySize, type MemorySize, type MemoryTracker } from '@core/MemoryTracker.js';
 import { ValueStack } from '@core/objects/stacks/ValueStack.js';
@@ -55,12 +54,29 @@ export class CallStack extends ValueStack implements ICallStack {
     return result;
   }
 
-  callStack(): IState['callStack'] {
-    return [...enumIArrayValues(this)].map((value, index) => ({
-      value,
-      operatorState: this._steps[index]!
-    }));
+  /** Does not copy dictionary values */
+  snapshot(): Result<CallStack> {
+    const allocationResult = CallStack.create(this.memoryTracker, this.memoryType, this.length, 0);
+    if (!allocationResult.success) {
+      return allocationResult;
+    }
+    const snapshot = allocationResult.value;
+    let index = this.length;
+    while (--index >= 0) {
+      snapshot.push(this.at(index));
+      // Bypass validation
+      snapshot._steps[0] = this.operatorStateAt(index);
+    }
+    return { success: true, value: snapshot };
   }
+
+  // region IReadOnlyCallStack
+
+  operatorStateAt(index: number): number {
+    return this._steps[index] ?? OPERATOR_STATE_UNKNOWN;
+  }
+
+  // endregion IReadOnlyCallStack
 
   // region IDictionary
 
@@ -78,7 +94,7 @@ export class CallStack extends ValueStack implements ICallStack {
 
   def(name: string, value: Value): Result<Value> {
     if (this.length === 0) {
-      return { success: false, error: new StackUnderflowException() }
+      return { success: false, exception: 'stackUnderflow' }
     }
     let dictionary = this._dictionaries[0];
     if (dictionary === undefined) {

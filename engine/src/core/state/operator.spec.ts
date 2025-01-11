@@ -1,14 +1,11 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { enumIArrayValues, markValue, ValueType } from '@api/index.js';
+import { enumIArrayValues, Exception, markValue, ValueType } from '@api/index.js';
 import type { IFunctionOperator, IInternalState, IOperator } from '@sdk/index.js';
 import {
   OPERATOR_STATE_FIRST_CALL,
   OPERATOR_STATE_POP,
   OPERATOR_STATE_CALL_BEFORE_POP,
   OperatorType,
-  StackUnderflowException,
-  TypeCheckException,
-  BaseException,
   assert
 } from '@sdk/index.js';
 import { toValue } from '@test/index.js';
@@ -90,13 +87,13 @@ describe('With parameters', () => {
 
     it('fails with StackUnderflow if the operand stack does not contain enough values', () => {
       state.cycle();
-      expect(state.exception).toBeInstanceOf(StackUnderflowException);
+      expect(state.exception).toStrictEqual<Exception>('stackUnderflow');
     });
 
     it('fails with TypeCheck if the operand stack does not contain the right values', () => {
       assert(state.operands.push(toValue(false)));
       state.cycle();
-      expect(state.exception).toBeInstanceOf(TypeCheckException);
+      expect(state.exception).toStrictEqual<Exception>('typeCheck');
     });
 
     it("builds the list of parameters and pass them to the operator's implementation", () => {
@@ -150,13 +147,13 @@ describe('With parameters', () => {
 
     it('fails with StackUnderflow if the operand stack does not contain enough values', () => {
       state.cycle();
-      expect(state.exception).toBeInstanceOf(StackUnderflowException);
+      expect(state.exception).toStrictEqual<Exception>('stackUnderflow');
     });
 
     it('fails with StackUnderflow if the operand stack does not contain enough values (only one passed)', () => {
       assert(state.operands.push(toValue('abc')));
       state.cycle();
-      expect(state.exception).toBeInstanceOf(StackUnderflowException);
+      expect(state.exception).toStrictEqual<Exception>('stackUnderflow');
     });
 
     it("builds the list of parameters and pass them to the operator's implementation", () => {
@@ -378,7 +375,7 @@ describe('operator lifecycle', () => {
             implementation(state) {
               operands.pop();
               assert(operands.push(toValue(3)));
-              state.raiseException(new BaseException('STOP'));
+              state.raiseException('stop');
             }
           });
         } else if (calls.topOperatorState === OPERATOR_STATE_CALL_BEFORE_POP) {

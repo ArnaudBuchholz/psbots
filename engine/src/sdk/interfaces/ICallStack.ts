@@ -1,4 +1,4 @@
-import type { IDictionary } from '@api/index.js';
+import type { IDictionary, IReadOnlyCallStack } from '@api/index.js';
 import type { IStack } from '@sdk/interfaces/IStack.js';
 
 /** Default value for topOperatorState */
@@ -52,6 +52,6 @@ export const OPERATOR_STATE_POP = Number.NEGATIVE_INFINITY;
 */
 
 /** Call stack, top parameters exposed through IDictionary */
-export interface ICallStack extends IStack, IDictionary {
+export interface ICallStack extends IReadOnlyCallStack, IStack, IDictionary {
   topOperatorState: number;
 }

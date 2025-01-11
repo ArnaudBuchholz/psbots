@@ -1,7 +1,7 @@
 import { it, expect, beforeEach, afterEach, beforeAll } from 'vitest';
-import { enumIArrayValues, ExceptionDictionaryName, markValue, ValueType } from '@api/index.js';
-import type { IDebugSource, IDictionary, Value } from '@api/index.js';
-import { toValue, waitForGenerator } from '@test/index.js';
+import { enumIArrayValues, markValue, ValueType } from '@api/index.js';
+import type { Exception, IDebugSource, IDictionary, Value } from '@api/index.js';
+import { toValue, waitForExec } from '@test/index.js';
 import { State } from './State.js';
 import { SystemDictionary } from '@core/objects/dictionaries/System.js';
 import { assert } from '@sdk/index.js';
@@ -48,8 +48,7 @@ it('is popped once the corresponding value has been processed', () => {
 it("throws an exception if the value can't be found", () => {
   state.calls.push(toValue(Symbol.for('unknown call'), { isExecutable: true }));
   state.cycle();
-  expect(state.exception).not.toBeUndefined();
-  expect(state.exception?.lookup(ExceptionDictionaryName.name)).toStrictEqual(toValue('UndefinedException'));
+  expect(state.exception).toStrictEqual<Exception>('undefined');
 });
 
 it('puts the call in the operand stack when calls are prevented', () => {
@@ -73,7 +72,7 @@ it('*always* execute { and } even if it changes callEnabled', () => {
 });
 
 it('*always* execute { and } (cumulated)', () => {
-  waitForGenerator(state.exec(toValue('{ { } { } }', { isExecutable: true })));
+  waitForExec(state.exec(toValue('{ { } { } }', { isExecutable: true })));
   expect(state.callEnabled).toStrictEqual(true);
 });
 

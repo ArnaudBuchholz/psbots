@@ -1,5 +1,4 @@
 {
-  "busy": "Engine is already busy",
   "dictStackUnderflow": "No custom dictionary left to unstack",
   "invalidAccess": "Object is read-only",
   "limitcheck": "An implementation limit has been exceeded",

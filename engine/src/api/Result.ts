@@ -1,9 +1,11 @@
-export type Result<Value = undefined, E extends Error = Error> =
+import type { Exception } from './Exception.js';
+
+export type Result<V = undefined, E extends Exception = Exception> =
   | {
       success: false;
-      error: E;
+      exception: E;
     }
   | {
       success: true;
-      value: Value;
+      value: V;
     };

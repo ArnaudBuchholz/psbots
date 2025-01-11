@@ -1,7 +1,7 @@
 import type { Value, DictionaryValue, Result, MemoryType, NullValue } from '@api/index.js';
 import { SYSTEM_MEMORY_TYPE, ValueType } from '@api/index.js';
 import type { DictionaryStackWhereResult, IDictionaryStack } from '@sdk/index.js';
-import { assert, DictStackUnderflowException, UndefinedException } from '@sdk/index.js';
+import { assert } from '@sdk/index.js';
 import type { MemoryTracker } from '@core/MemoryTracker.js';
 import { ValueStack } from '@core/objects/stacks/ValueStack.js';
 import { SystemDictionary } from '@core/objects/dictionaries/System.js';
@@ -99,9 +99,9 @@ export class DictionaryStack extends ValueStack implements IDictionaryStack {
     return this.push(dictionary);
   }
 
-  end(): Result<number, DictStackUnderflowException> {
+  end(): Result<number, 'dictStackUnderflow'> {
     if (this.length === MIN_SIZE) {
-      return { success: false, error: new DictStackUnderflowException() };
+      return { success: false, exception: 'dictStackUnderflow' };
     }
     this.pop();
     return { success: true, value: this.length };
@@ -121,10 +121,10 @@ export class DictionaryStack extends ValueStack implements IDictionaryStack {
     return null;
   }
 
-  lookup(name: string): Result<Value, UndefinedException> {
+  lookup(name: string): Result<Value, 'undefined'> {
     const result = this.where(name);
     if (result === null) {
-      return { success: false, error: new UndefinedException() };
+      return { success: false, exception: 'undefined' };
     }
     return { success: true, value: result.value };
   }

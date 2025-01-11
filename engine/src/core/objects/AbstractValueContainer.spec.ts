@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi, MockInstance } from 'vitest';
 import type { MemoryType, Result, Value } from '@api/index.js';
 import { nullValue, USER_MEMORY_TYPE } from '@api/index.js';
-import { assert, isArrayValue, LimitcheckException, VmOverflowException } from '@sdk/index.js';
+import { assert, isArrayValue } from '@sdk/index.js';
 import { MemoryTracker } from '@core/MemoryTracker.js';
 import { AbstractValueContainer } from './AbstractValueContainer.js';
 import { toValue } from '@test/index.js';
@@ -83,7 +83,7 @@ describe('memory', () => {
   it('handles initial allocation failure', () => {
     const tracker = new MemoryTracker({ total: 1 });
     const result = TestValueArray.create(tracker, USER_MEMORY_TYPE, 10000, 10);
-    expect(result).toStrictEqual<Result<TestValueArray>>({ success: false, error: expect.any(VmOverflowException) });
+    expect(result).toStrictEqual<Result<TestValueArray>>({ success: false, exception: 'vmOverflow' });
   });
 
   it('allows fixed size container', () => {
@@ -91,7 +91,7 @@ describe('memory', () => {
     assert(result);
     const array = result.value;
     expect(array.push(toValue(1))).toStrictEqual<Result<number>>({ success: true, value: 1 });
-    expect(array.push(toValue(2))).toStrictEqual<Result<number>>({ success: false, error: expect.any(LimitcheckException) });
+    expect(array.push(toValue(2))).toStrictEqual<Result<number>>({ success: false, exception: 'limitcheck' });
     array.release();
   });
 
@@ -140,7 +140,7 @@ describe('memory', () => {
         const valueArray = result.value;
         valueArray.push(toValue(0));
         const pushResult = valueArray.push(toValue(1));
-        expect(pushResult).toStrictEqual<Result<TestValueArray>>({ success: false, error: expect.any(VmOverflowException) });
+        expect(pushResult).toStrictEqual<Result<TestValueArray>>({ success: false, exception: 'vmOverflow' });
       });
 
       it('allocates an increment when going beyond initial capacity (one value)', () => {
@@ -230,7 +230,7 @@ describe('memory', () => {
     });
 
     it('fails if memory allocation fails without removing items', () => {
-      const expectedResult: Result<number> = { success: false, error: new Error() };
+      const expectedResult: Result<number> = { success: false, exception: 'vmOverflow' };
       allocate.mockImplementation(() => expectedResult);
       const result = valueArray.popush(3, [toValue(10), toValue(11), toValue(12), toValue(13)]);
       expect(result).toStrictEqual(expectedResult);

@@ -1,6 +1,5 @@
 import { ValueType } from '@api/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
-import { RangeCheckException } from '@sdk/index.js';
 
 buildFunctionOperator(
   {
@@ -53,7 +52,7 @@ buildFunctionOperator(
     // TODO: rewrite to pop and push only once
     // Intermediate value array *must* be allocated
     if (count <= 0 || count > operands.length - 2) {
-      return { success: false, error: new RangeCheckException() };
+      return { success: false, exception: 'rangeCheck' };
     }
     operands.pop();
     operands.pop();

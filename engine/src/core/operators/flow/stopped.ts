@@ -4,7 +4,6 @@ import {
   OPERATOR_STATE_FIRST_CALL,
   OPERATOR_STATE_CALL_BEFORE_POP,
   toBooleanValue,
-  StopException,
   assert
 } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
@@ -48,7 +47,7 @@ buildFunctionOperator(
     if (!state.exception) {
       return operands.push(toBooleanValue(false));
     }
-    if (state.exception instanceof StopException) {
+    if (state.exception === 'stop') {
       state.clearException();
       return operands.push(toBooleanValue(true));
     }

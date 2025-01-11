@@ -3,7 +3,6 @@ import type { Result, Value } from '@api/index.js';
 import { ValueType } from '@api/index.js';
 import { toBooleanValue, toIntegerValue, toNameValue, toStringValue } from './toValue.js';
 import { MemoryTracker } from '@core/MemoryTracker.js';
-import { UndefinedResultException } from '@sdk/exceptions/UndefinedResultException.js';
 import { assert } from './assert.js';
 
 it('converts a boolean', () => {
@@ -34,7 +33,7 @@ describe('toIntegerValue', () => {
       const integerResult = toIntegerValue(1.2);
       expect(integerResult).toStrictEqual<Result<number>>({
         success: false,
-        error: expect.any(UndefinedResultException)
+        exception: 'undefinedResult'
       });
     });
 
@@ -42,7 +41,7 @@ describe('toIntegerValue', () => {
       const integerResult = toIntegerValue(Number.POSITIVE_INFINITY);
       expect(integerResult).toStrictEqual<Result<number>>({
         success: false,
-        error: expect.any(UndefinedResultException)
+        exception: 'undefinedResult'
       });
     });
 
@@ -50,7 +49,7 @@ describe('toIntegerValue', () => {
       const integerResult = toIntegerValue(Number.NEGATIVE_INFINITY);
       expect(integerResult).toStrictEqual<Result<number>>({
         success: false,
-        error: expect.any(UndefinedResultException)
+        exception: 'undefinedResult'
       });
     });
 
@@ -58,7 +57,7 @@ describe('toIntegerValue', () => {
       const integerResult = toIntegerValue(Number.MAX_SAFE_INTEGER + 1);
       expect(integerResult).toStrictEqual<Result<number>>({
         success: false,
-        error: expect.any(UndefinedResultException)
+        exception: 'undefinedResult'
       });
     });
 
@@ -66,7 +65,7 @@ describe('toIntegerValue', () => {
       const integerResult = toIntegerValue(Number.MIN_SAFE_INTEGER - 1);
       expect(integerResult).toStrictEqual<Result<number>>({
         success: false,
-        error: expect.any(UndefinedResultException)
+        exception: 'undefinedResult'
       });
     });
   });

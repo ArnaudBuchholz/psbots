@@ -1,5 +1,4 @@
 import { ValueType } from '@api/index.js';
-import { InvalidAccessException } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 
 buildFunctionOperator(
@@ -23,7 +22,7 @@ buildFunctionOperator(
   },
   ({ operands, dictionaries }, { name }, value) => {
     if (dictionaries.top.isReadOnly) {
-      return { success: false, error: new InvalidAccessException() };
+      return { success: false, exception: 'invalidAccess' };
     }
     const { dictionary } = dictionaries.top;
     const defResult = dictionary.def(name, value);

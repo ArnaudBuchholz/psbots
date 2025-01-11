@@ -1,14 +1,11 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import type { IState } from '@api/index.js';
 import { nullValue, Result, SYSTEM_MEMORY_TYPE, Value } from '@api/index.js';
 import {
   assert,
   OPERATOR_STATE_UNKNOWN,
   OPERATOR_STATE_FIRST_CALL,
   OPERATOR_STATE_CALL_BEFORE_POP,
-  OPERATOR_STATE_POP,
-  StackUnderflowException,
-  VmOverflowException
+  OPERATOR_STATE_POP
 } from '@sdk/index.js';
 import { CallStack } from './CallStack.js';
 import { memorySizeToBytes, MemoryTracker } from '@core/MemoryTracker.js';
@@ -42,18 +39,15 @@ describe('callStack', () => {
     expect(tracker.used).toBeGreaterThan(memoryBefore);
   });
 
-  it('returns empty array when empty', () => {
-    expect(callstack.callStack()).toStrictEqual([]);
-  });
+  for (let index = -1; index < 2; ++index) {
+    it(`returns default value for operator state when out of range (${index})`, () => {
+      expect(callstack.operatorStateAt(index)).toStrictEqual(OPERATOR_STATE_UNKNOWN);
+    });
+  }
 
   it('returns default value for operatorState', () => {
     callstack.push(toValue(1));
-    expect(callstack.callStack()).toStrictEqual<IState['callStack']>([
-      {
-        value: toValue(1),
-        operatorState: OPERATOR_STATE_UNKNOWN
-      }
-    ]);
+    expect(callstack.topOperatorState).toStrictEqual(OPERATOR_STATE_UNKNOWN);
   });
 
   it('returns value set for operatorState', () => {
@@ -62,16 +56,10 @@ describe('callStack', () => {
     callstack.push(toValue(2));
     callstack.topOperatorState = OPERATOR_STATE_FIRST_CALL;
     callstack.topOperatorState = 123;
-    expect(callstack.callStack()).toStrictEqual<IState['callStack']>([
-      {
-        value: toValue(2),
-        operatorState: 123
-      },
-      {
-        value: toValue(1),
-        operatorState: OPERATOR_STATE_FIRST_CALL
-      }
-    ]);
+    expect(callstack.at(0)).toStrictEqual(toValue(2));
+    expect(callstack.operatorStateAt(0)).toStrictEqual(123);
+    expect(callstack.at(1)).toStrictEqual(toValue(1));
+    expect(callstack.operatorStateAt(1)).toStrictEqual(OPERATOR_STATE_FIRST_CALL);
   });
 
   it('supports popush', () => {
@@ -88,7 +76,7 @@ describe('IDictionary', () => {
   });
 
   it('fails if no item exists in the stack', () => {
-    expect(callstack.def('test', toValue(123))).toStrictEqual<Result<Value>>({ success: false, error: expect.any(StackUnderflowException) });
+    expect(callstack.def('test', toValue(123))).toStrictEqual<Result<Value>>({ success: false, exception: 'stackUnderflow' });
   });
 
   it('fails if no more memory', () => {
@@ -97,7 +85,7 @@ describe('IDictionary', () => {
     assert(callstackResult);
     const callstack = callstackResult.value;
     expect(callstack.push(toValue(0))).toStrictEqual<Result<number>>({ success: true, value: 1 });
-    expect(callstack.def('test', toValue('abc'))).toStrictEqual<Result<Value>>({ success: false, error:expect.any(VmOverflowException) });
+    expect(callstack.def('test', toValue('abc'))).toStrictEqual<Result<Value>>({ success: false, exception: 'vmOverflow' });
   });
 
   it('associates a dictionary on the current item', () => {
@@ -218,5 +206,23 @@ describe('topOperatorState', () => {
         }
       }
     }
+  });
+});
+
+describe('snapshot', () => {
+  it('copies most important info from the callstack', () => {
+    callstack.push(toValue(1));
+    callstack.topOperatorState = OPERATOR_STATE_FIRST_CALL;
+    callstack.push(toValue(2));
+    callstack.topOperatorState = OPERATOR_STATE_FIRST_CALL;
+    callstack.topOperatorState = 123;
+    const snapshotResult = callstack.snapshot();
+    assert(snapshotResult);
+    const snapshot = snapshotResult.value;
+    expect(snapshot.at(0)).toStrictEqual(toValue(2));
+    expect(snapshot.operatorStateAt(0)).toStrictEqual(123);
+    expect(snapshot.at(1)).toStrictEqual(toValue(1));
+    expect(snapshot.operatorStateAt(1)).toStrictEqual(OPERATOR_STATE_FIRST_CALL);
+    snapshot.release();
   });
 });

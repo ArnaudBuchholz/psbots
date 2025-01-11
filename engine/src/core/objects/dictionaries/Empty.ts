@@ -1,6 +1,5 @@
 import type { IDictionary, Result, Value } from '@api/index.js';
 import { nullValue } from '@api/index.js';
-import { InvalidAccessException } from '@sdk/index.js';
 
 export class EmptyDictionary implements IDictionary {
   protected constructor() {}
@@ -27,7 +26,7 @@ export class EmptyDictionary implements IDictionary {
   // region IDictionary
 
   def(name: string, value: Value): Result<Value> {
-    return { success: false, error: new InvalidAccessException() };
+    return { success: false, exception: 'invalidAccess' };
   }
 
   // endregion IDictionary

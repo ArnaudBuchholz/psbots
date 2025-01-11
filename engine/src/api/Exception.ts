@@ -1,0 +1,28 @@
+export type Exception =
+  | 'dictStackUnderflow'
+  | 'invalidAccess'
+  | 'limitcheck'
+  | 'rangeCheck'
+  | 'stackUnderflow'
+  | 'stop'
+  | 'typeCheck'
+  | 'undefined'
+  | 'undefinedResult'
+  | 'unmatchedMark'
+  | 'vmOverflow';
+
+const messages: { [key in Exception]: string } = {
+  dictStackUnderflow: 'No custom dictionary left to unstack',
+  invalidAccess: 'Object is read-only',
+  limitcheck: 'An implementation limit has been exceeded',
+  rangeCheck: 'Operand is too big or too small',
+  stackUnderflow: 'Not enough operands on the stack to perform the operation',
+  stop: 'Execution stopped',
+  typeCheck: 'Operand is of the wrong type',
+  undefined: 'Name is not defined in the dictionary stack',
+  undefinedResult: 'Result cannot be represented as a number',
+  unmatchedMark: 'Unmatched mark in the operand stack',
+  vmOverflow: 'Virtual memory exceeded'
+};
+
+export const getExceptionMessage = (exception: Exception): string => messages[exception];

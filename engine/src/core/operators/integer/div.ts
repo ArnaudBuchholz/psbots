@@ -1,5 +1,5 @@
 import { ValueType } from '@api/index.js';
-import { toIntegerValue, UndefinedResultException } from '@sdk/index.js';
+import { toIntegerValue } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 
 buildFunctionOperator(
@@ -25,7 +25,7 @@ buildFunctionOperator(
   (state, { integer: divisor }, { integer: quotient }) => {
     const { operands } = state;
     if (quotient === 0) {
-      return { success: false, error: new UndefinedResultException() };
+      return { success: false, exception: 'undefinedResult' };
     }
     const reminder = divisor % quotient;
     const reminderResult = toIntegerValue(reminder);

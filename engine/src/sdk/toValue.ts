@@ -1,6 +1,5 @@
 import type { IValueTracker, Result, Value } from '@api/index.js';
 import { ValueType } from '@api/index.js';
-import { UndefinedResultException } from '@sdk/exceptions/UndefinedResultException.js';
 
 export function toBooleanValue(isSet: boolean): Value<ValueType.boolean> {
   return {
@@ -13,7 +12,7 @@ export function toBooleanValue(isSet: boolean): Value<ValueType.boolean> {
 
 export function toIntegerValue(integer: number): Result<Value<ValueType.integer>> {
   if (integer % 1 !== 0 || integer < Number.MIN_SAFE_INTEGER || integer > Number.MAX_SAFE_INTEGER) {
-    return { success: false, error: new UndefinedResultException() };
+    return { success: false, exception: 'undefinedResult' };
   }
   return {
     success: true,

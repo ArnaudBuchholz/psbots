@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import type { Value } from '@api/index.js';
 import { enumIArrayValues, nullValue, USER_MEMORY_TYPE } from '@api/index.js';
-import { RangeCheckException, VmOverflowException, assert, isArrayValue } from '@sdk/index.js';
+import { assert, isArrayValue } from '@sdk/index.js';
 import { MemoryTracker } from '@core/MemoryTracker.js';
 import { ValueArray } from './ValueArray.js';
 import { toValue } from '@test/index.js';
@@ -60,7 +60,7 @@ describe('memory', () => {
   it('handles creation failure', () => {
     const tracker = new MemoryTracker({ total: 1 });
     const creationResult = ValueArray.create(tracker, USER_MEMORY_TYPE, 10, 1);
-    expect(creationResult).toStrictEqual({ success: false, error: expect.any(VmOverflowException) });
+    expect(creationResult).toStrictEqual({ success: false, exception: 'vmOverflow' });
   });
 
   it('handles allocation failure of the increment', () => {
@@ -70,7 +70,7 @@ describe('memory', () => {
     const valueArray = creationResult.value;
     valueArray.push(toValue(0));
     const result = valueArray.set(5, toValue(1));
-    expect(result).toStrictEqual({ success: false, error: expect.any(VmOverflowException) });
+    expect(result).toStrictEqual({ success: false, exception: 'vmOverflow' });
   });
 });
 
@@ -100,7 +100,7 @@ describe('IArray', () => {
   });
 
   it('fails with RangeCheckException on invalid index', () => {
-    expect(valueArray.set(-1, toValue(0))).toStrictEqual({ success: false, error: expect.any(RangeCheckException) });
+    expect(valueArray.set(-1, toValue(0))).toStrictEqual({ success: false, exception: 'rangeCheck' });
   });
 
   describe('handling tracked values', () => {

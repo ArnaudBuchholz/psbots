@@ -1,7 +1,6 @@
 import { it, expect, beforeEach } from 'vitest';
 import type { Result } from '@api/index.js';
 import { markValue, USER_MEMORY_TYPE } from '@api/index.js';
-import { UnmatchedMarkException } from '@sdk/exceptions/UnmatchedMarkException.js';
 import { MemoryTracker } from '@core/MemoryTracker.js';
 import { ValueStack } from '@core/objects/stacks/ValueStack.js';
 import { findMarkPos } from './findMarkPos.js';
@@ -37,6 +36,6 @@ it('fails with UnmatchedMark if no mark found', () => {
   const findMarkPosResult = findMarkPos(stack);
   expect(findMarkPosResult).toStrictEqual<Result<number>>({
     success: false,
-    error: expect.any(UnmatchedMarkException)
+    exception: 'unmatchedMark'
   });
 });

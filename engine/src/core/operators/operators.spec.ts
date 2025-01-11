@@ -3,7 +3,7 @@ import { enumIArrayValues, parse } from '@api/index.js';
 import type { OperatorDefinition } from './operators.js';
 import { registry } from './operators.js';
 import { State } from '@core/state/State.js';
-import { toValue, waitForGenerator } from '@test/index.js';
+import { toValue, waitForExec } from '@test/index.js';
 import { assert } from '@sdk/index.js';
 
 const nullDefinition: OperatorDefinition = {
@@ -62,12 +62,12 @@ describe('executing in & out using debug', () => {
                 failed = true;
               });
               const start = performance.now();
-              debugCycles += waitForGenerator(state.exec(toValue(sample.in, { isExecutable: true }))).length;
-              debugCycles += waitForGenerator(expectedState.exec(toValue(sample.out, { isExecutable: true }))).length;
+              debugCycles += waitForExec(state.exec(toValue(sample.in, { isExecutable: true }))).length;
+              debugCycles += waitForExec(expectedState.exec(toValue(sample.out, { isExecutable: true }))).length;
               debugMilliseconds += Math.ceil(performance.now() - start);
               if (expectedState.exception) {
                 expect(state.exception).not.toBeUndefined();
-                expect(state.exception).toBeInstanceOf(expectedState.exception.constructor);
+                expect(state.exception).toStrictEqual(expectedState.exception);
               } else {
                 expect(state.exception).toBeUndefined();
                 expect(state.operands.length).toStrictEqual(expectedState.operands.length);
@@ -120,7 +120,9 @@ describe.runIf(!failed)('executing in only (performance)', () => {
           const description = sample.description ?? definition.description;
           if (missingOperators.length === 0) {
             it(`[${sampleId}] ${description}`, () => {
-              const iterator = state.exec(toValue(sample.in, { isExecutable: true }));
+              const execResult = state.exec(toValue(sample.in, { isExecutable: true }));
+              assert(execResult);
+              const iterator = execResult.value;
               // eslint-disable-next-line no-constant-condition
               while (true) {
                 const start = performance.now();

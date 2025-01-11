@@ -1,6 +1,6 @@
 import type { ArrayValue, IReadOnlyArray, IValuePermissions, MemoryType, Result, Value } from '@api/index.js';
 import { nullValue, ValueType } from '@api/index.js';
-import { assert, LimitcheckException } from '@sdk/index.js';
+import { assert } from '@sdk/index.js';
 import type { MemoryPointer, MemorySize, MemoryTracker } from '@core/MemoryTracker.js';
 import { addMemorySize } from '@core/MemoryTracker.js';
 import { ShareableObject } from '@core/objects/ShareableObject.js';
@@ -96,7 +96,7 @@ export abstract class AbstractValueContainer extends ShareableObject implements 
     const missingCapacity = minCapacity - this.capacity;
     if (missingCapacity > 0) {
       if (this._capacityIncrement === 0) {
-        return { success: false, error: new LimitcheckException() };
+        return { success: false, exception: 'limitcheck' };
       }
       let increments = Math.ceil(missingCapacity / this._capacityIncrement);
       while (increments > 0) {

@@ -1,6 +1,6 @@
 import type { IArray, IDictionary, Result, Value } from '@api/index.js';
 import { ValueType } from '@api/index.js';
-import { assert, checkPos, InvalidAccessException, RangeCheckException, toStringValue, TypeCheckException } from '@sdk/index.js';
+import { assert, checkPos, toStringValue } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 import { MemoryTracker } from '@core/MemoryTracker.js';
 
@@ -9,11 +9,11 @@ const implementations: { [type in ValueType]?: (container: Value<type>, index: V
   [ValueType.string]: ({ string, tracker }, index, value) => {
     assert(tracker instanceof MemoryTracker);
     if (value.type !== ValueType.integer) {
-      return { success: false, error: new TypeCheckException() };
+      return { success: false, exception: 'typeCheck' };
     }
     const { integer: charCode } = value;
     if (charCode < 0 || charCode > 65535) {
-      return { success: false, error: new RangeCheckException() };
+      return { success: false, exception: 'rangeCheck' };
     }
     const posResult = checkPos(index, string.length);
     if (!posResult.success) {
@@ -30,7 +30,7 @@ const implementations: { [type in ValueType]?: (container: Value<type>, index: V
   [ValueType.array]: (container, index, value) => {
     const { array, isReadOnly } = container;
     if (isReadOnly) {
-      return { success: false, error: new InvalidAccessException() };
+      return { success: false, exception: 'invalidAccess' };
     }
     const posResult = checkPos(index, array.length);
     if (!posResult.success) {
@@ -47,10 +47,10 @@ const implementations: { [type in ValueType]?: (container: Value<type>, index: V
   [ValueType.dictionary]: (container, index, value) => {
     const { dictionary, isReadOnly } = container;
     if (isReadOnly) {
-      return { success: false, error: new InvalidAccessException() };
+      return { success: false, exception: 'invalidAccess' };
     }
     if (index.type !== ValueType.name) {
-      return { success: false, error: new TypeCheckException() };
+      return { success: false, exception: 'typeCheck' };
     }
     const { name } = index;
     const defResult = (dictionary as IDictionary).def(name, value);
@@ -168,7 +168,7 @@ buildFunctionOperator(
   ({ operands }, container, index, value) => {
     const implementation = implementations[container.type];
     if (implementation === undefined) {
-      return { success: false, error: new TypeCheckException() };
+      return { success: false, exception: 'typeCheck' };
     }
     const putResult = implementation(container as never, index, value);
     if (!putResult.success) {
