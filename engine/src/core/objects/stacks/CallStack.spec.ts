@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { nullValue, Result, SYSTEM_MEMORY_TYPE, Value } from '@api/index.js';
 import {
   assert,
@@ -224,5 +224,13 @@ describe('snapshot', () => {
     expect(snapshot.at(1)).toStrictEqual(toValue(1));
     expect(snapshot.operatorStateAt(1)).toStrictEqual(OPERATOR_STATE_FIRST_CALL);
     snapshot.release();
+  });
+
+  it('fails when no more memory', () => {
+    callstack.push(toValue(1));
+    const isAvailable = vi.spyOn(MemoryTracker.prototype, 'isAvailable');
+    isAvailable.mockImplementation(() => ({ success: false, exception: 'vmOverflow' }));
+    expect(callstack.snapshot()).toStrictEqual({ success: false, exception: 'vmOverflow' });
+    isAvailable.mockRestore();
   });
 });
