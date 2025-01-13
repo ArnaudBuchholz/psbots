@@ -1,5 +1,5 @@
 import { ValueType } from '@api/index.js';
-import { toIntegerValue } from '@sdk/index.js';
+import { assert, toIntegerValue } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 
 buildFunctionOperator(
@@ -19,9 +19,7 @@ buildFunctionOperator(
   },
   ({ operands, calls }) => {
     const integerResult = toIntegerValue(calls.length);
-    if (!integerResult.success) {
-      return integerResult;
-    }
+    assert(integerResult); // cannot exceed limit
     return operands.push(integerResult.value);
   }
 );
