@@ -1,10 +1,5 @@
 import { ValueType } from '@api/index.js';
-import {
-  OPERATOR_STATE_POP,
-  OPERATOR_STATE_FIRST_CALL,
-  OPERATOR_STATE_CALL_BEFORE_POP,
-  assert
-} from '@sdk/index.js';
+import { OPERATOR_STATE_POP, OPERATOR_STATE_FIRST_CALL, OPERATOR_STATE_CALL_BEFORE_POP, assert } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 
 const LOOP_BLOCK = 'block';

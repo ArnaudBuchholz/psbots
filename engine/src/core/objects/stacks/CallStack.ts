@@ -8,16 +8,22 @@ import {
   OPERATOR_STATE_CALL_BEFORE_POP,
   assert
 } from '@sdk/index.js';
-import { addMemorySize, type MemorySize, type MemoryTracker } from '@core/MemoryTracker.js';
+import { addMemorySize } from '@core/MemoryTracker.js';
+import type { MemorySize, MemoryTracker } from '@core/MemoryTracker.js';
 import { ValueStack } from '@core/objects/stacks/ValueStack.js';
 import { Dictionary } from '@core/objects/dictionaries/Dictionary.js';
 
 const OPERATOR_STATE_INVALID = 'Invalid operator state change';
 
 export class CallStack extends ValueStack implements ICallStack {
-  static override create(memoryTracker: MemoryTracker, memoryType: MemoryType, initialCapacity: number, capacityIncrement: number): Result<CallStack> {
+  static override create(
+    memoryTracker: MemoryTracker,
+    memoryType: MemoryType,
+    initialCapacity: number,
+    capacityIncrement: number
+  ): Result<CallStack> {
     assert(memoryType === SYSTEM_MEMORY_TYPE);
-    return super.createInstance(memoryTracker, memoryType, initialCapacity, capacityIncrement)
+    return super.createInstance(memoryTracker, memoryType, initialCapacity, capacityIncrement);
   }
 
   private _dictionaries: (Dictionary | undefined)[] = [];
@@ -94,7 +100,7 @@ export class CallStack extends ValueStack implements ICallStack {
 
   def(name: string, value: Value): Result<Value> {
     if (this.length === 0) {
-      return { success: false, exception: 'stackUnderflow' }
+      return { success: false, exception: 'stackUnderflow' };
     }
     let dictionary = this._dictionaries[0];
     if (dictionary === undefined) {

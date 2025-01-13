@@ -72,12 +72,7 @@ export class State implements IInternalState {
     if (!callsResult.success) {
       return callsResult;
     }
-    return { success: true, value: new State(
-      memoryTracker,
-      dictionaries,
-      operandsResult.value,
-      callsResult.value
-    )}
+    return { success: true, value: new State(memoryTracker, dictionaries, operandsResult.value, callsResult.value) };
   }
 
   get destroyed() {

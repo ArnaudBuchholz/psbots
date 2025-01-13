@@ -49,15 +49,20 @@ export const registry: {
 export function buildFunctionOperator<T1 extends ValueType>(
   definition: OperatorDefinition<[IOperatorTypeCheck<T1>]>,
   implementation: (state: IInternalState, value: Value<T1>) => Result<unknown> | void
-): OperatorValue
+): OperatorValue;
 export function buildFunctionOperator<T1 extends ValueType, T2 extends ValueType>(
   definition: OperatorDefinition<[IOperatorTypeCheck<T1>, IOperatorTypeCheck<T2>]>,
   implementation: (state: IInternalState, value1: Value<T1>, value2: Value<T2>) => Result<unknown> | void
-): OperatorValue
+): OperatorValue;
 export function buildFunctionOperator<T1 extends ValueType, T2 extends ValueType, T3 extends ValueType>(
   definition: OperatorDefinition<[IOperatorTypeCheck<T1>, IOperatorTypeCheck<T2>, IOperatorTypeCheck<T3>]>,
-  implementation: (state: IInternalState, value1: Value<T1>, value2: Value<T2>, value3: Value<T3>) => Result<unknown> | void
-): OperatorValue
+  implementation: (
+    state: IInternalState,
+    value1: Value<T1>,
+    value2: Value<T2>,
+    value3: Value<T3>
+  ) => Result<unknown> | void
+): OperatorValue;
 export function buildFunctionOperator(
   definition: OperatorDefinition,
   implementation: (state: IInternalState, ...values: Value[]) => Result<unknown> | void

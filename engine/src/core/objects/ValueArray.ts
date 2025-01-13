@@ -5,7 +5,12 @@ import { AbstractValueContainer } from '@core/objects/AbstractValueContainer.js'
 import type { MemoryTracker } from '@core/MemoryTracker.js';
 
 export class ValueArray extends AbstractValueContainer implements IArray {
-  static create(memoryTracker: MemoryTracker, memoryType: MemoryType, initialCapacity: number, capacityIncrement: number): Result<ValueArray> {
+  static create(
+    memoryTracker: MemoryTracker,
+    memoryType: MemoryType,
+    initialCapacity: number,
+    capacityIncrement: number
+  ): Result<ValueArray> {
     return super.createInstance(memoryTracker, memoryType, initialCapacity, capacityIncrement);
   }
 

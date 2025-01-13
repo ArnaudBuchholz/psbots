@@ -14,13 +14,23 @@ const GLOBAL_INDEX_FROM_BOTTOM = -3;
 const USER_INDEX_FROM_BOTTOM = -4;
 
 export class DictionaryStack extends ValueStack implements IDictionaryStack {
-  static override create(memoryTracker: MemoryTracker, memoryType: MemoryType, initialCapacity: number, capacityIncrement: number): Result<DictionaryStack> {
+  static override create(
+    memoryTracker: MemoryTracker,
+    memoryType: MemoryType,
+    initialCapacity: number,
+    capacityIncrement: number
+  ): Result<DictionaryStack> {
     assert(memoryType === SYSTEM_MEMORY_TYPE);
     assert(initialCapacity > 4);
-    return super.createInstance(memoryTracker, memoryType, initialCapacity, capacityIncrement)
+    return super.createInstance(memoryTracker, memoryType, initialCapacity, capacityIncrement);
   }
 
-  protected constructor(tracker: MemoryTracker, memoryType: MemoryType, initialCapacity: number, capacityIncrement: number) {
+  protected constructor(
+    tracker: MemoryTracker,
+    memoryType: MemoryType,
+    initialCapacity: number,
+    capacityIncrement: number
+  ) {
     super(tracker, memoryType, initialCapacity, capacityIncrement);
     this.begin({
       type: ValueType.dictionary,
@@ -48,7 +58,7 @@ export class DictionaryStack extends ValueStack implements IDictionaryStack {
     });
   }
 
-  protected getDictionaryValue (indexFromBottom: number): DictionaryValue {
+  protected getDictionaryValue(indexFromBottom: number): DictionaryValue {
     const value = this._values[this._values.length + indexFromBottom];
     assert(!!value && value.type === ValueType.dictionary);
     return value;

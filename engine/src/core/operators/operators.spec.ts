@@ -75,7 +75,9 @@ describe('executing in & out using debug', () => {
                 Object.assign(state.memoryTracker, { _peak: 0 });
                 Object.assign(expectedState.memoryTracker, { _peak: 0 });
                 expect(state.memoryTracker.byType).toStrictEqual(expectedState.memoryTracker.byType);
-                expect([...enumIArrayValues(state.operands)]).toStrictEqual([...enumIArrayValues(expectedState.operands)]);
+                expect([...enumIArrayValues(state.operands)]).toStrictEqual([
+                  ...enumIArrayValues(expectedState.operands)
+                ]);
               }
             });
           }

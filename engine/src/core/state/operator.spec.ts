@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { enumIArrayValues, Exception, markValue, ValueType } from '@api/index.js';
+import type { Exception } from '@api/index.js';
+import { enumIArrayValues, markValue, ValueType } from '@api/index.js';
 import type { IFunctionOperator, IInternalState, IOperator } from '@sdk/index.js';
 import {
   OPERATOR_STATE_FIRST_CALL,
@@ -26,16 +27,18 @@ afterEach(() => {
 
 describe('Constant operator', () => {
   beforeEach(() => {
-    assert(state.calls.push({
-      type: ValueType.operator,
-      isExecutable: true,
-      isReadOnly: true,
-      operator: <IOperator>{
-        name: 'test',
-        type: OperatorType.constant,
-        constant: toValue(true)
-      }
-    }));
+    assert(
+      state.calls.push({
+        type: ValueType.operator,
+        isExecutable: true,
+        isReadOnly: true,
+        operator: <IOperator>{
+          name: 'test',
+          type: OperatorType.constant,
+          constant: toValue(true)
+        }
+      })
+    );
   });
 
   it('push the value on the first cycle and pops the call', () => {
@@ -46,16 +49,18 @@ describe('Constant operator', () => {
 });
 
 function pushFunctionOperatorToCallStack(operator: Partial<IFunctionOperator>) {
-  assert(state.calls.push({
-    type: ValueType.operator,
-    isExecutable: true,
-    isReadOnly: true,
-    operator: {
-      name: 'test',
-      type: OperatorType.implementation,
-      ...operator
-    }
-  }));
+  assert(
+    state.calls.push({
+      type: ValueType.operator,
+      isExecutable: true,
+      isReadOnly: true,
+      operator: {
+        name: 'test',
+        type: OperatorType.implementation,
+        ...operator
+      }
+    })
+  );
 }
 
 describe('No parameters', () => {
@@ -75,11 +80,11 @@ describe('With parameters', () => {
     beforeEach(() => {
       pushFunctionOperatorToCallStack({
         implementation({ operands }, ...values) {
-          assert(operands.push(
-            toValue(
-              values.length === 1 && values[0]?.type === ValueType.integer && values[0]?.integer === 123
+          assert(
+            operands.push(
+              toValue(values.length === 1 && values[0]?.type === ValueType.integer && values[0]?.integer === 123)
             )
-          ));
+          );
         },
         typeCheck: [{ type: ValueType.integer }]
       });
@@ -131,15 +136,17 @@ describe('With parameters', () => {
     beforeEach(() => {
       pushFunctionOperatorToCallStack({
         implementation({ operands }, ...values) {
-          assert(operands.push(
-            toValue(
-              values.length === 2 &&
-              values[0]?.type === ValueType.integer &&
-              values[0]?.integer === 123 &&
-              values[1]?.type === ValueType.boolean &&
-              values[1]?.isSet === true
+          assert(
+            operands.push(
+              toValue(
+                values.length === 2 &&
+                  values[0]?.type === ValueType.integer &&
+                  values[0]?.integer === 123 &&
+                  values[1]?.type === ValueType.boolean &&
+                  values[1]?.isSet === true
+              )
             )
-          ));
+          );
         },
         typeCheck: [{ type: ValueType.integer }, { type: ValueType.boolean }]
       });

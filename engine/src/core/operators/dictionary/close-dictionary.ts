@@ -1,4 +1,5 @@
-import { NameValue, USER_MEMORY_TYPE, ValueType } from '@api/index.js';
+import type { NameValue } from '@api/index.js';
+import { USER_MEMORY_TYPE, ValueType } from '@api/index.js';
 import { findMarkPos, valuesOf } from '@sdk/index.js';
 import type { IInternalState } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';

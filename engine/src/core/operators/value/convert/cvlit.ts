@@ -1,4 +1,5 @@
-import { Value, ValueType } from '@api/index.js';
+import type { Value } from '@api/index.js';
+import { ValueType } from '@api/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 
 buildFunctionOperator(

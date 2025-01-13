@@ -34,12 +34,21 @@ export abstract class AbstractValueContainer extends ShareableObject implements 
     super();
     assert(this._initialCapacity > 0);
     assert(this._capacityIncrement >= 0);
-    const isMemoryAvailable = this._memoryTracker.allocate(AbstractValueContainer.getSize(this._initialCapacity), this._memoryType, this);
+    const isMemoryAvailable = this._memoryTracker.allocate(
+      AbstractValueContainer.getSize(this._initialCapacity),
+      this._memoryType,
+      this
+    );
     assert(isMemoryAvailable);
     this._pointers.push(isMemoryAvailable.value);
   }
 
-  protected static createInstance<T>(memoryTracker: MemoryTracker, memoryType: MemoryType, initialCapacity: number, capacityIncrement: number): Result<T> {
+  protected static createInstance<T>(
+    memoryTracker: MemoryTracker,
+    memoryType: MemoryType,
+    initialCapacity: number,
+    capacityIncrement: number
+  ): Result<T> {
     assert(initialCapacity > 0);
     assert(capacityIncrement >= 0);
     const isMemoryAvailable = memoryTracker.isAvailable(this.getSize(initialCapacity), memoryType);
@@ -47,7 +56,12 @@ export abstract class AbstractValueContainer extends ShareableObject implements 
       return isMemoryAvailable;
     }
     // Hack to convert the class into its constructor
-    const Constructor = this as unknown as new (memoryTracker: MemoryTracker, memoryType: MemoryType, initialCapacity: number, capacityIncrement: number) => T;
+    const Constructor = this as unknown as new (
+      memoryTracker: MemoryTracker,
+      memoryType: MemoryType,
+      initialCapacity: number,
+      capacityIncrement: number
+    ) => T;
     return {
       success: true,
       value: new Constructor(memoryTracker, memoryType, initialCapacity, capacityIncrement)
@@ -57,14 +71,14 @@ export abstract class AbstractValueContainer extends ShareableObject implements 
   static getSize(capacity: number): MemorySize {
     return addMemorySize(ShareableObject.size, {
       pointers: 1,
-      values: capacity,
+      values: capacity
     });
   }
 
   protected getIncrementSize(capacity: number): MemorySize {
     return {
       pointers: 1,
-      values: capacity,
+      values: capacity
     };
   }
 
@@ -100,7 +114,11 @@ export abstract class AbstractValueContainer extends ShareableObject implements 
       }
       let increments = Math.ceil(missingCapacity / this._capacityIncrement);
       while (increments > 0) {
-        const isMemoryAvailable = this._memoryTracker.allocate(this.getIncrementSize(this._capacityIncrement), this._memoryType, this);
+        const isMemoryAvailable = this._memoryTracker.allocate(
+          this.getIncrementSize(this._capacityIncrement),
+          this._memoryType,
+          this
+        );
         if (!isMemoryAvailable.success) {
           return isMemoryAvailable;
         }
@@ -108,7 +126,7 @@ export abstract class AbstractValueContainer extends ShareableObject implements 
         --increments;
       }
     }
-    return { success: true, value: undefined }
+    return { success: true, value: undefined };
   }
 
   /** Puts the value in the right place */
@@ -158,9 +176,9 @@ export abstract class AbstractValueContainer extends ShareableObject implements 
     return value;
   }
 
-  popush(count: number): { success: true, value: number }
-  popush(count: number, valueArray: Value[], ...values: Value[]): Result<number>
-  popush(count: number, ...values: Value[]): Result<number>
+  popush(count: number): { success: true; value: number };
+  popush(count: number, valueArray: Value[], ...values: Value[]): Result<number>;
+  popush(count: number, ...values: Value[]): Result<number>;
   popush(count: number, valueOrArray?: Value | Value[], ...values: Value[]): Result<number> {
     const { capacity } = this;
     let arrayOfValues: Value[];

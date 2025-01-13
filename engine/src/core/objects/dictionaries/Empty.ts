@@ -1,5 +1,6 @@
 import type { IDictionary, Result, Value } from '@api/index.js';
 import { nullValue } from '@api/index.js';
+import { assert } from '@sdk/index.js';
 
 export class EmptyDictionary implements IDictionary {
   protected constructor() {}
@@ -26,6 +27,8 @@ export class EmptyDictionary implements IDictionary {
   // region IDictionary
 
   def(name: string, value: Value): Result<Value> {
+    assert(!!name);
+    assert(!!value);
     return { success: false, exception: 'invalidAccess' };
   }
 

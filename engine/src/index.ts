@@ -3,7 +3,7 @@ import type { OperatorDefinition } from '@core/operators/operators.js';
 import type { StateFactorySettings } from '@core/state/State.js';
 import { registry } from '@core/operators/operators.js';
 import { State } from '@core/state/State.js';
-import { Result } from '@api/Result.js';
+import type { Result } from '@api/Result.js';
 
 export { StateFactorySettings } from '@core/state/State.js';
 export * from './api/index.js';

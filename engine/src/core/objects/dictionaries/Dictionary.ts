@@ -7,7 +7,7 @@ import { assert } from '@sdk/index.js';
 
 /**
  * IDictionary implementation
- * 
+ *
  * NOTE about memory management :
  * When the dictionary is created with an initial capacity but the initial keys are removed afterward,
  * the allocated memory is not freed or reclaimed. It will be released only when the object is destroyed.
@@ -46,12 +46,12 @@ export class Dictionary extends ShareableObject implements IDictionary {
   static getSize(initialCapacity: number): MemorySize {
     return addMemorySize(ShareableObject.size, {
       pointers: 1 + initialCapacity,
-      values: initialCapacity,
+      values: initialCapacity
     });
   }
 
   static create(memoryTracker: MemoryTracker, memoryType: MemoryType, initialKeyCount: number): Result<Dictionary> {
-    const isMemoryAvailable = memoryTracker.isAvailable(Dictionary.getSize(initialKeyCount),memoryType);
+    const isMemoryAvailable = memoryTracker.isAvailable(Dictionary.getSize(initialKeyCount), memoryType);
     if (!isMemoryAvailable.success) {
       return isMemoryAvailable;
     }

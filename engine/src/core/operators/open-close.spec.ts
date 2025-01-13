@@ -31,12 +31,12 @@ it('forwards debug info', async () => {
         debugSource,
         ...toValue(source, { isExecutable: true })
       })
-    )    
+    )
   );
   expect(state.operands.top.debugSource).toStrictEqual<IDebugSource>(debugSource);
 });
 
-it('forwards error if the array cannot be created', async () => {
+it('forwards error if the array cannot be created', async () => {
   const stateResult = State.create();
   assert(stateResult);
   const { value: state } = stateResult;

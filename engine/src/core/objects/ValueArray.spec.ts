@@ -53,7 +53,12 @@ it('implements a LIFO array (pop)', () => {
 
 it('implements a LIFO array (push)', () => {
   valueArray.push(toValue(0));
-  expect([...enumIArrayValues(valueArray)]).toStrictEqual<Value[]>([toValue(123), toValue('abc'), shared.value, toValue(0)]);
+  expect([...enumIArrayValues(valueArray)]).toStrictEqual<Value[]>([
+    toValue(123),
+    toValue('abc'),
+    shared.value,
+    toValue(0)
+  ]);
 });
 
 describe('memory', () => {
@@ -89,7 +94,12 @@ describe('IArray', () => {
 
   it('allows setting a new item', () => {
     expect(valueArray.set(3, toValue(456))).toStrictEqual({ success: true, value: nullValue });
-    expect([...enumIArrayValues(valueArray)]).toStrictEqual<Value[]>([toValue(123), toValue('abc'), shared.value, toValue(456)]);
+    expect([...enumIArrayValues(valueArray)]).toStrictEqual<Value[]>([
+      toValue(123),
+      toValue('abc'),
+      shared.value,
+      toValue(456)
+    ]);
   });
 
   it('allows overriding an item', () => {

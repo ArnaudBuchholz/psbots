@@ -9,7 +9,7 @@ buildFunctionOperator(
     labels: ['integer', 'math'],
     signature: {
       input: [{ type: ValueType.integer }, { type: ValueType.integer }],
-      output: [{ type: ValueType.integer }, { type: ValueType.integer }],
+      output: [{ type: ValueType.integer }, { type: ValueType.integer }]
     },
     samples: [
       {

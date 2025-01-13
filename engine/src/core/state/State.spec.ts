@@ -1,14 +1,10 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { enumIArrayValues, Exception, ValueType } from '@api/index.js';
-import type { Result, Value } from '@api/index.js';
+import { enumIArrayValues, ValueType } from '@api/index.js';
+import type { Result, Value, Exception } from '@api/index.js';
 import { State } from './State.js';
 import { toValue, waitForExec } from '@test/index.js';
 import type { IFunctionOperator, IInternalState } from '@sdk/index.js';
-import {
-  assert,
-  OPERATOR_STATE_FIRST_CALL,
-  OperatorType
-} from '@sdk/index.js';
+import { assert, OPERATOR_STATE_FIRST_CALL, OperatorType } from '@sdk/index.js';
 import { STRING_MEMORY_TYPE } from '@core/MemoryTracker.js';
 
 let state: State;
@@ -87,7 +83,10 @@ describe('exec', () => {
 
   it('fails if already busy', () => {
     state.exec(toValue('123', { isExecutable: true }));
-    expect(state.exec(toValue('456', { isExecutable: true }))).toStrictEqual<Result<Generator>>({ success: false, exception: 'invalidAccess' });
+    expect(state.exec(toValue('456', { isExecutable: true }))).toStrictEqual<Result<Generator>>({
+      success: false,
+      exception: 'invalidAccess'
+    });
   });
 });
 
@@ -149,48 +148,56 @@ describe('exception handling', () => {
 
   it('fails on any error', () => {
     const error = new Error('KO');
-    assert(state.calls.push({
-      type: ValueType.operator,
-      isExecutable: true,
-      isReadOnly: true,
-      operator: <IFunctionOperator>{
-        name: 'test',
-        type: OperatorType.implementation,
-        implementation: () => {
-          throw error;
+    assert(
+      state.calls.push({
+        type: ValueType.operator,
+        isExecutable: true,
+        isReadOnly: true,
+        operator: <IFunctionOperator>{
+          name: 'test',
+          type: OperatorType.implementation,
+          implementation: () => {
+            throw error;
+          }
         }
-      }
-    }));
+      })
+    );
     expect(() => state.cycle()).toThrowError(error);
   });
 
   it('adds call stack information', () => {
-    assert(state.calls.push({
-      type: ValueType.string,
-      isExecutable: true,
-      isReadOnly: true,
-      string: 'step1'
-    }));
-    assert(state.calls.push({
-      type: ValueType.string,
-      isExecutable: true,
-      isReadOnly: true,
-      string: 'step2'
-    }));
+    assert(
+      state.calls.push({
+        type: ValueType.string,
+        isExecutable: true,
+        isReadOnly: true,
+        string: 'step1'
+      })
+    );
+    assert(
+      state.calls.push({
+        type: ValueType.string,
+        isExecutable: true,
+        isReadOnly: true,
+        string: 'step2'
+      })
+    );
     state.calls.topOperatorState = OPERATOR_STATE_FIRST_CALL;
     state.calls.topOperatorState = 5;
-    assert(state.calls.push({
-      type: ValueType.operator,
-      isExecutable: true,
-      isReadOnly: true,
-      operator: <IFunctionOperator>{
-        name: 'invalidaccess',
-        type: OperatorType.implementation,
-        implementation: (state: IInternalState) => {
-          state.raiseException('invalidAccess');
+    assert(
+      state.calls.push({
+        type: ValueType.operator,
+        isExecutable: true,
+        isReadOnly: true,
+        operator: <IFunctionOperator>{
+          name: 'invalidaccess',
+          type: OperatorType.implementation,
+          implementation: (state: IInternalState) => {
+            state.raiseException('invalidAccess');
+          }
         }
-      }
-    }));
+      })
+    );
     state.cycle();
     expect(state.exception).toStrictEqual<Exception>('invalidAccess');
     // TODO: validate stack

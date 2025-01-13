@@ -9,7 +9,11 @@ import {
   isArrayValue,
   isDictionaryValue,
   isNameValue,
-  assert, toIntegerValue, toNameValue, toStringValue } from '@sdk/index.js';
+  assert,
+  toIntegerValue,
+  toNameValue,
+  toStringValue
+} from '@sdk/index.js';
 
 function testFlags(
   is: (value: unknown, flags?: Partial<IValuePermissions>) => void,

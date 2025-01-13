@@ -30,5 +30,6 @@ buildFunctionOperator(
       }
     ]
   },
-  ({ operands }, { isSet: value1 }, { isSet: value2 }) => operands.popush(2, toBooleanValue((value1 && !value2) || (!value1 && value2)))
+  ({ operands }, { isSet: value1 }, { isSet: value2 }) =>
+    operands.popush(2, toBooleanValue((value1 && !value2) || (!value1 && value2)))
 );

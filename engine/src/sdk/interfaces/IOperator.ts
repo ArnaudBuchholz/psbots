@@ -19,7 +19,7 @@ export interface IOperatorTypeCheck<Type = ValueType> {
    */
   type: Type;
   permissions?: Partial<IValuePermissions>;
-};
+}
 
 /** Other operators are implemented with functions */
 export interface IFunctionOperator extends IAbstractOperator {

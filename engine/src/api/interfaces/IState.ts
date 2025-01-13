@@ -2,8 +2,8 @@ import type { IReadOnlyArray } from '@api/interfaces/IReadOnlyArray.js';
 import type { IMemoryTracker } from '@api/interfaces/IMemoryTracker.js';
 import type { IReadOnlyCallStack } from '@api/interfaces/IReadOnlyCallStack.js';
 import type { Value } from '@api/values/Value.js';
-import { Exception } from '@api/Exception.js';
-import { Result } from '@api/Result.js';
+import type { Exception } from '@api/Exception.js';
+import type { Result } from '@api/Result.js';
 
 /** Public version of the engine state */
 export interface IState {

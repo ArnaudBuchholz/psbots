@@ -1,4 +1,5 @@
-import { Exception, IReadOnlyCallStack, nullValue, ValueType } from '@api/index.js';
+import type { Exception, IReadOnlyCallStack } from '@api/index.js';
+import { nullValue, ValueType } from '@api/index.js';
 import {
   OPERATOR_STATE_POP,
   OPERATOR_STATE_FIRST_CALL,

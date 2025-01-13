@@ -1,6 +1,7 @@
 import { it, expect, vi } from 'vitest';
-import { Exception, ValueType } from '@api/index.js';
-import { assert, toIntegerValue } from '@sdk/index.js'
+import type { Exception } from '@api/index.js';
+import { ValueType } from '@api/index.js';
+import { assert, toIntegerValue } from '@sdk/index.js';
 import { State } from '@core/state/State.js';
 import { toValue, waitForExec } from '@test/index.js';
 

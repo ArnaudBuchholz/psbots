@@ -1,4 +1,5 @@
-import { SYSTEM_MEMORY_TYPE, Value, ValueType } from '@api/index.js';
+import type { Value } from '@api/index.js';
+import { SYSTEM_MEMORY_TYPE, ValueType } from '@api/index.js';
 import {
   OPERATOR_STATE_UNKNOWN,
   OPERATOR_STATE_FIRST_CALL,
@@ -7,7 +8,8 @@ import {
   assert
 } from '@sdk/index.js';
 import type { IFunctionOperator, IInternalState, IOperator } from '@sdk/index.js';
-import { MemoryPointer, MemoryTracker } from '@core/MemoryTracker.js';
+import type { MemoryPointer } from '@core/MemoryTracker.js';
+import { MemoryTracker } from '@core/MemoryTracker.js';
 
 export function operatorPop(state: IInternalState, value: Value<ValueType.operator>): void {
   const { calls } = state;
@@ -50,12 +52,13 @@ export function operatorCycle(state: IInternalState, value: Value<ValueType.oper
         return;
       }
       valuesMemory = isAvailable.value;
-      for (const { type, permissions} of operator.typeCheck) {
+      for (const { type, permissions } of operator.typeCheck) {
         const value = operands.at(--length);
         const { isReadOnly, isExecutable } = permissions ?? {};
-        if ((type === ValueType.null || type === value.type)
-          && (isReadOnly === undefined || isReadOnly === value.isReadOnly)
-          && (isExecutable === undefined || isExecutable === value.isExecutable)
+        if (
+          (type === ValueType.null || type === value.type) &&
+          (isReadOnly === undefined || isReadOnly === value.isReadOnly) &&
+          (isExecutable === undefined || isExecutable === value.isExecutable)
         ) {
           values.push(value);
         } else {
@@ -68,7 +71,7 @@ export function operatorCycle(state: IInternalState, value: Value<ValueType.oper
         value.tracker?.addValueRef(value);
       }
     }
-    let exceptionBefore = state.exception;
+    const exceptionBefore = state.exception;
     const result = operator.implementation(state, ...values);
     if (valuesMemory !== undefined) {
       for (const value of values) {

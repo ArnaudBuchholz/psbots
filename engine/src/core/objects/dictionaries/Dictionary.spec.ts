@@ -26,13 +26,13 @@ describe('IDictionary', () => {
     shared.object.release();
     refTrackerUsed = tracker.used;
   });
-  
+
   afterEach(() => {
     expect(dictionary.release()).toStrictEqual(false);
     expect(shared.object.disposeCalled).toStrictEqual(1);
     expect(tracker.used).toStrictEqual(0);
   });
-  
+
   it('converts to a Value (read-only)', () => {
     const value = dictionary.toValue();
     expect(value).toStrictEqual<Value>({
@@ -44,7 +44,7 @@ describe('IDictionary', () => {
     });
     expect(dictionary.refCount).toStrictEqual(1);
   });
-  
+
   it('converts to a Value (read/write)', () => {
     const value = dictionary.toValue({ isReadOnly: false });
     expect(value).toStrictEqual<Value>({
@@ -56,53 +56,53 @@ describe('IDictionary', () => {
     });
     expect(dictionary.refCount).toStrictEqual(1);
   });
-  
+
   it('fails to convert to a Value when isExecutable is set', () => {
     expect(() => dictionary.toValue({ isExecutable: true })).toThrowError();
   });
-  
+
   it('tracks memory used', () => {
     expect(refTrackerUsed).not.toStrictEqual(0);
   });
-  
+
   it('offers list of names', () => {
     expect(dictionary.names).toStrictEqual<string[]>(['value1', 'value2', 'shared']);
   });
-  
+
   it('retrieves a value by its name', () => {
     expect(dictionary.lookup('value1')).toStrictEqual<Value>(toValue(1));
   });
-  
+
   it('returns null on an unknown name', () => {
     expect(dictionary.lookup('name0')).toStrictEqual(nullValue);
   });
-  
+
   it('allows the override of a named value', () => {
     expect(dictionary.def('value2', toValue(3))).toStrictEqual<Result<Value>>({ success: true, value: toValue(2) });
     expect(dictionary.lookup('value2')).toStrictEqual<Value>(toValue(3));
     // Same name (and simple value) does not increase memory
     expect(tracker.used).toStrictEqual(refTrackerUsed);
   });
-  
+
   it('allows the override of a named value (shareable, not released)', () => {
     shared.object.addRef();
     expect(dictionary.def('shared', toValue(0))).toStrictEqual<Result<Value>>({ success: true, value: shared.value });
     expect(shared.object.refCount).toStrictEqual(1);
     shared.object.release(); // to fit afterEach checks
   });
-  
+
   it('allows the override of a named value (shareable, released)', () => {
     expect(dictionary.def('shared', toValue(0))).toStrictEqual<Result<Value>>({ success: true, value: nullValue });
     expect(shared.object.disposeCalled).toStrictEqual(1);
   });
-  
+
   it('allows the clearing of a named value', () => {
     expect(dictionary.def('shared', nullValue)).toStrictEqual<Result<Value>>({ success: true, value: nullValue });
     expect(shared.object.disposeCalled).toStrictEqual(1);
     expect(dictionary.names.length).toStrictEqual(2);
     expect(dictionary.names).toStrictEqual<string[]>(['value1', 'value2']);
   });
-  
+
   it('allows new values', () => {
     expect(dictionary.def('new_value', toValue(3))).toStrictEqual<Result<Value>>({ success: true, value: nullValue });
     expect(dictionary.lookup('new_value')).toStrictEqual<Value>(toValue(3));
@@ -152,7 +152,7 @@ describe('Memory handling', () => {
       dictionary = result.value;
       refTrackerUsed = tracker.used;
     });
-    
+
     afterEach(() => {
       expect(dictionary.release()).toStrictEqual(false);
       expect(tracker.used).toStrictEqual(refTrackerInit);

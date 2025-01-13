@@ -49,10 +49,7 @@ export function pushOpenClosedValueWithDebugInfo({
   return operands.popush(popCount, value);
 }
 
-export function closeToMark(
-  state: IInternalState,
-  { isExecutable }: { isExecutable: boolean }
-): Result<unknown> {
+export function closeToMark(state: IInternalState, { isExecutable }: { isExecutable: boolean }): Result<unknown> {
   const { operands, memoryTracker, calls } = state;
   const { top: closeOp } = calls;
   const markPosResult = findMarkPos(operands);

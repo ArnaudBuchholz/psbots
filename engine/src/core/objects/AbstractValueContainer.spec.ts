@@ -1,4 +1,5 @@
-import { describe, it, expect, beforeEach, afterEach, vi, MockInstance } from 'vitest';
+import type { MockInstance } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import type { MemoryType, Result, Value } from '@api/index.js';
 import { nullValue, USER_MEMORY_TYPE } from '@api/index.js';
 import { assert, isArrayValue } from '@sdk/index.js';
@@ -7,7 +8,12 @@ import { AbstractValueContainer } from './AbstractValueContainer.js';
 import { toValue } from '@test/index.js';
 
 class TestValueArray extends AbstractValueContainer {
-  static create(memoryTracker: MemoryTracker, memoryType: MemoryType, initialCapacity: number, capacityIncrement: number): Result<TestValueArray> {
+  static create(
+    memoryTracker: MemoryTracker,
+    memoryType: MemoryType,
+    initialCapacity: number,
+    capacityIncrement: number
+  ): Result<TestValueArray> {
     return super.createInstance(memoryTracker, memoryType, initialCapacity, capacityIncrement);
   }
 
@@ -123,7 +129,7 @@ describe('memory', () => {
         expect(valueArray.pop()).toStrictEqual(nullValue);
         expect(shared.object.refCount).toStrictEqual(0);
       });
-  
+
       it('releases memory when removing items', () => {
         shared.object.addRef();
         expect(valueArray.pop()).toStrictEqual(shared.value);
@@ -161,7 +167,7 @@ describe('memory', () => {
         valueArray.push(toValue(0), toValue(1), toValue(2));
         expect(valueArray.pop()).toStrictEqual(toValue(2));
         expect(tracker.used).toStrictEqual(memoryUsedBefore);
-      })
+      });
 
       it('frees the memory when the values count decrease (two values)', () => {
         valueArray.push(toValue(0), toValue(1), toValue(2), toValue(3));

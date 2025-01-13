@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { enumIArrayValues, type IDebugSource, type Value } from '@api/index.js';
+import { enumIArrayValues } from '@api/index.js';
+import type { IDebugSource, Value } from '@api/index.js';
 import { toValue } from '@test/index.js';
 import { State } from './State.js';
 import { assert } from '@sdk/index.js';

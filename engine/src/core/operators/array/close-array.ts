@@ -9,7 +9,7 @@ buildFunctionOperator(
     description: 'finalizes an array',
     labels: ['array', 'mark'],
     signature: {
-      output: [{ type: ValueType.array, permissions: { isReadOnly: false, isExecutable: false }}]
+      output: [{ type: ValueType.array, permissions: { isReadOnly: false, isExecutable: false } }]
     },
     samples: [
       {

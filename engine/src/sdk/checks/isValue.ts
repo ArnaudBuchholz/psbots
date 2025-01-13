@@ -78,7 +78,12 @@ export function isNameValue(value: unknown, flags?: { isExecutable?: boolean }):
 }
 
 export function isOperatorValue(value: unknown): value is OperatorValue {
-  return is(ValueType.operator, value, undefined, ({ operator }) => operator !== undefined && typeof operator.name === 'string');
+  return is(
+    ValueType.operator,
+    value,
+    undefined,
+    ({ operator }) => operator !== undefined && typeof operator.name === 'string'
+  );
 }
 
 const isFunction = (value: unknown, expectedLength: number): boolean =>
@@ -91,15 +96,18 @@ export function isArrayValue(value: unknown, flags?: Partial<IValuePermissions>)
     ValueType.array,
     value,
     flags,
-    ({ isReadOnly, array }) => 
-      array !== undefined && isPositiveInteger(array.length) && isFunction(array.at, 1) && (isReadOnly || isFunction(array.set, 2))
+    ({ isReadOnly, array }) =>
+      array !== undefined &&
+      isPositiveInteger(array.length) &&
+      isFunction(array.at, 1) &&
+      (isReadOnly || isFunction(array.set, 2))
   );
 }
 
 export function isDictionaryValue(value: unknown, flags?: Partial<IValuePermissions>): value is DictionaryValue {
   return is(ValueType.dictionary, value, flags, ({ isReadOnly, dictionary }) => {
     if (dictionary === undefined) {
-      return false
+      return false;
     }
     const { names, lookup, def } = dictionary as IDictionary;
     return (

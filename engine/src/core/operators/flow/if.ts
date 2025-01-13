@@ -30,6 +30,6 @@ buildFunctionOperator(
     if (condition) {
       return calls.push(value);
     }
-    return { success: true, value: undefined }
+    return { success: true, value: undefined };
   }
 );

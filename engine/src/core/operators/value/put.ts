@@ -5,62 +5,64 @@ import { buildFunctionOperator } from '@core/operators/operators.js';
 import { MemoryTracker } from '@core/MemoryTracker.js';
 
 /** Returned value is addRef'ed */
-const implementations: { [type in ValueType]?: (container: Value<type>, index: Value, value: Value) => Result<Value> } = {
-  [ValueType.string]: ({ string, tracker }, index, value) => {
-    assert(tracker instanceof MemoryTracker);
-    if (value.type !== ValueType.integer) {
-      return { success: false, exception: 'typeCheck' };
-    }
-    const { integer: charCode } = value;
-    if (charCode < 0 || charCode > 65535) {
-      return { success: false, exception: 'rangeCheck' };
-    }
-    const posResult = checkPos(index, string.length);
-    if (!posResult.success) {
-      return posResult
-    }
-    const stringResult = string.substring(0, posResult.value) + String.fromCharCode(charCode) + string.substring(posResult.value + 1);
-    const refResult = tracker.addStringRef(stringResult);
-    if (!refResult.success) {
-      return refResult;
-    }
-    return { success: true, value: toStringValue(stringResult, { tracker }) };
-  },
+const implementations: { [type in ValueType]?: (container: Value<type>, index: Value, value: Value) => Result<Value> } =
+  {
+    [ValueType.string]: ({ string, tracker }, index, value) => {
+      assert(tracker instanceof MemoryTracker);
+      if (value.type !== ValueType.integer) {
+        return { success: false, exception: 'typeCheck' };
+      }
+      const { integer: charCode } = value;
+      if (charCode < 0 || charCode > 65535) {
+        return { success: false, exception: 'rangeCheck' };
+      }
+      const posResult = checkPos(index, string.length);
+      if (!posResult.success) {
+        return posResult;
+      }
+      const stringResult =
+        string.substring(0, posResult.value) + String.fromCharCode(charCode) + string.substring(posResult.value + 1);
+      const refResult = tracker.addStringRef(stringResult);
+      if (!refResult.success) {
+        return refResult;
+      }
+      return { success: true, value: toStringValue(stringResult, { tracker }) };
+    },
 
-  [ValueType.array]: (container, index, value) => {
-    const { array, isReadOnly } = container;
-    if (isReadOnly) {
-      return { success: false, exception: 'invalidAccess' };
-    }
-    const posResult = checkPos(index, array.length);
-    if (!posResult.success) {
-      return posResult
-    }
-    const setResult = (array as IArray).set(posResult.value, value);
-    if (!setResult.success) {
-      return setResult;
-    }
-    container.tracker?.addValueRef(container);
-    return { success: true, value: container };
-  },
+    [ValueType.array]: (container, index, value) => {
+      const { array, isReadOnly } = container;
+      if (isReadOnly) {
+        return { success: false, exception: 'invalidAccess' };
+      }
+      const posResult = checkPos(index, array.length);
+      if (!posResult.success) {
+        return posResult;
+      }
+      const setResult = (array as IArray).set(posResult.value, value);
+      if (!setResult.success) {
+        return setResult;
+      }
+      container.tracker?.addValueRef(container);
+      return { success: true, value: container };
+    },
 
-  [ValueType.dictionary]: (container, index, value) => {
-    const { dictionary, isReadOnly } = container;
-    if (isReadOnly) {
-      return { success: false, exception: 'invalidAccess' };
+    [ValueType.dictionary]: (container, index, value) => {
+      const { dictionary, isReadOnly } = container;
+      if (isReadOnly) {
+        return { success: false, exception: 'invalidAccess' };
+      }
+      if (index.type !== ValueType.name) {
+        return { success: false, exception: 'typeCheck' };
+      }
+      const { name } = index;
+      const defResult = (dictionary as IDictionary).def(name, value);
+      if (!defResult.success) {
+        return defResult;
+      }
+      container.tracker?.addValueRef(container);
+      return { success: true, value: container };
     }
-    if (index.type !== ValueType.name) {
-      return { success: false, exception: 'typeCheck' };
-    }
-    const { name } = index;
-    const defResult = (dictionary as IDictionary).def(name, value);
-    if (!defResult.success) {
-      return defResult;
-    }
-    container.tracker?.addValueRef(container);
-    return { success: true, value: container };
-  }
-};
+  };
 
 buildFunctionOperator(
   {

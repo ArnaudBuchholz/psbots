@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { nullValue, Result, SYSTEM_MEMORY_TYPE, Value } from '@api/index.js';
+import type { Result, Value } from '@api/index.js';
+import { nullValue, SYSTEM_MEMORY_TYPE } from '@api/index.js';
 import {
   assert,
   OPERATOR_STATE_UNKNOWN,
@@ -76,7 +77,10 @@ describe('IDictionary', () => {
   });
 
   it('fails if no item exists in the stack', () => {
-    expect(callstack.def('test', toValue(123))).toStrictEqual<Result<Value>>({ success: false, exception: 'stackUnderflow' });
+    expect(callstack.def('test', toValue(123))).toStrictEqual<Result<Value>>({
+      success: false,
+      exception: 'stackUnderflow'
+    });
   });
 
   it('fails if no more memory', () => {
@@ -85,7 +89,10 @@ describe('IDictionary', () => {
     assert(callstackResult);
     const callstack = callstackResult.value;
     expect(callstack.push(toValue(0))).toStrictEqual<Result<number>>({ success: true, value: 1 });
-    expect(callstack.def('test', toValue('abc'))).toStrictEqual<Result<Value>>({ success: false, exception: 'vmOverflow' });
+    expect(callstack.def('test', toValue('abc'))).toStrictEqual<Result<Value>>({
+      success: false,
+      exception: 'vmOverflow'
+    });
   });
 
   it('associates a dictionary on the current item', () => {

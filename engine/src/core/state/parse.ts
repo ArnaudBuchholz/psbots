@@ -2,7 +2,7 @@ import type { Result, Value } from '@api/index.js';
 import { ValueType, parse } from '@api/index.js';
 import type { IInternalState } from '@sdk/index.js';
 import { OPERATOR_STATE_FIRST_CALL, OPERATOR_STATE_UNKNOWN, valuesOf } from '@sdk/index.js';
-import { MemoryTracker } from '@core/MemoryTracker.js';
+import type { MemoryTracker } from '@core/MemoryTracker.js';
 
 const UNKNOWN_FILENAME = 'unknown';
 
