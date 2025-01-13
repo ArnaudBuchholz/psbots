@@ -17,7 +17,7 @@ const implementations: { [type in ValueType]?: (container: Value<type>, index: V
     if (!refResult.success) {
       return refResult;
     }
-    return { success: true, value: toStringValue(stringResult, { tracker }) }
+    return { success: true, value: toStringValue(stringResult, { tracker }) };
   },
 
   [ValueType.array]: ({ array }, index) => {
@@ -27,7 +27,7 @@ const implementations: { [type in ValueType]?: (container: Value<type>, index: V
     }
     const value = array.at(posResult.value);
     value.tracker?.addValueRef(value);
-    return { success: true, value }
+    return { success: true, value };
   },
 
   [ValueType.dictionary]: ({ dictionary }, index) => {
@@ -103,6 +103,11 @@ buildFunctionOperator(
         description: 'returns the indexed item of a dictionary',
         in: 'systemdict /get get',
         out: '{ get } bind 0 get'
+      },
+      {
+        description: 'returns the indexed item of a dictionary (handles reference counting)',
+        in: '/test "abc" def userdict /test get',
+        out: '/test "abc" def "abc"'
       },
       {
         description: 'fails if invalid index for a dictionary',
