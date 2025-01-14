@@ -43,14 +43,14 @@
   "author": "Arnaud Buchholz <arnaud.buchholz@free.fr>",
   "license": "MIT",
   "devDependencies": {
-    "@stylistic/eslint-plugin-js": "^2.11.0",
-    "@vitest/coverage-v8": "^2.1.6",
+    "@stylistic/eslint-plugin-js": "^2.13.0",
+    "@vitest/coverage-v8": "^2.1.8",
     "dpdm": "^3.14.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-prettier": "^5.2.1",
-    "typescript": "^5.7.2",
+    "typescript": "^5.7.3",
     "typescript-eslint": "^7.16.1",
-    "vitest": "^2.1.6"
+    "vitest": "^2.1.8"
   }
 }
