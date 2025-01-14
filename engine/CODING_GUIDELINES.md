@@ -52,3 +52,9 @@ releaseString(string: string): boolean
 * When an object instantiation *may* fail (because of the constructor), encapsulate the object creation in a factory returning a `Result`.
 
 * Even if a method is not supposed to fail, it is possible to use exceptions to detect unexpected situation. This will crash the engine.
+
+## Operators and cycles
+
+* Operators *must* have a **predictable** cycle length : no iteration should occur within a cycle, use `operatorState` to enable iteration.
+
+* Operators *must* leave the operand stack clean when they fail to enable debugging.
