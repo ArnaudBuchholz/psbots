@@ -65,6 +65,7 @@ export function closeToMark(state: IInternalState, { isExecutable }: { isExecuta
   const array = arrayResult.value;
   let index: number;
   for (index = 0; index < markPos; ++index) {
+    // TODO: if any set fails, it should fail the whole operator
     array.set(markPos - index - 1, operands.top);
     operands.pop();
   }
