@@ -27,6 +27,7 @@ Several constraints are defined :
     * opponent pad position (`opponent_y`, `opponent_x`)
   * Output :
     * direction (`up` or `down`)
+* The match can either be watched in real time or simulated for faster resolution
    
 ## Example psbot
 
