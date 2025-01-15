@@ -12,8 +12,10 @@ Several constraints are defined :
 
 * Dimensions and coordinates are expressed in pixels
   * (0,0) is the top left corner
+  * The ball start at the center of the arena, in a random direction (limits are defined to ensure it goes either left or right)
 * The time unit of measure is based on ?
   * Speeds (ball, pad) are expressed in pixels / unit of measure
+* Each time the ball hits a pad, its speed increases
 * Each engine will have limitations, they are not necessarily equivalent
   * Number of cycles per unit of time
   * Memory
