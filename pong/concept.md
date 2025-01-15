@@ -30,6 +30,7 @@ Several constraints are defined :
 
 ```postscript
 {
+  % Adjust pad position based on current position of the ball
   ball_center_y current_center_y lt
   {
     "up" set_direction
