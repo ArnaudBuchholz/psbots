@@ -13,6 +13,15 @@ export default defineConfig({
     }
   },
   test: {
+    poolOptions: {
+      forks: {
+        execArgv: [
+          '--disable-proto=throw',
+          // '--permission',
+          '--throw-deprecation'
+        ],
+      }
+    },    
     exclude: [...configDefaults.exclude],
     coverage: {
       exclude: [
