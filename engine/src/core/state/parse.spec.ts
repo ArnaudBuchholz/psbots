@@ -1,9 +1,11 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { enumIArrayValues } from '@api/index.js';
 import type { IDebugSource, Value } from '@api/index.js';
 import { toValue } from '@test/index.js';
 import { State } from './State.js';
 import { assert } from '@sdk/index.js';
+import { MemoryTracker } from '@core/MemoryTracker.js';
+import { ValueStack } from '@core/objects/index.js';
 
 let state: State;
 
@@ -108,5 +110,23 @@ describe('memory tracker', () => {
       Object.assign({ tracker: state.memoryTracker }, toValue('abc'))
     ]);
     expect(state.calls.length).toStrictEqual(0);
+  });
+
+  it('fails if no more memory', () => {
+    state.calls.push(toValue('"abc"', { isExecutable: true }));
+    const addStringRef = vi.spyOn(MemoryTracker.prototype, 'addStringRef');
+    addStringRef.mockImplementation(() => ({ success: false, exception: 'vmOverflow' }));
+    state.cycle();
+    addStringRef.mockRestore();
+    expect(state.exception).toStrictEqual('vmOverflow');
+  });
+
+  it('forwards ValueStack::push error', () => {
+    state.calls.push(toValue('"abc"', { isExecutable: true }));
+    const push = vi.spyOn(ValueStack.prototype, 'push');
+    push.mockImplementation(() => ({ success: false, exception: 'vmOverflow' }));
+    state.cycle();
+    push.mockRestore();
+    expect(state.exception).toStrictEqual('vmOverflow');
   });
 });
