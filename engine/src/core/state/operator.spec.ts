@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import type { Exception } from '@api/index.js';
 import { enumIArrayValues, markValue, ValueType } from '@api/index.js';
 import type { IFunctionOperator, IInternalState, IOperator } from '@sdk/index.js';
@@ -12,6 +12,7 @@ import {
 import { toValue } from '@test/index.js';
 import { State } from './State.js';
 import type { ShareableObject } from '@core/objects/ShareableObject.js';
+import { MemoryTracker } from '@core/MemoryTracker.js';
 
 let state: State;
 
@@ -169,6 +170,66 @@ describe('With parameters', () => {
       state.cycle();
       expect(state.exception).toBeUndefined();
       expect([...enumIArrayValues(state.operands)]).toStrictEqual([toValue(true), toValue(true), toValue(123)]);
+    });
+
+    it('fails if not enough memory to hold parameters', () => {
+      assert(state.operands.push(toValue(123)));
+      assert(state.operands.push(toValue(true)));
+      const allocate = vi.spyOn(MemoryTracker.prototype, 'allocate');
+      allocate.mockImplementation(() => ({ success: false, exception: 'vmOverflow' }));
+      state.cycle();
+      allocate.mockRestore();
+      expect(state.exception).toStrictEqual('vmOverflow');
+    });
+  });
+
+  describe('testing parameters permissions', () => {
+    describe('read-only', () => {
+      beforeEach(() => {
+        pushFunctionOperatorToCallStack({
+          implementation({ operands }) {
+            assert(operands.push(toValue(true)));
+          },
+          typeCheck: [{ type: ValueType.array, permissions: { isReadOnly: true } }]
+        });
+      });
+
+      it('accepts read-only array', () => {
+        assert(state.operands.push(toValue([], { isReadOnly: true })));
+        state.cycle();
+        expect(state.exception).toBeUndefined();
+        expect(state.operands.at(0)).toStrictEqual(toValue(true));
+      });
+
+      it('rejects non read-only array', () => {
+        assert(state.operands.push(toValue([], { isReadOnly: false })));
+        state.cycle();
+        expect(state.exception).toStrictEqual('typeCheck');
+      });
+    });
+
+    describe('executable', () => {
+      beforeEach(() => {
+        pushFunctionOperatorToCallStack({
+          implementation({ operands }) {
+            assert(operands.push(toValue(true)));
+          },
+          typeCheck: [{ type: ValueType.array, permissions: { isExecutable: true } }]
+        });
+      });
+
+      it('accepts executable array', () => {
+        assert(state.operands.push(toValue([], { isExecutable: true })));
+        state.cycle();
+        expect(state.exception).toBeUndefined();
+        expect(state.operands.at(0)).toStrictEqual(toValue(true));
+      });
+
+      it('rejects non executable array', () => {
+        assert(state.operands.push(toValue([], { isExecutable: false })));
+        state.cycle();
+        expect(state.exception).toStrictEqual('typeCheck');
+      });
     });
   });
 
