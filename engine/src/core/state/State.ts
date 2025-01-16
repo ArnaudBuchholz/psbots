@@ -166,7 +166,7 @@ export class State implements IInternalState {
       assert(stack instanceof CallStack);
       this._exceptionStack = stack;
       this._exceptionStack.addRef();
-    } else {
+    } else if (exception !== 'vmOverflow') {
       const snapshotResult = this._calls.snapshot();
       // TODO: halt engine because if vmOverflow
       assert(snapshotResult);
