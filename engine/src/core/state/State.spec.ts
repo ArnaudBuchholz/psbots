@@ -1,11 +1,16 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { enumIArrayValues, ValueType } from '@api/index.js';
-import type { Result, Value, Exception } from '@api/index.js';
+import type { Result, Value, Exception, MemoryType } from '@api/index.js';
 import { State } from './State.js';
 import { toValue, waitForExec } from '@test/index.js';
 import type { IFunctionOperator, IInternalState } from '@sdk/index.js';
 import { assert, OPERATOR_STATE_FIRST_CALL, OperatorType } from '@sdk/index.js';
+import type { MemoryTracker } from '@core/MemoryTracker.js';
 import { STRING_MEMORY_TYPE } from '@core/MemoryTracker.js';
+import { DictionaryStack } from '@core/objects/stacks/DictionaryStack.js';
+import { Dictionary } from '@core/objects/dictionaries/Dictionary.js';
+import { ValueStack } from '@core/objects/stacks/ValueStack.js';
+import { CallStack } from '@core/objects/stacks/CallStack.js';
 
 let state: State;
 
@@ -131,6 +136,54 @@ describe('memory', () => {
     const value = productionState.operands.top;
     value.tracker?.addValueRef(value); // will leak
     expect(() => productionState.destroy()).toThrowError('Memory leaks detected');
+  });
+
+  describe('creation with limited memory', () => {
+    it('fails on DictionaryStack.create', () => {
+      const dictionaryStackCreate = vi.spyOn(DictionaryStack, 'create');
+      dictionaryStackCreate.mockImplementation(() => ({ success: false, exception: 'vmOverflow' }));
+      expect(State.create()).toStrictEqual<Result>({ success: false, exception: 'vmOverflow' });
+      dictionaryStackCreate.mockRestore();
+    });
+
+    it('fails on Dictionary.create (global)', () => {
+      const dictionaryCreate = vi.spyOn(Dictionary, 'create');
+      dictionaryCreate.mockImplementation(() => ({ success: false, exception: 'vmOverflow' }));
+      expect(State.create()).toStrictEqual<Result>({ success: false, exception: 'vmOverflow' });
+      dictionaryCreate.mockRestore();
+    });
+
+    it('fails on Dictionary.create (user)', () => {
+      const originalDictionaryCreate = Dictionary.create;
+      const dictionaryCreate = vi.spyOn(Dictionary, 'create');
+      let nbCalls = 0;
+      dictionaryCreate.mockImplementation(function (
+        memoryTracker: MemoryTracker,
+        memoryType: MemoryType,
+        initialKeyCount: number
+      ) {
+        if (++nbCalls === 1) {
+          return originalDictionaryCreate(memoryTracker, memoryType, initialKeyCount);
+        }
+        return { success: false, exception: 'vmOverflow' };
+      });
+      expect(State.create()).toStrictEqual<Result>({ success: false, exception: 'vmOverflow' });
+      dictionaryCreate.mockRestore();
+    });
+
+    it('fails on ValueStack.create', () => {
+      const valueStackCreate = vi.spyOn(ValueStack, 'create');
+      valueStackCreate.mockImplementation(() => ({ success: false, exception: 'vmOverflow' }));
+      expect(State.create()).toStrictEqual<Result>({ success: false, exception: 'vmOverflow' });
+      valueStackCreate.mockRestore();
+    });
+
+    it('fails on CallStack.create', () => {
+      const callStackCreate = vi.spyOn(CallStack, 'create');
+      callStackCreate.mockImplementation(() => ({ success: false, exception: 'vmOverflow' }));
+      expect(State.create()).toStrictEqual<Result>({ success: false, exception: 'vmOverflow' });
+      callStackCreate.mockRestore();
+    });
   });
 });
 
