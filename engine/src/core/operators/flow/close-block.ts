@@ -1,5 +1,6 @@
 import { ValueType } from '@api/index.js';
 import type { IInternalState } from '@sdk/index.js';
+import { OPERATOR_STATE_FIRST_CALL } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 import { closeToMark } from '@core/operators/open-close.js';
 
@@ -30,7 +31,9 @@ buildFunctionOperator(
     ]
   },
   (state: IInternalState) => {
-    state.allowCall();
+    if (state.calls.topOperatorState === OPERATOR_STATE_FIRST_CALL) {
+      state.allowCall();
+    }
     return closeToMark(state, { isExecutable: true });
   }
 );
