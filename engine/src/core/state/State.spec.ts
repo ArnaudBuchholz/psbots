@@ -187,6 +187,18 @@ describe('memory', () => {
   });
 });
 
+describe('host dictionary', () => {
+  it('extends the context', async () => {
+    const { dictionary: hostDictionary } = toValue({ host: toValue('host') }, { isReadOnly: true });
+    const stateResult = State.create({ hostDictionary });
+    assert(stateResult);
+    const { value: state } = stateResult;
+    const generator = state.exec(toValue('host', { isExecutable: true }));
+    waitForExec(generator);
+    expect(state.operands.at(0)).toStrictEqual(toValue('host'));
+  });
+});
+
 describe('exception handling', () => {
   it('detects invalid executable value', () => {
     const invalidValue = {
