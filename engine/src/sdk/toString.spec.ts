@@ -1,7 +1,13 @@
 import { describe, it, expect } from 'vitest';
-import type { IDebugSource, Value } from '@api/index.js';
+import type { IDebugSource, IReadOnlyCallStack, Value } from '@api/index.js';
 import { markValue, nullValue } from '@api/index.js';
-import { toString, TOSTRING_BEGIN_MARKER, TOSTRING_END_MARKER, TOSTRING_NULL } from '@sdk/toString.js';
+import {
+  callStackToString,
+  toString,
+  TOSTRING_BEGIN_MARKER,
+  TOSTRING_END_MARKER,
+  TOSTRING_NULL
+} from '@sdk/toString.js';
 import {
   OPERATOR_STATE_CALL_BEFORE_POP,
   OPERATOR_STATE_FIRST_CALL,
@@ -444,5 +450,24 @@ ${TOSTRING_BEGIN_MARKER}{${TOSTRING_END_MARKER}
         })
       ).toStrictEqual(`{ -operator- ${TOSTRING_BEGIN_MARKER}2${TOSTRING_END_MARKER} 3 }`);
     });
+  });
+});
+
+describe('call stack', () => {
+  it('converts an IReadOnlyCallStack to an array of strings', () => {
+    const callStack: IReadOnlyCallStack = {
+      length: 2,
+      at(index) {
+        if (index === 0) {
+          return toValue('abc');
+        }
+        return toValue(Symbol.for('abc'));
+      },
+      operatorStateAt(/*index*/) {
+        return 0;
+      },
+      topOperatorState: 0
+    };
+    expect(callStackToString(callStack)).toStrictEqual(['"abc"', '/abc']);
   });
 });

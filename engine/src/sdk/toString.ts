@@ -1,4 +1,4 @@
-import type { IDebugSource, Value } from '@api/index.js';
+import type { IDebugSource, IReadOnlyCallStack, Value } from '@api/index.js';
 import { ValueType, parse } from '@api/index.js';
 import {
   OPERATOR_STATE_CALL_BEFORE_POP,
@@ -206,4 +206,18 @@ export function toString(value: Value, options?: ToStringOptions): string {
       maxWidth: 0
     }
   );
+}
+
+export function callStackToString(
+  callStack: IReadOnlyCallStack,
+  options?: Omit<ToStringOptions, 'operatorState'>
+): string[] {
+  const { length } = callStack;
+  const result: string[] = [];
+  for (let index = 0; index < length; ++index) {
+    const value = callStack.at(index);
+    const operatorState = callStack.operatorStateAt(index);
+    result.push(toString(value, Object.assign({}, options, { operatorState })));
+  }
+  return result;
 }
