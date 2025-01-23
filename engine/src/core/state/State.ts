@@ -114,10 +114,6 @@ export class State implements IInternalState {
     return this._dictionaries;
   }
 
-  get callStack() {
-    return this.calls;
-  }
-
   private _callDisablingCount = 0;
 
   get callEnabled() {

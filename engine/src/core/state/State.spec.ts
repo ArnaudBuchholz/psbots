@@ -4,7 +4,7 @@ import type { Result, Value, Exception, MemoryType } from '@api/index.js';
 import { State } from './State.js';
 import { toValue, waitForExec } from '@test/index.js';
 import type { IFunctionOperator, IInternalState } from '@sdk/index.js';
-import { assert, OPERATOR_STATE_FIRST_CALL, OperatorType } from '@sdk/index.js';
+import { assert, callStackToString, OPERATOR_STATE_FIRST_CALL, OperatorType } from '@sdk/index.js';
 import type { MemoryTracker } from '@core/MemoryTracker.js';
 import { STRING_MEMORY_TYPE } from '@core/MemoryTracker.js';
 import { DictionaryStack } from '@core/objects/stacks/DictionaryStack.js';
@@ -253,11 +253,13 @@ describe('exception handling', () => {
     );
     state.cycle();
     expect(state.exception).toStrictEqual<Exception>('invalidAccess');
-    // TODO: validate stack
-    // expect(state.exception?.engineStack).toStrictEqual([
-    //   `-invalidaccess-`,
-    //   'step2',
-    //   'step1'
-    // ]);
+    if (state.exceptionStack === undefined) {
+      expect.unreachable();
+    }
+    expect(callStackToString(state.exceptionStack)).toStrictEqual([
+      '-invalidaccess-',
+      'step2',
+      'step1'
+    ]);
   });
 });
