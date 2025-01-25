@@ -20,10 +20,10 @@
     "@psbots/repl": "0.0.1"
   },
   "devDependencies": {
-    "@stylistic/eslint-plugin-js": "^2.13.0",
-    "eslint-config-prettier": "^9.1.0",
+    "@stylistic/eslint-plugin-js": "^3.0.0",
+    "eslint-config-prettier": "^10.0.1",
     "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-prettier": "^5.2.3",
-    "typescript-eslint": "^7.16.1"
+    "typescript-eslint": "^8.21.0"
   }
 }

@@ -27,7 +27,9 @@
     "no-unused-vars": "off",
     "comma-dangle": ["error", "never"],
     "@typescript-eslint/no-unused-vars": "error",
-    "@typescript-eslint/ban-types": "error",
+    "@typescript-eslint/no-empty-object-type": "error",
+    "@typescript-eslint/no-unsafe-function-type": "error",
+    "@typescript-eslint/no-wrapper-object-types": "error",
     "max-len": "off",
     "@typescript-eslint/consistent-type-imports": [
       "error",
