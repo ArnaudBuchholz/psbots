@@ -5,7 +5,7 @@ import { State } from '@core/state/State.js';
 import { toValue, waitForExec } from '@test/index.js';
 import { CallStack } from '@core/objects/stacks/CallStack.js';
 import { ValueArray } from '@core/objects/ValueArray.js';
-import { ValueStack } from '@core/objects/stacks/ValueStack.js'
+import { ValueStack } from '@core/objects/stacks/ValueStack.js';
 import { OPERATOR_STATE_ALLOC_ARRAY } from './open-close.js';
 
 let state: State;
@@ -58,7 +58,7 @@ describe('error handling', () => {
       done = run.next().done;
     }
     expect(maxIterations).toBeGreaterThan(0);
-  })
+  });
 
   it('fails if not able to store mark position in stack', () => {
     const def = vi.spyOn(CallStack.prototype, 'def');
@@ -76,7 +76,7 @@ describe('error handling', () => {
     });
 
     it('fails if the array cannot be created', async () => {
-      const create = vi.spyOn(ValueArray, 'create')
+      const create = vi.spyOn(ValueArray, 'create');
       create.mockImplementation(() => ({ success: false, exception: 'limitcheck' }));
       run.next();
       expect(state.exception).toStrictEqual<Exception>('limitcheck');
@@ -99,7 +99,7 @@ describe('error handling', () => {
       beforeEach(() => {
         run.next();
       });
-  
+
       it('fails if not able to store an item in the array', () => {
         const set = vi.spyOn(ValueArray.prototype, 'set');
         set.mockImplementation(() => ({ success: false, exception: 'limitcheck' }));
@@ -114,7 +114,7 @@ describe('error handling', () => {
         beforeEach(() => {
           run.next();
         });
-    
+
         it('fails if not able to add the array in the operands stack', () => {
           const popush = vi.spyOn(ValueStack.prototype, 'popush');
           popush.mockImplementation(() => ({ success: false, exception: 'limitcheck' }));
@@ -127,5 +127,4 @@ describe('error handling', () => {
       });
     });
   });
-})
-
+});

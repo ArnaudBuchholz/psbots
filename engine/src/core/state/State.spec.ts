@@ -268,10 +268,6 @@ describe('exception handling', () => {
     if (state.exceptionStack === undefined) {
       expect.unreachable();
     }
-    expect(callStackToString(state.exceptionStack)).toStrictEqual([
-      '-invalidaccess-',
-      'step2',
-      'step1'
-    ]);
+    expect(callStackToString(state.exceptionStack)).toStrictEqual(['-invalidaccess-', 'step2', 'step1']);
   });
 });

@@ -81,7 +81,7 @@ export function closeToMark(state: IInternalState, { isExecutable }: { isExecuta
       return arrayResult;
     }
     const array = arrayResult.value;
-    const defResult = calls.def(CALLS_ARRAY, array.toValue({ isReadOnly: isExecutable, isExecutable }))
+    const defResult = calls.def(CALLS_ARRAY, array.toValue({ isReadOnly: isExecutable, isExecutable }));
     if (!defResult.success) {
       array.release();
     } else {
