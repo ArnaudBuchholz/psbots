@@ -24,7 +24,7 @@
   "scripts": {
     "make-sources": "node ../tools/sync-aliases.mjs && node tools/make-sources.mjs",
     "precheck": "npm run make-sources",
-    "check": "tsc --noEmit && dpdm ./src/** -T --no-tree --no-warning && eslint tools/*.mjs --env node --fix && eslint src/**/*.ts --fix",
+    "check": "tsc --noEmit && dpdm ./src/** -T --no-tree --no-warning && eslint tools/*.mjs --env node --fix && eslint src --fix",
     "pretest": "npm run make-sources",
     "test": "vitest run --coverage",
     "test:watch": "vitest",
