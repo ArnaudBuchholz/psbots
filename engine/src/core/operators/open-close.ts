@@ -51,7 +51,7 @@ export function pushOpenClosedValueWithDebugInfo({
 
 const CALLS_MARKPOS = 'markpos';
 const CALLS_ARRAY = 'array';
-const OPERATOR_STATE_ALLOC_ARRAY = 1;
+export const OPERATOR_STATE_ALLOC_ARRAY = 1;
 const OPERATOR_STATE_FILL_ARRAY = 2;
 
 export function closeToMark(state: IInternalState, { isExecutable }: { isExecutable: boolean }): Result<unknown> {
@@ -65,8 +65,11 @@ export function closeToMark(state: IInternalState, { isExecutable }: { isExecuta
     const markPos = markPosResult.value;
     const integerResult = toIntegerValue(markPos);
     assert(integerResult);
-    calls.topOperatorState = OPERATOR_STATE_ALLOC_ARRAY;
-    return calls.def(CALLS_MARKPOS, integerResult.value);
+    const defResult = calls.def(CALLS_MARKPOS, integerResult.value);
+    if (defResult.success) {
+      calls.topOperatorState = OPERATOR_STATE_ALLOC_ARRAY;
+    }
+    return defResult;
   }
   const markPosValue = calls.lookup(CALLS_MARKPOS);
   assert(markPosValue.type === ValueType.integer);
@@ -93,7 +96,12 @@ export function closeToMark(state: IInternalState, { isExecutable }: { isExecuta
   const index = calls.topOperatorState - OPERATOR_STATE_FILL_ARRAY;
   if (index < markPos) {
     calls.topOperatorState = OPERATOR_STATE_FILL_ARRAY + index + 1;
-    return array.set(markPos - index - 1, operands.at(index));
+    const setResult = array.set(markPos - index - 1, operands.at(index));
+    if (!setResult.success) {
+      array.release();
+      calls.topOperatorState = OPERATOR_STATE_ALLOC_ARRAY;
+    }
+    return setResult;
   }
   const mark = operands.at(index);
   const result = pushOpenClosedValueWithDebugInfo({
@@ -104,8 +112,10 @@ export function closeToMark(state: IInternalState, { isExecutable }: { isExecuta
     closeOp
   });
   if (result.success) {
-    array.release();
     calls.topOperatorState = OPERATOR_STATE_POP;
+  } else {
+    calls.topOperatorState = OPERATOR_STATE_ALLOC_ARRAY;
   }
+  array.release();
   return result;
 }
