@@ -52,13 +52,19 @@ buildFunctionOperator(
     const { operands, calls } = state;
     const { topOperatorState } = calls;
     if (topOperatorState === OPERATOR_STATE_FIRST_CALL) {
-      calls.topOperatorState = OPERATOR_STATE_CALL_BEFORE_POP;
       const defResult = calls.def(CALLS_BLOCK, finalBlock);
       if (!defResult.success) {
         return defResult;
       }
-      operands.popush(2);
-      return calls.push(codeBlock);
+      calls.topOperatorState = OPERATOR_STATE_CALL_BEFORE_POP;
+      const callResult = calls.push(codeBlock);
+      if (callResult.success) {
+        const popushResult = operands.popush(2);
+        assert(popushResult);
+      } else {
+        calls.topOperatorState = OPERATOR_STATE_FIRST_CALL;
+      }
+      return callResult;
     }
     if (topOperatorState === OPERATOR_STATE_CALL_BEFORE_POP) {
       calls.topOperatorState = -2;
@@ -75,6 +81,7 @@ buildFunctionOperator(
         state.clearException();
       }
       const finalBlock = calls.lookup(CALLS_BLOCK);
+      assert(finalBlock.type !== ValueType.null);
       return calls.push(finalBlock);
     }
     assert(topOperatorState === -2);
