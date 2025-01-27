@@ -30,12 +30,12 @@ export const OPERATOR_STATE_POP = Number.NEGATIVE_INFINITY;
 
 /*
 ---
-title: CallStack operatorState diagram
+title: CallStack operator state
 ---
 
 stateDiagram-v2
-  ACTIVE: Calling operator cycle
-  POPPING: Popping operator cycle
+  CALLING: calling phase
+  POPPING: popping phase
   OPERATOR_STATE_FIRST_CALL: OPERATOR_STATE_FIRST_CALL(0)
   OPERATOR_STATE_CALL_BEFORE_POP: OPERATOR_STATE_CALL_BEFORE_POP(-1)
   BACK_TO_FIRST_CALL: OPERATOR_STATE_FIRST_CALL(0)
@@ -43,9 +43,9 @@ stateDiagram-v2
   NEG_456: -456
 
   [*] --> OPERATOR_STATE_UNKNOWN
-  OPERATOR_STATE_UNKNOWN --> ACTIVE
+  OPERATOR_STATE_UNKNOWN --> CALLING
 
-  state ACTIVE {
+  state CALLING {
     [*] --> OPERATOR_STATE_FIRST_CALL
     OPERATOR_STATE_FIRST_CALL --> [*]
     OPERATOR_STATE_FIRST_CALL --> 123
@@ -55,9 +55,9 @@ stateDiagram-v2
     OPERATOR_STATE_FIRST_CALL --> [*]
   }
 
-  ACTIVE --> POPPING
-  ACTIVE --> OPERATOR_STATE_POP
-  ACTIVE --> [*]
+  CALLING --> POPPING
+  CALLING --> OPERATOR_STATE_POP
+  CALLING --> [*]
 
   state POPPING {
     [*] --> OPERATOR_STATE_CALL_BEFORE_POP
