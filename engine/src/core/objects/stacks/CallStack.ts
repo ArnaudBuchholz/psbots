@@ -128,13 +128,13 @@ export class CallStack extends ValueStack implements ICallStack {
     const current = this.topOperatorState;
     if (
       (current === OPERATOR_STATE_UNKNOWN && value !== OPERATOR_STATE_FIRST_CALL) ||
-      (current !== OPERATOR_STATE_UNKNOWN && value === OPERATOR_STATE_FIRST_CALL) ||
+      (current !== OPERATOR_STATE_UNKNOWN && current !== OPERATOR_STATE_CALL_BEFORE_POP && value === OPERATOR_STATE_FIRST_CALL) ||
       value === OPERATOR_STATE_UNKNOWN ||
       current === OPERATOR_STATE_POP ||
       (value !== OPERATOR_STATE_POP &&
         ((current > OPERATOR_STATE_FIRST_CALL && value < OPERATOR_STATE_CALL_BEFORE_POP) ||
           (current < OPERATOR_STATE_CALL_BEFORE_POP && value >= OPERATOR_STATE_CALL_BEFORE_POP) ||
-          (current < OPERATOR_STATE_FIRST_CALL && value >= OPERATOR_STATE_FIRST_CALL) ||
+          (current === OPERATOR_STATE_CALL_BEFORE_POP && value > OPERATOR_STATE_FIRST_CALL) ||
           (current === OPERATOR_STATE_FIRST_CALL && value < OPERATOR_STATE_CALL_BEFORE_POP)))
     ) {
       assert(false, OPERATOR_STATE_INVALID);

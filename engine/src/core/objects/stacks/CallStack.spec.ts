@@ -194,6 +194,8 @@ describe('topOperatorState', () => {
     allows(-123, OPERATOR_STATE_POP);
     allows(-456, -123);
     allows(-456, OPERATOR_STATE_POP);
+    // Required to revert in case of error during the operator execution
+    allows(OPERATOR_STATE_CALL_BEFORE_POP, OPERATOR_STATE_FIRST_CALL);
 
     function forbids(from: number, to: number) {
       it(`forbids ${stringify(from)} ➝ ${stringify(to)}`, () => {
