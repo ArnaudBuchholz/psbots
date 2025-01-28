@@ -11,8 +11,9 @@ import { buildFunctionOperator } from '@core/operators/operators.js';
 import { CallStack } from '@core/objects/stacks/CallStack.js';
 
 const CALLS_BLOCK = 'block';
-const CALLS_EXCEPTION = 'exception';
+export const CALLS_EXCEPTION = 'exception';
 const CALLS_EXCEPTION_STACK = 'stack';
+export const OPERATOR_STATE_POPPING = -2;
 
 buildFunctionOperator(
   {
@@ -61,13 +62,11 @@ buildFunctionOperator(
       if (callResult.success) {
         const popushResult = operands.popush(2);
         assert(popushResult);
-      } else {
-        calls.topOperatorState = OPERATOR_STATE_FIRST_CALL;
       }
       return callResult;
     }
     if (topOperatorState === OPERATOR_STATE_CALL_BEFORE_POP) {
-      calls.topOperatorState = -2;
+      calls.topOperatorState = OPERATOR_STATE_POPPING;
       if (state.exception) {
         const defExceptionResult = calls.def(CALLS_EXCEPTION, toStringValue(state.exception));
         if (!defExceptionResult.success) {
@@ -76,7 +75,7 @@ buildFunctionOperator(
         assert(state.exceptionStack instanceof CallStack);
         const defExceptionStackResult = calls.def(CALLS_EXCEPTION_STACK, state.exceptionStack.toValue());
         if (!defExceptionStackResult.success) {
-          return defExceptionResult;
+          return defExceptionStackResult;
         }
         state.clearException();
       }
@@ -84,7 +83,7 @@ buildFunctionOperator(
       assert(finalBlock.type !== ValueType.null);
       return calls.push(finalBlock);
     }
-    assert(topOperatorState === -2);
+    assert(topOperatorState === OPERATOR_STATE_POPPING);
     if (state.exception === undefined) {
       const exception = calls.lookup(CALLS_EXCEPTION);
       if (exception !== nullValue) {

@@ -4,6 +4,7 @@ import { assert, OPERATOR_STATE_CALL_BEFORE_POP, OPERATOR_STATE_FIRST_CALL } fro
 import { toValue, waitForExec } from '@test/index.js';
 import { State } from '@core/state/State.js';
 import { CallStack } from '@core/objects/stacks/CallStack.js';
+import { CALLS_EXCEPTION, OPERATOR_STATE_POPPING } from './finally.js';
 
 let state: State;
 
@@ -49,14 +50,15 @@ describe('error handling', () => {
     push.mockImplementation(() => ({ success: false, exception: 'limitcheck' }));
     run.next();
     expect(state.exception).toStrictEqual<Exception>('limitcheck');
-    expect(state.calls.operatorStateAt(0)).toStrictEqual(OPERATOR_STATE_FIRST_CALL);
+    expect(state.calls.operatorStateAt(0)).toStrictEqual(OPERATOR_STATE_CALL_BEFORE_POP);
     expect(state.operands.length).toStrictEqual(2);
     push.mockRestore();
   });
 
   describe('before pop', () => {
     beforeEach(() => {
-      while (state.calls.topOperatorState !== OPERATOR_STATE_CALL_BEFORE_POP) {
+      run.next();
+      while (state.calls.length !== 3) {
         run.next();
       }
     });
@@ -66,7 +68,23 @@ describe('error handling', () => {
       def.mockImplementation(() => ({ success: false, exception: 'limitcheck' }));
       run.next();
       expect(state.exception).toStrictEqual<Exception>('limitcheck');
-      expect(state.calls.operatorStateAt(0)).toStrictEqual(OPERATOR_STATE_FIRST_CALL);
+      expect(state.calls.operatorStateAt(0)).toStrictEqual(OPERATOR_STATE_POPPING);
+      expect(state.operands.length).toStrictEqual(0);
+      def.mockRestore();
+    });
+
+    it('fails if not able to store exception stack in stack', () => {
+      const originalDef = CallStack.prototype.def;
+      const def = vi.spyOn(CallStack.prototype, 'def');
+      def.mockImplementation(function (this: CallStack, name, value) {
+        if (name === CALLS_EXCEPTION) {
+          return originalDef.call(this, name, value);
+        }
+        return { success: false, exception: 'limitcheck' };
+      });
+      run.next();
+      expect(state.exception).toStrictEqual<Exception>('limitcheck');
+      expect(state.calls.operatorStateAt(0)).toStrictEqual(OPERATOR_STATE_POPPING);
       expect(state.operands.length).toStrictEqual(0);
       def.mockRestore();
     });
