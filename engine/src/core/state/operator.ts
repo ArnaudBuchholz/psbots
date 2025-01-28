@@ -18,7 +18,11 @@ export function operatorPop(state: IInternalState, value: Value<ValueType.operat
   if (calls.topOperatorState >= OPERATOR_STATE_FIRST_CALL || calls.topOperatorState === OPERATOR_STATE_POP) {
     calls.pop();
   } else {
-    operator.implementation(state);
+    // TODO: test what happens if exception during popping
+    const result = operator.implementation(state);
+    if (result && result.success === false) {
+      state.raiseException(result.exception);
+    }
   }
 }
 
