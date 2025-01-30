@@ -9,28 +9,42 @@ import { ExitError } from './host/exit.js';
 import { status } from './status.js';
 import { buildInputHandler, InputError } from './inputHandler.js';
 import { DebugError } from './host/debug.js';
-import { showError } from './showError.js';
+import { showError, failed } from './showError.js';
 import { runWithDebugger } from './debug.js';
 
 export * from './IReplIO.js';
 
+function showVersion (replIO: IReplIO): boolean {
+  const stateResult = createState();
+  if (failed(replIO, stateResult, { message: 'Unable to allocate state' })) {
+    return false;
+  }
+  const { value: state } = stateResult;
+
+  const execVersionResult = state.exec(toStringValue('version', { isExecutable: true }));
+  if (failed(replIO, execVersionResult, { message: 'Unable to execute version' })) {
+    return false;
+  }
+  [...execVersionResult.value];
+  const version = state.operands.at(0);
+  assert(version.type === ValueType.string);
+  replIO.output(`${cyan}Welcome to 🤖${magenta}${version.string}${white}\r\n`);
+  return true;
+}
+
 export async function repl(replIO: IReplIO, debug?: boolean): Promise<void> {
+  if (!showVersion(replIO)) {
+    return;
+  }
+
   const stateResult = createState({
     hostDictionary: createHostDictionary(replIO),
     debugMemory: debug
   });
-  if (!stateResult.success) {
-    replIO.output(`${red}Unable to allocate state${white}\r\n`);
-    showError(replIO, stateResult.error);
+  if (failed(replIO, stateResult, { message: 'Unable to allocate state' })) {
     return;
   }
   const { value: state } = stateResult;
-
-  [...state.exec(toStringValue('version', { isExecutable: true }))];
-  const version = state.operands.at(0);
-  assert(version.type === ValueType.string);
-  replIO.output(`${cyan}Welcome to 🤖${magenta}${version.string}${white}\r\n`);
-  [...state.exec(toStringValue('pop', { isExecutable: true }))];
 
   if (debug === true) {
     replIO.output(`${green}DEBUG mode enabled${white}\r\n`);
@@ -51,7 +65,7 @@ export async function repl(replIO: IReplIO, debug?: boolean): Promise<void> {
       const lastUsedMemory = state.memoryTracker.used;
       let cycle = 0;
 
-      const iterator = state.exec(
+      const execResult = state.exec(
         Object.assign(
           {
             debugSource: <IDebugSource>{
@@ -64,6 +78,8 @@ export async function repl(replIO: IReplIO, debug?: boolean): Promise<void> {
           toStringValue(src, { isExecutable: true })
         )
       );
+      assert(execResult);
+      const { value: iterator } = execResult;
 
       let { done } = iterator.next();
       while (done === false) {
