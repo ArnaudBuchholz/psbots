@@ -4,7 +4,7 @@ import { ValueArray } from '@core/objects/ValueArray.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 import { pop } from '@core/operators/stacks/operand/pop.js';
 
-const bind = buildFunctionOperator(
+export const bind = buildFunctionOperator(
   {
     name: 'bind',
     description: 'binds the block calls to their value by resolving the names from the dictionary stack',
@@ -44,7 +44,6 @@ const bind = buildFunctionOperator(
     assert(array instanceof ValueArray);
     if (step < array.length) {
       const value = array.at(step);
-      calls.topOperatorState = step + 1;
       if (value && value.isExecutable) {
         if (value.type === ValueType.name) {
           const location = dictionaries.where(value.name);
@@ -54,9 +53,11 @@ const bind = buildFunctionOperator(
               return setResult;
             }
           }
+          calls.topOperatorState = step + 1;          
         } else if (value.type === ValueType.array) {
+          calls.topOperatorState = step + 1;          
           const operandPushResult = operands.push(value);
-          if (!operandPushResult) {
+          if (!operandPushResult.success) {
             return operandPushResult;
           }
           const popInCallsResult = calls.push(pop);
