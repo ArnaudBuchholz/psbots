@@ -29,7 +29,7 @@ function colorize(string: string): string {
 export async function runWithDebugger({ replIO, state, iterator, waitForChar }: DebugParameters): Promise<number> {
   let lastOperandsCount = state.operands.length;
   let lastUsedMemory = state.memoryTracker.used;
-  let lastCallStackSize = state.callStack.length;
+  let lastCallStackSize = state.calls.length;
   let cycle = 0;
 
   // TODO: show dictionaries
@@ -84,15 +84,14 @@ export async function runWithDebugger({ replIO, state, iterator, waitForChar }: 
     }
     replIO.output(`${border}│${operandsInfo}${''.padStart(operandsWidth - operandsInfoSize, ' ')}`);
 
-    const callStackVariation = formatCountVariation(lastCallStackSize, state.callStack.length);
-    let callStackInfo = `${white}C${shortcut}a${white}ll stack: ${yellow}${state.callStack.length}`;
-    let callStackInfoSize = 12 + state.callStack.length.toString().length;
+    const callStackVariation = formatCountVariation(lastCallStackSize, state.calls.length);
+    let callStackInfo = `${white}C${shortcut}a${white}ll stack: ${yellow}${state.calls.length}`;
+    let callStackInfoSize = 12 + state.calls.length.toString().length;
     let exceptionInfo = '';
     let exceptionInfoSize = 0;
     if (state.exception) {
-      const { name } = state.exception;
-      exceptionInfo = ` ${red}❌${name}`;
-      exceptionInfoSize = name.length + 2;
+      exceptionInfo = ` ${red}❌${state.exception}`;
+      exceptionInfoSize = state.exception.length + 2;
     }
     if (callStackInfoSize + callStackVariation.length + exceptionInfoSize < callStackWidth) {
       callStackInfo += callStackVariation.formatted + exceptionInfo;
@@ -107,7 +106,7 @@ export async function runWithDebugger({ replIO, state, iterator, waitForChar }: 
 
     replIO.output(`${border}│${callStackInfo}${''.padStart(callStackWidth - callStackInfoSize, ' ')}${border}│`);
 
-    const callStack = state.callStack;
+    const callStack = state.calls;
     for (let index = 0; index < 5; ++index) {
       replIO.output(`${border}│${white}`);
 
@@ -122,7 +121,8 @@ export async function runWithDebugger({ replIO, state, iterator, waitForChar }: 
       replIO.output(`${border}│${white}`);
 
       if (index < callStack.length) {
-        const { value, operatorState } = state.callStack[index]!;
+        const value = state.calls.at(index);
+        const operatorState = state.calls.operatorStateAt(index);
         const callStackInfo = toString(value, { maxWidth: callStackWidth, operatorState, includeDebugSource: true });
         const callStackInfoSize = callStackInfo.length;
         replIO.output(`${colorize(callStackInfo)}${''.padStart(callStackWidth - callStackInfoSize, ' ')}`);
@@ -138,7 +138,7 @@ export async function runWithDebugger({ replIO, state, iterator, waitForChar }: 
 
     lastOperandsCount = state.operands.length;
     lastUsedMemory = state.memoryTracker.used;
-    lastCallStackSize = state.callStack.length;
+    lastCallStackSize = state.calls.length;
 
     const step = await waitForChar();
     replIO.output('\b \b');

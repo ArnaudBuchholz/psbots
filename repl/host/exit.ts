@@ -1,21 +1,18 @@
 import { ValueType } from '@psbots/engine';
 import type { Value } from '@psbots/engine';
-import { OperatorType, BaseException } from '@psbots/engine/sdk';
+import { OperatorType } from '@psbots/engine/sdk';
 import type { IFunctionOperator } from '@psbots/engine/sdk';
+import type { ReplHostDictionary } from './index.js';
 
-export class ExitError extends BaseException {
-  constructor() {
-    super('exit');
-  }
+export function createExitOperator(rh: ReplHostDictionary): Value<ValueType.operator> {
+  return {
+    type: ValueType.operator,
+    isExecutable: true,
+    isReadOnly: true,
+    operator: <IFunctionOperator>{
+      name: 'exit',
+      type: OperatorType.implementation,
+      implementation: () => rh.exit()
+    }
+  };
 }
-
-export const exit: Value<ValueType.operator> = {
-  type: ValueType.operator,
-  isExecutable: true,
-  isReadOnly: true,
-  operator: <IFunctionOperator>{
-    name: 'exit',
-    type: OperatorType.implementation,
-    implementation: () => ({ success: false, error: new ExitError() })
-  }
-};
