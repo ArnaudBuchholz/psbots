@@ -53,9 +53,9 @@ export const bind = buildFunctionOperator(
               return setResult;
             }
           }
-          calls.topOperatorState = step + 1;          
+          calls.topOperatorState = step + 1;
         } else if (value.type === ValueType.array) {
-          calls.topOperatorState = step + 1;          
+          calls.topOperatorState = step + 1;
           const operandPushResult = operands.push(value);
           if (!operandPushResult.success) {
             return operandPushResult;
