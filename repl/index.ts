@@ -1,16 +1,13 @@
 import type { IDebugSource } from '@psbots/engine';
 import { createState, ValueType } from '@psbots/engine';
-import type { IInternalState } from '@psbots/engine/sdk';
 import { assert, toStringValue } from '@psbots/engine/sdk';
 import type { IReplIO } from './IReplIO.js';
 import { cyan, green, magenta, red, white, yellow } from './colors.js';
 import { createHostDictionary } from './host/index.js';
-import { ExitError } from './host/exit.js';
 import { status } from './status.js';
 import { buildInputHandler, InputError } from './inputHandler.js';
-import { DebugError } from './host/debug.js';
-import { showError, failed } from './showError.js';
-import { runWithDebugger } from './debug.js';
+import { showError, failed, showException } from './showError.js';
+// import { runWithDebugger } from './debug.js';
 
 export * from './IReplIO.js';
 
@@ -54,7 +51,7 @@ export async function repl(replIO: IReplIO, debug?: boolean): Promise<void> {
   replIO.output(`${cyan}Use '${yellow}help${cyan}'  to display help${white}\r\n`);
 
   let replIndex = 0;
-  const { waitForLines, waitForChar } = buildInputHandler(replIO);
+  const { waitForLines/*, waitForChar */ } = buildInputHandler(replIO);
 
   // eslint-disable-next-line no-constant-condition
   while (true) {
@@ -83,22 +80,22 @@ export async function repl(replIO: IReplIO, debug?: boolean): Promise<void> {
 
       let { done } = iterator.next();
       while (done === false) {
-        const { exception } = state;
-        if (exception instanceof DebugError) {
-          (state as IInternalState).clearException();
-          cycle += await runWithDebugger({ replIO, state, iterator, waitForChar });
-        } else {
+        // const { exception } = state;
+        // if (exception instanceof DebugError) {
+        //   (state as IInternalState).clearException();
+        //   cycle += await runWithDebugger({ replIO, state, iterator, waitForChar });
+        // } else {
           ++cycle;
-        }
+        // }
         const next = iterator.next();
         done = next.done;
       }
       const { exception } = state;
-      if (exception instanceof ExitError) {
-        break;
-      }
+      // if (exception instanceof ExitError) {
+      //   break;
+      // }
       if (exception !== undefined) {
-        showError(replIO, exception);
+        showException(replIO, exception, state.exceptionStack);
       }
       replIO.output(
         status(state, {
