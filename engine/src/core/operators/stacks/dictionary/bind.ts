@@ -32,6 +32,16 @@ export const bind = buildFunctionOperator(
         description: 'works only on code blocks',
         in: '[ 1 2 ] bind',
         out: '[ 1 2 ] typecheck'
+      },
+      {
+        description: 'does nothing when no names are used',
+        in: '{ {} 1 2 3 } bind',
+        out: '{ {} 1 2 3 }'
+      },
+      {
+        description: 'works on mixed content',
+        in: '{ 1 clear } bind 1 get',
+        out: 'systemdict /clear get'
       }
     ]
   },
@@ -69,6 +79,8 @@ export const bind = buildFunctionOperator(
             return bindInCallsResult;
           }
         }
+      } else {
+        calls.topOperatorState = step + 1;
       }
     } else {
       calls.topOperatorState = OPERATOR_STATE_POP;
