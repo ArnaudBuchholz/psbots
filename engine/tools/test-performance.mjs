@@ -29,10 +29,10 @@ function execute(source) {
     throw new Error(execFailed);
   }
   while (++cycles < MAX_CYCLES) {
-    const { callStack } = state;
+    const { calls } = state;
     let instruction;
-    if (callStack.at(0).type === ValueType.operator) {
-      instruction = callStack.at(0).operator.name;
+    if (calls.at(0).type === ValueType.operator) {
+      instruction = calls.at(0).operator.name;
       if (state.exception !== undefined) {
         instruction += '!';
       }
