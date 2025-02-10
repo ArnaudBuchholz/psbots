@@ -1,32 +1,25 @@
 const BOARD_WIDTH = 3200
 const BOARD_HEIGHT = 2000
-const PADDLE_WIDTH = 10
-const PADDLE_HEIGHT = 200
-const BALL_WIDTH = 32
-const BALL_HEIGHT = 32
+const PADDLE_WIDTH = 50
+const PADDLE_HEIGHT = 300
+const BALL_RADIUS = 32
 
-const paddlePosistions = [BOARD_HEIGHT / 2, BOARD_HEIGHT - PADDLE_HEIGHT]
-
-// let gameState = 'start';
 const paddles = [document.querySelector('.paddle_1'), document.querySelector('.paddle_2')]
 const board = document.querySelector('.board')
-// let initial_ball = document.querySelector('.ball');
-// let ball = document.querySelector('.ball');
-// let score_1 = document.querySelector('.player_1_score');
-// let score_2 = document.querySelector('.player_2_score');
-// let message = document.querySelector('.message');
-// let paddle_1_coord = paddle_1.getBoundingClientRect();
-// let paddle_2_coord = paddle_2.getBoundingClientRect();
-// let initial_ball_coord = ball.getBoundingClientRect();
-// let ball_coord = initial_ball_coord;
-// let board_coord = board.getBoundingClientRect();
-// let paddle_common =
-//   document.querySelector('.paddle').getBoundingClientRect();
+const ball = document.querySelector('.ball')
 
-// let dx = Math.floor(Math.random() * 4) + 3;
-// let dy = Math.floor(Math.random() * 4) + 3;
-// let dxd = Math.floor(Math.random() * 2);
-// let dyd = Math.floor(Math.random() * 2);
+const state = {
+  paddles: [
+    { y: (BOARD_HEIGHT - PADDLE_HEIGHT) / 2, dy: 1 },
+    { y: BOARD_HEIGHT - PADDLE_HEIGHT, dy: -1 },
+  ],
+  ball: {
+    x: BOARD_WIDTH / 2 - BALL_RADIUS,
+    dx: 1,
+    y: BOARD_HEIGHT / 2 - BALL_RADIUS,
+    dy: 1
+  }
+}
 
 
 // document.addEventListener('keydown', (e) => {
@@ -127,48 +120,121 @@ const board = document.querySelector('.board')
 // ball.style.left = ball_coord.left + dx * (dxd == 0 ? -1 : 1) + 'px';
 // ball_coord = ball.getBoundingClientRect();
 
+const BOARD_SCALED = { width: 0, height: 0 }
+const PADDLE_SCALED = { width: 0, height: 0 }
+const BALL_SCALED = { radius: 0 }
+
 const resize = () => {
   const MARGINS = 50;
   const windowRatio = window.innerWidth / window.innerHeight
   const boardRatio = BOARD_WIDTH / BOARD_HEIGHT
 
-  let width, height
   if (windowRatio > boardRatio) {
-    height = window.innerHeight - 2 * MARGINS
-    width = height * boardRatio
+    BOARD_SCALED.height = window.innerHeight - 2 * MARGINS
+    BOARD_SCALED.width = BOARD_SCALED.height * boardRatio
   } else {
-    width = window.innerWidth - 2 * MARGINS
-    height = width / boardRatio
+    BOARD_SCALED.width = window.innerWidth - 2 * MARGINS
+    BOARD_SCALED.height = BOARD_SCALED.width / boardRatio
   }
 
-  board.setAttribute('style', `width: ${width}px; height: ${height}px`)
+  PADDLE_SCALED.width = Math.ceil(PADDLE_WIDTH * BOARD_SCALED.width / BOARD_WIDTH)
+  PADDLE_SCALED.height = Math.ceil(PADDLE_HEIGHT * BOARD_SCALED.height / BOARD_HEIGHT)
+  BALL_SCALED.radius = Math.ceil(BALL_RADIUS * BOARD_SCALED.height / BOARD_HEIGHT)
+
+  board.setAttribute('style', `width: ${BOARD_SCALED.width}px; height: ${BOARD_SCALED.height}px`)
+  paddles[0].setAttribute('style', `width: ${PADDLE_SCALED.width}px; height: ${PADDLE_SCALED.height}px`)
+  paddles[1].setAttribute('style', `width: ${PADDLE_SCALED.width}px; height: ${PADDLE_SCALED.height}px; left: calc(100% - ${PADDLE_SCALED.width}px);`)
+  ball.setAttribute('style', `width: ${BALL_SCALED.radius * 2}px; height: ${BALL_SCALED.radius * 2}px;`)
 }
 
 window.addEventListener('resize', resize)
 window.addEventListener('load', resize)
 
+let speed = 1
 
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowLeft') {
+    speed = Math.max(1, speed - 1)
+  } else if (e.key === 'ArrowRight') {
+    ++speed
+  }
+})
+
+let lastTimestamp
+
+const FPS_REFRESH = 500
 const fps = document.querySelector('.fps')
-let lastFpsTimeStamp
-let lastFpsRefresh = 250
+let lastFpsRefresh = FPS_REFRESH
+let lastFpsValue
 
 const frame = (timestamp) => {
-  if (lastFpsTimeStamp) {
-    const elapsed = timestamp - lastFpsTimeStamp
-    const estimatedFps = 1000 / elapsed
-    lastFpsRefresh -= elapsed
-    if (lastFpsRefresh <= 0) {
-      fps.innerHTML = Math.floor(estimatedFps)
-      lastFpsRefresh = 250
-    }
+  if (!lastTimestamp) {
+    lastTimestamp = timestamp
+    requestAnimationFrame(frame)
+    return
   }
-  lastFpsTimeStamp = timestamp
-  paddles[0].style.top = (paddlePosistions[0] / BOARD_HEIGHT) + '%'
 
+  const elapsed = timestamp - lastTimestamp
+  lastTimestamp = timestamp  
 
+  const estimatedFps = Math.floor(1000 / elapsed)
+  lastFpsRefresh -= elapsed
+  if (lastFpsRefresh <= 0) {
+    if (lastFpsValue !== estimatedFps) {
+      fps.innerHTML = estimatedFps
+      lastFpsValue = estimatedFps
+    }
+    lastFpsRefresh = FPS_REFRESH
+  }
+
+  let frames = Math.floor(elapsed * speed / 4)
+  while (frames-- > 0) {
+
+    for (const paddle of state.paddles) {
+      let { y, dy } = paddle
+      y += dy
+      if (dy > 0) {
+        if (y > BOARD_HEIGHT - PADDLE_HEIGHT) {
+          y = 2 * (BOARD_HEIGHT - PADDLE_HEIGHT) - y
+          dy = -dy
+        }
+      } else if (y < 0) {
+        y = -y
+        dy = -dy
+      }
+      paddle.y = y
+      paddle.dy = dy
+    }
+
+    let { x, dx, y, dy } = state.ball
+    x += dx
+    y += dy
+    if (x > BOARD_WIDTH - BALL_RADIUS) {
+      // +1 to paddle left
+      dx = -dx
+      x = 2 *(BOARD_WIDTH - BALL_RADIUS) - x
+    } else if (x < BALL_RADIUS) {
+      // +1 to paddle right
+      dx = -dx
+      x = 2 * BALL_RADIUS - x
+    }
+    if (y > BOARD_HEIGHT - BALL_RADIUS) {
+      dy = -dy
+      y = 2 * (BOARD_HEIGHT - BALL_RADIUS) - y
+    } else if (y < BALL_RADIUS) {
+      dy = -dy
+      y = 2 * BALL_RADIUS - y
+    }
+    state.ball = { x, dx, y, dy }
+  }
+
+  paddles[0].style.top = `${100 * (state.paddles[0].y / BOARD_HEIGHT)}%`
+  paddles[1].style.top = `${100 * (state.paddles[1].y / BOARD_HEIGHT)}%`
+  ball.style.left = `calc(${100 * (state.ball.x / BOARD_WIDTH)}% - ${BALL_SCALED.radius}px)`
+  ball.style.top = `calc(${100 * (state.ball.y / BOARD_HEIGHT)}% - ${BALL_SCALED.radius}px)`
 
   requestAnimationFrame(frame)
 }
 
-requestAnimationFrame(frame);
+requestAnimationFrame(frame)
 
