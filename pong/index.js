@@ -5,120 +5,28 @@ const PADDLE_HEIGHT = 300
 const BALL_RADIUS = 32
 
 const paddles = [document.querySelector('.paddle_1'), document.querySelector('.paddle_2')]
+const scores = [document.querySelector('.score_1'), document.querySelector('.score_2')]
 const board = document.querySelector('.board')
 const ball = document.querySelector('.ball')
 
+const input = new URLSearchParams(location.search)
+const inputBallDx = parseInt(input.get('ballx') ?? '1')
+const inputBallDY = parseInt(input.get('bally') ?? '1')
+const inputSpeed = parseInt(input.get('speed') ?? '1')
+const MAX_POINTS = parseInt(input.get('points') ?? '3')
+
 const state = {
   paddles: [
-    { y: (BOARD_HEIGHT - PADDLE_HEIGHT) / 2, dy: 1 },
-    { y: BOARD_HEIGHT - PADDLE_HEIGHT, dy: -1 },
+    { y: (BOARD_HEIGHT - PADDLE_HEIGHT) / 2, dy: 1, score: 0 },
+    { y: BOARD_HEIGHT - PADDLE_HEIGHT, dy: -1, score: 0 },
   ],
   ball: {
     x: BOARD_WIDTH / 2 - BALL_RADIUS,
-    dx: 1,
+    dx: inputBallDx,
     y: BOARD_HEIGHT / 2 - BALL_RADIUS,
-    dy: 1
+    dy: inputBallDY
   }
 }
-
-
-// document.addEventListener('keydown', (e) => {
-// if (e.key == 'Enter') {
-//   gameState = gameState == 'start' ? 'play' : 'start';
-//   if (gameState == 'play') {
-//   message.innerHTML = 'Game Started';
-//   message.style.left = 42 + 'vw';
-//   requestAnimationFrame(() => {
-//     dx = Math.floor(Math.random() * 4) + 3;
-//     dy = Math.floor(Math.random() * 4) + 3;
-//     dxd = Math.floor(Math.random() * 2);
-//     dyd = Math.floor(Math.random() * 2);
-//     moveBall(dx, dy, dxd, dyd);
-//   });
-//   }
-// }
-// if (gameState == 'play') {
-//   if (e.key == 'w') {
-//   paddle_1.style.top =
-//     Math.max(
-//     board_coord.top,
-//     paddle_1_coord.top - window.innerHeight * 0.06
-//     ) + 'px';
-//   paddle_1_coord = paddle_1.getBoundingClientRect();
-//   }
-//   if (e.key == 's') {
-//   paddle_1.style.top =
-//     Math.min(
-//     board_coord.bottom - paddle_common.height,
-//     paddle_1_coord.top + window.innerHeight * 0.06
-//     ) + 'px';
-//   paddle_1_coord = paddle_1.getBoundingClientRect();
-//   }
-
-//   if (e.key == 'ArrowUp') {
-//   paddle_2.style.top =
-//     Math.max(
-//     board_coord.top,
-//     paddle_2_coord.top - window.innerHeight * 0.1
-//     ) + 'px';
-//   paddle_2_coord = paddle_2.getBoundingClientRect();
-//   }
-//   if (e.key == 'ArrowDown') {
-//   paddle_2.style.top =
-//     Math.min(
-//     board_coord.bottom - paddle_common.height,
-//     paddle_2_coord.top + window.innerHeight * 0.1
-//     ) + 'px';
-//   paddle_2_coord = paddle_2.getBoundingClientRect();
-//   }
-// }
-// });
-
-// function moveBall(dx, dy, dxd, dyd) {
-// if (ball_coord.top <= board_coord.top) {
-//   dyd = 1;
-// }
-// if (ball_coord.bottom >= board_coord.bottom) {
-//   dyd = 0;
-// }
-// if (
-//   ball_coord.left <= paddle_1_coord.right &&
-//   ball_coord.top >= paddle_1_coord.top &&
-//   ball_coord.bottom <= paddle_1_coord.bottom
-// ) {
-//   dxd = 1;
-//   dx = Math.floor(Math.random() * 4) + 3;
-//   dy = Math.floor(Math.random() * 4) + 3;
-// }
-// if (
-//   ball_coord.right >= paddle_2_coord.left &&
-//   ball_coord.top >= paddle_2_coord.top &&
-//   ball_coord.bottom <= paddle_2_coord.bottom
-// ) {
-//   dxd = 0;
-//   dx = Math.floor(Math.random() * 4) + 3;
-//   dy = Math.floor(Math.random() * 4) + 3;
-// }
-// if (
-//   ball_coord.left <= board_coord.left ||
-//   ball_coord.right >= board_coord.right
-// ) {
-//   if (ball_coord.left <= board_coord.left) {
-//   score_2.innerHTML = +score_2.innerHTML + 1;
-//   } else {
-//   score_1.innerHTML = +score_1.innerHTML + 1;
-//   }
-//   gameState = 'start';
-
-//   ball_coord = initial_ball_coord;
-//   ball.style = initial_ball.style;
-//   message.innerHTML = 'Press Enter to Play Pong';
-//   message.style.left = 38 + 'vw';
-//   return;
-// }
-// ball.style.top = ball_coord.top + dy * (dyd == 0 ? -1 : 1) + 'px';
-// ball.style.left = ball_coord.left + dx * (dxd == 0 ? -1 : 1) + 'px';
-// ball_coord = ball.getBoundingClientRect();
 
 const BOARD_SCALED = { width: 0, height: 0 }
 const PADDLE_SCALED = { width: 0, height: 0 }
@@ -150,10 +58,14 @@ const resize = () => {
 window.addEventListener('resize', resize)
 window.addEventListener('load', resize)
 
-let speed = 1
+let speed = inputSpeed
 
 document.addEventListener('keydown', (e) => {
-  if (e.key === 'ArrowLeft') {
+  if (e.key === 'a') {
+    state.paddles[0].dy = -state.paddles[0].dy
+  } else if (e.key === 's') {
+    state.paddles[1].dy = -state.paddles[1].dy
+  } else if (e.key === 'ArrowLeft') {
     speed = Math.max(1, speed - 1)
   } else if (e.key === 'ArrowRight') {
     ++speed
@@ -163,7 +75,7 @@ document.addEventListener('keydown', (e) => {
 let lastTimestamp
 
 const FPS_REFRESH = 500
-const fps = document.querySelector('.fps')
+const status = document.querySelector('.status')
 let lastFpsRefresh = FPS_REFRESH
 let lastFpsValue
 
@@ -181,7 +93,7 @@ const frame = (timestamp) => {
   lastFpsRefresh -= elapsed
   if (lastFpsRefresh <= 0) {
     if (lastFpsValue !== estimatedFps) {
-      fps.innerHTML = estimatedFps
+      status.innerHTML = `x${speed} fps: ${estimatedFps}/s`
       lastFpsValue = estimatedFps
     }
     lastFpsRefresh = FPS_REFRESH
@@ -209,15 +121,29 @@ const frame = (timestamp) => {
     let { x, dx, y, dy } = state.ball
     x += dx
     y += dy
-    if (x > BOARD_WIDTH - BALL_RADIUS) {
-      // +1 to paddle left
+
+    if (x > BOARD_WIDTH - BALL_RADIUS - PADDLE_WIDTH &&
+      y > state.paddles[1].y &&
+      y < state.paddles[1].y + PADDLE_HEIGHT
+    ) {
       dx = -dx
-      x = 2 *(BOARD_WIDTH - BALL_RADIUS) - x
+      x = 2 * (BOARD_WIDTH - BALL_RADIUS - PADDLE_WIDTH) - x
+    } else if (x > BOARD_WIDTH - BALL_RADIUS) {
+      ++state.paddles[0].score >= MAX_POINTS
+      dx = -dx
+      x = 2 * (BOARD_WIDTH - BALL_RADIUS) - x
+    } else if (x < BALL_RADIUS + PADDLE_WIDTH &&
+      y > state.paddles[0].y &&
+      y < state.paddles[0].y + PADDLE_HEIGHT
+    ) {
+      dx = -dx
+      x = 2 * (BALL_RADIUS + PADDLE_WIDTH) - x
     } else if (x < BALL_RADIUS) {
-      // +1 to paddle right
+      ++state.paddles[1].score
       dx = -dx
       x = 2 * BALL_RADIUS - x
     }
+
     if (y > BOARD_HEIGHT - BALL_RADIUS) {
       dy = -dy
       y = 2 * (BOARD_HEIGHT - BALL_RADIUS) - y
@@ -226,10 +152,19 @@ const frame = (timestamp) => {
       y = 2 * BALL_RADIUS - y
     }
     state.ball = { x, dx, y, dy }
+
+    if (state.paddles[0].score >= MAX_POINTS || state.paddles[1].score >= MAX_POINTS) {
+      state.paddles[0].dy = 0
+      state.paddles[1].dy = 0
+      state.ball.dx = 0
+      state.ball.dy = 0
+    }
   }
 
   paddles[0].style.top = `${100 * (state.paddles[0].y / BOARD_HEIGHT)}%`
+  scores[0].innerHTML = state.paddles[0].score
   paddles[1].style.top = `${100 * (state.paddles[1].y / BOARD_HEIGHT)}%`
+  scores[1].innerHTML = state.paddles[1].score
   ball.style.left = `calc(${100 * (state.ball.x / BOARD_WIDTH)}% - ${BALL_SCALED.radius}px)`
   ball.style.top = `calc(${100 * (state.ball.y / BOARD_HEIGHT)}% - ${BALL_SCALED.radius}px)`
 
