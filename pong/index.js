@@ -14,11 +14,12 @@ const inputBallDx = parseInt(input.get('ballx') ?? '1')
 const inputBallDY = parseInt(input.get('bally') ?? '1')
 const inputSpeed = parseInt(input.get('speed') ?? '1')
 const MAX_POINTS = parseInt(input.get('points') ?? '3')
+const PADDLE_SPEED = parseInt(input.get('paddle') ?? '1')
 
 const state = {
   paddles: [
-    { y: (BOARD_HEIGHT - PADDLE_HEIGHT) / 2, dy: 1, score: 0 },
-    { y: BOARD_HEIGHT - PADDLE_HEIGHT, dy: -1, score: 0 },
+    { y: (BOARD_HEIGHT - PADDLE_HEIGHT) / 2, dy: PADDLE_SPEED, score: 0 },
+    { y: BOARD_HEIGHT - PADDLE_HEIGHT, dy: -PADDLE_SPEED, score: 0 },
   ],
   ball: {
     x: BOARD_WIDTH / 2 - BALL_RADIUS,
@@ -99,68 +100,6 @@ const frame = (timestamp) => {
     lastFpsRefresh = FPS_REFRESH
   }
 
-  let frames = Math.floor(elapsed * speed / 4)
-  while (frames-- > 0) {
-
-    for (const paddle of state.paddles) {
-      let { y, dy } = paddle
-      y += dy
-      if (dy > 0) {
-        if (y > BOARD_HEIGHT - PADDLE_HEIGHT) {
-          y = 2 * (BOARD_HEIGHT - PADDLE_HEIGHT) - y
-          dy = -dy
-        }
-      } else if (y < 0) {
-        y = -y
-        dy = -dy
-      }
-      paddle.y = y
-      paddle.dy = dy
-    }
-
-    let { x, dx, y, dy } = state.ball
-    x += dx
-    y += dy
-
-    if (x > BOARD_WIDTH - BALL_RADIUS - PADDLE_WIDTH &&
-      y > state.paddles[1].y &&
-      y < state.paddles[1].y + PADDLE_HEIGHT
-    ) {
-      dx = -dx
-      x = 2 * (BOARD_WIDTH - BALL_RADIUS - PADDLE_WIDTH) - x
-    } else if (x > BOARD_WIDTH - BALL_RADIUS) {
-      ++state.paddles[0].score >= MAX_POINTS
-      dx = -dx
-      x = 2 * (BOARD_WIDTH - BALL_RADIUS) - x
-    } else if (x < BALL_RADIUS + PADDLE_WIDTH &&
-      y > state.paddles[0].y &&
-      y < state.paddles[0].y + PADDLE_HEIGHT
-    ) {
-      dx = -dx
-      x = 2 * (BALL_RADIUS + PADDLE_WIDTH) - x
-    } else if (x < BALL_RADIUS) {
-      ++state.paddles[1].score
-      dx = -dx
-      x = 2 * BALL_RADIUS - x
-    }
-
-    if (y > BOARD_HEIGHT - BALL_RADIUS) {
-      dy = -dy
-      y = 2 * (BOARD_HEIGHT - BALL_RADIUS) - y
-    } else if (y < BALL_RADIUS) {
-      dy = -dy
-      y = 2 * BALL_RADIUS - y
-    }
-    state.ball = { x, dx, y, dy }
-
-    if (state.paddles[0].score >= MAX_POINTS || state.paddles[1].score >= MAX_POINTS) {
-      state.paddles[0].dy = 0
-      state.paddles[1].dy = 0
-      state.ball.dx = 0
-      state.ball.dy = 0
-    }
-  }
-
   paddles[0].style.top = `${100 * (state.paddles[0].y / BOARD_HEIGHT)}%`
   scores[0].innerHTML = state.paddles[0].score
   paddles[1].style.top = `${100 * (state.paddles[1].y / BOARD_HEIGHT)}%`
@@ -168,7 +107,72 @@ const frame = (timestamp) => {
   ball.style.left = `calc(${100 * (state.ball.x / BOARD_WIDTH)}% - ${BALL_SCALED.radius}px)`
   ball.style.top = `calc(${100 * (state.ball.y / BOARD_HEIGHT)}% - ${BALL_SCALED.radius}px)`
 
-  requestAnimationFrame(frame)
+  // Let the window refresh before processing
+  setTimeout(() => {
+    let frames = Math.floor(elapsed * speed / 4)
+    while (frames-- > 0) {
+  
+      for (const paddle of state.paddles) {
+        let { y, dy } = paddle
+        y += dy
+        if (dy > 0) {
+          if (y > BOARD_HEIGHT - PADDLE_HEIGHT) {
+            y = 2 * (BOARD_HEIGHT - PADDLE_HEIGHT) - y
+            dy = -dy
+          }
+        } else if (y < 0) {
+          y = -y
+          dy = -dy
+        }
+        paddle.y = y
+        paddle.dy = dy
+      }
+  
+      let { x, dx, y, dy } = state.ball
+      x += dx
+      y += dy
+  
+      if (x > BOARD_WIDTH - BALL_RADIUS - PADDLE_WIDTH &&
+        y > state.paddles[1].y &&
+        y < state.paddles[1].y + PADDLE_HEIGHT
+      ) {
+        dx = -dx
+        x = 2 * (BOARD_WIDTH - BALL_RADIUS - PADDLE_WIDTH) - x
+      } else if (x > BOARD_WIDTH - BALL_RADIUS) {
+        ++state.paddles[0].score >= MAX_POINTS
+        dx = -dx
+        x = 2 * (BOARD_WIDTH - BALL_RADIUS) - x
+      } else if (x < BALL_RADIUS + PADDLE_WIDTH &&
+        y > state.paddles[0].y &&
+        y < state.paddles[0].y + PADDLE_HEIGHT
+      ) {
+        dx = -dx
+        x = 2 * (BALL_RADIUS + PADDLE_WIDTH) - x
+      } else if (x < BALL_RADIUS) {
+        ++state.paddles[1].score
+        dx = -dx
+        x = 2 * BALL_RADIUS - x
+      }
+  
+      if (y > BOARD_HEIGHT - BALL_RADIUS) {
+        dy = -dy
+        y = 2 * (BOARD_HEIGHT - BALL_RADIUS) - y
+      } else if (y < BALL_RADIUS) {
+        dy = -dy
+        y = 2 * BALL_RADIUS - y
+      }
+      state.ball = { x, dx, y, dy }
+  
+      if (state.paddles[0].score >= MAX_POINTS || state.paddles[1].score >= MAX_POINTS) {
+        state.paddles[0].dy = 0
+        state.paddles[1].dy = 0
+        state.ball.dx = 0
+        state.ball.dy = 0
+      }
+    }
+  
+    requestAnimationFrame(frame)
+  }, 0)
 }
 
 requestAnimationFrame(frame)

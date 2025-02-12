@@ -1,4 +1,4 @@
-# 🤖 pspong
+# 🤖 psbots / pong
 
 ## Overview
 
@@ -15,7 +15,7 @@ Several constraints are defined :
   * The ball start at the center of the arena, in a random direction (limits are defined to ensure it goes either left or right)
 * The time unit of measure is based on ?
   * Speeds (ball, pad) are expressed in pixels / unit of measure
-* Each time the ball hits a pad, its speed increases
+* Each time the ball hits a pad, its speed increases (?)
 * Each engine will have limitations, they are not necessarily equivalent
   * Number of cycles per unit of time
   * Memory
@@ -38,3 +38,12 @@ Several constraints are defined :
   set_direction
 } loop
 ```
+
+## Ideas
+
+* Limit the number of allowed cycles (the program stops after)
+* Limit the energy to move, allow the paddle to stop
+* Energize the paddle to increase the ball speed (consumes energy)
+* Spin effect to make the ball have a non linear trajectory
+* Obstacles
+* Power Ups / Downs (energy, blockers, bigger paddle, smaller...)
