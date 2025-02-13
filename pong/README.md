@@ -21,10 +21,10 @@ Several constraints are defined :
   * Memory
 * Pad controllers I/O :
   * Input :
-    * ball information (`ball_center_x`, `ball_center_y`, `ball_radius`, `ball_x_speed`, `ball_y_speed`)
-    * arena information (`arena_width`, `arena_height`, `pad_width`, `pad_height`)
-    * current center pad position (`current_center_y`, `current_x`)
+    * board information (`board_width`, `board_height`, `paddle_width`, `paddle_height`)
+    * current pad position (`current_y`, `current_x`)
     * opponent pad position (`opponent_y`, `opponent_x`)
+    * ball information (`ball_center_x`, `ball_center_y`, `ball_radius`, `ball_speed_x`, `ball_speed_y`)
   * Output :
     * direction (`up` or `down`)
 * The match can either be watched in real time or simulated for faster resolution
@@ -34,7 +34,7 @@ Several constraints are defined :
 ```postscript
 {
   % Adjust pad position based on current position of the ball
-  ball_center_y current_center_y lt "up" "down" ifelse
+  ball_center_y current_y paddle_height 2 div pop add lt "up" "down" ifelse
   set_direction
 } loop
 ```
