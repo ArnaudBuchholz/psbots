@@ -1,4 +1,12 @@
-import { BALL_RADIUS, BOARD_HEIGHT, BOARD_MIN_SCALE, BOARD_WIDTH, FPS_REFRESH, PADDLE_HEIGHT, PADDLE_WIDTH } from './constants.js';
+import {
+  BALL_RADIUS,
+  BOARD_HEIGHT,
+  BOARD_MIN_SCALE,
+  BOARD_WIDTH,
+  FPS_REFRESH,
+  PADDLE_HEIGHT,
+  PADDLE_WIDTH
+} from './constants.js';
 import type { Game } from './Game.js';
 
 const BOARD_SCALED = { width: 0, height: 0 };
