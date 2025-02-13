@@ -79,6 +79,7 @@ body {
 
 .score {
   position: absolute;
+  top: -1vh;
   font-size: 10vh;
   z-index: 0;
 }
