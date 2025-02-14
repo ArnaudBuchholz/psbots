@@ -48,6 +48,7 @@ export class PaddleHost implements IReadOnlyDictionary {
     ];
   }
 
+  // TODO: need to return operators because of bind
   lookup(name: string): Value {
     if (name === HOST_BOARD_WIDTH) {
       return safeToIntegerValue(BOARD_WIDTH);

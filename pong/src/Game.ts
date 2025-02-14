@@ -1,6 +1,6 @@
 import { createState } from '@psbots/engine';
 import type { IState } from '@psbots/engine';
-import { assert } from '@psbots/engine/sdk';
+import { assert, toStringValue } from '@psbots/engine/sdk';
 import { MAX_POINTS } from './constants.js';
 import { State } from './State.js';
 import { PaddleHost } from './PaddleHost.js';
@@ -17,7 +17,9 @@ export class Game {
       hostDictionary: new PaddleHost(this._state, paddleIndex)
     });
     assert(createStateResult);
-    this._engines[paddleIndex] = createStateResult.value;
+    const engine = createStateResult.value
+    this._engines[paddleIndex] = engine;
+    return engine;
   }
 
   private _speed = 1;
@@ -28,8 +30,21 @@ export class Game {
   private _ended = false;
 
   setup() {
-    this._allocateEngine(0);
-    this._allocateEngine(1);
+    for (let paddleIndex = 0; paddleIndex < 2; ++paddleIndex) {
+      const engine = this._allocateEngine(paddleIndex);
+      const execResult = engine.exec(toStringValue(`
+/main
+{
+  {
+    % Adjust pad position based on current position of the ball
+    ball_center_y current_y paddle_height 2 div pop add lt "up" "down" ifelse
+    set_direction
+  } loop
+} bind def
+`, { isExecutable: true }));
+      assert(execResult);
+      [...execResult.value];
+    }
   }
 
   run(frames: number) {
