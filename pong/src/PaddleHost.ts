@@ -27,7 +27,7 @@ const safeToIntegerValue = (value: number): Value<ValueType.integer> => {
 export class PaddleHost implements IReadOnlyDictionary {
   constructor(
     private _state: State,
-    private _padIndex: number
+    private _paddleIndex: number
   ) {}
 
   get names() {
@@ -62,22 +62,22 @@ export class PaddleHost implements IReadOnlyDictionary {
       return safeToIntegerValue(PADDLE_HEIGHT);
     }
     if (name === HOST_CURRENT_X) {
-      if (this._padIndex === 0) {
+      if (this._paddleIndex === 0) {
         return safeToIntegerValue(0);
       }
       return safeToIntegerValue(BOARD_WIDTH - PADDLE_WIDTH);
     }
     if (name === HOST_CURRENT_Y) {
-      return safeToIntegerValue(this._state.paddles[this._padIndex].y);
+      return safeToIntegerValue(this._state.paddles[this._paddleIndex].y);
     }
     if (name === HOST_OPPONENT_X) {
-      if (this._padIndex === 1) {
+      if (this._paddleIndex === 1) {
         return safeToIntegerValue(0);
       }
       return safeToIntegerValue(BOARD_WIDTH - PADDLE_WIDTH);
     }
     if (name === HOST_OPPONENT_Y) {
-      return safeToIntegerValue(this._state.paddles[1 - this._padIndex].y);
+      return safeToIntegerValue(this._state.paddles[1 - this._paddleIndex].y);
     }
     if (name === HOST_BALL_CENTER_X) {
       return safeToIntegerValue(this._state.ball.x);

@@ -1,10 +1,23 @@
+import { createState } from '@psbots/engine';
+import type { IState } from '@psbots/engine';
+import { assert } from '@psbots/engine/sdk';
 import { MAX_POINTS } from './constants.js';
 import { State } from './State.js';
+import { PaddleHost } from './PaddleHost.js';
 
 export class Game {
   private _state: State;
   get state() {
     return this._state;
+  }
+
+  private _engines: IState[] = [];
+  private _allocateEngine (paddleIndex: number) {
+    const createStateResult = createState({
+      hostDictionary: new PaddleHost(this._state, paddleIndex)
+    });
+    assert(createStateResult);
+    this._engines[paddleIndex] = createStateResult.value;
   }
 
   private _speed = 1;
@@ -13,6 +26,11 @@ export class Game {
   }
 
   private _ended = false;
+
+  setup() {
+    this._allocateEngine(0);
+    this._allocateEngine(1);
+  }
 
   run(frames: number) {
     if (this._ended) {
