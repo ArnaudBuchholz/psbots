@@ -4,6 +4,7 @@ export type Paddle = {
   y: number;
   dy: number;
   score: number;
+  running: boolean;
 };
 
 export type Ball = {
@@ -15,8 +16,8 @@ export type Ball = {
 
 export class State {
   private _paddles: [Paddle, Paddle] = [
-    { y: 0, dy: 0, score: 0 },
-    { y: 0, dy: 0, score: 0 }
+    { y: 0, dy: 0, score: 0, running: false },
+    { y: 0, dy: 0, score: 0, running: false }
   ];
   get paddles() {
     return this._paddles;

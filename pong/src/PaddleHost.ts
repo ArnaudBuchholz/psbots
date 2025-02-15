@@ -1,6 +1,8 @@
 import { nullValue } from '@psbots/engine';
-import type { Value, IReadOnlyDictionary, ValueType } from '@psbots/engine';
-import { assert, toIntegerValue } from '@psbots/engine/sdk';
+import type { Value, IReadOnlyDictionary } from '@psbots/engine';
+import { ValueType } from '@psbots/engine';
+import type { IOperator } from '@psbots/engine/sdk';
+import { assert, OperatorType, toIntegerValue } from '@psbots/engine/sdk';
 import type { State } from './State.js';
 import { BALL_RADIUS, BOARD_HEIGHT, BOARD_WIDTH, PADDLE_HEIGHT, PADDLE_WIDTH } from './constants.js';
 
@@ -17,6 +19,8 @@ const HOST_BALL_CENTER_Y = 'ball_center_y';
 const HOST_BALL_RADIUS = 'ball_radius';
 const HOST_BALL_SPEED_X = `ball_speed_x`;
 const HOST_BALL_SPEED_Y = `ball_speed_y`;
+const HOST_PADDLE_UP = `paddle_up`;
+const HOST_PADDLE_DOWN = `paddle_down`;
 
 const safeToIntegerValue = (value: number): Value<ValueType.integer> => {
   const result = toIntegerValue(value);
@@ -24,77 +28,86 @@ const safeToIntegerValue = (value: number): Value<ValueType.integer> => {
   return result.value;
 };
 
+const buildIntegerOperatorValue = (name: string, impl: () => number): Value => ({
+  type: ValueType.operator,
+  isExecutable: true,
+  isReadOnly: true,
+  operator: <IOperator>{
+    name,
+    type: OperatorType.implementation,
+    implementation: ({ operands }) => operands.push(safeToIntegerValue(impl()))
+  }
+});
+
+const buildModifierOperatorValue = (name: string, implementation: () => void): Value => ({
+  type: ValueType.operator,
+  isExecutable: true,
+  isReadOnly: true,
+  operator: <IOperator>{
+    name,
+    type: OperatorType.implementation,
+    implementation
+  }
+});
+
 export class PaddleHost implements IReadOnlyDictionary {
+  private _mappings: { [key in string]: Value } = {
+    [HOST_BOARD_WIDTH]: safeToIntegerValue(BOARD_WIDTH),
+    [HOST_BOARD_HEIGHT]: safeToIntegerValue(BOARD_HEIGHT),
+    [HOST_PADDLE_WIDTH]: safeToIntegerValue(PADDLE_WIDTH),
+    [HOST_PADDLE_HEIGHT]: safeToIntegerValue(PADDLE_HEIGHT),
+    [HOST_CURRENT_X]: nullValue,
+    [HOST_CURRENT_Y]: nullValue,
+    [HOST_OPPONENT_X]: nullValue,
+    [HOST_OPPONENT_Y]: nullValue,
+    [HOST_BALL_CENTER_X]: nullValue,
+    [HOST_BALL_CENTER_Y]: nullValue,
+    [HOST_BALL_RADIUS]: safeToIntegerValue(BALL_RADIUS),
+    [HOST_BALL_SPEED_X]: nullValue,
+    [HOST_BALL_SPEED_Y]: nullValue,
+    [HOST_PADDLE_UP]: nullValue,
+    [HOST_PADDLE_DOWN]: nullValue
+  };
+
   constructor(
     private _state: State,
     private _paddleIndex: number
-  ) {}
-
-  get names() {
-    return [
-      HOST_BOARD_WIDTH,
-      HOST_BOARD_HEIGHT,
-      HOST_PADDLE_WIDTH,
-      HOST_PADDLE_HEIGHT,
-      HOST_CURRENT_X,
-      HOST_CURRENT_Y,
-      HOST_OPPONENT_X,
-      HOST_OPPONENT_Y,
-      HOST_BALL_CENTER_X,
-      HOST_BALL_CENTER_Y,
-      HOST_BALL_RADIUS,
-      HOST_BALL_SPEED_X,
-      HOST_BALL_SPEED_Y
-    ];
+  ) {
+    if (this._paddleIndex === 0) {
+      this._mappings[HOST_CURRENT_X] = safeToIntegerValue(0);
+    } else {
+      this._mappings[HOST_CURRENT_X] = safeToIntegerValue(BOARD_WIDTH - PADDLE_WIDTH);
+    }
+    this._mappings[HOST_CURRENT_Y] = buildIntegerOperatorValue(
+      'HOST_CURRENT_Y',
+      () => this._state.paddles[this._paddleIndex].y
+    );
+    if (this._paddleIndex === 1) {
+      this._mappings[HOST_OPPONENT_X] = safeToIntegerValue(0);
+    } else {
+      this._mappings[HOST_OPPONENT_X] = safeToIntegerValue(BOARD_WIDTH - PADDLE_WIDTH);
+    }
+    this._mappings[HOST_OPPONENT_Y] = buildIntegerOperatorValue(
+      'HOST_OPPONENT_Y',
+      () => this._state.paddles[1 - this._paddleIndex].y
+    );
+    this._mappings[HOST_BALL_CENTER_X] = buildIntegerOperatorValue('HOST_BALL_CENTER_X', () => this._state.ball.x);
+    this._mappings[HOST_BALL_CENTER_Y] = buildIntegerOperatorValue('HOST_BALL_CENTER_Y', () => this._state.ball.y);
+    this._mappings[HOST_BALL_SPEED_X] = buildIntegerOperatorValue('HOST_BALL_SPEED_X', () => this._state.ball.dx);
+    this._mappings[HOST_BALL_SPEED_Y] = buildIntegerOperatorValue('HOST_BALL_SPEED_Y', () => this._state.ball.dy);
+    this._mappings[HOST_PADDLE_UP] = buildModifierOperatorValue('HOST_PADDLE_UP', () => {
+      this._state.paddles[this._paddleIndex].dy = -1;
+    });
+    this._mappings[HOST_PADDLE_DOWN] = buildModifierOperatorValue('HOST_PADDLE_DOWN', () => {
+      this._state.paddles[this._paddleIndex].dy = 1;
+    });
   }
 
-  // TODO: need to return operators because of bind
+  get names() {
+    return Object.keys(this._mappings);
+  }
+
   lookup(name: string): Value {
-    if (name === HOST_BOARD_WIDTH) {
-      return safeToIntegerValue(BOARD_WIDTH);
-    }
-    if (name === HOST_BOARD_HEIGHT) {
-      return safeToIntegerValue(BOARD_HEIGHT);
-    }
-    if (name === HOST_PADDLE_WIDTH) {
-      return safeToIntegerValue(PADDLE_WIDTH);
-    }
-    if (name === HOST_PADDLE_HEIGHT) {
-      return safeToIntegerValue(PADDLE_HEIGHT);
-    }
-    if (name === HOST_CURRENT_X) {
-      if (this._paddleIndex === 0) {
-        return safeToIntegerValue(0);
-      }
-      return safeToIntegerValue(BOARD_WIDTH - PADDLE_WIDTH);
-    }
-    if (name === HOST_CURRENT_Y) {
-      return safeToIntegerValue(this._state.paddles[this._paddleIndex].y);
-    }
-    if (name === HOST_OPPONENT_X) {
-      if (this._paddleIndex === 1) {
-        return safeToIntegerValue(0);
-      }
-      return safeToIntegerValue(BOARD_WIDTH - PADDLE_WIDTH);
-    }
-    if (name === HOST_OPPONENT_Y) {
-      return safeToIntegerValue(this._state.paddles[1 - this._paddleIndex].y);
-    }
-    if (name === HOST_BALL_CENTER_X) {
-      return safeToIntegerValue(this._state.ball.x);
-    }
-    if (name === HOST_BALL_CENTER_Y) {
-      return safeToIntegerValue(this._state.ball.y);
-    }
-    if (name === HOST_BALL_RADIUS) {
-      return safeToIntegerValue(BALL_RADIUS);
-    }
-    if (name === HOST_BALL_SPEED_X) {
-      return safeToIntegerValue(this._state.ball.dx);
-    }
-    if (name === HOST_BALL_SPEED_Y) {
-      return safeToIntegerValue(this._state.ball.dy);
-    }
-    return nullValue;
+    return this._mappings[name] ?? nullValue;
   }
 }

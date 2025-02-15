@@ -26,7 +26,7 @@ Several constraints are defined :
     * opponent pad position (`opponent_y`, `opponent_x`)
     * ball information (`ball_center_x`, `ball_center_y`, `ball_radius`, `ball_speed_x`, `ball_speed_y`)
   * Output :
-    * direction (`up` or `down`)
+    * direction (`paddle_up` or `paddle_down`)
 * The match can either be watched in real time or simulated for faster resolution
    
 ## Example psbot
@@ -34,8 +34,16 @@ Several constraints are defined :
 ```postscript
 {
   % Adjust pad position based on current position of the ball
-  ball_center_y current_y paddle_height 2 div pop add lt "up" "down" ifelse
-  set_direction
+  ball_center_y % ball position
+  current_y paddle_height 2 div pop add % center of paddle
+  lt
+  {
+    paddle_up
+  }
+  {
+    paddle_down
+  }
+  ifelse
 } loop
 ```
 
