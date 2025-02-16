@@ -17,10 +17,10 @@ const HOST_OPPONENT_X = 'opponent_x';
 const HOST_BALL_CENTER_X = 'ball_center_x';
 const HOST_BALL_CENTER_Y = 'ball_center_y';
 const HOST_BALL_RADIUS = 'ball_radius';
-const HOST_BALL_SPEED_X = `ball_speed_x`;
-const HOST_BALL_SPEED_Y = `ball_speed_y`;
-const HOST_PADDLE_UP = `paddle_up`;
-const HOST_PADDLE_DOWN = `paddle_down`;
+const HOST_BALL_SPEED_X = 'ball_speed_x';
+const HOST_BALL_SPEED_Y = 'ball_speed_y';
+const HOST_PADDLE_UP = 'paddle_up';
+const HOST_PADDLE_DOWN = 'paddle_down';
 
 const safeToIntegerValue = (value: number): Value<ValueType.integer> => {
   const result = toIntegerValue(value);
