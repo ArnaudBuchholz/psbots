@@ -24,6 +24,7 @@ The classical [pong](https://en.wikipedia.org/wiki/Pong) game but with a twist :
 > Each paddle is controlled with a different script :
 >
 > * Left paddle (follow the ball) :
+>
 > ```postscript
 > /main
 > {
@@ -44,6 +45,7 @@ The classical [pong](https://en.wikipedia.org/wiki/Pong) game but with a twist :
 > ```
 >
 > * Right paddle (follow the ball when coming or center position) :
+>
 > ```postscript
 > /main
 > {
@@ -73,3 +75,4 @@ The classical [pong](https://en.wikipedia.org/wiki/Pong) game but with a twist :
 >     ifelse
 >   } loop
 > } bind def
+> ```
