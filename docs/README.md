@@ -1,5 +1,7 @@
 # 🤖 psbots
 
+> [⋔ Fork me on GitHub](https://github.com/ArnaudBuchholz/psbots)
+
 ## 📚 Documentation
 
 > 🚧 Work in progress
