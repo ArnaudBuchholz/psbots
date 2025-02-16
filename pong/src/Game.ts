@@ -1,9 +1,14 @@
 import { createState } from '@psbots/engine';
 import type { IState } from '@psbots/engine';
-import { assert, toStringValue } from '@psbots/engine/sdk';
+import { assert, callStackToString, toStringValue } from '@psbots/engine/sdk';
 import { MAX_POINTS } from './constants.js';
 import { State } from './State.js';
 import { PaddleHost } from './PaddleHost.js';
+
+type GameSetup = {
+  scripts: [string, string],
+  maxPoints: number,
+};
 
 export class Game {
   private _state: State;
@@ -29,33 +34,22 @@ export class Game {
     return this._speed;
   }
 
+  modifySpeed(increment: number) {
+    this._speed = Math.min(Math.max(this._speed + increment, 1), 1000);
+  }
+
+  private _maxPoints = MAX_POINTS;
   private _ended = false;
 
-  setup() {
+  setup({
+    scripts,
+    maxPoints,
+  }: GameSetup) {
+    this._maxPoints = maxPoints;
     for (let paddleIndex = 0; paddleIndex < 2; ++paddleIndex) {
       const engine = this._allocateEngine(paddleIndex);
       const execResult = engine.exec(
-        toStringValue(
-          `
-/main
-{
-  {
-    % Adjust pad position based on current position of the ball
-    ball_center_y % ball position
-    current_y paddle_height 2 div pop add % center of paddle
-    lt
-    {
-      paddle_up
-    }
-    {
-      paddle_down
-    }
-    ifelse
-  } loop
-} bind def
-`,
-          { isExecutable: true }
-        )
+        toStringValue(scripts[paddleIndex], { isExecutable: true })
       );
       assert(execResult);
       // eslint-disable-next-line @typescript-eslint/no-unused-expressions
@@ -80,11 +74,21 @@ export class Game {
       this._state.run();
       for (let paddleIndex = 0; !this._ended && paddleIndex < 2; ++paddleIndex) {
         const paddle = this._state.paddles[paddleIndex];
-        if (paddle.score >= MAX_POINTS) {
+        if (paddle.score >= this._maxPoints) {
           this._ended = true;
         } else if (paddle.running) {
           const { done } = this._runners[paddleIndex].next();
           if (done) {
+            console.log(`${paddleIndex ? 'Right' : 'Left'} paddle stopped running`);
+            const engine = this._engines[paddleIndex];
+            const { exception } = engine;
+            if (exception) {
+              console.log(`❌ ${exception}`);
+              const { exceptionStack } = engine;
+              if (exceptionStack) {
+                callStackToString(exceptionStack).forEach((line) => console.log(line));
+              }
+            }
             paddle.running = false;
           }
         }
