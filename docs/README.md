@@ -6,4 +6,4 @@
 
 ## 🧪 Online testing
 
-> 🚧 An online repl tool provided to test the language
+An [online repl](repl/index.html) tool provided to test the language
