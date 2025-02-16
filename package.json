@@ -18,7 +18,8 @@
     "./engine",
     "./repl",
     "./cli",
-    "./wi"
+    "./wi",
+    "./pong"
   ],
   "keywords": [
     "postscript",
