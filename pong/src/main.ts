@@ -51,8 +51,7 @@ const scripts = {
   } loop
 } bind def
 `
-
-}
+};
 
 const game = new Game();
 game.setup({

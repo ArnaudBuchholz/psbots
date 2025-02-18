@@ -14,6 +14,16 @@ export type Ball = {
   dy: number;
 };
 
+export type Particle = {
+  id: number;
+  x: number;
+  dx: number;
+  y: number;
+  dy: number;
+  frames: number;
+  content: string;
+};
+
 export class State {
   private _paddles: [Paddle, Paddle] = [
     { y: 0, dy: 0, score: 0, running: false },
@@ -33,6 +43,15 @@ export class State {
     return this._ball;
   }
 
+  private _lastParticleId = 0;
+  private _particles: Particle[] = [];
+  get particles(): readonly Particle[] {
+    return this._particles;
+  }
+  addParticle(particle: Omit<Particle, 'id'>) {
+    this._particles.push({ ...particle, id: this._lastParticleId++ });
+  }
+
   resetPositions() {
     for (const paddle of this.paddles) {
       paddle.y = Math.floor((BOARD_HEIGHT - PADDLE_HEIGHT) / 2);
@@ -46,9 +65,13 @@ export class State {
   }
 
   reset() {
+    this._lastParticleId = 0;
     this.resetPositions();
-    this.paddles[0].score = 0;
-    this.paddles[1].score = 0;
+    for (const paddle of this.paddles) {
+      paddle.score = 0;
+      paddle.running = true;
+    }
+    this._particles = [];
   }
 
   run() {
@@ -98,6 +121,16 @@ export class State {
       y = 2 * BALL_RADIUS - y;
     }
     this._ball = { x, dx, y, dy };
+
+    let cleanParticles = false;
+    for (const particle of this._particles) {
+      particle.x += particle.dx;
+      particle.y += particle.dy;
+      cleanParticles = cleanParticles || 0 > --particle.frames;
+    }
+    if (cleanParticles) {
+      this._particles = this._particles.filter(({ frames }) => frames > 0);
+    }
   }
 
   constructor() {

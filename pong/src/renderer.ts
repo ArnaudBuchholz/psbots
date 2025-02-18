@@ -107,6 +107,30 @@ const frame = function (this: Game, timestamp: number) {
     `width: ${BALL_SCALED.radius * 2}px; height: ${BALL_SCALED.radius * 2}px; left: calc(${100 * (state.ball.x / BOARD_WIDTH)}% - ${BALL_SCALED.radius}px); top: calc(${100 * (state.ball.y / BOARD_HEIGHT)}% - ${BALL_SCALED.radius}px)`
   );
 
+  const particles = board.querySelectorAll('.particle');
+  const particleById: { [key in string]: Element } = {};
+  for (const particle of particles.values()) {
+    particleById[particle.id] = particle;
+  }
+  const ids = [];
+  for (const { id, x, y, content } of state.particles) {
+    ids.push(id.toString());
+    let particle = particleById[id];
+    if (!particle) {
+      particle = board.appendChild(document.createElement('div'));
+      particle.setAttribute('id', id.toString());
+      particle.setAttribute('class', 'particle');
+      particle.innerHTML = content;
+    }
+    particle.setAttribute('style', `left: ${100 * (x / BOARD_WIDTH)}%; top: ${100 * (y / BOARD_HEIGHT)}%`);
+  }
+  for (const particle of particles.values()) {
+    const { id } = particle;
+    if (!ids.includes(id)) {
+      board.removeChild(particle);
+    }
+  }
+
   // Let the window refresh before processing
   setTimeout(() => {
     this.run(Math.ceil(elapsed / 4));

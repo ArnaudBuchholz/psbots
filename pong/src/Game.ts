@@ -6,8 +6,8 @@ import { State } from './State.js';
 import { PaddleHost } from './PaddleHost.js';
 
 type GameSetup = {
-  scripts: [string, string],
-  maxPoints: number,
+  scripts: [string, string];
+  maxPoints: number;
 };
 
 export class Game {
@@ -41,16 +41,11 @@ export class Game {
   private _maxPoints = MAX_POINTS;
   private _ended = false;
 
-  setup({
-    scripts,
-    maxPoints,
-  }: GameSetup) {
+  setup({ scripts, maxPoints }: GameSetup) {
     this._maxPoints = maxPoints;
     for (let paddleIndex = 0; paddleIndex < 2; ++paddleIndex) {
       const engine = this._allocateEngine(paddleIndex);
-      const execResult = engine.exec(
-        toStringValue(scripts[paddleIndex], { isExecutable: true })
-      );
+      const execResult = engine.exec(toStringValue(scripts[paddleIndex], { isExecutable: true }));
       assert(execResult);
       // eslint-disable-next-line @typescript-eslint/no-unused-expressions
       [...execResult.value];
@@ -94,6 +89,14 @@ export class Game {
         }
       }
     }
+    this._state.addParticle({
+      x: this._state.ball.x,
+      y: this._state.ball.y,
+      dx: 0,
+      dy: 0,
+      frames: 60,
+      content: '.'
+    });
   }
 
   constructor() {

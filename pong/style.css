@@ -31,10 +31,16 @@ body {
   height: 30px;
   width: 30px;
   border-radius: 50%;
-  position: relative;
+  position: absolute;
   top: calc(50% - 15px);
   left: calc(50% - 15px);
   z-index: 1;
+}
+
+.particle {
+  position: absolute;
+  z-index: 2;
+  color: #0f0;
 }
 
 .ball_effect {
