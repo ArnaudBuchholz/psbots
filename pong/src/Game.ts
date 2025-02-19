@@ -89,14 +89,14 @@ export class Game {
         }
       }
     }
-    this._state.addParticle({
-      x: this._state.ball.x,
-      y: this._state.ball.y,
-      dx: 0,
-      dy: 0,
-      frames: 60,
-      content: '.'
-    });
+    // this._state.addParticle({
+    //   x: this._state.ball.x,
+    //   y: this._state.ball.y,
+    //   dx: 0,
+    //   dy: 0,
+    //   frames: 60 * this._speed,
+    //   className: 'ball_spark'
+    // });
   }
 
   constructor() {

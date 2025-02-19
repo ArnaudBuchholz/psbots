@@ -43,6 +43,19 @@ body {
   color: #0f0;
 }
 
+.ball_spark {
+  width: 1px;
+  height: 1px;
+  border: 1px solid #040;
+  z-index: 0;
+}
+
+.paddle_action {
+  width: 48px;
+  height: 48px;
+  color: #0f0;
+}
+
 .ball_effect {
   height: 100%;
   width: 100%;

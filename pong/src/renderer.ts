@@ -113,16 +113,18 @@ const frame = function (this: Game, timestamp: number) {
     particleById[particle.id] = particle;
   }
   const ids = [];
-  for (const { id, x, y, content } of state.particles) {
+  for (const { id, x, y, className, content } of state.particles) {
     ids.push(id.toString());
     let particle = particleById[id];
     if (!particle) {
       particle = board.appendChild(document.createElement('div'));
       particle.setAttribute('id', id.toString());
-      particle.setAttribute('class', 'particle');
-      particle.innerHTML = content;
+      particle.setAttribute('class', `particle ${className}`);
     }
     particle.setAttribute('style', `left: ${100 * (x / BOARD_WIDTH)}%; top: ${100 * (y / BOARD_HEIGHT)}%`);
+    if (content) {
+      particle.innerHTML = content;
+    }
   }
   for (const particle of particles.values()) {
     const { id } = particle;

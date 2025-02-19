@@ -96,9 +96,27 @@ export class PaddleHost implements IReadOnlyDictionary {
     this._mappings[HOST_BALL_SPEED_X] = buildIntegerOperatorValue('HOST_BALL_SPEED_X', () => this._state.ball.dx);
     this._mappings[HOST_BALL_SPEED_Y] = buildIntegerOperatorValue('HOST_BALL_SPEED_Y', () => this._state.ball.dy);
     this._mappings[HOST_PADDLE_UP] = buildModifierOperatorValue('HOST_PADDLE_UP', () => {
+      this._state.addParticle({
+        x: this._paddleIndex === 1 ? BOARD_WIDTH - PADDLE_WIDTH : 0,
+        y: this._state.paddles[this._paddleIndex].y + PADDLE_HEIGHT,
+        dx: 0,
+        dy: 0,
+        frames: 60,
+        className: 'paddle_action',
+        content: '⬆'
+      });
       this._state.paddles[this._paddleIndex].dy = -1;
     });
     this._mappings[HOST_PADDLE_DOWN] = buildModifierOperatorValue('HOST_PADDLE_DOWN', () => {
+      this._state.addParticle({
+        x: this._paddleIndex === 1 ? BOARD_WIDTH - PADDLE_WIDTH : 0,
+        y: this._state.paddles[this._paddleIndex].y,
+        dx: 0,
+        dy: 0,
+        frames: 60,
+        className: 'paddle_action',
+        content: '⬇'
+      });
       this._state.paddles[this._paddleIndex].dy = 1;
     });
   }

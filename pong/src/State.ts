@@ -21,7 +21,8 @@ export type Particle = {
   y: number;
   dy: number;
   frames: number;
-  content: string;
+  className: string;
+  content?: string;
 };
 
 export class State {
