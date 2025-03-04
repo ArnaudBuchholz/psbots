@@ -1,0 +1,84 @@
+import eslint from '@eslint/js';
+import tseslint from 'typescript-eslint';
+import prettier from 'eslint-plugin-prettier';
+import security from 'eslint-plugin-security';
+import noOnlyTests from 'eslint-plugin-no-only-tests';
+import importPlugin from 'eslint-plugin-import';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { FlatCompat } from '@eslint/eslintrc';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const compat = new FlatCompat({
+  baseDirectory: __dirname,
+  recommendedConfig: eslint.configs.recommended,
+  allConfig: eslint.configs.all,
+});
+
+export default [
+  ...tseslint.config(eslint.configs.recommended, tseslint.configs.recommended, importPlugin.flatConfigs.recommended),
+  ...compat.extends('plugin:prettier/recommended', 'prettier'),
+  {
+    plugins: {
+      prettier,
+      security,
+      'no-only-tests': noOnlyTests,
+    },
+    languageOptions: {
+      globals: {
+        Proxy: false,
+      },
+    },
+    rules: {
+      // prettier
+      'prettier/prettier': [
+        'error',
+        {
+          semi: true,
+          singleQuote: true,
+          tabWidth: 2,
+          useTabs: false,
+          printWidth: 120,
+          trailingComma: 'none'
+        },
+      ],
+      'no-unused-vars': 'off',
+      'comma-dangle': ['error', 'never'],
+      '@typescript-eslint/no-unused-vars': 'error',
+      '@typescript-eslint/no-empty-object-type': 'error',
+      '@typescript-eslint/no-unsafe-function-type': 'error',
+      '@typescript-eslint/no-wrapper-object-types': 'error',
+      'max-len': 'off',
+      '@typescript-eslint/consistent-type-imports': [
+        'error',
+        {
+          'prefer': 'type-imports',
+          'fixStyle': 'separate-type-imports'
+        }
+      ],
+      'import/consistent-type-specifier-style': [
+        'error',
+        'prefer-top-level'
+      ],
+      'import/extensions': [
+        'error',
+        'ignorePackages',
+        {
+          'ts': 'never'
+        }
+      ],
+      '@typescript-eslint/no-import-type-side-effects': 'error',
+      '@typescript-eslint/no-explicit-any': 'error',
+      'security/detect-unsafe-regex': 'error',
+      'security/detect-buffer-noassert': 'error',
+      'security/detect-child-process': 'error',
+      'security/detect-eval-with-expression': 'error',
+      'security/detect-non-literal-regexp': 'error',
+      'security/detect-non-literal-require': 'error',
+      'security/detect-possible-timing-attacks': 'error',
+      'security/detect-pseudoRandomBytes': 'error',
+      'no-only-tests/no-only-tests': 'error',
+    },
+  }
+];
