@@ -29,14 +29,20 @@
   "author": "Arnaud Buchholz <arnaud.buchholz@free.fr>",
   "license": "MIT",
   "devDependencies": {
+    "@stylistic/eslint-plugin-js": "^4.2.0",
+    "@vitest/coverage-v8": "^3.0.7",
+    "dpdm": "^3.14.0",
     "eslint": "^9.21.0",
     "eslint-config-prettier": "^10.0.2",
     "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-no-only-tests": "^3.3.0",
     "eslint-plugin-prettier": "^5.2.3",
     "eslint-plugin-security": "^3.0.1",
+    "eslint-plugin-unicorn": "^57.0.0",
+    "globals": "^16.0.0",
     "npm-check-updates": "^17.1.15",
     "typescript": "^5.8.2",
-    "typescript-eslint": "^8.26.0"
+    "typescript-eslint": "^8.26.0",
+    "vitest": "^3.0.7"
   }
 }

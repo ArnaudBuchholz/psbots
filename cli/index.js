@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import { repl } from '@psbots/repl';
 import { stdin, stdout } from 'node:process';
 
@@ -19,8 +21,8 @@ await repl(
     }
   },
   process.argv.includes('--debug')
-).catch((reason) => {
-  console.error(reason);
+).catch((error) => {
+  console.error(error);
   process.exitCode = -1;
 });
 

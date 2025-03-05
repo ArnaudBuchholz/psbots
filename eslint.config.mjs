@@ -4,6 +4,8 @@ import prettier from 'eslint-plugin-prettier';
 import security from 'eslint-plugin-security';
 import noOnlyTests from 'eslint-plugin-no-only-tests';
 import importPlugin from 'eslint-plugin-import';
+import stylisticJs from '@stylistic/eslint-plugin-js';
+import eslintPluginUnicorn from 'eslint-plugin-unicorn';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { FlatCompat } from '@eslint/eslintrc';
@@ -19,11 +21,13 @@ const compat = new FlatCompat({
 export default [
   ...tseslint.config(eslint.configs.recommended, tseslint.configs.recommended, importPlugin.flatConfigs.recommended),
   ...compat.extends('plugin:prettier/recommended', 'prettier'),
+  eslintPluginUnicorn.configs.recommended,
   {
     plugins: {
       prettier,
       security,
       'no-only-tests': noOnlyTests,
+      '@stylistic/js': stylisticJs,
     },
     languageOptions: {
       globals: {
@@ -68,6 +72,7 @@ export default [
           'ts': 'never'
         }
       ],
+      'import/no-unresolved': 'off', // TODO: not sure how to configure aliases or .js
       '@typescript-eslint/no-import-type-side-effects': 'error',
       '@typescript-eslint/no-explicit-any': 'error',
       'security/detect-unsafe-regex': 'error',
@@ -79,6 +84,20 @@ export default [
       'security/detect-possible-timing-attacks': 'error',
       'security/detect-pseudoRandomBytes': 'error',
       'no-only-tests/no-only-tests': 'error',
+      'unicorn/import-style': 'off',
+      'unicorn/filename-case': [
+        'error',
+        {
+          "cases": {
+            "camelCase": true,
+            "pascalCase": true
+          }
+        }
+      ],
+      'unicorn/no-null': 'off'
     },
+  },
+  {
+    ignores: ["*/dist/"]
   }
 ];

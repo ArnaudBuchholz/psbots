@@ -38,7 +38,7 @@ async function generateIndexes(path, generate) {
 }
 
 async function generateExceptions() {
-  const exceptions = JSON.parse(await readFile('tools/system-exceptions.json', 'utf-8'));
+  const exceptions = JSON.parse(await readFile('tools/system-exceptions.json', 'utf8'));
 
   writeFile(
     `src/api/Exception.ts`,
@@ -87,11 +87,12 @@ buildFunctionOperator(
 }
 
 async function updateVersion() {
-  const projectPackage = JSON.parse(await readFile('./package.json', 'utf-8'));
+  const projectPackage = JSON.parse(await readFile('./package.json', 'utf8'));
   const VERSION_OPERATOR_PATH = './src/core/operators/value/version.ts';
+  const VERSION_OPERATOR_SOURCE = await readFile(VERSION_OPERATOR_PATH, 'utf8');
   await writeFile(
     VERSION_OPERATOR_PATH,
-    (await readFile(VERSION_OPERATOR_PATH, 'utf-8')).replace(
+    VERSION_OPERATOR_SOURCE.replace(
       /const VERSION = '[^']*';/,
       () => `const VERSION = '${projectPackage.name}@${projectPackage.version}';`
     )
@@ -110,32 +111,30 @@ async function checkSources(path) {
     if (stat.isDirectory()) {
       errors += await checkSources(fullPath);
     } else {
-      const source = await readFile(fullPath, 'utf-8');
+      const source = await readFile(fullPath, 'utf8');
       const lines = [];
-      source.replace(/import (?:type )?\{[^}]+\} from '((?:@|\.)[^']+)';/g, (line, src) => {
-        if (!src.endsWith('.js')) {
+      source.replaceAll(/import (?:type )?\{[^}]+\} from '((?:@|\.)[^']+)';/g, (line, source_) => {
+        if (!source_.endsWith('.js')) {
           lines.push(line);
         }
       });
-      if (lines.length) {
+      if (lines.length > 0) {
         errors += lines.length;
         console.error('⚠️', fullPath, ': check imports');
-        lines.forEach((line) => console.error('\t', line));
+        for (const line of lines) console.error('\t', line);
       }
     }
   }
   return errors;
 }
 
-async function main() {
+try {
   await generateExceptions();
   await generateIndexes('src', false);
   await updateVersion();
   process.exitCode = 0;
   process.exitCode += await checkSources('src');
-}
-
-main().catch((reason) => {
-  console.error(reason);
+} catch (error) {
+  console.error(error);
   process.exitCode = -1;
-});
+}

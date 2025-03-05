@@ -18,12 +18,5 @@
   "license": "MIT",
   "dependencies": {
     "@psbots/repl": "0.0.1"
-  },
-  "devDependencies": {
-    "@stylistic/eslint-plugin-js": "^4.2.0",
-    "eslint-config-prettier": "^10.0.2",
-    "eslint-plugin-import": "^2.31.0",
-    "eslint-plugin-prettier": "^5.2.3",
-    "typescript-eslint": "^8.26.0"
   }
 }

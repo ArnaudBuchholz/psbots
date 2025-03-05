@@ -22,9 +22,9 @@
     }
   },  
   "scripts": {
-    "make-sources": "node ../tools/sync-aliases.mjs && node tools/make-sources.mjs",
+    "make-sources": "node ../tools/sync-aliases.mjs && node tools/makeSources.mjs",
     "precheck": "npm run make-sources",
-    "check": "tsc --noEmit && dpdm ./src/** -T --no-tree --no-warning && eslint tools/*.mjs --env node --fix && eslint src --fix",
+    "check": "tsc --noEmit && dpdm ./src/** -T --no-tree --no-warning && eslint tools/*.mjs && eslint src",
     "pretest": "npm run make-sources",
     "test": "vitest run --coverage",
     "test:watch": "vitest",
@@ -41,16 +41,5 @@
     "engine"
   ],
   "author": "Arnaud Buchholz <arnaud.buchholz@free.fr>",
-  "license": "MIT",
-  "devDependencies": {
-    "@stylistic/eslint-plugin-js": "^4.2.0",
-    "@vitest/coverage-v8": "^3.0.7",
-    "dpdm": "^3.14.0",
-    "eslint-config-prettier": "^10.0.2",
-    "eslint-plugin-import": "^2.31.0",
-    "eslint-plugin-prettier": "^5.2.3",
-    "typescript": "^5.8.2",
-    "typescript-eslint": "^8.26.0",
-    "vitest": "^3.0.7"
-  }
+  "license": "MIT"
 }
