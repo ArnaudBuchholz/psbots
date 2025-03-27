@@ -93,7 +93,8 @@ export default [
           }
         }
       ],
-      'unicorn/no-null': 'off'
+      'unicorn/no-null': 'off',
+      'unicorn/prefer-switch': 'off'
     }
   },
   {

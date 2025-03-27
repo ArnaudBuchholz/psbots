@@ -1,6 +1,6 @@
 import { nullValue } from '@psbots/engine';
 import type { Value, IReadOnlyDictionary } from '@psbots/engine';
-import type { IReplIO } from '../IReplIO.js';
+import type { IReplIO } from '../IReplIo.js';
 import { createExitOperator } from './exit.js';
 import { createStateOperator } from './state.js';
 import { createHelpOperator } from './help.js';

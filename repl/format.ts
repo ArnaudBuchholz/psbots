@@ -1,7 +1,7 @@
 import { enumIArrayValues } from '@psbots/engine';
 import type { IReadOnlyArray, IState } from '@psbots/engine';
 import { toString } from '@psbots/engine/sdk';
-import type { IReplIO } from './IReplIO.js';
+import type { IReplIO } from './IReplIo.js';
 import { blue, cyan, white, /* green, red, white, */ yellow } from './colors.js';
 import { memory } from './status.js';
 
@@ -10,15 +10,12 @@ type EnumAndDisplayOptions = {
   includeIndex: boolean;
 };
 
-export function enumAndDisplay(
-  replIO: IReplIO,
-  values: IReadOnlyArray,
-  options: EnumAndDisplayOptions = {
+export function enumAndDisplay(replIO: IReplIO, values: IReadOnlyArray, options?: EnumAndDisplayOptions): void {
+  const { includeDebugSource, includeIndex } = {
     includeDebugSource: true,
-    includeIndex: true
-  }
-): void {
-  const { includeDebugSource, includeIndex } = options;
+    includeIndex: true,
+    ...options
+  };
   let index = 0;
   for (const value of enumIArrayValues(values)) {
     const formattedIndex = index.toString();
@@ -35,7 +32,7 @@ export function enumAndDisplay(
       instruction = withDebugInfo[1]!;
       debugInfo = `${blue}@${withDebugInfo[2]}`;
     }
-    if (options.includeIndex) {
+    if (includeIndex) {
       replIO.output(`${formattedIndex} ${instruction}${debugInfo}${white}\r\n`);
     } else {
       replIO.output(`${instruction}${debugInfo}${white}\r\n`);

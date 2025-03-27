@@ -1,6 +1,6 @@
 import type { Exception, IReadOnlyCallStack, Result } from '@psbots/engine';
 import { callStackToString } from '@psbots/engine/sdk';
-import type { IReplIO } from './IReplIO.js';
+import type { IReplIO } from './IReplIo.js';
 import { red, white } from './colors.js';
 
 export function failed(
@@ -27,15 +27,15 @@ export function showException(replIO: IReplIO, exception: string, stack?: IReadO
   }
 }
 
-export function showError(replIO: IReplIO, e: unknown) {
+export function showError(replIO: IReplIO, error: unknown) {
   let name: string;
   let message: string;
-  if (e instanceof Error) {
-    name = e.name;
-    message = e.message;
+  if (error instanceof Error) {
+    name = error.name;
+    message = error.message;
   } else {
     name = 'Unknown error';
-    message = JSON.stringify(e);
+    message = JSON.stringify(error);
   }
   if (message.length > 0) {
     message = ': ' + message;

@@ -54,12 +54,7 @@ export function formatMemoryVariation(last: number, current: number): { length: 
 }
 
 export function status(state: IState, options: StatusOptions): string {
-  let cycleLabel: string;
-  if (options.absolute) {
-    cycleLabel = 'cycle: #';
-  } else {
-    cycleLabel = 'cycles: ';
-  }
+  const cycleLabel = options.absolute ? 'cycle: #' : 'cycles: ';
 
   const currentOperandsCount = state.operands.length;
   const operandsVariation = formatCountVariation(

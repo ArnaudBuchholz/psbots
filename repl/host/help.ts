@@ -3,7 +3,7 @@ import type { Value } from '@psbots/engine';
 import { OperatorType } from '@psbots/engine/sdk';
 import type { IFunctionOperator } from '@psbots/engine/sdk';
 import { cyan, white, yellow } from '../colors.js';
-import type { IReplIO } from '../IReplIO.js';
+import type { IReplIO } from '../IReplIo.js';
 
 export function createHelpOperator(replIO: IReplIO): Value<ValueType.operator> {
   return {

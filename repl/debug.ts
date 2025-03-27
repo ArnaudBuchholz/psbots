@@ -1,5 +1,5 @@
 import type { IState } from '@psbots/engine';
-import type { IReplIO } from './IReplIO.js';
+import type { IReplIO } from './IReplIo.js';
 import { toString, TOSTRING_BEGIN_MARKER, TOSTRING_END_MARKER } from '@psbots/engine/sdk';
 import { blue, /* cyan, */ green, magenta, red, white, yellow } from './colors.js';
 import { formatCountVariation, formatMemoryVariation } from './status.js';
@@ -19,11 +19,12 @@ const shortcut = green;
 function colorize(string: string): string {
   return string
     .replaceAll(
+      // eslint-disable-next-line security/detect-non-literal-regexp -- both are constants
       new RegExp(TOSTRING_BEGIN_MARKER + '.*' + TOSTRING_END_MARKER, 'g'),
       (match: string): string => `${yellow}${match}${white}`
     )
-    .replaceAll(/@.*$/g, (match: string): string => `${blue}${match}${white}`)
-    .replaceAll(/…|↵|⭲/g, (match: string): string => `${blue}${match}${white}`);
+    .replaceAll(/@.+$/g, (match: string): string => `${blue}${match}${white}`)
+    .replaceAll(/[…↵⭲]/g, (match: string): string => `${blue}${match}${white}`);
 }
 
 export async function runWithDebugger({ replIO, state, iterator, waitForChar }: DebugParameters): Promise<number> {

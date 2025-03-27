@@ -1,4 +1,4 @@
-import type { IReplIO } from './IReplIO.js';
+import type { IReplIO } from './IReplIo.js';
 
 export interface IInputHandler {
   waitForLines: () => Promise<string>;
@@ -25,7 +25,7 @@ export function buildInputHandler(replIO: IReplIO): IInputHandler {
     error;
   };
   const appendToLinesBuffer = (data: string, newLine = false) => {
-    if (data.length) {
+    if (data.length > 0) {
       linesBuffer[0] = linesBuffer[0] + data;
     }
     if (newLine) {
@@ -42,18 +42,18 @@ export function buildInputHandler(replIO: IReplIO): IInputHandler {
 
   replIO.input((data) => {
     if (data.length > 1) {
-      if (data.charAt(0) === '\u001b') {
+      if (data.charAt(0) === '\u001B') {
         return; // ignore
       }
       let unterminatedLine: string;
       if (data.includes('\r')) {
         const lines = data.split('\r');
         unterminatedLine = lines.pop()!; // because it includes \r
-        lines.forEach((line) => {
+        for (const line of lines) {
           replIO.output(line);
           replIO.output('\r\n');
           appendToLinesBuffer(line, true);
-        });
+        }
       } else {
         unterminatedLine = data;
       }
@@ -70,13 +70,13 @@ export function buildInputHandler(replIO: IReplIO): IInputHandler {
       const line = linesBuffer[0];
       if (line && line.length > 0) {
         replIO.output('\b \b');
-        linesBuffer[0] = line.substring(0, line.length - 1);
+        linesBuffer[0] = line.slice(0, Math.max(0, line.length - 1));
       }
     } else if (data === '\u0003') {
       rejectInput(new EndOfTextError());
-    } else if (data === '\u001b') {
+    } else if (data === '\u001B') {
       rejectInput(new EscapeError());
-    } else if ((data >= String.fromCharCode(0x20) && data <= String.fromCharCode(0x7e)) || data >= '\u00a0') {
+    } else if ((data >= ' ' && data <= '~') || data >= '\u00A0') {
       replIO.output(data);
       appendToLinesBuffer(data, false);
     }
@@ -111,8 +111,8 @@ export function buildInputHandler(replIO: IReplIO): IInputHandler {
       }
       const line = linesBuffer.at(-1)!;
       const char = line.charAt(0);
-      const remainder = line.substring(1);
-      if (remainder.length || linesBuffer.length === 1) {
+      const remainder = line.slice(1);
+      if (remainder.length > 0 || linesBuffer.length === 1) {
         linesBuffer[linesBuffer.length - 1] = remainder;
       } else {
         linesBuffer.pop();

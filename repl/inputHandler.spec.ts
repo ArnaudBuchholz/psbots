@@ -8,7 +8,7 @@ let onData: (data: string) => void;
 
 const simulate = async (text: string | string[]) => {
   if (typeof text === 'string') {
-    text = text.split('');
+    text = [...text];
   }
   for (const data of text) {
     onData(data);

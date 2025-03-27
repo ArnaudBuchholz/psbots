@@ -1,7 +1,7 @@
 import type { IDebugSource } from '@psbots/engine';
 import { createState, ValueType } from '@psbots/engine';
 import { assert, toStringValue } from '@psbots/engine/sdk';
-import type { IReplIO } from './IReplIO.js';
+import type { IReplIO } from './IReplIo.js';
 import { cyan, green, magenta, red, white, yellow } from './colors.js';
 import { ReplHostDictionary } from './host/index.js';
 import { status } from './status.js';
@@ -9,7 +9,7 @@ import { buildInputHandler, InputError } from './inputHandler.js';
 import { showError, failed, showException } from './showError.js';
 import { runWithDebugger } from './debug.js';
 
-export * from './IReplIO.js';
+export * from './IReplIo.js';
 
 function showVersion(replIO: IReplIO): boolean {
   const stateResult = createState();

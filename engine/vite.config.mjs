@@ -6,11 +6,11 @@ const path = (rel) => fileURLToPath(new URL(`./${rel}`, import.meta.url));
 export default defineConfig({
   resolve: {
     alias: {
-      '@api': path('src/api'),
+    '@api': path('src/api'),
       '@sdk': path('src/sdk'),
       '@core': path('src/core'),
       '@test': path('src/test')
-    }
+  }
   },
   test: {
     poolOptions: {

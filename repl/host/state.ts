@@ -3,7 +3,7 @@ import type { Value } from '@psbots/engine';
 import { OperatorType } from '@psbots/engine/sdk';
 import type { IFunctionOperator, IInternalState } from '@psbots/engine/sdk';
 import { state as displayState } from '../format.js';
-import type { IReplIO } from 'IReplIO.js';
+import type { IReplIO } from 'IReplIo.js';
 
 export function createStateOperator(replIO: IReplIO): Value<ValueType.operator> {
   return {
