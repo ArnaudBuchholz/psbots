@@ -4,7 +4,7 @@
   "description": "Command line interface for the engine",
   "type": "module",
   "scripts": {
-    "check": "eslint ./index.js --fix",
+    "check": "eslint . --fix",
     "build": ""
   },
   "keywords": [
