@@ -15,15 +15,37 @@ export class InputError extends Error {
 class EndOfTextError extends InputError {}
 class EscapeError extends InputError {}
 
+const noop = () => {};
+
+const paste = (replIO: IReplIO, appendToLinesBuffer: (data: string, newLine?: boolean) => void, data: string) => {
+  if (data.charAt(0) === '\u001B') {
+    return; // ignore
+  }
+  let unterminatedLine: string;
+  if (data.includes('\r')) {
+    const lines = data.split('\r');
+    unterminatedLine = lines.pop()!; // because it includes \r
+    for (const line of lines) {
+      replIO.output(line);
+      replIO.output('\r\n');
+      appendToLinesBuffer(line, true);
+    }
+  } else {
+    unterminatedLine = data;
+  }
+  if (unterminatedLine.length > 0) {
+    replIO.output(unterminatedLine);
+    appendToLinesBuffer(unterminatedLine);
+  }
+};
+
 export function buildInputHandler(replIO: IReplIO): IInputHandler {
   const linesBuffer: string[] = [];
 
   let linesBufferChange = Promise.resolve();
 
-  let notifyLinesBufferChange = () => {};
-  let rejectInput = (error: Error) => {
-    error;
-  };
+  let notifyLinesBufferChange: () => void = noop;
+  let rejectInput: (reason: Error) => void = noop;
   const appendToLinesBuffer = (data: string, newLine = false) => {
     if (data.length > 0) {
       linesBuffer[0] = linesBuffer[0] + data;
@@ -42,25 +64,7 @@ export function buildInputHandler(replIO: IReplIO): IInputHandler {
 
   replIO.input((data) => {
     if (data.length > 1) {
-      if (data.charAt(0) === '\u001B') {
-        return; // ignore
-      }
-      let unterminatedLine: string;
-      if (data.includes('\r')) {
-        const lines = data.split('\r');
-        unterminatedLine = lines.pop()!; // because it includes \r
-        for (const line of lines) {
-          replIO.output(line);
-          replIO.output('\r\n');
-          appendToLinesBuffer(line, true);
-        }
-      } else {
-        unterminatedLine = data;
-      }
-      if (unterminatedLine.length > 0) {
-        replIO.output(unterminatedLine);
-        appendToLinesBuffer(unterminatedLine);
-      }
+      paste(replIO, appendToLinesBuffer, data);
     } else if (data === '\r') {
       // Enter
       replIO.output('\r\n');

@@ -94,7 +94,8 @@ export default [
         }
       ],
       'unicorn/no-null': 'off',
-      'unicorn/prefer-switch': 'off'
+      'unicorn/prefer-switch': 'off',
+      'sonarjs/todo-tag': 'warn'
     }
   },
   {

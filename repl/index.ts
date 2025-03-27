@@ -1,6 +1,6 @@
 import type { IDebugSource } from '@psbots/engine';
 import { createState, ValueType } from '@psbots/engine';
-import { assert, toStringValue } from '@psbots/engine/sdk';
+import { assert, run, toStringValue } from '@psbots/engine/sdk';
 import type { IReplIO } from './IReplIo.js';
 import { cyan, green, magenta, red, white, yellow } from './colors.js';
 import { ReplHostDictionary } from './host/index.js';
@@ -17,18 +17,14 @@ function showVersion(replIO: IReplIO): boolean {
     return false;
   }
   const { value: state } = stateResult;
-
-  const execVersionResult = state.exec(toStringValue('version', { isExecutable: true }));
-  if (failed(replIO, execVersionResult, { message: 'Unable to execute version' })) {
-    return false;
-  }
-  [...execVersionResult.value];
+  run(state.exec(toStringValue('version', { isExecutable: true })));
   const version = state.operands.at(0);
   assert(version.type === ValueType.string);
   replIO.output(`${cyan}Welcome to 🤖${magenta}${version.string}${white}\r\n`);
   return true;
 }
 
+// eslint-disable-next-line sonarjs/cognitive-complexity -- very little value / interest in refactoring this function
 export async function repl(replIO: IReplIO, debug?: boolean): Promise<void> {
   if (!showVersion(replIO)) {
     return;
@@ -82,6 +78,7 @@ export async function repl(replIO: IReplIO, debug?: boolean): Promise<void> {
       while (done === false) {
         if (hostDictionary.debugCalled) {
           cycle += await runWithDebugger({ replIO, state, iterator, waitForChar });
+          // TOOD: how to end debug mode ?
         } else {
           ++cycle;
         }

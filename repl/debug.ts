@@ -17,6 +17,19 @@ const border = magenta;
 const shortcut = green;
 
 function colorize(string: string): string {
+  // const chars = [...string];
+  // const beginMarkerPos = chars.indexOf(TOSTRING_BEGIN_MARKER);
+  // const endMarkerPos = chars.indexOf(TOSTRING_END_MARKER, beginMarkerPos);
+  // if (beginMarkerPos > -1 && endMarkerPos > -1) {
+  //   chars.splice(endMarkerPos + 1, 0, white);
+  //   chars.splice(beginMarkerPos + 1, 0, yellow);
+  // }
+  // const sourcePos = chars.lastIndexOf('@');
+  // if (sourcePos > -1) {
+  //   chars.splice(sourcePos + 1, 0, blue);
+  //   chars.push(white);
+  // }
+  // TODO: 
   return string
     .replaceAll(
       // eslint-disable-next-line security/detect-non-literal-regexp -- both are constants
