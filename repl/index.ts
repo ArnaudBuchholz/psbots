@@ -11,7 +11,7 @@ import { runWithDebugger } from './debug.js';
 
 export * from './IReplIO.js';
 
-function showVersion (replIO: IReplIO): boolean {
+function showVersion(replIO: IReplIO): boolean {
   const stateResult = createState();
   if (failed(replIO, stateResult, { message: 'Unable to allocate state' })) {
     return false;
@@ -54,11 +54,10 @@ export async function repl(replIO: IReplIO, debug?: boolean): Promise<void> {
   let replIndex = 0;
   const { waitForLines, waitForChar } = buildInputHandler(replIO);
 
-  // eslint-disable-next-line no-constant-condition
   while (true) {
     replIO.output('? ');
     try {
-      const src = await waitForLines();
+      const source = await waitForLines();
       const lastOperandsCount = state.operands.length;
       const lastUsedMemory = state.memoryTracker.used;
       let cycle = 0;
@@ -69,11 +68,11 @@ export async function repl(replIO: IReplIO, debug?: boolean): Promise<void> {
             debugSource: <IDebugSource>{
               filename: `repl${replIndex++}`,
               pos: 0,
-              length: src.length,
-              source: src
+              length: source.length,
+              source: source
             }
           },
-          toStringValue(src, { isExecutable: true })
+          toStringValue(source, { isExecutable: true })
         )
       );
       assert(execResult);
@@ -103,9 +102,9 @@ export async function repl(replIO: IReplIO, debug?: boolean): Promise<void> {
           lastUsedMemory
         })
       );
-    } catch (e) {
-      showError(replIO, e);
-      if (e instanceof InputError) {
+    } catch (error) {
+      showError(replIO, error);
+      if (error instanceof InputError) {
         break;
       }
     }
@@ -114,8 +113,8 @@ export async function repl(replIO: IReplIO, debug?: boolean): Promise<void> {
   replIO.output(`${red}terminating...${white}\r\n`);
   try {
     state.destroy();
-  } catch (e) {
-    showError(replIO, e);
+  } catch (error) {
+    showError(replIO, error);
   }
   replIO.output(`${red}terminated.${white}\r\n`);
 }

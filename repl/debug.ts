@@ -18,12 +18,12 @@ const shortcut = green;
 
 function colorize(string: string): string {
   return string
-    .replace(
+    .replaceAll(
       new RegExp(TOSTRING_BEGIN_MARKER + '.*' + TOSTRING_END_MARKER, 'g'),
       (match: string): string => `${yellow}${match}${white}`
     )
-    .replace(/@.*$/g, (match: string): string => `${blue}${match}${white}`)
-    .replace(/…|↵|⭲/g, (match: string): string => `${blue}${match}${white}`);
+    .replaceAll(/@.*$/g, (match: string): string => `${blue}${match}${white}`)
+    .replaceAll(/…|↵|⭲/g, (match: string): string => `${blue}${match}${white}`);
 }
 
 export async function runWithDebugger({ replIO, state, iterator, waitForChar }: DebugParameters): Promise<number> {
@@ -34,7 +34,6 @@ export async function runWithDebugger({ replIO, state, iterator, waitForChar }: 
 
   // TODO: show dictionaries
 
-  // eslint-disable-next-line no-constant-condition
   while (true) {
     const { width, height } = replIO;
     if (width < 40 || height < 10) {
@@ -42,7 +41,7 @@ export async function runWithDebugger({ replIO, state, iterator, waitForChar }: 
       return 0;
     }
 
-    replIO.output('\x1b[1;1H\x1b[J'); // clear display
+    replIO.output('\u001B[1;1H\u001B[J'); // clear display
 
     const cycleLength = cycle.toString().length;
     const cycleInfoLength = 8 + cycleLength;
@@ -154,6 +153,6 @@ export async function runWithDebugger({ replIO, state, iterator, waitForChar }: 
       break;
     }
   }
-  replIO.output('\x1b[1;1H\x1b[J'); // clear display
+  replIO.output('\u001B[1;1H\u001B[J'); // clear display
   return cycle;
 }

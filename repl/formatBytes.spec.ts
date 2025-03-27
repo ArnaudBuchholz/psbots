@@ -9,11 +9,11 @@ const values = {
   1024: '1.00kB',
   1500: '1.46kB',
   2048: '2.00kB',
-  1048576: '1.00MB'
+  1_048_576: '1.00MB'
 };
 
 for (const [bytes, expected] of Object.entries(values)) {
   it(`converts ${bytes} to ${expected}`, () => {
-    expect(formatBytes(parseInt(bytes, 10))).toStrictEqual(expected);
+    expect(formatBytes(Number.parseInt(bytes, 10))).toStrictEqual(expected);
   });
 }
