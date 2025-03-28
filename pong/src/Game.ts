@@ -1,6 +1,6 @@
 import { createState } from '@psbots/engine';
 import type { IState } from '@psbots/engine';
-import { assert, callStackToString, toStringValue } from '@psbots/engine/sdk';
+import { assert, callStackToString, run, toStringValue } from '@psbots/engine/sdk';
 import { MAX_POINTS } from './constants.js';
 import { State } from './State.js';
 import { PaddleHost } from './PaddleHost.js';
@@ -45,12 +45,8 @@ export class Game {
     this._maxPoints = maxPoints;
     for (let paddleIndex = 0; paddleIndex < 2; ++paddleIndex) {
       const engine = this._allocateEngine(paddleIndex);
-      const execResult = engine.exec(toStringValue(scripts[paddleIndex], { isExecutable: true }));
-      assert(execResult);
-      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-      [...execResult.value];
-      // TODO: check if execution succeeded
-
+      // TODO: limit the number of cycles, implement throw on failure
+      run(engine.exec(toStringValue(scripts[paddleIndex], { isExecutable: true })));
       const runResult = engine.exec(toStringValue('main', { isExecutable: true }));
       this._state.paddles[paddleIndex].running = true;
       assert(runResult);
@@ -58,6 +54,22 @@ export class Game {
     }
     this._state.ball.dx = 1;
     this._state.ball.dy = 1;
+  }
+
+  private _engineStopped(paddleIndex: number) {
+    console.log(`${paddleIndex ? 'Right' : 'Left'} paddle stopped running`);
+    const engine = this._engines[paddleIndex];
+    const { exception } = engine;
+    if (exception) {
+      console.log(`❌ ${exception}`);
+      const { exceptionStack } = engine;
+      if (exceptionStack) {
+        for (const line of callStackToString(exceptionStack)) {
+          console.log(line);
+        }
+      }
+    }
+    this._state.paddles[paddleIndex].running = false;
   }
 
   run(frames: number) {
@@ -74,29 +86,19 @@ export class Game {
         } else if (paddle.running) {
           const { done } = this._runners[paddleIndex].next();
           if (done) {
-            console.log(`${paddleIndex ? 'Right' : 'Left'} paddle stopped running`);
-            const engine = this._engines[paddleIndex];
-            const { exception } = engine;
-            if (exception) {
-              console.log(`❌ ${exception}`);
-              const { exceptionStack } = engine;
-              if (exceptionStack) {
-                callStackToString(exceptionStack).forEach((line) => console.log(line));
-              }
-            }
-            paddle.running = false;
+            this._engineStopped(paddleIndex);
           }
         }
       }
     }
-    // this._state.addParticle({
-    //   x: this._state.ball.x,
-    //   y: this._state.ball.y,
-    //   dx: 0,
-    //   dy: 0,
-    //   frames: 60 * this._speed,
-    //   className: 'ball_spark'
-    // });
+    this._state.addParticle({
+      x: this._state.ball.x,
+      y: this._state.ball.y,
+      dx: 0,
+      dy: 0,
+      frames: 60 * this._speed,
+      className: 'ball_spark'
+    });
   }
 
   constructor() {

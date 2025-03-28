@@ -60,10 +60,10 @@ game.setup({
 });
 start(game);
 
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'ArrowLeft') {
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'ArrowLeft') {
     game.modifySpeed(-20);
-  } else if (e.key === 'ArrowRight') {
+  } else if (event.key === 'ArrowRight') {
     game.modifySpeed(+10);
   }
 });

@@ -75,7 +75,7 @@ export class State {
     this._particles = [];
   }
 
-  run() {
+  private _runPaddles() {
     for (const paddle of this._paddles) {
       let { y, dy } = paddle;
       y += dy;
@@ -91,7 +91,9 @@ export class State {
       paddle.y = y;
       paddle.dy = dy;
     }
+  }
 
+  private _runBall() {
     let { x, dx, y, dy } = this._ball;
     x += dx;
     y += dy;
@@ -122,7 +124,9 @@ export class State {
       y = 2 * BALL_RADIUS - y;
     }
     this._ball = { x, dx, y, dy };
+  }
 
+  private _runParticles() {
     let cleanParticles = false;
     for (const particle of this._particles) {
       particle.x += particle.dx;
@@ -132,6 +136,12 @@ export class State {
     if (cleanParticles) {
       this._particles = this._particles.filter(({ frames }) => frames > 0);
     }
+  }
+
+  run() {
+    this._runPaddles();
+    this._runBall();
+    this._runParticles();
   }
 
   constructor() {

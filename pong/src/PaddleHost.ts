@@ -1,6 +1,6 @@
-import { nullValue } from '@psbots/engine';
+import { nullValue, ValueType } from '@psbots/engine';
 import type { Value, IReadOnlyDictionary } from '@psbots/engine';
-import { ValueType } from '@psbots/engine';
+
 import type { IOperator } from '@psbots/engine/sdk';
 import { assert, OperatorType, toIntegerValue } from '@psbots/engine/sdk';
 import type { State } from './State.js';
@@ -73,20 +73,14 @@ export class PaddleHost implements IReadOnlyDictionary {
     private _state: State,
     private _paddleIndex: number
   ) {
-    if (this._paddleIndex === 0) {
-      this._mappings[HOST_CURRENT_X] = safeToIntegerValue(0);
-    } else {
-      this._mappings[HOST_CURRENT_X] = safeToIntegerValue(BOARD_WIDTH - PADDLE_WIDTH);
-    }
+    this._mappings[HOST_CURRENT_X] =
+      this._paddleIndex === 0 ? safeToIntegerValue(0) : safeToIntegerValue(BOARD_WIDTH - PADDLE_WIDTH);
     this._mappings[HOST_CURRENT_Y] = buildIntegerOperatorValue(
       'HOST_CURRENT_Y',
       () => this._state.paddles[this._paddleIndex].y
     );
-    if (this._paddleIndex === 1) {
-      this._mappings[HOST_OPPONENT_X] = safeToIntegerValue(0);
-    } else {
-      this._mappings[HOST_OPPONENT_X] = safeToIntegerValue(BOARD_WIDTH - PADDLE_WIDTH);
-    }
+    this._mappings[HOST_OPPONENT_X] =
+      this._paddleIndex === 1 ? safeToIntegerValue(0) : safeToIntegerValue(BOARD_WIDTH - PADDLE_WIDTH);
     this._mappings[HOST_OPPONENT_Y] = buildIntegerOperatorValue(
       'HOST_OPPONENT_Y',
       () => this._state.paddles[1 - this._paddleIndex].y

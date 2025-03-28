@@ -117,7 +117,8 @@ const frame = function (this: Game, timestamp: number) {
     ids.push(id.toString());
     let particle = particleById[id];
     if (!particle) {
-      particle = board.appendChild(document.createElement('div'));
+      particle = document.createElement('div');
+      board.append(particle);
       particle.setAttribute('id', id.toString());
       particle.setAttribute('class', `particle ${className}`);
     }
@@ -129,7 +130,7 @@ const frame = function (this: Game, timestamp: number) {
   for (const particle of particles.values()) {
     const { id } = particle;
     if (!ids.includes(id)) {
-      board.removeChild(particle);
+      particle.remove();
     }
   }
 
