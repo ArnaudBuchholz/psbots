@@ -4,33 +4,29 @@ import { Terminal } from '@xterm/xterm';
 import { FitAddon } from '@xterm/addon-fit';
 import { repl } from '@psbots/repl';
 
-async function main() {
-  const term = new Terminal({
-    cursorBlink: true
-  });
-  const fitAddon = new FitAddon();
-  term.loadAddon(fitAddon);
-  term.open(document.getElementById('terminal')!);
-  fitAddon.fit();
+const term = new Terminal({
+  cursorBlink: true
+});
+const fitAddon = new FitAddon();
+term.loadAddon(fitAddon);
+term.open(document.querySelector('#terminal')!);
+fitAddon.fit();
 
-  window.addEventListener('resize', () => fitAddon.fit());
+window.addEventListener('resize', () => fitAddon.fit());
 
-  await repl({
-    get width() {
-      return term.cols;
-    },
-    get height() {
-      return term.rows;
-    },
-    input(callback) {
-      term.onData(callback);
-    },
-    output(text) {
-      term.write(text);
-    }
-  }).catch((reason) => {
-    console.error(reason);
-  });
-}
-
-main();
+await repl({
+  get width() {
+    return term.cols;
+  },
+  get height() {
+    return term.rows;
+  },
+  input(callback) {
+    term.onData(callback);
+  },
+  output(text) {
+    term.write(text);
+  }
+}).catch((error) => {
+  console.error(error);
+});
