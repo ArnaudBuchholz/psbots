@@ -34,24 +34,22 @@ export function* parse(source: string, pos: number = 0, filename?: string): Gene
         ...common,
         type: ValueType.integer,
         isExecutable: false,
-        integer: parseInt(integer, 10)
+        integer: Number.parseInt(integer, 10)
       };
     } else if (call !== undefined) {
-      if (call.length > 1 && call.startsWith('/')) {
-        yield {
-          ...common,
-          type: ValueType.name,
-          isExecutable: false,
-          name: call.substring(1)
-        };
-      } else {
-        yield {
-          ...common,
-          type: ValueType.name,
-          isExecutable: true,
-          name: call
-        };
-      }
+      yield call.length > 1 && call.startsWith('/')
+        ? {
+            ...common,
+            type: ValueType.name,
+            isExecutable: false,
+            name: call.slice(1)
+          }
+        : {
+            ...common,
+            type: ValueType.name,
+            isExecutable: true,
+            name: call
+          };
     }
     match = matcher.exec(source);
   }
