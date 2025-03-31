@@ -124,13 +124,13 @@ describe('With parameters', () => {
       expect([...enumIArrayValues(state.operands)][0]).toStrictEqual(toValue(true));
     });
 
-    it('supports boolean', () => state.operands.push(toValue(true)));
-    it('supports integer', () => state.operands.push(toValue(123)));
-    it('supports string', () => state.operands.push(toValue('abc')));
-    it('supports mark', () => state.operands.push(markValue));
-    it('supports operator', () => state.operands.push(toValue(() => {})));
-    it('supports array', () => state.operands.push(toValue([])));
-    it('supports dictionary', () => state.operands.push(toValue({})));
+    it('supports boolean', () => expect(() => state.operands.push(toValue(true))).not.toThrowError());
+    it('supports integer', () => expect(() => state.operands.push(toValue(123))).not.toThrowError());
+    it('supports string', () => expect(() => state.operands.push(toValue('abc'))).not.toThrowError());
+    it('supports mark', () => expect(() => state.operands.push(markValue)).not.toThrowError());
+    it('supports operator', () => expect(() => state.operands.push(toValue(() => {}))).not.toThrowError());
+    it('supports array', () => expect(() => state.operands.push(toValue([]))).not.toThrowError());
+    it('supports dictionary', () => expect(() => state.operands.push(toValue({}))).not.toThrowError());
   });
 
   describe('using several parameters', () => {

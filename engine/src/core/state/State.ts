@@ -189,7 +189,7 @@ export class State implements IInternalState {
   // endregion IInternalState
 
   *run() {
-    while (this.calls.length !== 0) {
+    while (this.calls.length > 0) {
       this.cycle();
       yield;
     }

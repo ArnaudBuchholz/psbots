@@ -20,7 +20,7 @@ function testFlags(
   values: Value[],
   flags: (keyof IValuePermissions)[]
 ): void {
-  flags.forEach((flag) => {
+  for (const flag of flags) {
     const trueValues = values.filter((value) => value[flag]);
     const falseValues = values.filter((value) => !value[flag]);
     describe(flag, () => {
@@ -31,19 +31,27 @@ function testFlags(
         expect(falseValues.length).not.toStrictEqual(0);
       });
       it('accepts only values with matching flag (true)', () => {
-        trueValues.forEach((value) => expect(is(value, { [flag]: true })).toStrictEqual(true));
+        for (const value of trueValues) {
+          expect(is(value, { [flag]: true })).toStrictEqual(true);
+        }
       });
       it('accepts only values with matching flag (false)', () => {
-        falseValues.forEach((value) => expect(is(value, { [flag]: false })).toStrictEqual(true));
+        for (const value of falseValues) {
+          expect(is(value, { [flag]: false })).toStrictEqual(true);
+        }
       });
       it('rejects values with non matching flag (true)', () => {
-        falseValues.forEach((value) => expect(is(value, { [flag]: true })).toStrictEqual(false));
+        for (const value of falseValues) {
+          expect(is(value, { [flag]: true })).toStrictEqual(false);
+        }
       });
       it('rejects only values with matching flag (false)', () => {
-        trueValues.forEach((value) => expect(is(value, { [flag]: false })).toStrictEqual(false));
+        for (const value of trueValues) {
+          expect(is(value, { [flag]: false })).toStrictEqual(false);
+        }
       });
     });
-  });
+  }
 }
 
 describe('isIntegerValue', () => {

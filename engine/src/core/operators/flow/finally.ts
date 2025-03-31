@@ -1,5 +1,6 @@
-import type { Exception, IReadOnlyCallStack } from '@api/index.js';
+import type { Exception, IReadOnlyCallStack, Result, Value } from '@api/index.js';
 import { nullValue, ValueType } from '@api/index.js';
+import type { IInternalState } from '@sdk/index.js';
 import {
   OPERATOR_STATE_POP,
   OPERATOR_STATE_FIRST_CALL,
@@ -14,6 +15,60 @@ const CALLS_BLOCK = 'block';
 export const CALLS_EXCEPTION = 'exception';
 const CALLS_EXCEPTION_STACK = 'stack';
 export const OPERATOR_STATE_POPPING = -2;
+
+function firstCall(
+  state: IInternalState,
+  codeBlock: Value<ValueType.array>,
+  finalBlock: Value<ValueType.array>
+): Result<unknown> {
+  const { operands, calls } = state;
+  const finalBlockDefined = calls.def(CALLS_BLOCK, finalBlock);
+  if (!finalBlockDefined.success) {
+    return finalBlockDefined;
+  }
+  calls.topOperatorState = OPERATOR_STATE_CALL_BEFORE_POP;
+  const codeBlockDefined = calls.push(codeBlock);
+  if (codeBlockDefined.success) {
+    const popushResult = operands.popush(2);
+    assert(popushResult);
+  }
+  return codeBlockDefined;
+}
+
+function callBeforePop(state: IInternalState): Result<unknown> {
+  const { calls } = state;
+  calls.topOperatorState = OPERATOR_STATE_POPPING;
+  if (state.exception) {
+    const exceptionDefined = calls.def(CALLS_EXCEPTION, toStringValue(state.exception));
+    if (!exceptionDefined.success) {
+      return exceptionDefined;
+    }
+    assert(state.exceptionStack instanceof CallStack);
+    const stackDefined = calls.def(CALLS_EXCEPTION_STACK, state.exceptionStack.toValue());
+    if (!stackDefined.success) {
+      return stackDefined;
+    }
+    state.clearException();
+  }
+  const finalBlock = calls.lookup(CALLS_BLOCK);
+  assert(finalBlock.type !== ValueType.null);
+  return calls.push(finalBlock);
+}
+
+function popping(state: IInternalState): Result<unknown> {
+  const { calls } = state;
+  if (state.exception === undefined) {
+    const exception = calls.lookup(CALLS_EXCEPTION);
+    if (exception !== nullValue) {
+      assert(exception.type === ValueType.string);
+      const exceptionStack = calls.lookup(CALLS_EXCEPTION_STACK);
+      assert(exceptionStack.type === ValueType.array);
+      state.raiseException(exception.string as Exception, exceptionStack.array as IReadOnlyCallStack);
+    }
+  }
+  calls.topOperatorState = OPERATOR_STATE_POP;
+  return { success: true, value: undefined };
+}
 
 buildFunctionOperator(
   {
@@ -50,50 +105,14 @@ buildFunctionOperator(
     ]
   },
   (state, codeBlock, finalBlock) => {
-    const { operands, calls } = state;
-    const { topOperatorState } = calls;
+    const { topOperatorState } = state.calls;
     if (topOperatorState === OPERATOR_STATE_FIRST_CALL) {
-      const defined = calls.def(CALLS_BLOCK, finalBlock);
-      if (!defined.success) {
-        return defined;
-      }
-      calls.topOperatorState = OPERATOR_STATE_CALL_BEFORE_POP;
-      const callResult = calls.push(codeBlock);
-      if (callResult.success) {
-        const popushResult = operands.popush(2);
-        assert(popushResult);
-      }
-      return callResult;
+      return firstCall(state, codeBlock, finalBlock);
     }
     if (topOperatorState === OPERATOR_STATE_CALL_BEFORE_POP) {
-      calls.topOperatorState = OPERATOR_STATE_POPPING;
-      if (state.exception) {
-        const exceptionDefined = calls.def(CALLS_EXCEPTION, toStringValue(state.exception));
-        if (!exceptionDefined.success) {
-          return exceptionDefined;
-        }
-        assert(state.exceptionStack instanceof CallStack);
-        const stackDefined = calls.def(CALLS_EXCEPTION_STACK, state.exceptionStack.toValue());
-        if (!stackDefined.success) {
-          return stackDefined;
-        }
-        state.clearException();
-      }
-      const finalBlock = calls.lookup(CALLS_BLOCK);
-      assert(finalBlock.type !== ValueType.null);
-      return calls.push(finalBlock);
+      return callBeforePop(state);
     }
     assert(topOperatorState === OPERATOR_STATE_POPPING);
-    if (state.exception === undefined) {
-      const exception = calls.lookup(CALLS_EXCEPTION);
-      if (exception !== nullValue) {
-        assert(exception.type === ValueType.string);
-        const exceptionStack = calls.lookup(CALLS_EXCEPTION_STACK);
-        assert(exceptionStack.type === ValueType.array);
-        state.raiseException(exception.string as Exception, exceptionStack.array as IReadOnlyCallStack);
-      }
-    }
-    calls.topOperatorState = OPERATOR_STATE_POP;
-    return { success: true, value: undefined };
+    return popping(state);
   }
 );

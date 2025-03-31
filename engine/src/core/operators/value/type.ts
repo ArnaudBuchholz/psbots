@@ -34,9 +34,9 @@ buildFunctionOperator(
   ({ operands, memoryTracker }, value) => {
     assert(memoryTracker instanceof MemoryTracker);
     const { type } = value;
-    const refResult = memoryTracker.addStringRef(type);
-    if (!refResult.success) {
-      return refResult;
+    const referenced = memoryTracker.addStringRef(type);
+    if (!referenced.success) {
+      return referenced;
     }
     const popushResult = operands.popush(1, toNameValue(type, { tracker: memoryTracker }));
     memoryTracker.releaseString(type);

@@ -91,7 +91,7 @@ export function operatorCycle(state: IInternalState, value: Value<ValueType.oper
       return;
     }
     if (
-      calls.length &&
+      calls.length > 0 &&
       calls.top === top &&
       (calls.topOperatorState === OPERATOR_STATE_POP || calls.topOperatorState === OPERATOR_STATE_FIRST_CALL)
     ) {

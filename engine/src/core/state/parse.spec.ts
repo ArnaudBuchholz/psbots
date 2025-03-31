@@ -114,10 +114,10 @@ describe('memory tracker', () => {
 
   it('fails if no more memory', () => {
     state.calls.push(toValue('"abc"', { isExecutable: true }));
-    const addStringRef = vi.spyOn(MemoryTracker.prototype, 'addStringRef');
-    addStringRef.mockImplementation(() => ({ success: false, exception: 'vmOverflow' }));
+    const methodSpy = vi.spyOn(MemoryTracker.prototype, 'addStringRef');
+    methodSpy.mockImplementation(() => ({ success: false, exception: 'vmOverflow' }));
     state.cycle();
-    addStringRef.mockRestore();
+    methodSpy.mockRestore();
     expect(state.exception).toStrictEqual('vmOverflow');
   });
 
