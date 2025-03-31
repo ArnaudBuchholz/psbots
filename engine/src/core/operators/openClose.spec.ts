@@ -7,7 +7,7 @@ import { State } from '@core/state/State.js';
 import { CallStack } from '@core/objects/stacks/CallStack.js';
 import { ValueArray } from '@core/objects/ValueArray.js';
 import { ValueStack } from '@core/objects/stacks/ValueStack.js';
-import { OPERATOR_STATE_ALLOC_ARRAY } from './open-close.js';
+import { OPERATOR_STATE_ALLOC_ARRAY } from './openClose.js';
 
 let state: State;
 

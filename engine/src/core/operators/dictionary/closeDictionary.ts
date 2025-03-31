@@ -3,7 +3,7 @@ import { USER_MEMORY_TYPE, ValueType } from '@api/index.js';
 import { findMarkPos, valuesOf } from '@sdk/index.js';
 import type { IInternalState } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
-import { pushOpenClosedValueWithDebugInfo } from '@core/operators/open-close.js';
+import { pushOpenClosedValueWithDebugInfo } from '@core/operators/openClose.js';
 import { Dictionary } from '@core/objects/dictionaries/Dictionary.js';
 import type { MemoryTracker } from '@core/MemoryTracker.js';
 

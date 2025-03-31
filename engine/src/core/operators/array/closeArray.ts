@@ -1,7 +1,7 @@
 import { ValueType } from '@api/index.js';
 import type { IInternalState } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
-import { closeToMark } from '@core/operators/open-close.js';
+import { closeToMark } from '@core/operators/openClose.js';
 
 buildFunctionOperator(
   {

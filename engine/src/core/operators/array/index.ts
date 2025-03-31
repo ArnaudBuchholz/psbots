@@ -1,3 +1,3 @@
 import './aload.js';
-import './close-array.js';
-import './open-array.js';
+import './closeArray.js';
+import './openArray.js';

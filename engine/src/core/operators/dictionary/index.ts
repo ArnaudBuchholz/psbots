@@ -1,2 +1,2 @@
-import './close-dictionary.js';
-import './open-dictionary.js';
+import './closeDictionary.js';
+import './openDictionary.js';

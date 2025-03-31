@@ -5,6 +5,6 @@ import './dictionary/index.js';
 import './exceptions/index.js';
 import './flow/index.js';
 import './integer/index.js';
-import './open-close.js';
+import './openClose.js';
 import './stacks/index.js';
 import './value/index.js';
