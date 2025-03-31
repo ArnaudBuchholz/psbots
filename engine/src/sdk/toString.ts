@@ -17,7 +17,7 @@ export type ToStringOptions = {
   maxWidth?: number;
 };
 
-function convertPosToLineAndCol(source: string, pos: number): { line: number; col: number } {
+function convertPosToLineAndCol(source: string, pos: number) {
   let line = 1;
   let lastCrIndex = 0;
   let crIndex = source.indexOf('\n');
@@ -31,7 +31,7 @@ function convertPosToLineAndCol(source: string, pos: number): { line: number; co
   return { line, col: pos + 1 };
 }
 
-function minimizeAt(at: string): string {
+function minimizeAt(at: string) {
   const atParts = at.split(/([\\/])/).filter((part) => part.trim());
   if (atParts.length < 3) {
     return at;
@@ -39,7 +39,27 @@ function minimizeAt(at: string): string {
   return '…' + atParts.splice(-2).join('');
 }
 
-function fitToMaxWidth(stringifiedValue: string, at: string | undefined, maxWidth: number): string {
+function centerValue(stringifiedValue: string, maxWidth: number) {
+  const beginMarkerPos = stringifiedValue.indexOf(TOSTRING_BEGIN_MARKER);
+  const endMarkerPos = stringifiedValue.indexOf(TOSTRING_END_MARKER, beginMarkerPos + 1);
+  const markedAreaLength = endMarkerPos - beginMarkerPos + 1;
+  if (beginMarkerPos > -1 && endMarkerPos > -1 && markedAreaLength > 0) {
+    if (maxWidth > markedAreaLength) {
+      let from = beginMarkerPos - Math.ceil((maxWidth - markedAreaLength) / 2);
+      if (from + maxWidth > stringifiedValue.length) {
+        from = stringifiedValue.length - maxWidth + 1;
+      }
+      if (from > 0) {
+        return '…' + stringifiedValue.slice(Math.max(0, from));
+      }
+    } else {
+      return '…' + stringifiedValue.slice(Math.max(0, beginMarkerPos - 1));
+    }
+  }
+  return stringifiedValue;
+}
+
+function fitToMaxWidth(stringifiedValue: string, at: string | undefined, maxWidth: number) {
   let result = at === undefined ? stringifiedValue : `${stringifiedValue}@${at}`;
   if (maxWidth < 1 || result.length <= maxWidth) {
     return result;
@@ -59,22 +79,7 @@ function fitToMaxWidth(stringifiedValue: string, at: string | undefined, maxWidt
     }
   }
 
-  const beginMarkerPos = stringifiedValue.indexOf(TOSTRING_BEGIN_MARKER);
-  const endMarkerPos = stringifiedValue.indexOf(TOSTRING_END_MARKER, beginMarkerPos + 1);
-  const markedAreaLength = endMarkerPos - beginMarkerPos + 1;
-  if (beginMarkerPos > -1 && endMarkerPos > -1 && markedAreaLength > 0) {
-    if (maxWidth > markedAreaLength) {
-      let from = beginMarkerPos - Math.ceil((maxWidth - markedAreaLength) / 2);
-      if (from + maxWidth > stringifiedValue.length) {
-        from = stringifiedValue.length - maxWidth + 1;
-      }
-      if (from > 0) {
-        stringifiedValue = '…' + stringifiedValue.slice(Math.max(0, from));
-      }
-    } else {
-      stringifiedValue = '…' + stringifiedValue.slice(Math.max(0, beginMarkerPos - 1));
-    }
-  }
+  stringifiedValue = centerValue(stringifiedValue, maxWidth);
 
   if (stringifiedValue.length > maxWidth) {
     stringifiedValue = stringifiedValue.slice(0, Math.max(0, maxWidth - 1)) + '…';
