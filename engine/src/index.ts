@@ -14,12 +14,10 @@ export function createState(settings?: StateFactorySettings): Result<IState> {
 }
 
 /** Operators registry */
-export function getOperatorDefinitionRegistry(): { [name in string]: OperatorDefinition } {
-  return Object.entries(registry).reduce(
-    (result, [name, item]) => {
-      result[name] = item.definition;
-      return result;
-    },
-    {} as { [name in string]: OperatorDefinition }
-  );
+export function getOperatorDefinitionRegistry() {
+  const result: { [name in string]: OperatorDefinition } = {};
+  for (const [name, item] of Object.entries(registry)) {
+    result[name] = item.definition;
+  }
+  return result;
 }
