@@ -111,6 +111,7 @@ export function toValue(
   permissions?: Partial<IValuePermissions>
 ): DictionaryValue;
 export function toValue(value: CompatibleValue, permissions?: Partial<IValuePermissions>): Value;
+// eslint-disable-next-line sonarjs/cognitive-complexity -- no value in reducing complexity
 export function toValue(
   value: CompatibleValue,
   { isReadOnly = false, isExecutable = false }: Partial<IValuePermissions> = {}
