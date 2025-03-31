@@ -53,9 +53,9 @@ it('filters out comments', () => {
   ]).toStrictEqual<Value[]>([toValue(789)]);
 });
 
-describe('handling of special characters', () => {
-  const name = (name: string) => toValue(Symbol.for(name), { isExecutable: true });
+const name = (name: string) => toValue(Symbol.for(name), { isExecutable: true });
 
+describe('handling of special characters', () => {
   it('isolates special characters from values (before / after)', () => {
     expect([...parse('[123]')]).toStrictEqual<Value[]>([name('['), toValue(123), name(']')]);
   });

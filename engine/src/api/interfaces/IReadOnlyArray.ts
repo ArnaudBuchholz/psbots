@@ -8,9 +8,9 @@ export interface IReadOnlyArray {
 }
 
 /** Enumerate IReadOnlyArray values */
-export function* enumIArrayValues(iArray: IReadOnlyArray): Generator<Value> {
-  const { length } = iArray;
+export function* enumIArrayValues(array: IReadOnlyArray): Generator<Value> {
+  const { length } = array;
   for (let index = 0; index < length; ++index) {
-    yield iArray.at(index);
+    yield array.at(index);
   }
 }

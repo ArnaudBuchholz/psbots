@@ -31,12 +31,12 @@ function releasePreviousValue(previousValue: Value | undefined): Value {
 
 function _toIReadOnlyArray(values: Value[]): { array: Value[]; iArray: IReadOnlyArray } {
   const array = [...values];
-  array.forEach((value) => {
+  for (const value of array) {
     if (value.tracker) {
       value.tracker.addValueRef(value);
     }
-  });
-  const iArray: IReadOnlyArray = {
+  }
+  const readOnlyArray: IReadOnlyArray = {
     get length() {
       return array.length;
     },
@@ -45,7 +45,7 @@ function _toIReadOnlyArray(values: Value[]): { array: Value[]; iArray: IReadOnly
       return array[index] ?? nullValue;
     }
   };
-  return { array, iArray };
+  return { array, iArray: readOnlyArray };
 }
 
 function toIArray(values: Value[]): IArray {
@@ -69,12 +69,12 @@ function _toIReadOnlyDictionary(mapping: ValueDictionary): {
   iDictionary: IReadOnlyDictionary;
 } {
   const dictionary = { ...mapping };
-  Object.values(dictionary).forEach((value) => {
+  for (const value of Object.values(dictionary)) {
     if (value.tracker) {
       value.tracker.addValueRef(value);
     }
-  });
-  const iDictionary: IReadOnlyDictionary & Partial<IDictionary> = {
+  }
+  const readOnlyDictionary: IReadOnlyDictionary & Partial<IDictionary> = {
     get names() {
       return Object.keys(dictionary);
     },
@@ -83,7 +83,7 @@ function _toIReadOnlyDictionary(mapping: ValueDictionary): {
       return dictionary[name] ?? nullValue;
     }
   };
-  return { dictionary, iDictionary };
+  return { dictionary, iDictionary: readOnlyDictionary };
 }
 
 function toIDictionary(mapping: ValueDictionary): IDictionary {
@@ -170,9 +170,9 @@ export function toValue(
     return value;
   }
   const mapping: { [key in string]: Value } = {};
-  Object.entries(value).forEach(([name, item]) => {
+  for (const [name, item] of Object.entries(value)) {
     mapping[name] = toValue(item, { isReadOnly, isExecutable });
-  });
+  }
   return {
     type: ValueType.dictionary,
     isExecutable: false,

@@ -46,10 +46,7 @@ function checkFlags(
   if (expectedReadOnly !== undefined && isReadOnly !== expectedReadOnly) {
     return false;
   }
-  if (expectedExecutable !== undefined && isExecutable !== expectedExecutable) {
-    return false;
-  }
-  return true;
+  return expectedExecutable === undefined || isExecutable === expectedExecutable;
 }
 
 function is<T extends ValueType>(

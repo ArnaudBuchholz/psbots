@@ -99,6 +99,13 @@ export default [
     }
   },
   {
-    ignores: ['dist/']
+    files: ['**/*.spec.ts'],
+    rules: {
+      'unicorn/consistent-function-scoping': 'off',
+      'sonarjs/no-nested-functions': 'off'
+    }
+  },
+  {
+    ignores: ['dist/', 'coverage/']
   }
 ];

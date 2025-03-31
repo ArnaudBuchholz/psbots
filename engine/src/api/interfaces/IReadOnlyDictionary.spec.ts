@@ -3,16 +3,16 @@ import type { Value } from '@api/index.js';
 import { ValueType, enumIDictionaryValues, convertIDictionaryToObject } from '@api/index.js';
 import { toValue } from '@test/index.js';
 
-const iReadOnlyDictionary = toValue({ a: 1, b: 2, c: '3' }, { isReadOnly: true }).dictionary;
+const readOnlyDictionary = toValue({ a: 1, b: 2, c: '3' }, { isReadOnly: true }).dictionary;
 
 describe('enumIDictionaryValues', () => {
   it('returns a generator', () => {
-    const generator = enumIDictionaryValues(iReadOnlyDictionary);
+    const generator = enumIDictionaryValues(readOnlyDictionary);
     expect(generator.next).toBeInstanceOf(Function);
   });
 
   it('returns all values of the dictionary', () => {
-    expect([...enumIDictionaryValues(iReadOnlyDictionary)]).toStrictEqual<{ name: string; value: Value }[]>([
+    expect([...enumIDictionaryValues(readOnlyDictionary)]).toStrictEqual<{ name: string; value: Value }[]>([
       {
         name: 'a',
         value: {
@@ -49,7 +49,7 @@ describe('enumIDictionaryValues', () => {
 
 describe('convertIDictionaryToObject', () => {
   it('returns an object', () => {
-    expect(convertIDictionaryToObject(iReadOnlyDictionary)).toStrictEqual<{ [key in string]: Value }>({
+    expect(convertIDictionaryToObject(readOnlyDictionary)).toStrictEqual<{ [key in string]: Value }>({
       a: {
         type: ValueType.integer,
         isReadOnly: true,

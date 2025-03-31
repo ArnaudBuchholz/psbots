@@ -70,7 +70,7 @@ describe('memory', () => {
 
   it('handles allocation failure of the increment', () => {
     const tracker = new MemoryTracker({ total: 100 });
-    const creationResult = ValueArray.create(tracker, USER_MEMORY_TYPE, 1, 10000);
+    const creationResult = ValueArray.create(tracker, USER_MEMORY_TYPE, 1, 10_000);
     assert(creationResult);
     const valueArray = creationResult.value;
     valueArray.push(toValue(0));

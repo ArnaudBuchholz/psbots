@@ -10,12 +10,12 @@ await writeFile(
   viteConfig.replace(
     /alias: \{[^}]*}/,
     () => `alias: {
-    ${Object.entries(aliases)
+      ${Object.entries(aliases)
       .map(([alias, [path]]) => {
         const [, relativePath] = path.match(/\.\/(.*)\/\*/);
         return `'${alias.split('/*')[0]}': path('src/${relativePath}')`;
       })
       .join(',\n      ')}
-  }`
+    }`
   )
 );

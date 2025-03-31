@@ -21,11 +21,11 @@ describe('basic conversion', () => {
     expect(toString(nullValue)).toStrictEqual(TOSTRING_NULL);
   });
 
-  [...values.booleans, ...values.negativeIntegers, ...values.positiveIntegers].forEach((value) => {
+  for (const value of [...values.booleans, ...values.negativeIntegers, ...values.positiveIntegers]) {
     it(`converts a primitive value (${stringify(value)})`, () => {
       expect(toString(toValue(value))).toStrictEqual(value.toString());
     });
-  });
+  }
 
   it('converts a non executable string value', () => {
     expect(toString(toValue('Hello World !'))).toStrictEqual('"Hello World !"');

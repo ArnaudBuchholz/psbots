@@ -8,20 +8,20 @@ export interface IReadOnlyDictionary {
 }
 
 /** Enumerate IReadOnlyDictionary values */
-export function* enumIDictionaryValues(iDictionary: IReadOnlyDictionary): Generator<{
+export function* enumIDictionaryValues(dictionary: IReadOnlyDictionary): Generator<{
   name: string;
   value: Value;
 }> {
-  for (const name of iDictionary.names) {
-    const value = iDictionary.lookup(name);
+  for (const name of dictionary.names) {
+    const value = dictionary.lookup(name);
     yield { name, value };
   }
 }
 
 /** Returns an object containing all IReadOnlyDictionary values */
-export function convertIDictionaryToObject(iDictionary: IReadOnlyDictionary): { [key in string]: Value } {
+export function convertIDictionaryToObject(dictionary: IReadOnlyDictionary): { [key in string]: Value } {
   const result: { [key in string]: Value } = {};
-  for (const { name, value } of enumIDictionaryValues(iDictionary)) {
+  for (const { name, value } of enumIDictionaryValues(dictionary)) {
     result[name] = value;
   }
   return result;

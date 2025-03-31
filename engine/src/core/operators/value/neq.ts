@@ -36,11 +36,11 @@ buildFunctionOperator(
   },
   ({ operands }, value1, value2) => {
     let eq: boolean;
-    if (value1.type !== value2.type) {
-      eq = true;
-    } else {
+    if (value1.type === value2.type) {
       const [raw1, raw2] = valuesOf(value1, value2);
       eq = raw1 !== raw2;
+    } else {
+      eq = true;
     }
     return operands.popush(2, toBooleanValue(eq));
   }

@@ -90,9 +90,9 @@ buildFunctionOperator(
       const value = operands.at(operandIndex);
       const nameValue = operands.at(operandIndex + 1);
       const [name] = valuesOf<ValueType.name>(nameValue as NameValue); // checked before
-      const defResult = dictionary.def(name, value);
-      if (!defResult.success) {
-        return defResult;
+      const defined = dictionary.def(name, value);
+      if (!defined.success) {
+        return defined;
       }
     }
     const pushResult = pushOpenClosedValueWithDebugInfo({

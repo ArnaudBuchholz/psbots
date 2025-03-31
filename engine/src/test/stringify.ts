@@ -4,7 +4,7 @@ const stringified = ['π', '-π', '∞', '-∞'];
 
 export function stringify(value: unknown): string {
   if (typeof value === 'function') {
-    return value.toString().replace(/\n/g, '');
+    return value.toString().replaceAll('\n', '');
   }
   if (typeof value === 'bigint') {
     return value.toString() + 'n';

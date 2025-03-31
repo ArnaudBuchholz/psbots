@@ -37,7 +37,11 @@ it('handles four parameters', () => {
   expect(number).toStrictEqual(1);
   expect(string).toStrictEqual('a');
   expect(boolean).toStrictEqual(true);
-  [1, 'a', true].forEach((value, index) => expect(array.at(index)).toStrictEqual(toValue(value)));
+  let index = 0;
+  for (const value of [1, 'a', true]) {
+    expect(array.at(index)).toStrictEqual(toValue(value));
+    ++index;
+  }
 });
 
 it('handles null', () => {
@@ -52,8 +56,8 @@ it('handles mark', () => {
 
 it('handles an operator', () => {
   const [operator] = valuesOf<ValueType.operator>(toValue(values.emptyFunction));
-  expect(operator.name === 'emptyFunction');
-  expect((operator as IFunctionOperator).implementation === values.emptyFunction);
+  expect(operator.name).toStrictEqual('emptyFunction');
+  expect((operator as IFunctionOperator).implementation).toStrictEqual(values.emptyFunction);
 });
 
 it('handles a dictionary', () => {

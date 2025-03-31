@@ -13,7 +13,7 @@ const implementations: { [type in ValueType]?: (container: Value<type>, index: V
         return { success: false, exception: 'typeCheck' };
       }
       const { integer: charCode } = value;
-      if (charCode < 0 || charCode > 65535) {
+      if (charCode < 0 || charCode > 65_535) {
         return { success: false, exception: 'rangeCheck' };
       }
       const posResult = checkPos(index, string.length);
@@ -21,10 +21,12 @@ const implementations: { [type in ValueType]?: (container: Value<type>, index: V
         return posResult;
       }
       const stringResult =
-        string.substring(0, posResult.value) + String.fromCharCode(charCode) + string.substring(posResult.value + 1);
-      const refResult = tracker.addStringRef(stringResult);
-      if (!refResult.success) {
-        return refResult;
+        string.slice(0, Math.max(0, posResult.value)) +
+        String.fromCodePoint(charCode) +
+        string.slice(Math.max(0, posResult.value + 1));
+      const referenced = tracker.addStringRef(stringResult);
+      if (!referenced.success) {
+        return referenced;
       }
       return { success: true, value: toStringValue(stringResult, { tracker }) };
     },
@@ -55,9 +57,9 @@ const implementations: { [type in ValueType]?: (container: Value<type>, index: V
         return { success: false, exception: 'typeCheck' };
       }
       const { name } = index;
-      const defResult = (dictionary as IDictionary).def(name, value);
-      if (!defResult.success) {
-        return defResult;
+      const defined = (dictionary as IDictionary).def(name, value);
+      if (!defined.success) {
+        return defined;
       }
       container.tracker?.addValueRef(container);
       return { success: true, value: container };

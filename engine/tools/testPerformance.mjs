@@ -3,12 +3,8 @@ import { writeFile } from 'node:fs/promises';
 import { createState, getOperatorDefinitionRegistry, ValueType } from '../dist/index.js';
 import { toStringValue } from '../dist/sdk/index.js';
 
-// const red = '\x1b[31m';
-// const green = '\x1b[32m';
 const yellow = '\u001B[33m';
-// const blue = '\x1b[34m';
 const magenta = '\u001B[35m';
-// const cyan = '\x1b[36m';
 const white = '\u001B[37m';
 
 const LOOPS = 500;

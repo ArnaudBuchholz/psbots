@@ -13,9 +13,9 @@ const implementations: { [type in ValueType]?: (container: Value<type>, index: V
       return posResult;
     }
     const stringResult = string.charAt(posResult.value);
-    const refResult = tracker.addStringRef(stringResult);
-    if (!refResult.success) {
-      return refResult;
+    const referenced = tracker.addStringRef(stringResult);
+    if (!referenced.success) {
+      return referenced;
     }
     return { success: true, value: toStringValue(stringResult, { tracker }) };
   },

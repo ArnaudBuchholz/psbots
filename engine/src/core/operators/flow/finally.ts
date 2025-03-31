@@ -53,9 +53,9 @@ buildFunctionOperator(
     const { operands, calls } = state;
     const { topOperatorState } = calls;
     if (topOperatorState === OPERATOR_STATE_FIRST_CALL) {
-      const defResult = calls.def(CALLS_BLOCK, finalBlock);
-      if (!defResult.success) {
-        return defResult;
+      const defined = calls.def(CALLS_BLOCK, finalBlock);
+      if (!defined.success) {
+        return defined;
       }
       calls.topOperatorState = OPERATOR_STATE_CALL_BEFORE_POP;
       const callResult = calls.push(codeBlock);
@@ -68,14 +68,14 @@ buildFunctionOperator(
     if (topOperatorState === OPERATOR_STATE_CALL_BEFORE_POP) {
       calls.topOperatorState = OPERATOR_STATE_POPPING;
       if (state.exception) {
-        const defExceptionResult = calls.def(CALLS_EXCEPTION, toStringValue(state.exception));
-        if (!defExceptionResult.success) {
-          return defExceptionResult;
+        const exceptionDefined = calls.def(CALLS_EXCEPTION, toStringValue(state.exception));
+        if (!exceptionDefined.success) {
+          return exceptionDefined;
         }
         assert(state.exceptionStack instanceof CallStack);
-        const defExceptionStackResult = calls.def(CALLS_EXCEPTION_STACK, state.exceptionStack.toValue());
-        if (!defExceptionStackResult.success) {
-          return defExceptionStackResult;
+        const stackDefined = calls.def(CALLS_EXCEPTION_STACK, state.exceptionStack.toValue());
+        if (!stackDefined.success) {
+          return stackDefined;
         }
         state.clearException();
       }

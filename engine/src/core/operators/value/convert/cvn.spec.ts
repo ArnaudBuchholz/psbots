@@ -9,16 +9,16 @@ it('fails when no more memory is available', async () => {
   const stateResult = State.create();
   assert(stateResult);
   const { value: state } = stateResult;
-  const originalAddStringRef = MemoryTracker.prototype.addStringRef;
-  const addStringRef = vi.spyOn(MemoryTracker.prototype, 'addStringRef');
-  addStringRef.mockImplementation(function (this: MemoryTracker, string) {
+  const originalMethod = MemoryTracker.prototype.addStringRef;
+  const methodSpy = vi.spyOn(MemoryTracker.prototype, 'addStringRef');
+  methodSpy.mockImplementation(function (this: MemoryTracker, string) {
     if (string.startsWith('@psbots/engine')) {
       return { success: false, exception: 'vmOverflow' };
     }
-    return originalAddStringRef.call(this, string);
+    return originalMethod.call(this, string);
   });
   // version is an untracked string !
   await waitForExec(state.exec(toValue('version cvn', { isExecutable: true })));
-  addStringRef.mockRestore();
+  methodSpy.mockRestore();
   expect(state.exception).toStrictEqual<Exception>('vmOverflow');
 });

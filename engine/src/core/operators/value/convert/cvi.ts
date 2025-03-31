@@ -39,7 +39,7 @@ buildFunctionOperator(
   ({ operands }, value: Value) => {
     if (value.type !== ValueType.integer) {
       if (value.type === ValueType.string) {
-        const integer = parseInt(value.string, 10);
+        const integer = Number.parseInt(value.string, 10);
         const integerValueResult = toIntegerValue(integer);
         if (!integerValueResult.success) {
           return integerValueResult;

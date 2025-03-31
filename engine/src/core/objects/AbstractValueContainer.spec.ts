@@ -88,7 +88,7 @@ describe('toValue', () => {
 describe('memory', () => {
   it('handles initial allocation failure', () => {
     const tracker = new MemoryTracker({ total: 1 });
-    const result = TestValueArray.create(tracker, USER_MEMORY_TYPE, 10000, 10);
+    const result = TestValueArray.create(tracker, USER_MEMORY_TYPE, 10_000, 10);
     expect(result).toStrictEqual<Result<TestValueArray>>({ success: false, exception: 'vmOverflow' });
   });
 
@@ -141,7 +141,7 @@ describe('memory', () => {
     describe('going beyond initial capacity', () => {
       it('handles allocation failure of the increment', () => {
         const tracker = new MemoryTracker({ total: 100 });
-        const result = TestValueArray.create(tracker, USER_MEMORY_TYPE, 1, 10000);
+        const result = TestValueArray.create(tracker, USER_MEMORY_TYPE, 1, 10_000);
         assert(result);
         const valueArray = result.value;
         valueArray.push(toValue(0));

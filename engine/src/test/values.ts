@@ -3,8 +3,8 @@ const negativeIntegers = [-1, -10, -100];
 const positiveFloats = [0.5, Math.PI];
 const negativeFloats = [-0.5, -Math.PI];
 
-const positiveBigints = positiveIntegers.map((i) => BigInt(i));
-const negativeBigints = negativeIntegers.map((i) => BigInt(i));
+const positiveBigints = positiveIntegers.map(BigInt);
+const negativeBigints = negativeIntegers.map(BigInt);
 
 const emptyFunction = function (): void {};
 const emptyArrow = (): void => {};

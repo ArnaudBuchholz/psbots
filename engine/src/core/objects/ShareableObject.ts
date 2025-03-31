@@ -20,7 +20,7 @@ export abstract class ShareableObject {
 
   private _refCount: number;
 
-  static tracker: IValueTracker = {
+  static readonly tracker: IValueTracker = {
     addValueRef(value) {
       getShareableObject(value).addRef();
     },
@@ -34,6 +34,7 @@ export abstract class ShareableObject {
     this._refCount = 1;
   }
 
+  // TODO: rename to referenceCount
   get refCount(): number {
     return this._refCount;
   }
@@ -43,12 +44,12 @@ export abstract class ShareableObject {
   }
 
   release(): boolean {
-    const refCount = --this._refCount;
-    if (refCount === 0) {
+    const referenceCount = --this._refCount;
+    if (referenceCount === 0) {
       this._dispose();
       return false;
     }
-    assert(refCount > 0, 'Superfluous release');
+    assert(referenceCount > 0, 'Superfluous release');
     return true;
   }
 

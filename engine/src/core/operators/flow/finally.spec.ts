@@ -36,13 +36,13 @@ describe('error handling', () => {
   });
 
   it('fails if not able to store mark position in stack', () => {
-    const def = vi.spyOn(CallStack.prototype, 'def');
-    def.mockImplementation(() => ({ success: false, exception: 'limitcheck' }));
+    const methodSpy = vi.spyOn(CallStack.prototype, 'def');
+    methodSpy.mockImplementation(() => ({ success: false, exception: 'limitcheck' }));
     run.next();
     expect(state.exception).toStrictEqual<Exception>('limitcheck');
     expect(state.calls.operatorStateAt(0)).toStrictEqual(OPERATOR_STATE_FIRST_CALL);
     expect(state.operands.length).toStrictEqual(2);
-    def.mockRestore();
+    methodSpy.mockRestore();
   });
 
   it('fails if not able to add the code block to stack', () => {
@@ -64,21 +64,21 @@ describe('error handling', () => {
     });
 
     it('fails if not able to store exception in stack', () => {
-      const def = vi.spyOn(CallStack.prototype, 'def');
-      def.mockImplementation(() => ({ success: false, exception: 'limitcheck' }));
+      const methodSpy = vi.spyOn(CallStack.prototype, 'def');
+      methodSpy.mockImplementation(() => ({ success: false, exception: 'limitcheck' }));
       run.next();
       expect(state.exception).toStrictEqual<Exception>('limitcheck');
       expect(state.calls.operatorStateAt(0)).toStrictEqual(OPERATOR_STATE_POPPING);
       expect(state.operands.length).toStrictEqual(0);
-      def.mockRestore();
+      methodSpy.mockRestore();
     });
 
     it('fails if not able to store exception stack in stack', () => {
-      const originalDef = CallStack.prototype.def;
-      const def = vi.spyOn(CallStack.prototype, 'def');
-      def.mockImplementation(function (this: CallStack, name, value) {
+      const originalMethod = CallStack.prototype.def;
+      const methodSpy = vi.spyOn(CallStack.prototype, 'def');
+      methodSpy.mockImplementation(function (this: CallStack, name, value) {
         if (name === CALLS_EXCEPTION) {
-          return originalDef.call(this, name, value);
+          return originalMethod.call(this, name, value);
         }
         return { success: false, exception: 'limitcheck' };
       });
@@ -86,7 +86,7 @@ describe('error handling', () => {
       expect(state.exception).toStrictEqual<Exception>('limitcheck');
       expect(state.calls.operatorStateAt(0)).toStrictEqual(OPERATOR_STATE_POPPING);
       expect(state.operands.length).toStrictEqual(0);
-      def.mockRestore();
+      methodSpy.mockRestore();
     });
   });
 });

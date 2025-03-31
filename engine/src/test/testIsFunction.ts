@@ -10,6 +10,10 @@ export function testIsFunction<T>({
   valid: T[];
   invalid: unknown[];
 }): void {
-  valid.forEach((value) => it(`validates ${stringify(value)}`, () => expect(is(value)).toStrictEqual(true)));
-  invalid.forEach((value) => it(`rejects ${stringify(value)}`, () => expect(is(value)).toStrictEqual(false)));
+  for (const value of valid) {
+    it(`validates ${stringify(value)}`, () => expect(is(value)).toStrictEqual(true));
+  }
+  for (const value of invalid) {
+    it(`rejects ${stringify(value)}`, () => expect(is(value)).toStrictEqual(false));
+  }
 }

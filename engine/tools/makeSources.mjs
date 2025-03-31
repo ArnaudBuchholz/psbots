@@ -113,7 +113,7 @@ async function checkSources(path) {
     } else {
       const source = await readFile(fullPath, 'utf8');
       const lines = [];
-      source.replaceAll(/import (?:type )?\{[^}]+\} from '((?:@|\.)[^']+)';/g, (line, source_) => {
+      source.replaceAll(/import (?:type )?\{[^}]+\} from '((?:[@.])[^']+)';/g, (line, source_) => {
         if (!source_.endsWith('.js')) {
           lines.push(line);
         }

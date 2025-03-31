@@ -39,11 +39,11 @@ describe('MemorySize', () => {
     { a: { pointers: 1 }, b: { pointers: 2 }, total: 3 * POINTER_BYTES },
     { a: { values: 1 }, b: { values: 2 }, total: 3 * VALUE_BYTES }
   ];
-  tests.forEach(({ a, b, total }) => {
+  for (const { a, b, total } of tests) {
     it(`${JSON.stringify(a)} + ${JSON.stringify(b)} = ${total}`, () => {
       expect(memorySizeToBytes(addMemorySize(a, b))).toStrictEqual(total);
     });
-  });
+  }
 });
 
 describe('tracking', () => {

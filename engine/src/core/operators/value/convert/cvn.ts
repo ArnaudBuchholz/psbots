@@ -29,9 +29,9 @@ buildFunctionOperator(
   },
   ({ operands, memoryTracker }, { string }) => {
     assert(memoryTracker instanceof MemoryTracker);
-    const refResult = memoryTracker.addStringRef(string); // might be untracked
-    if (!refResult.success) {
-      return refResult;
+    const referenced = memoryTracker.addStringRef(string); // might be untracked
+    if (!referenced.success) {
+      return referenced;
     }
     const popushResult = operands.popush(1, toNameValue(string, { tracker: memoryTracker }));
     memoryTracker.releaseString(string);

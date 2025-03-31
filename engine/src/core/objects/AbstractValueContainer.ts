@@ -162,10 +162,8 @@ export abstract class AbstractValueContainer extends ShareableObject implements 
 
   private _pop(): Value {
     let value = this.popImpl();
-    if (value.type !== ValueType.null) {
-      if (value.tracker?.releaseValue(value) === false) {
-        value = nullValue;
-      }
+    if (value.type !== ValueType.null && value.tracker?.releaseValue(value) === false) {
+      value = nullValue;
     }
     return value;
   }
@@ -183,9 +181,9 @@ export abstract class AbstractValueContainer extends ShareableObject implements 
     const { capacity } = this;
     let arrayOfValues: Value[];
     if (Array.isArray(valueOrArray)) {
-      arrayOfValues = valueOrArray.concat(values);
+      arrayOfValues = [...valueOrArray, ...values];
     } else if (valueOrArray) {
-      arrayOfValues = [valueOrArray].concat(values);
+      arrayOfValues = [valueOrArray, ...values];
     } else {
       arrayOfValues = [];
     }

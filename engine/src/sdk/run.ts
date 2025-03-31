@@ -1,11 +1,11 @@
 import type { Result } from '@api/index.js';
 import { assert } from '@sdk/assert.js';
 
-const DEFAULT_MAX_ITERATIONS = 1_000;
+const DEFAULT_MAX_ITERATIONS = 1000;
 
 type RunOptions = {
-  /** Defaulted to 1_000, can be set to Number.POSITIVE_INFINITY but at your own risks */
-  maxIterations?: number
+  /** Defaulted to 1000, can be set to Number.POSITIVE_INFINITY but at your own risks */
+  maxIterations?: number;
   // TODO: throw on error ?
 };
 

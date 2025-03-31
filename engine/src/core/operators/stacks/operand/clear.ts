@@ -13,7 +13,7 @@ buildFunctionOperator(
     ]
   },
   ({ operands }) => {
-    while (operands.length) {
+    while (operands.length > 0) {
       operands.pop();
     }
   }

@@ -20,9 +20,9 @@ it('forwards Dictionary::def error', async () => {
   const stateResult = State.create();
   assert(stateResult);
   const { value: state } = stateResult;
-  const dictDef = vi.spyOn(Dictionary.prototype, 'def');
-  dictDef.mockImplementation(() => ({ success: false, exception: 'limitcheck' }));
+  const methodSpy = vi.spyOn(Dictionary.prototype, 'def');
+  methodSpy.mockImplementation(() => ({ success: false, exception: 'limitcheck' }));
   await waitForExec(state.exec(toValue('<< /a 1 >>', { isExecutable: true })));
-  dictDef.mockRestore();
+  methodSpy.mockRestore();
   expect(state.exception).toStrictEqual<Exception>('limitcheck');
 });

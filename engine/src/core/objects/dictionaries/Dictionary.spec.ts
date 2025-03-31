@@ -9,7 +9,7 @@ import { ShareableObject } from '../ShareableObject.js';
 
 let tracker: MemoryTracker;
 let dictionary: Dictionary;
-let refTrackerUsed: number;
+let trackerInitialUsed: number;
 let shared: ReturnType<typeof toValue.createSharedObject>;
 
 describe('IDictionary', () => {
@@ -24,7 +24,7 @@ describe('IDictionary', () => {
     dictionary.def('shared', shared.value);
     expect(shared.object.refCount).toStrictEqual(2);
     shared.object.release();
-    refTrackerUsed = tracker.used;
+    trackerInitialUsed = tracker.used;
   });
 
   afterEach(() => {
@@ -62,7 +62,7 @@ describe('IDictionary', () => {
   });
 
   it('tracks memory used', () => {
-    expect(refTrackerUsed).not.toStrictEqual(0);
+    expect(trackerInitialUsed).not.toStrictEqual(0);
   });
 
   it('offers list of names', () => {
@@ -81,7 +81,7 @@ describe('IDictionary', () => {
     expect(dictionary.def('value2', toValue(3))).toStrictEqual<Result<Value>>({ success: true, value: toValue(2) });
     expect(dictionary.lookup('value2')).toStrictEqual<Value>(toValue(3));
     // Same name (and simple value) does not increase memory
-    expect(tracker.used).toStrictEqual(refTrackerUsed);
+    expect(tracker.used).toStrictEqual(trackerInitialUsed);
   });
 
   it('allows the override of a named value (shareable, not released)', () => {
@@ -106,7 +106,7 @@ describe('IDictionary', () => {
   it('allows new values', () => {
     expect(dictionary.def('new_value', toValue(3))).toStrictEqual<Result<Value>>({ success: true, value: nullValue });
     expect(dictionary.lookup('new_value')).toStrictEqual<Value>(toValue(3));
-    expect(tracker.used).toBeGreaterThan(refTrackerUsed);
+    expect(tracker.used).toBeGreaterThan(trackerInitialUsed);
     expect(dictionary.names).toStrictEqual<string[]>(['value1', 'value2', 'shared', 'new_value']);
   });
 });
@@ -120,25 +120,25 @@ describe('Memory handling', () => {
 
   it('fails key creation on memory failure (key too big)', () => {
     tracker = new MemoryTracker({ total: 10 });
-    const result = Dictionary.create(tracker, USER_MEMORY_TYPE, 0);
-    assert(result);
-    dictionary = result.value;
-    const defResult = dictionary.def(''.padEnd(200, 'a'), toValue(1));
-    expect(defResult.success).toStrictEqual(false);
+    const dictionaryCreated = Dictionary.create(tracker, USER_MEMORY_TYPE, 0);
+    assert(dictionaryCreated);
+    dictionary = dictionaryCreated.value;
+    const result = dictionary.def(''.padEnd(200, 'a'), toValue(1));
+    expect(result.success).toStrictEqual(false);
   });
 
   it('fails key creation on memory failure (no more memory for slot)', () => {
     tracker = new MemoryTracker({ total: 19 });
-    const result = Dictionary.create(tracker, USER_MEMORY_TYPE, 0);
-    assert(result);
-    dictionary = result.value;
+    const dictionaryCreated = Dictionary.create(tracker, USER_MEMORY_TYPE, 0);
+    assert(dictionaryCreated);
+    dictionary = dictionaryCreated.value;
     assert(tracker.addStringRef('value1'));
-    const defResult = dictionary.def('value1', toValue(1));
-    expect(defResult.success).toStrictEqual(false);
+    const result = dictionary.def('value1', toValue(1));
+    expect(result.success).toStrictEqual(false);
   });
 
   describe('Creation with initial capacity', () => {
-    let refTrackerInit: number;
+    let trackerMemoryBeforeDictionaryCreation: number;
 
     beforeEach(() => {
       tracker = new MemoryTracker();
@@ -146,34 +146,34 @@ describe('Memory handling', () => {
       tracker.addStringRef('value1');
       tracker.addStringRef('value2');
       tracker.addStringRef('value3');
-      refTrackerInit = tracker.used;
+      trackerMemoryBeforeDictionaryCreation = tracker.used;
       const result = Dictionary.create(tracker, USER_MEMORY_TYPE, 2);
       assert(result);
       dictionary = result.value;
-      refTrackerUsed = tracker.used;
+      trackerInitialUsed = tracker.used;
     });
 
     afterEach(() => {
       expect(dictionary.release()).toStrictEqual(false);
-      expect(tracker.used).toStrictEqual(refTrackerInit);
+      expect(tracker.used).toStrictEqual(trackerMemoryBeforeDictionaryCreation);
     });
 
     it('does not allocate memory when filling pre-allocated slots (1)', () => {
       dictionary.def('value1', toValue(1));
-      expect(tracker.used).toStrictEqual(refTrackerUsed);
+      expect(tracker.used).toStrictEqual(trackerInitialUsed);
     });
 
     it('does not allocate memory when filling pre-allocated slots (2)', () => {
       dictionary.def('value1', toValue(1));
       dictionary.def('value2', toValue(2));
-      expect(tracker.used).toStrictEqual(refTrackerUsed);
+      expect(tracker.used).toStrictEqual(trackerInitialUsed);
     });
 
     it('does not allocate memory when filling pre-allocated slots (2 and replacing one)', () => {
       dictionary.def('value1', toValue(1));
       dictionary.def('value2', toValue(2));
       dictionary.def('value2', toValue(3));
-      expect(tracker.used).toStrictEqual(refTrackerUsed);
+      expect(tracker.used).toStrictEqual(trackerInitialUsed);
     });
 
     it('handles emptied slots (pre-allocated)', () => {

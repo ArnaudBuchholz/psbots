@@ -86,7 +86,7 @@ export function buildFunctionOperator(
     value
   };
   if (definition.aliases) {
-    definition.aliases.forEach((alias) => {
+    for (const alias of definition.aliases) {
       registry[alias] = {
         definition,
         value: {
@@ -97,7 +97,7 @@ export function buildFunctionOperator(
           }
         }
       };
-    });
+    }
   }
   return value;
 }

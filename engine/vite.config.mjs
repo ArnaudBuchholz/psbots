@@ -1,16 +1,16 @@
 import { defineConfig, configDefaults } from 'vitest/config';
 import { fileURLToPath, URL } from 'node:url';
 
-const path = (rel) => fileURLToPath(new URL(`./${rel}`, import.meta.url));
+const path = (relative) => fileURLToPath(new URL(relative, import.meta.url));
 
 export default defineConfig({
   resolve: {
     alias: {
-    '@api': path('src/api'),
+      '@api': path('src/api'),
       '@sdk': path('src/sdk'),
       '@core': path('src/core'),
       '@test': path('src/test')
-  }
+    }
   },
   test: {
     poolOptions: {
@@ -19,13 +19,14 @@ export default defineConfig({
           '--disable-proto=throw',
           // '--permission',
           '--throw-deprecation'
-        ],
+        ]
       }
-    },    
+    },
     exclude: [...configDefaults.exclude],
     coverage: {
       exclude: [
         'dist/**',
+        'eslint.config.mjs',
         'vite.config.mjs',
         'src/**/*.spec.ts',
         'src/**/index.ts',

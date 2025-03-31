@@ -5,12 +5,22 @@ import type { MemoryPointer, MemorySize, MemoryTracker } from '@core/MemoryTrack
 import { ShareableObject } from '@core/objects/ShareableObject.js';
 import { assert } from '@sdk/index.js';
 
+type ValueSlot = {
+  /** Value stored in the slot */
+  value: Value;
+  /** Memory block for this slot */
+  pointer: MemoryPointer;
+  // next slot pointer
+  // name pointer
+};
+
 /**
  * IDictionary implementation
  *
  * NOTE about memory management :
- * When the dictionary is created with an initial capacity but the initial keys are removed afterward,
+ * When the dictionary is created with an initial capacity and the initial keys are removed afterward,
  * the allocated memory is not freed or reclaimed. It will be released only when the object is destroyed.
+ * Any key allocated beyond initial capacity is allocated and released one by one.
  */
 export class Dictionary extends ShareableObject implements IDictionary {
   /** returned value is not addValueRef'ed */
@@ -26,7 +36,7 @@ export class Dictionary extends ShareableObject implements IDictionary {
   }
 
   private readonly _pointer: MemoryPointer;
-  private readonly _slots: { [key in string]: { value: Value; pointer: MemoryPointer } } = {};
+  private readonly _slots: { [key in string]: ValueSlot } = {};
 
   private constructor(
     private readonly _memoryTracker: MemoryTracker,
@@ -45,7 +55,7 @@ export class Dictionary extends ShareableObject implements IDictionary {
 
   static getSize(initialCapacity: number): MemorySize {
     return addMemorySize(ShareableObject.size, {
-      pointers: 1 + initialCapacity,
+      pointers: 1 + 2 * initialCapacity,
       values: initialCapacity
     });
   }
@@ -75,14 +85,49 @@ export class Dictionary extends ShareableObject implements IDictionary {
 
   // region IDictionary
 
-  private _checkCapacityUsage() {
-    let capacity: number = 0;
+  private _checkInitialCapacityUsage() {
+    let capacity = 0;
     for (const slot of Object.values(this._slots)) {
       if (slot.pointer === this._pointer) {
         ++capacity;
       }
     }
     return capacity;
+  }
+
+  private _getNewValueSlot(name: string): Result<ValueSlot> {
+    const isMemoryAvailableForName = this._memoryTracker.addStringRef(name);
+    if (!isMemoryAvailableForName.success) {
+      return isMemoryAvailableForName;
+    }
+    if (this._checkInitialCapacityUsage() < this._initialCapacity) {
+      return {
+        success: true,
+        value: {
+          value: nullValue,
+          pointer: this._pointer
+        }
+      };
+    }
+    const isMemoryAvailableForSlot = this._memoryTracker.allocate(
+      {
+        values: 1,
+        pointers: 3 /* MemoryPointer, chained slote, name */
+      },
+      this._memoryType,
+      this
+    );
+    if (!isMemoryAvailableForSlot.success) {
+      this._memoryTracker.releaseString(name);
+      return isMemoryAvailableForSlot;
+    }
+    return {
+      success: true,
+      value: {
+        value: nullValue,
+        pointer: isMemoryAvailableForSlot.value
+      }
+    };
   }
 
   def(name: string, value: Value): Result<Value> {
@@ -101,38 +146,16 @@ export class Dictionary extends ShareableObject implements IDictionary {
         return { success: true, value: previousValue };
       }
     } else if (value.type !== ValueType.null) {
-      const isMemoryAvailableForName = this._memoryTracker.addStringRef(name);
-      if (!isMemoryAvailableForName.success) {
-        return isMemoryAvailableForName;
+      const slotAllocated = this._getNewValueSlot(name);
+      if (!slotAllocated.success) {
+        return slotAllocated;
       }
-      if (this._checkCapacityUsage() < this._initialCapacity) {
-        slot = {
-          value: nullValue,
-          pointer: this._pointer
-        };
-      } else {
-        const isMemoryAvailableForSlot = this._memoryTracker.allocate(
-          {
-            values: 1,
-            pointers: 3
-          },
-          this._memoryType,
-          this
-        );
-        if (!isMemoryAvailableForSlot.success) {
-          this._memoryTracker.releaseString(name);
-          return isMemoryAvailableForSlot;
-        }
-        slot = {
-          value: nullValue,
-          pointer: isMemoryAvailableForSlot.value
-        };
-      }
+      slot = slotAllocated.value;
     }
     assert(slot !== undefined);
     slot.value = value;
     value.tracker?.addValueRef(value);
-    this._slots[name] = slot; // should not be undefined
+    this._slots[name] = slot;
     return { success: true, value: previousValue };
   }
 

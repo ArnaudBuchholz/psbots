@@ -32,7 +32,7 @@ function convertPosToLineAndCol(source: string, pos: number): { line: number; co
 }
 
 function minimizeAt(at: string): string {
-  const atParts = at.split(/(\\|\/)/).filter((part) => part.trim());
+  const atParts = at.split(/([\\/])/).filter((part) => part.trim());
   if (atParts.length < 3) {
     return at;
   }
@@ -40,12 +40,7 @@ function minimizeAt(at: string): string {
 }
 
 function fitToMaxWidth(stringifiedValue: string, at: string | undefined, maxWidth: number): string {
-  let result: string;
-  if (at !== undefined) {
-    result = `${stringifiedValue}@${at}`;
-  } else {
-    result = stringifiedValue;
-  }
+  let result = at === undefined ? stringifiedValue : `${stringifiedValue}@${at}`;
   if (maxWidth < 1 || result.length <= maxWidth) {
     return result;
   }
@@ -74,15 +69,15 @@ function fitToMaxWidth(stringifiedValue: string, at: string | undefined, maxWidt
         from = stringifiedValue.length - maxWidth + 1;
       }
       if (from > 0) {
-        stringifiedValue = '…' + stringifiedValue.substring(from);
+        stringifiedValue = '…' + stringifiedValue.slice(Math.max(0, from));
       }
     } else {
-      stringifiedValue = '…' + stringifiedValue.substring(beginMarkerPos - 1);
+      stringifiedValue = '…' + stringifiedValue.slice(Math.max(0, beginMarkerPos - 1));
     }
   }
 
   if (stringifiedValue.length > maxWidth) {
-    stringifiedValue = stringifiedValue.substring(0, maxWidth - 1) + '…';
+    stringifiedValue = stringifiedValue.slice(0, Math.max(0, maxWidth - 1)) + '…';
   }
   if (minimizedAt) {
     return `${stringifiedValue}${minimizedAt}`;
@@ -117,11 +112,11 @@ const implementations: { [type in ValueType]: (container: Value<type>, options: 
         const length = token?.debugSource?.length;
         if (length !== undefined) {
           stringified =
-            string.substring(0, operatorState) +
+            string.slice(0, Math.max(0, operatorState)) +
             TOSTRING_BEGIN_MARKER +
-            string.substring(operatorState, operatorState + length) +
+            string.slice(operatorState, operatorState + length) +
             TOSTRING_END_MARKER +
-            string.substring(operatorState + length);
+            string.slice(Math.max(0, operatorState + length));
         }
       }
       if (!stringified) {
@@ -133,7 +128,7 @@ const implementations: { [type in ValueType]: (container: Value<type>, options: 
     return decorate(stringified, debugSource, options);
   },
   [ValueType.name]: ({ isExecutable, name, debugSource }, options) => {
-    let stringified: string = name.replace(/ /g, '␣');
+    let stringified: string = name.replaceAll(' ', '␣');
     if (!isExecutable) {
       stringified = `/${stringified}`;
     }

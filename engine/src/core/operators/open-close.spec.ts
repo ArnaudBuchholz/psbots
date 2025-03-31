@@ -64,13 +64,13 @@ describe('error handling', () => {
   });
 
   it('fails if not able to store mark position in stack', () => {
-    const def = vi.spyOn(CallStack.prototype, 'def');
-    def.mockImplementation(() => ({ success: false, exception: 'limitcheck' }));
+    const methodSpy = vi.spyOn(CallStack.prototype, 'def');
+    methodSpy.mockImplementation(() => ({ success: false, exception: 'limitcheck' }));
     run.next();
     expect(state.exception).toStrictEqual<Exception>('limitcheck');
     // Reset operator state
     expect(state.calls.operatorStateAt(0)).toStrictEqual(OPERATOR_STATE_FIRST_CALL);
-    def.mockRestore();
+    methodSpy.mockRestore();
   });
 
   describe('OPERATOR_STATE_ALLOC_ARRAY', () => {
@@ -89,13 +89,13 @@ describe('error handling', () => {
     });
 
     it('fails if not able to store array in stack', () => {
-      const def = vi.spyOn(CallStack.prototype, 'def');
-      def.mockImplementation(() => ({ success: false, exception: 'limitcheck' }));
+      const methodSpy = vi.spyOn(CallStack.prototype, 'def');
+      methodSpy.mockImplementation(() => ({ success: false, exception: 'limitcheck' }));
       run.next();
       expect(state.exception).toStrictEqual<Exception>('limitcheck');
       // Reset operator state
       expect(state.calls.operatorStateAt(0)).toStrictEqual(OPERATOR_STATE_ALLOC_ARRAY);
-      def.mockRestore();
+      methodSpy.mockRestore();
     });
   });
 

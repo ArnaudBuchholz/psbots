@@ -25,9 +25,9 @@ buildFunctionOperator(
       return { success: false, exception: 'invalidAccess' };
     }
     const { dictionary } = dictionaries.top;
-    const defResult = dictionary.def(name, value);
-    if (!defResult.success) {
-      return defResult;
+    const defined = dictionary.def(name, value);
+    if (!defined.success) {
+      return defined;
     }
     return operands.popush(2);
   }

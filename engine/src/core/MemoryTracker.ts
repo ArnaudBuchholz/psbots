@@ -132,31 +132,33 @@ export class MemoryTracker implements IValueTracker, IMemoryTracker {
     if (this._byContainers && container !== this /* exclude strings */) {
       let containerRegisters = this._byContainers.get(container);
       if (containerRegisters === undefined) {
-        const containerRef = new WeakRef(container);
+        const containerWeakReference = new WeakRef(container);
         containerRegisters = {
-          container: containerRef,
+          container: containerWeakReference,
           type,
           total: 0,
           calls: []
         };
-        this._containers.push(containerRef);
+        this._containers.push(containerWeakReference);
         this._byContainers.set(container, containerRegisters);
       }
       assert(containerRegisters.type === type, 'Unexpected memory type change', { bytes, type, container });
       containerRegisters.total += bytes;
       assert(containerRegisters.total >= 0, 'Invalid memory registration', { bytes, type, container });
-      if (containerRegisters.total !== 0) {
-        let stack: string | undefined;
-        try {
-          throw new Error(); // Capture call stack
-        } catch (e) {
-          stack = (e as Error).stack;
-        }
-        containerRegisters.calls.push({ bytes, type, stack });
-      } else {
-        const index = this._containers.findIndex((containerRef) => containerRef.deref() === container);
+      if (containerRegisters.total === 0) {
+        const index = this._containers.findIndex(
+          (containerWeakReference) => containerWeakReference.deref() === container
+        );
         this._containers.splice(index, 1);
         this._byContainers.delete(container);
+      } else {
+        let stack: string | undefined;
+        try {
+          throw new Error('Capture call stack');
+        } catch (error) {
+          stack = (error as Error).stack;
+        }
+        containerRegisters.calls.push({ bytes, type, stack });
       }
     }
     return { success: true, value: undefined };
@@ -164,8 +166,8 @@ export class MemoryTracker implements IValueTracker, IMemoryTracker {
 
   *enumContainersAllocations(): Generator<ContainerRegisters> {
     if (this._byContainers !== undefined) {
-      for (const containerRef of this._containers) {
-        yield this._byContainers.get(containerRef.deref()!)!;
+      for (const containerWeakReference of this._containers) {
+        yield this._byContainers.get(containerWeakReference.deref()!)!;
       }
     }
   }
@@ -174,8 +176,8 @@ export class MemoryTracker implements IValueTracker, IMemoryTracker {
 
   /** returns the number of reference count */
   addStringRef(string: string): Result<number> {
-    let refCount = this._strings.get(string) ?? 0;
-    if (refCount === 0) {
+    let referenceCount = this._strings.get(string) ?? 0;
+    if (referenceCount === 0) {
       const size = stringSizer(string);
       const isMemoryAvailable = this.register(
         memorySizeToBytes({
@@ -189,14 +191,14 @@ export class MemoryTracker implements IValueTracker, IMemoryTracker {
         return isMemoryAvailable;
       }
     }
-    this._strings.set(string, ++refCount);
-    return { success: true, value: refCount };
+    this._strings.set(string, ++referenceCount);
+    return { success: true, value: referenceCount };
   }
 
   public releaseString(string: string): boolean {
-    const refCount = this._strings.get(string);
-    assert(refCount !== undefined, 'Unable to release string as it is not referenced', string);
-    if (refCount === 1) {
+    const referenceCount = this._strings.get(string);
+    assert(referenceCount !== undefined, 'Unable to release string as it is not referenced', string);
+    if (referenceCount === 1) {
       const size = stringSizer(string);
       this.release(
         {
@@ -212,7 +214,7 @@ export class MemoryTracker implements IValueTracker, IMemoryTracker {
       this._strings.delete(string);
       return false;
     }
-    this._strings.set(string, refCount - 1);
+    this._strings.set(string, referenceCount - 1);
     return true;
   }
 
