@@ -6,7 +6,6 @@ import {
   OPERATOR_STATE_POP,
   OPERATOR_STATE_UNKNOWN
 } from '@sdk/interfaces/ICallStack.js';
-import { a } from 'vitest/dist/chunks/suite.d.FvehnV49.js';
 
 export const TOSTRING_NULL = '␀';
 export const TOSTRING_BEGIN_MARKER = '▻';
@@ -35,7 +34,7 @@ function convertPosToLineAndCol(source: string, pos: number) {
 function minimizeAt(at: string) {
   const lastForwardSlash = at.lastIndexOf('/');
   const lastBackwardSlash = at.lastIndexOf('\\');
-  const lastSlash = lastForwardSlash > lastBackwardSlash ? lastForwardSlash : lastBackwardSlash;
+  const lastSlash = Math.max(lastForwardSlash, lastBackwardSlash);
   if (lastSlash === -1) {
     return at;
   }
