@@ -21,6 +21,30 @@ export default [
     }
   },
   {
+    ignores: ['**/*.mjs', '**/*.spec.ts'],
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: 'Literal[regex]',
+          message: 'Regular expressions are not allowed'
+        },
+        {
+          selector: "NewExpression[callee.name='RegExp']",
+          message: 'Regular expressions are not allowed'
+        },
+        {
+          selector: "CallExpression[callee.name='setTimeout']",
+          message: 'setTimeout calls are not allowed'
+        },
+        {
+          selector: "CallExpression[callee.name='setInterval']",
+          message: 'setInterval calls are not allowed'
+        }
+      ]
+    }
+  },
+  {
     files: ['**/*.mjs'],
     languageOptions: {
       globals: {
