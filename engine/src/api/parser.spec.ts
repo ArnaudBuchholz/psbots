@@ -32,7 +32,7 @@ it('extracts a name', () => {
 });
 
 it('should include debugging information', () => {
-  expect([...parse('"test"', 0, 'file.ps')]).toStrictEqual<Value[]>([
+  expect([...parse('"test"', { pos: 0, filename: 'file.ps' })]).toStrictEqual<Value[]>([
     {
       ...toValue('test'),
       debugSource: {

@@ -2,7 +2,42 @@ import { ValueType } from '@api/values/ValueType.js';
 import type { Value } from '@api/values/Value.js';
 import type { IDebugSource } from '@api/interfaces/IDebugSource.js';
 
-export function* parse(source: string, pos: number = 0, filename?: string): Generator<Value> {
+type ParseOptions = {
+  pos?: number;
+  filename?: string;
+  // TODO: syntax switch to enable real PostScript parsing
+};
+
+export function* parse(source: string, options?: ParseOptions): Generator<Value> {
+  options = options ?? {};
+  const { filename } = options;
+  let { pos = 0 } = options;
+  // const { length } = source;
+
+  // do {
+  //   const char = source[pos];
+  //   if (char === ' ' || char === '\t' || char === '\n') {
+  //     continue;
+  //   }
+  //   if (char === '%') {
+  //     pos = source.indexOf('\n', pos);
+  //     if (pos === -1) {
+  //       pos = length - 1;
+  //     }
+  //     continue;
+  //   }
+  //   if (char === '"') {
+  //     pos = source.indexOf('"', pos + 1);
+  //     if (pos === -1) {
+  //       // TODO: throw an error
+  //     }
+  //     ++pos;
+  //     yield 
+
+  //   }
+
+
+  // } while (++pos < length) {
   const matcher = /%[^\n]*|(?:"([^"]*)")|\s|((?:-|\+)?\d+)|(\[|\]|{|}|<<|>>|«|»|[^[\]{}<>«»\s]+)/g;
   matcher.lastIndex = pos;
   let match = matcher.exec(source);

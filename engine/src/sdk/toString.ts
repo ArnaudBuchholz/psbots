@@ -115,7 +115,7 @@ const implementations: { [type in ValueType]: (container: Value<type>, options: 
     if (isExecutable) {
       const { operatorState } = options;
       if (operatorState !== undefined && operatorState >= OPERATOR_STATE_FIRST_CALL) {
-        const [token] = parse(string, operatorState, 'toString');
+        const [token] = parse(string, { pos: operatorState, filename: 'toString' });
         const length = token?.debugSource?.length;
         if (length !== undefined) {
           stringified =
