@@ -6,6 +6,7 @@ import {
   OPERATOR_STATE_POP,
   OPERATOR_STATE_UNKNOWN
 } from '@sdk/interfaces/ICallStack.js';
+import { a } from 'vitest/dist/chunks/suite.d.FvehnV49.js';
 
 export const TOSTRING_NULL = '␀';
 export const TOSTRING_BEGIN_MARKER = '▻';
@@ -32,11 +33,13 @@ function convertPosToLineAndCol(source: string, pos: number) {
 }
 
 function minimizeAt(at: string) {
-  const atParts = at.split(/([\\/])/).filter((part) => part.trim());
-  if (atParts.length < 3) {
+  const lastForwardSlash = at.lastIndexOf('/');
+  const lastBackwardSlash = at.lastIndexOf('\\');
+  const lastSlash = lastForwardSlash > lastBackwardSlash ? lastForwardSlash : lastBackwardSlash;
+  if (lastSlash === -1) {
     return at;
   }
-  return '…' + atParts.splice(-2).join('');
+  return '…' + at.slice(lastSlash);
 }
 
 function centerValue(stringifiedValue: string, maxWidth: number) {
