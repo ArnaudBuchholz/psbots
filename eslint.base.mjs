@@ -95,6 +95,7 @@ export default [
       ],
       'unicorn/no-null': 'off',
       'unicorn/prefer-switch': 'off',
+      'unicorn/no-empty-file': 'warn',
       'sonarjs/todo-tag': 'warn'
     }
   },
