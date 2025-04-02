@@ -1,7 +1,7 @@
-import { ValueType } from '@api/values/ValueType.js';
-import type { Value } from '@api/values/Value.js';
-import { nullValue } from './values';
-import { assert } from '@sdk/assert';
+import { ValueType } from './values/ValueType.js';
+import type { Value } from './values/Value.js';
+import { nullValue } from './values/NullValue.js';
+import { assert } from '@sdk/index.js';
 
 type ParseOptions = {
   pos?: number;
@@ -44,7 +44,7 @@ function * parseString(options: ParseOptionsWithSource) {
     type: ValueType.string,
     isReadOnly: true,
     isExecutable: false,
-    string: source.slice(pos + 1, endPos - pos - 1)
+    string: source.slice(pos + 1, endPos - pos)
   }, { ...options, length: endPos - pos + 1 });
   return endPos + 1;
 }
@@ -96,11 +96,11 @@ function * parseCall(options: ParseOptionsWithSource) {
         isExecutable: true,
         string: header
       }, { ...options, length: 1 });
-   }
+    }
+    return pos + 1;
   }
+  assert(false);
   // << >>
-
-  return pos;
 }
 
 /** Returns nullValue if a syntax error is detected */
@@ -109,11 +109,11 @@ export function* parse(source: string, options?: ParseOptions): Generator<Value>
   const { filename } = options;
   let { pos = 0 } = options;
   const { length } = source;
-
-  do {
+  while (pos < length) {
     const char = source[pos];
     assert(char !== undefined);
     if (' \t\r\n'.includes(char)) {
+      ++pos;
       continue;
     }
     if (char === '%') {
@@ -121,6 +121,7 @@ export function* parse(source: string, options?: ParseOptions): Generator<Value>
       if (pos === -1) {
         return;
       }
+      ++pos;
       continue;
     }
     if (char === '"') {
@@ -130,5 +131,5 @@ export function* parse(source: string, options?: ParseOptions): Generator<Value>
     } else {
       pos = yield * parseCall({ source, filename, pos });
     }
-  } while (++pos < length) {
+  } 
 }
