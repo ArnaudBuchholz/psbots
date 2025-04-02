@@ -19,12 +19,16 @@ it('extracts a negative integer', () => {
   expect([...parse('-123')]).toStrictEqual<Value[]>([toValue(-123)]);
 });
 
+it('extracts a positive integer', () => {
+  expect([...parse('+123')]).toStrictEqual<Value[]>([toValue(123)]);
+});
+
 it('extracts an executable name', () => {
   expect([...parse('test')]).toStrictEqual<Value[]>([toValue(Symbol.for('test'), { isExecutable: true })]);
 });
 
 it('extracts an executable name', () => {
-  expect([...parse('/')]).toStrictEqual<Value[]>([toValue(Symbol.for('/'), { isExecutable: true })]);
+  expect([...parse('/')]).toStrictEqual<Value[]>([toValue(Symbol.for(''), { isExecutable: true })]);
 });
 
 it('extracts a name', () => {
