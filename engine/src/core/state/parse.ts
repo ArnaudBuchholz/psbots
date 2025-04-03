@@ -13,7 +13,10 @@ function getToken(state: IInternalState, value: Value<ValueType.string>): Value 
     const [first] = parse(value.string, { pos: 0, filename: value.debugSource?.filename ?? UNKNOWN_FILENAME });
     return first;
   } else {
-    const [, second] = parse(value.string, { pos: calls.topOperatorState, filename: value.debugSource?.filename ?? UNKNOWN_FILENAME });
+    const [, second] = parse(value.string, {
+      pos: calls.topOperatorState,
+      filename: value.debugSource?.filename ?? UNKNOWN_FILENAME
+    });
     return second;
   }
 }
