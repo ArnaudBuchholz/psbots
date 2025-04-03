@@ -121,7 +121,7 @@ export function toValue(
   }
   if (typeof value === 'symbol') {
     const key = Symbol.keyFor(value);
-    if (!key) {
+    if (key === undefined) {
       throw new Error('Use Symbol.for to ensure string can be extracted');
     }
     return toNameValue(key, { isExecutable });
