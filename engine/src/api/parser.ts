@@ -1,7 +1,7 @@
 import { ValueType } from './values/ValueType.js';
 import type { Value } from './values/Value.js';
 import { nullValue } from './values/NullValue.js';
-import { assert } from '@sdk/index.js';
+import { assert } from '@sdk/assert.js';
 
 type ParseOptions = {
   pos?: number;
@@ -9,13 +9,14 @@ type ParseOptions = {
   // TODO: syntax switch to enable real PostScript parsing
 };
 
-type ParseOptionsWithSource = ParseOptions & Required<Pick<ParseOptions, 'pos'>> & {
-  source: string;
-};
+type ParseOptionsWithSource = ParseOptions &
+  Required<Pick<ParseOptions, 'pos'>> & {
+    source: string;
+  };
 
 type AddDebugSourceOptions = ParseOptionsWithSource & {
   length: number;
-}
+};
 
 function addDebugSource(value: Value, { source, filename, pos, length }: AddDebugSourceOptions): Value {
   if (filename === undefined) {
@@ -32,7 +33,7 @@ function addDebugSource(value: Value, { source, filename, pos, length }: AddDebu
   });
 }
 
-function * parseString(options: ParseOptionsWithSource) {
+function* parseString(options: ParseOptionsWithSource) {
   const { source, pos } = options;
   // TODO: implement escaping with \
   const endPos = source.indexOf('"', pos + 1);
@@ -40,67 +41,133 @@ function * parseString(options: ParseOptionsWithSource) {
     yield addDebugSource(nullValue, { ...options, length: 1 });
     return source.length;
   }
-  yield addDebugSource({
-    type: ValueType.string,
-    isReadOnly: true,
-    isExecutable: false,
-    string: source.slice(pos + 1, endPos - pos)
-  }, { ...options, length: endPos - pos + 1 });
+  yield addDebugSource(
+    {
+      type: ValueType.string,
+      isReadOnly: true,
+      isExecutable: false,
+      string: source.slice(pos + 1, endPos)
+    },
+    { ...options, length: endPos - pos + 1 }
+  );
   return endPos + 1;
 }
 
-function * parseNumber(options: ParseOptionsWithSource) {
+function* parseNumber(options: ParseOptionsWithSource) {
   const { source, pos } = options;
+  const first = source[pos];
+  assert(first !== undefined);
   let endPos = pos + 1;
   while (endPos < source.length && '0123456789'.includes(source[endPos]!)) {
     ++endPos;
   }
-  if (endPos === pos + 1) {
-    yield addDebugSource(nullValue, { ...options, length: 1 });
-    return source.length;
+  if (endPos === pos + 1 && '+-'.includes(first)) {
+    // This is a name
+    yield addDebugSource(
+      {
+        type: ValueType.name,
+        isReadOnly: true,
+        isExecutable: true,
+        name: first
+      },
+      { ...options, length: 1 }
+    );
+    return endPos;
   }
-  yield addDebugSource({
-    type: ValueType.integer,
-    isReadOnly: true,
-    isExecutable: false,
-    integer: Number.parseInt(source.slice(pos, endPos - pos))
-  }, { ...options, length: endPos - pos + 1 });
-  return endPos + 1; // TODO: what if going beyond end of string ?
+  yield addDebugSource(
+    {
+      type: ValueType.integer,
+      isReadOnly: true,
+      isExecutable: false,
+      integer: Number.parseInt(source.slice(pos, endPos))
+    },
+    { ...options, length: endPos - pos }
+  );
+  return endPos;
 }
 
-function * parseCall(options: ParseOptionsWithSource) {
+function* parseName(options: ParseOptionsWithSource) {
   const { source, pos } = options;
-  const header = source[pos];
-  assert(header !== undefined);
-  if ('[]{}«»'.includes(header)) {
-    yield addDebugSource({
-      type: ValueType.string,
-      isReadOnly: true,
-      isExecutable: true,
-      string: header
-    }, { ...options, length: 1 });
+  const { length } = source;
+  const first = source[pos];
+  assert(first !== undefined);
+  if ('[]{}«»'.includes(first)) {
+    yield addDebugSource(
+      {
+        type: ValueType.name,
+        isReadOnly: true,
+        isExecutable: true,
+        name: first
+      },
+      { ...options, length: 1 }
+    );
     return pos + 1;
   }
-  if (pos === source.length - 1) {
-    if (header === '/') {
-      yield addDebugSource({
-        type: ValueType.string,
+  if (pos === length - 1) {
+    yield first === '/'
+      ? addDebugSource(
+          {
+            type: ValueType.name,
+            isReadOnly: true,
+            isExecutable: true,
+            name: ''
+          },
+          { ...options, length: 1 }
+        )
+      : addDebugSource(
+          {
+            type: ValueType.name,
+            isReadOnly: true,
+            isExecutable: true,
+            name: first
+          },
+          { ...options, length: 1 }
+        );
+    return pos + 1;
+  }
+  let endPos = pos + 1;
+  const second = source[endPos];
+  assert(second !== undefined);
+  if (first === second && '<>'.includes(first)) {
+    yield addDebugSource(
+      {
+        type: ValueType.name,
         isReadOnly: true,
         isExecutable: true,
-        string: ''
-      }, { ...options, length: 1 });
-    } else {
-      yield addDebugSource({
-        type: ValueType.string,
-        isReadOnly: true,
-        isExecutable: true,
-        string: header
-      }, { ...options, length: 1 });
+        name: first === '<' ? '<<' : '>>'
+      },
+      { ...options, length: 2 }
+    );
+    return endPos + 1;
+  }
+  while (endPos < length) {
+    const char = source[endPos];
+    assert(char !== undefined);
+    if (' \t\r\n%[]{}«»<>'.includes(char)) {
+      break;
     }
-    return pos + 1;
+    ++endPos;
   }
-  assert(false);
-  // << >>
+  yield first === '/'
+    ? addDebugSource(
+        {
+          type: ValueType.name,
+          isReadOnly: true,
+          isExecutable: false,
+          name: source.slice(pos + 1, endPos)
+        },
+        { ...options, length: endPos - pos }
+      )
+    : addDebugSource(
+        {
+          type: ValueType.name,
+          isReadOnly: true,
+          isExecutable: true,
+          name: source.slice(pos, endPos)
+        },
+        { ...options, length: endPos - pos }
+      );
+  return endPos;
 }
 
 /** Returns nullValue if a syntax error is detected */
@@ -125,11 +192,11 @@ export function* parse(source: string, options?: ParseOptions): Generator<Value>
       continue;
     }
     if (char === '"') {
-      pos = yield * parseString({ source, filename, pos });
+      pos = yield* parseString({ source, filename, pos });
     } else if ('-+0123456789'.includes(char)) {
-      pos = yield * parseNumber({ source, filename, pos });
+      pos = yield* parseNumber({ source, filename, pos });
     } else {
-      pos = yield * parseCall({ source, filename, pos });
+      pos = yield* parseName({ source, filename, pos });
     }
-  } 
+  }
 }
