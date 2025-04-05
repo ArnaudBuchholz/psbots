@@ -38,7 +38,6 @@ export class State implements IInternalState {
       total: settings.maxMemoryBytes,
       debug: settings.debugMemory
     });
-    /** TODO: allocation scheme is dynamic */
     const dictionariesResult = DictionaryStack.create(memoryTracker, SYSTEM_MEMORY_TYPE, 10, 1);
     if (!dictionariesResult.success) {
       return dictionariesResult;
@@ -164,7 +163,6 @@ export class State implements IInternalState {
       this._exceptionStack.addRef();
     } else if (exception !== 'vmOverflow') {
       const snapshotResult = this._calls.snapshot();
-      // TODO: halt engine because if vmOverflow
       assert(snapshotResult);
       this._exceptionStack = snapshotResult.value;
     }

@@ -6,7 +6,6 @@ import { assert } from '@sdk/assert.js';
 type ParseOptions = {
   pos?: number;
   filename?: string;
-  // TODO: syntax switch to enable real PostScript parsing
 };
 
 type ParseOptionsWithSource = ParseOptions &
@@ -35,7 +34,6 @@ function addDebugSource(value: Value, { source, filename, pos, length }: AddDebu
 
 function* parseString(options: ParseOptionsWithSource) {
   const { source, pos } = options;
-  // TODO: implement escaping with \
   const endPos = source.indexOf('"', pos + 1);
   if (endPos === -1) {
     yield addDebugSource(nullValue, { ...options, length: 1 });

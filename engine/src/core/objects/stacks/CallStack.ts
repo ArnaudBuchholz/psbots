@@ -104,7 +104,6 @@ export class CallStack extends ValueStack implements ICallStack {
     }
     let dictionary = this._dictionaries[0];
     if (dictionary === undefined) {
-      // TODO: what should be the strategy ?
       const dictionaryResult = Dictionary.create(this.memoryTracker, SYSTEM_MEMORY_TYPE, 1);
       if (!dictionaryResult.success) {
         return dictionaryResult;

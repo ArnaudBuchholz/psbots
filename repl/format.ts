@@ -19,7 +19,6 @@ export function enumAndDisplay(replIO: IReplIO, values: IReadOnlyArray, options?
   let index = 0;
   for (const value of enumIArrayValues(values)) {
     const formattedIndex = index.toString();
-    // TODO handle array
     let maxWidth = replIO.width;
     if (includeIndex) {
       maxWidth -= formattedIndex.length + 1;

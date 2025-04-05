@@ -45,7 +45,6 @@ export class Game {
     this._maxPoints = maxPoints;
     for (let paddleIndex = 0; paddleIndex < 2; ++paddleIndex) {
       const engine = this._allocateEngine(paddleIndex);
-      // TODO: limit the number of cycles, implement throw on failure
       run(engine.exec(toStringValue(scripts[paddleIndex], { isExecutable: true })));
       const runResult = engine.exec(toStringValue('main', { isExecutable: true }));
       this._state.paddles[paddleIndex].running = true;

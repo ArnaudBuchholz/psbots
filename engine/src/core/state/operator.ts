@@ -14,11 +14,9 @@ import { MemoryTracker } from '@core/MemoryTracker.js';
 export function operatorPop(state: IInternalState, value: Value<ValueType.operator>): void {
   const { calls } = state;
   const operator = value.operator as IFunctionOperator;
-  // TODO: test calls.topOperatorState >= OPERATOR_STATE_FIRST_CALL
   if (calls.topOperatorState >= OPERATOR_STATE_FIRST_CALL || calls.topOperatorState === OPERATOR_STATE_POP) {
     calls.pop();
   } else {
-    // TODO: test what happens if exception during popping
     const result = operator.implementation(state);
     if (result && result.success === false) {
       state.raiseException(result.exception);

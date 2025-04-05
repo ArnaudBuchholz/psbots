@@ -75,7 +75,6 @@ export function closeToMark(state: IInternalState, { isExecutable }: { isExecuta
   assert(markPosValue.type === ValueType.integer);
   const markPos = markPosValue.integer;
   if (calls.topOperatorState === OPERATOR_STATE_ALLOC_ARRAY) {
-    // TODO: apply allocation scheme for increment
     const arrayResult = ValueArray.create(memoryTracker as MemoryTracker, USER_MEMORY_TYPE, Math.max(markPos, 1), 1);
     if (!arrayResult.success) {
       return arrayResult;

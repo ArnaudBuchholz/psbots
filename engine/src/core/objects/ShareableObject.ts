@@ -34,7 +34,6 @@ export abstract class ShareableObject {
     this._refCount = 1;
   }
 
-  // TODO: rename to referenceCount
   get refCount(): number {
     return this._refCount;
   }

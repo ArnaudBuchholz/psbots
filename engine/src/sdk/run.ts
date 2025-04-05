@@ -6,7 +6,6 @@ const DEFAULT_MAX_ITERATIONS = 1000;
 type RunOptions = {
   /** Defaulted to 1000, can be set to Number.POSITIVE_INFINITY but at your own risks */
   maxIterations?: number;
-  // TODO: throw on error ?
 };
 
 /** Returns the number of iterations */

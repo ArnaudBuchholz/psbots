@@ -1,4 +1,3 @@
-import './catch.js';
 import './closeBlock.js';
 import './finally.js';
 import './if.js';

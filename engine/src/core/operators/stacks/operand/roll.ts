@@ -49,8 +49,6 @@ buildFunctionOperator(
     ]
   },
   ({ operands }, { integer: count }, { integer: shift }) => {
-    // TODO: rewrite to pop and push only once
-    // Intermediate value array *must* be allocated
     if (count <= 0 || count > operands.length - 2) {
       return { success: false, exception: 'rangeCheck' };
     }
@@ -69,12 +67,10 @@ buildFunctionOperator(
         const value = operands.top;
         values.unshift(value);
         value.tracker?.addValueRef(value);
-        // TODO: do not pop until all pushes succeeded
         operands.pop();
       }
       for (let from = 0; from < count; ++from) {
         const value = values[(from + shift) % count]!;
-        // TODO: do not pop until all pushes succeeded
         operands.push(value);
       }
     } finally {

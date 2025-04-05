@@ -185,8 +185,6 @@ export async function runWithDebugger({
   let lastCallStackSize = state.calls.length;
   let cycle = 0;
 
-  // TODO: show dictionaries
-
   while (hostDictionary.debugIsOn) {
     const { width, height } = replIO;
     if (width < 40 || height < 10) {

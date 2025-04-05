@@ -92,7 +92,6 @@ export class MemoryTracker implements IValueTracker, IMemoryTracker {
   /** Check if the requested memory size can be allocated, returns the equivalent number of bytes */
   isAvailable(size: MemorySize, type: MemoryType): Result<number> {
     assert(!!type);
-    // TODO: limit by type ?
     const bytes = memorySizeToBytes(size);
     assert(bytes > 0);
     if (this._used + bytes <= this._total) {
