@@ -5,10 +5,12 @@ import { blue, /* cyan, */ green, magenta, red, white, yellow } from './colors.j
 import { formatCountVariation, formatMemoryVariation } from './status.js';
 import { operands } from './format.js';
 import { formatBytes } from './formatBytes.js';
+import type { ReplHostDictionary } from 'host/index.js';
 
 type DebugParameters = {
   replIO: IReplIO;
   state: IState;
+  hostDictionary: ReplHostDictionary;
   iterator: Generator;
   waitForChar: () => Promise<string>;
 };
@@ -171,7 +173,13 @@ function renderOperandAndCallStacks({
   replIO.output(`${border}└${''.padStart(operandsWidth, '─')}┴${''.padStart(callStackWidth, '─')}┘`);
 }
 
-export async function runWithDebugger({ replIO, state, iterator, waitForChar }: DebugParameters): Promise<number> {
+export async function runWithDebugger({
+  replIO,
+  state,
+  hostDictionary,
+  iterator,
+  waitForChar
+}: DebugParameters): Promise<number> {
   let lastOperandsCount = state.operands.length;
   let lastUsedMemory = state.memoryTracker.used;
   let lastCallStackSize = state.calls.length;
@@ -179,7 +187,7 @@ export async function runWithDebugger({ replIO, state, iterator, waitForChar }: 
 
   // TODO: show dictionaries
 
-  while (true) {
+  while (hostDictionary.debugIsOn) {
     const { width, height } = replIO;
     if (width < 40 || height < 10) {
       replIO.output(`${red}⚠️ Output too small for debugger${white}\n`);
@@ -209,6 +217,7 @@ export async function runWithDebugger({ replIO, state, iterator, waitForChar }: 
     if (step === 'o') {
       operands(replIO, state);
     } else if (step === 'q') {
+      hostDictionary.debug(false);
       break;
     }
 

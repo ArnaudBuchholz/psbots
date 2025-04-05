@@ -76,9 +76,8 @@ export async function repl(replIO: IReplIO, debug?: boolean): Promise<void> {
 
       let { done } = iterator.next();
       while (done === false) {
-        if (hostDictionary.debugCalled) {
-          cycle += await runWithDebugger({ replIO, state, iterator, waitForChar });
-          // TOOD: how to end debug mode ?
+        if (hostDictionary.debugIsOn) {
+          cycle += await runWithDebugger({ replIO, state, hostDictionary, iterator, waitForChar });
         } else {
           ++cycle;
         }

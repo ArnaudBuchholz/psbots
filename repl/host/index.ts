@@ -38,11 +38,11 @@ export class ReplHostDictionary implements IReadOnlyDictionary {
 
   private _debug = false;
 
-  get debugCalled() {
+  get debugIsOn() {
     return this._debug;
   }
 
-  debug() {
-    this._debug = true;
+  debug(on = true) {
+    this._debug = on;
   }
 }
