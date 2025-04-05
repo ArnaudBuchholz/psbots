@@ -11,11 +11,11 @@ await writeFile(
     /alias: \{[^}]*}/,
     () => `alias: {
       ${Object.entries(aliases)
-      .map(([alias, [path]]) => {
-        const [, relativePath] = path.match(/\.\/(.*)\/\*/);
-        return `'${alias.split('/*')[0]}': path('src/${relativePath}')`;
-      })
-      .join(',\n      ')}
+        .map(([alias, [path]]) => {
+          const [, relativePath] = path.match(/\.\/(.*)\/\*/);
+          return `'${alias.split('/*')[0]}': path('src/${relativePath}')`;
+        })
+        .join(',\n      ')}
     }`
   )
 );
