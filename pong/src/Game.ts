@@ -1,6 +1,6 @@
-import { createState } from '@psbots/engine';
+import { createState, enumIArrayValues } from '@psbots/engine';
 import type { IState } from '@psbots/engine';
-import { assert, callStackToString, run, toStringValue } from '@psbots/engine/sdk';
+import { assert, callStackToString, run, toString, toStringValue } from '@psbots/engine/sdk';
 import { MAX_POINTS } from './constants.js';
 import { State } from './State.js';
 import { PaddleHost } from './PaddleHost.js';
@@ -98,6 +98,19 @@ export class Game {
       frames: 60 * this._speed,
       className: 'ball_spark'
     });
+  }
+
+  getEngineState(paddleIndex: number): string {
+    const engine = this._engines[paddleIndex];
+    const { operands, calls } = engine;
+    return [
+      `Operands: ${operands.length}`,
+      ...[...enumIArrayValues(operands)].map((value) => toString(value, { maxWidth: 40 })),
+      `Call stack: ${calls.length}`,
+      ...[...enumIArrayValues(calls)].map((value, index) =>
+        toString(value, { maxWidth: 40, operatorState: calls.operatorStateAt(index) })
+      )
+    ].join('\n');
   }
 
   constructor() {

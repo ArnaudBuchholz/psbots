@@ -111,3 +111,20 @@ body {
   right: 0;
   color: #040;
 }
+
+.code {
+  position: absolute;
+  top: 10vh;
+  font-size: 2vh;
+  color: green;
+  white-space: pre;
+}
+
+.code_1 {
+  color: #020;
+}
+
+.code_2 {
+  right: 0;
+  color: #040;
+}

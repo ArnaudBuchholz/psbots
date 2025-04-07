@@ -65,5 +65,7 @@ document.addEventListener('keydown', (event) => {
     game.modifySpeed(-20);
   } else if (event.key === 'ArrowRight') {
     game.modifySpeed(+10);
+  } else if (event.key === ' ') {
+    alert('paused');
   }
 });

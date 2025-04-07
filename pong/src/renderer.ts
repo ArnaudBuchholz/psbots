@@ -20,6 +20,7 @@ const $ = (cssSelector: string) => document.querySelector(cssSelector) ?? missin
 
 let paddles: [Element, Element];
 let scores: [Element, Element];
+let codes: [Element, Element];
 let board: Element;
 let ball: Element;
 let status: Element;
@@ -52,8 +53,10 @@ export const start = (game: Game) => {
   document.body.innerHTML = `
     <div class="status"></div>
     <div class="board">
+      <div class="code_1 code">This is an example source code</div>
       <div class="paddle_1 paddle"></div>
       <div class="score_1 score">0</div>
+      <div class="code_2 code">This is an example source code</div>
       <div class="paddle_2 paddle"></div>
       <div class="score_2 score">0</div>
       <div class='ball'>
@@ -63,6 +66,7 @@ export const start = (game: Game) => {
   `;
   paddles = [$('.paddle_1'), $('.paddle_2')];
   scores = [$('.score_1'), $('.score_2')];
+  codes = [$('.code_1'), $('.code_2')];
   board = $('.board');
   ball = $('.ball');
   status = $('.status');
@@ -97,11 +101,13 @@ const frame = function (this: Game, timestamp: number) {
     `width: ${PADDLE_SCALED.width}px; height: ${PADDLE_SCALED.height}px; top: ${100 * (state.paddles[0].y / BOARD_HEIGHT)}%;`
   );
   scores[0].innerHTML = state.paddles[0].score.toString();
+  codes[0].innerHTML = this.getEngineState(0);
   paddles[1].setAttribute(
     'style',
     `width: ${PADDLE_SCALED.width}px; height: ${PADDLE_SCALED.height}px; left: calc(100% - ${PADDLE_SCALED.width}px); top: ${100 * (state.paddles[1].y / BOARD_HEIGHT)}%;`
   );
   scores[1].innerHTML = state.paddles[1].score.toString();
+  codes[1].innerHTML = this.getEngineState(1);
   ball.setAttribute(
     'style',
     `width: ${BALL_SCALED.radius * 2}px; height: ${BALL_SCALED.radius * 2}px; left: calc(${100 * (state.ball.x / BOARD_WIDTH)}% - ${BALL_SCALED.radius}px); top: calc(${100 * (state.ball.y / BOARD_HEIGHT)}% - ${BALL_SCALED.radius}px)`
