@@ -47,11 +47,7 @@ export class Game {
   }
 
   decreaseSpeed() {
-    if (this._speed > 10) {
-      this._speed = Math.max(this._speed - 20, 1);
-    } else {
-      this._speed = Math.max(this._speed - 1, 0);
-    }
+    this._speed = this._speed > 10 ? Math.max(this._speed - 20, 1) : Math.max(this._speed - 1, 0);
   }
 
   private _oneStep = false;
@@ -92,10 +88,7 @@ export class Game {
     this._state.paddles[paddleIndex].running = false;
   }
 
-  run(frames: number) {
-    if (this._ended) {
-      return;
-    }
+  private getFrameCount(frames: number) {
     let count: number;
     if (this._speed === 0) {
       count = this._oneStep ? 1 : 0;
@@ -103,6 +96,14 @@ export class Game {
     } else {
       count = frames * this._speed;
     }
+    return count;
+  }
+
+  run(frames: number) {
+    if (this._ended) {
+      return;
+    }
+    let count = this.getFrameCount(frames);
     while (count-- > 0) {
       this._state.run();
       for (let paddleIndex = 0; !this._ended && paddleIndex < 2; ++paddleIndex) {
@@ -134,10 +135,14 @@ export class Game {
     const { operands, calls } = engine;
     return [
       `Operands: ${operands.length}`,
-      ...[...enumIArrayValues(operands)]
-        .map((value) => toString(value, { maxWidth: 40 }))
-        .concat(['', '', '', '', ''])
-        .slice(0, 5),
+      ...[
+        ...[...enumIArrayValues(operands)].map((value) => toString(value, { maxWidth: 40 })),
+        '',
+        '',
+        '',
+        '',
+        ''
+      ].slice(0, 5),
       `Call stack: ${calls.length}`,
       ...[...enumIArrayValues(calls)].map((value, index) =>
         toString(value, { maxWidth: 40, operatorState: calls.operatorStateAt(index) })

@@ -27,7 +27,7 @@ body {
   position: relative;
 }
 
-.ball {
+.sprite.ball {
   height: 30px;
   width: 30px;
   border-radius: 50%;
@@ -127,4 +127,24 @@ body {
 .code.player_2 {
   left: 50%;
   color: #040;
+}
+
+.coords {
+  position: absolute;
+  bottom: 1vh;
+  font-size: 2vh;
+}
+
+.coords.player_1 {
+  color: #020;
+}
+
+.coords.player_2 {
+  right: 0;
+  color: #040;
+}
+
+.coords.ball {
+  left: 50%;
+  color: #030;
 }

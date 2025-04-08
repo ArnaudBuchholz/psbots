@@ -57,10 +57,13 @@ export const start = (game: Game) => {
       <div class="code player_1">This is an example source code</div>
       <div class="paddle player_1"></div>
       <div class="score player_1">0</div>
+      <div class="coords player_1">0,0</div>
       <div class="code player_2">This is an example source code</div>
       <div class="paddle player_2"></div>
       <div class="score player_2">0</div>
-      <div class='ball'>
+      <div class="coords player_2">0,0</div>
+      <div class="coords ball">0,0</div>
+      <div class='sprite ball'>
         <div class="ball_effect"></div>
       </div>
     </div>
@@ -68,8 +71,9 @@ export const start = (game: Game) => {
   paddles = [$('.paddle.player_1'), $('.paddle.player_2')];
   scores = [$('.score.player_1'), $('.player_2')];
   codes = [$('.code.player_1'), $('.code.player_2')];
+  coords = [$('.coords.player_1'), $('.coords.player_2'), $('.coords.ball')];
   board = $('.board');
-  ball = $('.ball');
+  ball = $('.sprite.ball');
   status = $('.status');
   window.addEventListener('resize', resize);
   window.addEventListener('load', resize);
@@ -103,16 +107,19 @@ const frame = function (this: Game, timestamp: number) {
   );
   scores[0].innerHTML = state.paddles[0].score.toString();
   codes[0].innerHTML = this.getEngineState(0);
+  coords[0].innerHTML = `${state.paddles[0].y} ⇕${state.paddles[0].dy}`;
   paddles[1].setAttribute(
     'style',
     `width: ${PADDLE_SCALED.width}px; height: ${PADDLE_SCALED.height}px; left: calc(100% - ${PADDLE_SCALED.width}px); top: ${100 * (state.paddles[1].y / BOARD_HEIGHT)}%;`
   );
   scores[1].innerHTML = state.paddles[1].score.toString();
   codes[1].innerHTML = this.getEngineState(1);
+  coords[1].innerHTML = `${state.paddles[1].y} ⇕${state.paddles[1].dy}`;
   ball.setAttribute(
     'style',
     `width: ${BALL_SCALED.radius * 2}px; height: ${BALL_SCALED.radius * 2}px; left: calc(${100 * (state.ball.x / BOARD_WIDTH)}% - ${BALL_SCALED.radius}px); top: calc(${100 * (state.ball.y / BOARD_HEIGHT)}% - ${BALL_SCALED.radius}px)`
   );
+  coords[2].innerHTML = `${state.ball.x},${state.ball.y} ⇔${state.ball.dx}⇕${state.ball.dy}`;
 
   const particles = board.querySelectorAll('.particle');
   const particleById: { [key in string]: Element } = {};

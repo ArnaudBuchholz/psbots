@@ -66,8 +66,8 @@ document.addEventListener('keydown', (event) => {
   } else if (event.key === 'ArrowRight') {
     game.increaseSpeed();
   } else if (event.key === 'ArrowUp') {
-     game.resetSpeed  ();
-  }else if (event.key === 'ArrowDown') {
+    game.resetSpeed();
+  } else if (event.key === 'ArrowDown') {
     game.oneStep();
   }
 });
