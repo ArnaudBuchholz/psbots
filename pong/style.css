@@ -72,7 +72,7 @@ body {
   z-index: 1;
 }
 
-.paddle_1 {
+.paddle.player_1 {
   left: 0;
   box-shadow: inset 0 0 18px #040,
     inset 6px 0 18px #0f0,
@@ -84,7 +84,7 @@ body {
     4px 0 18px #afa;
 }
 
-.paddle_2 {
+.paddle.player_2 {
   left: calc(100% - 18px);
   box-shadow: inset 0 0 18px #0f0,
     inset 6px 0 18px #0a0,
@@ -103,11 +103,11 @@ body {
   z-index: 0;
 }
 
-.score_1 {
+.score.player_1 {
   color: #020;
 }
 
-.score_2 {
+.score.player_2 {
   right: 0;
   color: #040;
 }
@@ -120,11 +120,11 @@ body {
   white-space: pre;
 }
 
-.code_1 {
+.code.player_1 {
   color: #020;
 }
 
-.code_2 {
+.code.player_2 {
   right: 0;
   color: #040;
 }

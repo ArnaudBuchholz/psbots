@@ -20,6 +20,7 @@ const $ = (cssSelector: string) => document.querySelector(cssSelector) ?? missin
 
 let paddles: [Element, Element];
 let scores: [Element, Element];
+let coords: [Element, Element, Element];
 let codes: [Element, Element];
 let board: Element;
 let ball: Element;
@@ -53,20 +54,20 @@ export const start = (game: Game) => {
   document.body.innerHTML = `
     <div class="status"></div>
     <div class="board">
-      <div class="code_1 code">This is an example source code</div>
-      <div class="paddle_1 paddle"></div>
-      <div class="score_1 score">0</div>
-      <div class="code_2 code">This is an example source code</div>
-      <div class="paddle_2 paddle"></div>
-      <div class="score_2 score">0</div>
+      <div class="code player_1">This is an example source code</div>
+      <div class="paddle player_1"></div>
+      <div class="score player_1">0</div>
+      <div class="code player_2">This is an example source code</div>
+      <div class="paddle player_2"></div>
+      <div class="score player_2">0</div>
       <div class='ball'>
         <div class="ball_effect"></div>
       </div>
     </div>
   `;
-  paddles = [$('.paddle_1'), $('.paddle_2')];
-  scores = [$('.score_1'), $('.score_2')];
-  codes = [$('.code_1'), $('.code_2')];
+  paddles = [$('.paddle.player_1'), $('.paddle.player_2')];
+  scores = [$('.score.player_1'), $('.player_2')];
+  codes = [$('.code.player_1'), $('.code.player_2')];
   board = $('.board');
   ball = $('.ball');
   status = $('.status');
