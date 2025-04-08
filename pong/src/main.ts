@@ -62,10 +62,12 @@ start(game);
 
 document.addEventListener('keydown', (event) => {
   if (event.key === 'ArrowLeft') {
-    game.modifySpeed(-20);
+    game.decreaseSpeed();
   } else if (event.key === 'ArrowRight') {
-    game.modifySpeed(+10);
-  } else if (event.key === ' ') {
-    alert('paused');
+    game.increaseSpeed();
+  } else if (event.key === 'ArrowUp') {
+     game.resetSpeed  ();
+  }else if (event.key === 'ArrowDown') {
+    game.oneStep();
   }
 });

@@ -125,6 +125,6 @@ body {
 }
 
 .code.player_2 {
-  right: 0;
+  left: 50%;
   color: #040;
 }

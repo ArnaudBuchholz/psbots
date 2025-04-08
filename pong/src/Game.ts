@@ -34,8 +34,29 @@ export class Game {
     return this._speed;
   }
 
-  modifySpeed(increment: number) {
-    this._speed = Math.min(Math.max(this._speed + increment, 1), 1000);
+  resetSpeed() {
+    this._speed = 1;
+  }
+
+  increaseSpeed() {
+    if (this._speed > 10) {
+      this._speed = Math.min(this._speed + 10, 1000);
+    } else {
+      ++this._speed;
+    }
+  }
+
+  decreaseSpeed() {
+    if (this._speed > 10) {
+      this._speed = Math.max(this._speed - 20, 1);
+    } else {
+      this._speed = Math.max(this._speed - 1, 0);
+    }
+  }
+
+  private _oneStep = false;
+  oneStep() {
+    this._oneStep = true;
   }
 
   private _maxPoints = MAX_POINTS;
@@ -75,7 +96,13 @@ export class Game {
     if (this._ended) {
       return;
     }
-    let count = frames * this._speed;
+    let count: number;
+    if (this._speed === 0) {
+      count = this._oneStep ? 1 : 0;
+      this._oneStep = false;
+    } else {
+      count = frames * this._speed;
+    }
     while (count-- > 0) {
       this._state.run();
       for (let paddleIndex = 0; !this._ended && paddleIndex < 2; ++paddleIndex) {
@@ -90,14 +117,16 @@ export class Game {
         }
       }
     }
-    this._state.addParticle({
-      x: this._state.ball.x,
-      y: this._state.ball.y,
-      dx: 0,
-      dy: 0,
-      frames: 60 * this._speed,
-      className: 'ball_spark'
-    });
+    if (this._speed > 0) {
+      this._state.addParticle({
+        x: this._state.ball.x,
+        y: this._state.ball.y,
+        dx: 0,
+        dy: 0,
+        frames: 60 * this._speed,
+        className: 'ball_spark'
+      });
+    }
   }
 
   getEngineState(paddleIndex: number): string {
@@ -105,7 +134,10 @@ export class Game {
     const { operands, calls } = engine;
     return [
       `Operands: ${operands.length}`,
-      ...[...enumIArrayValues(operands)].map((value) => toString(value, { maxWidth: 40 })),
+      ...[...enumIArrayValues(operands)]
+        .map((value) => toString(value, { maxWidth: 40 }))
+        .concat(['', '', '', '', ''])
+        .slice(0, 5),
       `Call stack: ${calls.length}`,
       ...[...enumIArrayValues(calls)].map((value, index) =>
         toString(value, { maxWidth: 40, operatorState: calls.operatorStateAt(index) })
