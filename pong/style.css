@@ -104,12 +104,12 @@ body {
 }
 
 .score.player_1 {
-  color: #020;
+  color: #060;
 }
 
 .score.player_2 {
   right: 0;
-  color: #040;
+  color: #080;
 }
 
 .code {
@@ -121,12 +121,12 @@ body {
 }
 
 .code.player_1 {
-  color: #020;
+  color: #060;
 }
 
 .code.player_2 {
   left: 50%;
-  color: #040;
+  color: #080;
 }
 
 .coords {
@@ -136,15 +136,15 @@ body {
 }
 
 .coords.player_1 {
-  color: #020;
+  color: #060;
 }
 
 .coords.player_2 {
   right: 0;
-  color: #040;
+  color: #080;
 }
 
 .coords.ball {
   left: 50%;
-  color: #030;
+  color: #070;
 }
