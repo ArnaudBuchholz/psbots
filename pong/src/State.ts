@@ -77,7 +77,8 @@ export class State {
 
   private _runPaddles() {
     for (const paddle of this._paddles) {
-      let { y, dy } = paddle;
+      const { dy } = paddle;
+      let { y } = paddle;
       y += dy;
       if (dy > 0) {
         if (y > BOARD_HEIGHT - PADDLE_HEIGHT) {
@@ -87,7 +88,6 @@ export class State {
         y = 0;
       }
       paddle.y = y;
-      paddle.dy = dy;
     }
   }
 
