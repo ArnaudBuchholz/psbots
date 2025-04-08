@@ -81,12 +81,10 @@ export class State {
       y += dy;
       if (dy > 0) {
         if (y > BOARD_HEIGHT - PADDLE_HEIGHT) {
-          y = 2 * (BOARD_HEIGHT - PADDLE_HEIGHT) - y;
-          dy = -dy;
+          y = BOARD_HEIGHT - PADDLE_HEIGHT;
         }
       } else if (y < 0) {
-        y = -y;
-        dy = -dy;
+        y = 0;
       }
       paddle.y = y;
       paddle.dy = dy;
