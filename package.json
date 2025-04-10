@@ -5,7 +5,7 @@
   "scripts": {
     "update": "ncu --deep -i --format group",
     "check": "eslint ./tools/*.mjs *.mjs --fix && npm run check --workspaces",
-    "test": "npm run test --workspaces",
+    "test": "npm run test --workspaces --if-present",
     "build": "npm run build --workspaces",
     "build:docs": "npm run build && rm -rf docs/pong/* docs/repl/* && cp -r wi/dist/* docs/repl && cp -r pong/dist/* docs/pong",
     "start:docs": "reserve",
