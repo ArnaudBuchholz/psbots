@@ -12,6 +12,9 @@ type RunOptions = {
 export function run(execResult: Result<Generator>, options?: RunOptions): number {
   assert(execResult);
   const { maxIterations = DEFAULT_MAX_ITERATIONS } = options ?? {};
+  if (maxIterations <= 0) {
+    return 0;
+  }
   const iterator = execResult.value;
   let iterations = 0;
   while (iterations < maxIterations) {
