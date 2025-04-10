@@ -28,6 +28,7 @@
     "pretest": "npm run make-sources",
     "test": "vitest run --coverage",
     "test:watch": "vitest",
+    "test:perf": "node tools/testPerformance.mjs",
     "pretest:operators": "npm run make-sources",
     "test:operators": "vitest run --no-coverage operators.spec",
     "prebuild": "npm run make-sources",

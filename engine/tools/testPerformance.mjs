@@ -105,4 +105,4 @@ for (const instruction of intructions) {
 }
 console.table(statistics);
 
-await writeFile('./performances.txt', JSON.stringify(measurements, undefined, 2));
+await writeFile('./performances.json', JSON.stringify(measurements, undefined, 2));
