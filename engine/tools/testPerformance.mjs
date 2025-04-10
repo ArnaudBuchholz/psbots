@@ -29,8 +29,10 @@ function execute(source) {
     let instruction;
     if (calls.at(0).type === ValueType.operator) {
       instruction = calls.at(0).operator.name;
-      if (state.exception !== undefined) {
-        instruction += '!';
+      if (calls.topOperatorState > 0 && calls.topOperatorState < Number.POSITIVE_INFINITY) {
+        instruction += '+';
+      } else if (calls.topOperatorState < 0) {
+        instruction += '-';
       }
     }
     const start = hrtime();
@@ -62,6 +64,15 @@ for (const definition of Object.values(registry)) {
     }
   }
 }
+
+// Scalability use cases
+function* iterate(from, to) {
+  for (let index = from; index <= to; ++index) {
+    yield index;
+  }
+}
+
+execute(['[', ...iterate(0, 10_000), ']'].join(' '));
 
 console.log(`Version   :${magenta}`, version, white);
 console.log('Samples   :', sampleCount);
