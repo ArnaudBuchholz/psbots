@@ -1,4 +1,7 @@
-import { ValueType } from '@api/index.js';
+import type { Value } from '@api/index.js';
+import { SYSTEM_MEMORY_TYPE, ValueType } from '@api/index.js';
+import { assert } from '@sdk/assert.js';
+import { MemoryTracker } from '@core/MemoryTracker.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 
 buildFunctionOperator(
@@ -48,36 +51,33 @@ buildFunctionOperator(
       }
     ]
   },
-  ({ operands }, { integer: count }, { integer: shift }) => {
+  ({ operands, memoryTracker }, { integer: count }, { integer: shift }) => {
     if (count <= 0 || count > operands.length - 2) {
       return { success: false, exception: 'rangeCheck' };
     }
-    operands.pop();
-    operands.pop();
-    shift = -shift % count;
-    if (shift === 0) {
-      return;
+    assert(memoryTracker instanceof MemoryTracker);
+    const arrayAllocated = memoryTracker.allocate({ values: count }, SYSTEM_MEMORY_TYPE, operands);
+    if (!arrayAllocated.success) {
+      return arrayAllocated;
     }
-    if (shift < 0) {
-      shift += count;
+    const values: Value[] = [];
+    let offset = (count - 1 + shift) % count;
+    if (offset < 0) {
+      offset += count;
     }
-    const values = [];
-    try {
-      for (let remaining = count; remaining > 0; --remaining) {
-        const value = operands.top;
-        values.unshift(value);
-        value.tracker?.addValueRef(value);
-        operands.pop();
+    for (let index = 0; index < count; ++index) {
+      const value = operands.at(2 + offset);
+      if (--offset < 0) {
+        offset += count;
       }
-      for (let from = 0; from < count; ++from) {
-        const value = values[(from + shift) % count]!;
-        operands.push(value);
-      }
-    } finally {
-      for (const value of values) {
-        value.tracker?.releaseValue(value);
-      }
+      value.tracker?.addValueRef(value);
+      values.push(value);
     }
-    return { success: true, value: undefined };
+    const moved = operands.popush(2 + count, values);
+    for (const value of values) {
+      value.tracker?.releaseValue(value);
+    }
+    memoryTracker.release(arrayAllocated.value, operands);
+    return moved;
   }
 );
