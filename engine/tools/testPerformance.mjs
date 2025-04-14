@@ -51,21 +51,32 @@ function * compute (loops) {
         const { calls } = state;
         if (calls.length) {
           const value = calls.at(0);
-          const i = {
-            t: value.type,
-            v: valuesOf(value)[0]
-          }
-          if (value.type === ValueType.string) {
-            delete i.v; // No need
+          const info = [];
+          if (!value.isExecutable) {
+            info.push('l:', value.type);
+          } else if (value.type === ValueType.string) {
+            info.push('p');
+          } else if (value.type === ValueType.array) {
+            info.push('a');
           } else if (value.type === ValueType.operator) {
-            i.v = i.v.name;
+            info.push('o:', value.operator.name);
+          } else if (value.type === ValueType.name) {
+            info.push('n:', value.name);
+          } else {
+            console.log('How to handle', value.type);
+            process.exit(0);
           }
-          const o = calls.topOperatorState;
-          const start = hrtime();
+          const operatorState = calls.topOperatorState;
+          if (operatorState !== 0 && operatorState !== Number.POSITIVE_INFINITY) {
+            info.push('@', operatorState);
+          }
+          const start = hrtime.bigint();
           iterator.next();
-          const d = hrtime(start)[1];
-          iteration.push({ i, o, d });
-          timeSpent += d;
+          const end = hrtime.bigint();
+          const duration = Number(end - start) / 100;
+          info.push('=', duration);
+          iteration.push(info.join(''));
+          timeSpent += duration;
         } else {
           const { done } = iterator.next();
           assert(done);
@@ -73,14 +84,13 @@ function * compute (loops) {
         }
       }
       state.destroy();
-      result.push(iteration);
+      result.push(iteration.join(','));
     }
     yield {
       sampleCount,
       cycles,
       timeSpent,
-      // source,
-      result
+      measures: result.join('|')
     };
   }
   
@@ -94,6 +104,7 @@ function * compute (loops) {
     }
   }
   
+/*
   // Scalability use cases
   function* iterate(from, to) {
     for (let index = from; index <= to; ++index) {
@@ -111,6 +122,7 @@ function * compute (loops) {
       .join(' '),
     '>>'
   );
+*/
 }
 
 /*
