@@ -56,7 +56,9 @@ function * compute (loops) {
             v: valuesOf(value)[0]
           }
           if (value.type === ValueType.string) {
-            delete i.v;
+            delete i.v; // No need
+          } else if (value.type === ValueType.operator) {
+            i.v = i.v.name;
           }
           const o = calls.topOperatorState;
           const start = hrtime();
