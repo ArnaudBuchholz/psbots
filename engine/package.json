@@ -10,8 +10,12 @@
   "main": "./dist/index.js",
   "typesVersions": {
     "*": {
-      "*": ["dist/*"],
-      "sdk": ["dist/sdk/index.d.ts"]
+      "*": [
+        "dist/*"
+      ],
+      "sdk": [
+        "dist/sdk/index.d.ts"
+      ]
     }
   },
   "exports": {
@@ -20,7 +24,7 @@
       "types": "./dist/sdk/index.d.ts",
       "import": "./dist/sdk/index.js"
     }
-  },  
+  },
   "scripts": {
     "make-sources": "node ../tools/syncAliases.mjs && node tools/makeSources.mjs",
     "precheck": "npm run make-sources",
@@ -42,5 +46,8 @@
     "engine"
   ],
   "author": "Arnaud Buchholz <arnaud.buchholz@free.fr>",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "reserve": "^2.2.0"
+  }
 }

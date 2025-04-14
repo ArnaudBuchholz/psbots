@@ -1,104 +1,117 @@
 import { hrtime } from 'node:process';
-import { writeFile } from 'node:fs/promises';
 import { createState, getOperatorDefinitionRegistry, ValueType } from '../dist/index.js';
-import { toStringValue, assert } from '../dist/sdk/index.js';
+import { toStringValue, assert, valuesOf } from '../dist/sdk/index.js';
+import { log, serve } from 'reserve';
 
-const yellow = '\u001B[33m';
-const magenta = '\u001B[35m';
-const white = '\u001B[37m';
-const red = '\u001B[31m';
-const green = '\u001B[32m';
-const TICKS = ['\u280b', '\u2819', '\u2839', '\u2838', '\u283c', '\u2834', '\u2826', '\u2827', '\u2807', '\u280f']
+log(serve({
+  port: 8080,
+  mappings: [{
+    match: '/compute/:loops',
+    custom: async (request, response, loops) => {
+      response.writeHead(200, {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+      });
+      const iterator = compute(Number.parseInt(loops));
+      while (true) {
+        const next = iterator.next();
+        if (next.done) {
+          break;
+        }
+        response.write(`event: progress\ndata: ${JSON.stringify(next.value)}\n\n`);
+        await new Promise(resolve => setTimeout(resolve, 0));
+      }
+      response.write(`event: done\ndata: \n\n`);
+      response.end();
+    }
+  }, {
+    match: '(.*)',
+    file: 'tools/performances/$1',
+    static: false
+  }]
+}));
 
-const LOOPS = 500;
 const MAX_CYCLES = 10 ** 9;
 
-let sampleCount = 0;
-let cycles = 0;
-let timeSpent = 0; // nanoseconds
-const measurements = {};
-let lastFeedbackTimestamp = Date.now();
-let lastFeedbackTick = 0
-
-function execute(source, loops = LOOPS) {
-  let result;
-  ++sampleCount;
-  for (let loop = 0; loop < loops; ++loop) {
-    const { value: state } = createState();
-    assert(!!state);
-    const { value: iterator } = state.exec(toStringValue(source, { isExecutable: true }));
-    assert(!!iterator);
-    while (++cycles < MAX_CYCLES) {
-      if (Date.now() - lastFeedbackTimestamp > 250) {
-        process.stdout.write(`${TICKS[lastFeedbackTick]} Running samples (${sampleCount})...\r`);
-        lastFeedbackTick = (lastFeedbackTick + 1) % TICKS.length;
-        lastFeedbackTimestamp = Date.now();
-      }
-      const { calls } = state;
-      let instruction;
-      if (calls.at(0).type === ValueType.operator) {
-        instruction = calls.at(0).operator.name;
-        if (calls.topOperatorState > 0 && calls.topOperatorState < Number.POSITIVE_INFINITY) {
-          instruction += '+';
-        } else if (calls.topOperatorState < 0) {
-          instruction += '-';
+function * compute (loops) {
+  let sampleCount = 0;
+  let cycles = 0;
+  let timeSpent = 0; // nanoseconds
+  
+  function * execute(source) {
+    const result = [];
+    ++sampleCount;
+    for (let loop = 0; loop < loops; ++loop) {
+      const iteration = [];
+      const { value: state } = createState();
+      assert(!!state);
+      const { value: iterator } = state.exec(toStringValue(source, { isExecutable: true }));
+      assert(!!iterator);
+      while (++cycles < MAX_CYCLES) {
+        const { calls } = state;
+        if (calls.length) {
+          const value = calls.at(0);
+          const i = {
+            t: value.type,
+            v: valuesOf(value)[0]
+          }
+          if (value.type === ValueType.string) {
+            delete i.v;
+          }
+          const o = calls.topOperatorState;
+          const start = hrtime();
+          iterator.next();
+          const d = hrtime(start)[1];
+          iteration.push({ i, o, d });
+          timeSpent += d;
+        } else {
+          const { done } = iterator.next();
+          assert(done);
+          break;
         }
       }
-      const start = hrtime();
-      const { done } = iterator.next();
-      const duration = hrtime(start)[1];
-      timeSpent += duration;
-      if (instruction) {
-        measurements[instruction] ??= [];
-        measurements[instruction].push(duration);
-      }
-      if (done === true) {
-        break;
-      }
+      state.destroy();
+      result.push(iteration);
     }
-    result = state.operands.at(0);
-    state.destroy();
+    yield {
+      sampleCount,
+      cycles,
+      timeSpent,
+      // source,
+      result
+    };
   }
-  return result;
-}
+  
+  yield * execute('version', 1);
 
-const { string: version } = execute('version', 1);
-
-const registry = getOperatorDefinitionRegistry();
-for (const definition of Object.values(registry)) {
-  for (const sample of definition.samples) {
-    execute(sample.in);
-    execute(sample.out);
+  const registry = getOperatorDefinitionRegistry();
+  for (const definition of Object.values(registry)) {
+    for (const sample of definition.samples) {
+      yield * execute(sample.in);
+      yield * execute(sample.out);
+    }
   }
-}
-
-// Scalability use cases
-function* iterate(from, to) {
-  for (let index = from; index <= to; ++index) {
-    yield index;
+  
+  // Scalability use cases
+  function* iterate(from, to) {
+    for (let index = from; index <= to; ++index) {
+      yield index;
+    }
   }
+  
+  yield * execute(['[', ...iterate(0, 10_000), ']'].join(' '));
+  yield * execute(['{', ...iterate(0, 10_000), '}'].join(' '));
+  yield * execute(
+    '<<',
+    [ ...iterate(0, 10_000) ]
+      .map((value) => [`/value_${value}`, value])
+      .flat()
+      .join(' '),
+    '>>'
+  );
 }
 
 /*
-execute(['[', ...iterate(0, 10_000), ']'].join(' '));
-execute(['{', ...iterate(0, 10_000), '}'].join(' '));
-execute(
-  '<<',
-  [ ...iterate(0, 10_000) ]
-    .map((value) => [`/value_${value}`, value])
-    .flat()
-    .join(' '),
-  '>>'
-);
-*/
-
-console.log(`\nVersion   :${magenta}`, version, white);
-console.log('Samples   :', sampleCount);
-console.log('Cycles    :', cycles);
-console.log(`Duration  :${yellow}`, timeSpent.toLocaleString(), `${white}ns`);
-console.log('Cycles/ms :', Math.floor((10 ** 9 * cycles) / timeSpent) / 1000);
-const globalMean = Math.ceil(timeSpent / cycles);
-console.log('Mean      :', globalMean, 'ns');
 
 const intructions = Object.keys(measurements).sort();
 const statistics = {};
@@ -134,10 +147,4 @@ for (const instruction of intructions) {
     twicePercentile
   };
 }
-
-const maxOperatorWidth = Object.keys(statistics).reduce((max, length) => Math.max(max, length), 0)
-const maxCountWidth = Object.values(statistics).reduce((max, { count }) => Math.max(max, count.toString().length), 0)
-
-console.table(statistics);
-
-await writeFile('./performances.json', JSON.stringify(measurements, undefined, 2));
+*/
