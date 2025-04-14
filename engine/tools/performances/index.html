@@ -26,12 +26,40 @@ function compute() {
   });
 }
 
+class TimeBucket {
+  #count = 0;
+  #total = 0;
+  #ranges = [];
+
+  add (duration) {
+    ++this.#count;
+    ++this.#total;
+
+    index = duration / 100;
+    if (!this.#ranges[index]) {
+      this.#ranges[index] = 1;
+    } else {
+      ++this.#ranges;
+    }
+  }
+}
+
+const buckets = {};
+
 function analyze() {
   for (const { measures } of data) {
     for (const measure of measures.split(/[,|]/)) {
-      console.log(measure)
+      const [,type, name, operatorState, baseDuration] = measure.match(/(\w)(?::([^=@]+))?(?:@(-?\d+))?=(\d+)/)
+      const duration = baseDuration * 100
+      if (type === 'p') {
+        if (!buckets['-parser-']) {
+          buckets['-parser-'] = new TimeBucket();
+        }
+        buckets['-parser-'].add(duration);
+      }
     }
   }
+  console.log(buckets);
 }
     </script>
   </head>
@@ -48,8 +76,6 @@ function analyze() {
     <button onclick="compute()">Compute</button>
     /* Insert bucket size */    
     <button onclick="analyze()">Analyze</button>
-    <div class="progress">
-
-    </div>
+    <div class="progress"></div>
   </body>
 </html>
