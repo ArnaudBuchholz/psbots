@@ -3,6 +3,11 @@ import { createState, getOperatorDefinitionRegistry, ValueType } from '../dist/i
 import { toStringValue, assert, valuesOf } from '../dist/sdk/index.js';
 import { log, serve } from 'reserve';
 
+const cached = {
+  loops: undefined,
+  data: []
+};
+
 log(serve({
   port: 8080,
   mappings: [{
@@ -12,14 +17,23 @@ log(serve({
         'Content-Type': 'text/event-stream',
         'Cache-Control': 'no-cache',
       });
-      const iterator = compute(Number.parseInt(loops));
-      while (true) {
-        const next = iterator.next();
-        if (next.done) {
-          break;
+      if (cached.loops !== loops) {
+        cached.loops = loops;
+        cached.data.length = 0;
+        const iterator = compute(Number.parseInt(loops));
+        while (true) {
+          const next = iterator.next();
+          if (next.done) {
+            break;
+          }
+          cached.data.push(next.value);
+          response.write(`event: progress\ndata: ${JSON.stringify(next.value)}\n\n`);
+          await new Promise(resolve => setTimeout(resolve, 0));
         }
-        response.write(`event: progress\ndata: ${JSON.stringify(next.value)}\n\n`);
-        await new Promise(resolve => setTimeout(resolve, 0));
+      } else {
+        for (const data of cached.data) {
+          response.write(`event: progress\ndata: ${JSON.stringify(data)}\n\n`);
+        }
       }
       response.write(`event: done\ndata: \n\n`);
       response.end();
@@ -73,8 +87,8 @@ function * compute (loops) {
           const start = hrtime.bigint();
           iterator.next();
           const end = hrtime.bigint();
-          const duration = Number(end - start) / 100;
-          info.push('=', duration);
+          const duration = Number(end - start);
+          info.push('=', duration / 100);
           iteration.push(info.join(''));
           timeSpent += duration;
         } else {

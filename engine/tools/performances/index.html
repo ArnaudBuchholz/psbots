@@ -5,29 +5,51 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Performance measurement</title>
     <script>
+let data;
+
 function compute() {
-  const numberOfLoops = document.getElementById('loopCount').value;
+  const numberOfLoops = document.querySelector('#loopCount').value;
   const eventSource = new EventSource(`http://localhost:8080/compute/${numberOfLoops}`);
+  const progress = document.querySelector('.progress');
+  data = [];
 
   eventSource.addEventListener('progress', (event) => {
-    console.log(event.data);
+    const chunk = JSON.parse(event.data);
+    data.push(chunk);
+    progress.innerHTML = `sample count: ${chunk.sampleCount}, cycles: ${chunk.cycles}, time spent: ${chunk.timeSpent}`;
   });
 
   eventSource.addEventListener('done', () => {
     eventSource.close();
+    progress.innerHTML = 'Analyzing data...';
+    setTimeout(analyze, 0);
   });
+}
+
+function analyze() {
+  for (const { measures } of data) {
+    for (const measure of measures.split(/[,|]/)) {
+      console.log(measure)
+    }
+  }
 }
     </script>
   </head>
   <body>
-    <h1>Loop Computation</h1>
+    <h1>Performance measurement</h1>
     <label for="loopCount">Select number of loops:</label>
     <select id="loopCount">
         <option value="1">1</option>
+        <option value="10">10</option>
         <option value="100">100</option>
         <option value="500">500</option>
         <option value="1000">1000</option>
     </select>
     <button onclick="compute()">Compute</button>
+    /* Insert bucket size */    
+    <button onclick="analyze()">Analyze</button>
+    <div class="progress">
+
+    </div>
   </body>
 </html>
