@@ -35,11 +35,14 @@ class TimeBucket {
     ++this.#count;
     ++this.#total;
 
-    index = duration / 100;
+    const index = duration / 100;
+    if (isNaN(index)) {
+      debugger;
+    }
     if (!this.#ranges[index]) {
       this.#ranges[index] = 1;
     } else {
-      ++this.#ranges;
+      ++this.#ranges[index];
     }
   }
 }
@@ -56,6 +59,11 @@ function analyze() {
           buckets['-parser-'] = new TimeBucket();
         }
         buckets['-parser-'].add(duration);
+      } else if (type === 'o') {
+        if (!buckets[`-${name}-`]) {
+          buckets[`-${name}-`] = new TimeBucket();
+        }
+        buckets[`-${name}-`].add(duration);
       }
     }
   }
