@@ -61,6 +61,45 @@ function analyze() {
   }
   console.log(buckets);
 }
+
+/*
+
+const intructions = Object.keys(measurements).sort();
+const statistics = {};
+for (const instruction of intructions) {
+  const durations = measurements[instruction];
+  const totalDuration = durations.reduce((total, duration) => duration + total);
+  const mean = Math.floor(totalDuration / durations.length);
+  const variance = Math.floor(
+    Math.sqrt(durations.reduce((total, duration) => total + (mean - duration) ** 2, 0) / (durations.length - 1))
+  );
+  const halfPercentile = Math.floor(
+    (100 * durations.reduce((total, duration) => total + (2 * duration <= mean ? 1 : 0), 0)) / durations.length
+  );
+  const meanPercentile = Math.floor(
+    (100 * durations.reduce((total, duration) => total + (duration <= mean ? 1 : 0), 0)) / durations.length
+  );
+  const twicePercentile = Math.floor(
+    (100 * durations.reduce((total, duration) => total + (duration >= 2 * mean ? 1 : 0), 0)) / durations.length
+  );
+  statistics[instruction] = {
+    count: durations.length,
+    't (ns)': mean, // > 2 * globalMean ? `${red}${mean}${white}` : `${yellow}${mean}${white}`,
+    Δ: variance,
+    '≤t%': meanPercentile,
+    '≤½t%': halfPercentile,
+    '≥2t%': twicePercentile
+  };
+  measurements[instruction] = {
+    durations,
+    mean,
+    variance,
+    meanPercentile,
+    twicePercentile
+  };
+}
+*/
+
     </script>
   </head>
   <body>

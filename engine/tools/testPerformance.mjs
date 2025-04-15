@@ -1,58 +1,93 @@
 import { hrtime } from 'node:process';
-import { createState, getOperatorDefinitionRegistry, ValueType } from '../dist/index.js';
-import { toStringValue, assert, valuesOf } from '../dist/sdk/index.js';
+import { readdir, readFile, stat, unlink, writeFile } from 'node:fs/promises';
+import { join } from 'node:path';
 import { log, serve } from 'reserve';
 
-const cached = {
-  loops: undefined,
-  data: []
-};
+async function getLastModifiedTimestamp(path = 'dist') {
+  const files = await readdir(path);
+  let lastModifiedTimestamp = 0;
+  for (const filename of files) {
+    const fileStat = await stat(join(path, filename));
+    lastModifiedTimestamp = fileStat.isDirectory()
+      ? Math.max(lastModifiedTimestamp, await getLastModifiedTimestamp(join(path, filename)))
+      : Math.max(lastModifiedTimestamp, fileStat.mtimeMs);
+  }
+  return lastModifiedTimestamp;
+}
 
-log(serve({
-  port: 8080,
-  mappings: [{
-    match: '/compute/:loops',
-    custom: async (request, response, loops) => {
-      response.writeHead(200, {
-        'Content-Type': 'text/event-stream',
-        'Cache-Control': 'no-cache',
-      });
-      if (cached.loops !== loops) {
-        cached.loops = loops;
-        cached.data.length = 0;
-        const iterator = compute(Number.parseInt(loops));
-        while (true) {
-          const next = iterator.next();
-          if (next.done) {
-            break;
+log(
+  serve({
+    port: 8080,
+    mappings: [
+      {
+        match: '/compute/:loops',
+        custom: async (request, response, loops) => {
+          const cachedFilename = `perf-${loops}.jsonl`;
+          let generate = false;
+          try {
+            const cachedStat = await stat(cachedFilename);
+            const distributionTimestamp = await getLastModifiedTimestamp();
+            generate = distributionTimestamp > cachedStat.mtimeMs;
+            if (generate) {
+              await unlink(cachedFilename);
+            }
+          } catch {
+            generate = true;
           }
-          cached.data.push(next.value);
-          response.write(`event: progress\ndata: ${JSON.stringify(next.value)}\n\n`);
-          await new Promise(resolve => setTimeout(resolve, 0));
+          response.writeHead(200, {
+            'Content-Type': 'text/event-stream',
+            'Cache-Control': 'no-cache'
+          });
+          if (generate) {
+            const iterator = compute(Number.parseInt(loops));
+            while (true) {
+              const next = await iterator.next();
+              if (next.done) {
+                break;
+              }
+              const data = JSON.stringify(next.value) + '\n';
+              response.write(`event: progress\ndata: ${data}\n`);
+              await writeFile(cachedFilename, data, { flag: 'a+' });
+            }
+          } else {
+            const cached = await readFile(cachedFilename, 'utf8');
+            for (const data of cached.split('\n')) {
+              if (data.trim()) {
+                response.write(`event: progress\ndata: ${data}\n\n`);
+              }
+            }
+          }
+          response.write(`event: done\ndata: \n\n`);
+          response.end();
         }
-      } else {
-        for (const data of cached.data) {
-          response.write(`event: progress\ndata: ${JSON.stringify(data)}\n\n`);
-        }
+      },
+      {
+        match: '(.*)',
+        file: 'tools/performances/$1',
+        static: false
       }
-      response.write(`event: done\ndata: \n\n`);
-      response.end();
-    }
-  }, {
-    match: '(.*)',
-    file: 'tools/performances/$1',
-    static: false
-  }]
-}));
+    ]
+  })
+);
 
 const MAX_CYCLES = 10 ** 9;
 
-function * compute (loops) {
+function* iterate(from, to) {
+  for (let index = from; index <= to; ++index) {
+    yield index;
+  }
+}
+
+async function* compute(loops) {
+  const { createState, getOperatorDefinitionRegistry, ValueType } = await import('../dist/index.js');
+  const { toStringValue, assert } = await import('../dist/sdk/index.js');
+
   let sampleCount = 0;
   let cycles = 0;
   let timeSpent = 0; // nanoseconds
-  
-  function * execute(source) {
+
+  // eslint-disable-next-line sonarjs/cognitive-complexity -- not production code
+  function* execute(source) {
     const result = [];
     ++sampleCount;
     for (let loop = 0; loop < loops; ++loop) {
@@ -63,7 +98,7 @@ function * compute (loops) {
       assert(!!iterator);
       while (++cycles < MAX_CYCLES) {
         const { calls } = state;
-        if (calls.length) {
+        if (calls.length > 0) {
           const value = calls.at(0);
           const info = [];
           if (!value.isExecutable) {
@@ -77,8 +112,7 @@ function * compute (loops) {
           } else if (value.type === ValueType.name) {
             info.push('n:', value.name);
           } else {
-            console.log('How to handle', value.type);
-            process.exit(0);
+            throw new Error(`How to handle ${value.type}`);
           }
           const operatorState = calls.topOperatorState;
           if (operatorState !== 0 && operatorState !== Number.POSITIVE_INFINITY) {
@@ -107,72 +141,19 @@ function * compute (loops) {
       measures: result.join('|')
     };
   }
-  
-  yield * execute('version', 1);
+
+  yield* execute('version');
 
   const registry = getOperatorDefinitionRegistry();
   for (const definition of Object.values(registry)) {
     for (const sample of definition.samples) {
-      yield * execute(sample.in);
-      yield * execute(sample.out);
+      yield* execute(sample.in);
+      yield* execute(sample.out);
     }
   }
-  
-/*
+
   // Scalability use cases
-  function* iterate(from, to) {
-    for (let index = from; index <= to; ++index) {
-      yield index;
-    }
-  }
-  
-  yield * execute(['[', ...iterate(0, 10_000), ']'].join(' '));
-  yield * execute(['{', ...iterate(0, 10_000), '}'].join(' '));
-  yield * execute(
-    '<<',
-    [ ...iterate(0, 10_000) ]
-      .map((value) => [`/value_${value}`, value])
-      .flat()
-      .join(' '),
-    '>>'
-  );
-*/
+  yield* execute(['[', ...iterate(0, 1000), ']'].join(' '));
+  yield* execute(['{', ...iterate(0, 1000), '}'].join(' '));
+  yield* execute('<<' + [...iterate(0, 1000)].flatMap((value) => [`/value_${value}`, value]).join(' ') + '>>');
 }
-
-/*
-
-const intructions = Object.keys(measurements).sort();
-const statistics = {};
-for (const instruction of intructions) {
-  const durations = measurements[instruction];
-  const totalDuration = durations.reduce((total, duration) => duration + total);
-  const mean = Math.floor(totalDuration / durations.length);
-  const variance = Math.floor(
-    Math.sqrt(durations.reduce((total, duration) => total + (mean - duration) ** 2, 0) / (durations.length - 1))
-  );
-  const halfPercentile = Math.floor(
-    (100 * durations.reduce((total, duration) => total + (2 * duration <= mean ? 1 : 0), 0)) / durations.length
-  );
-  const meanPercentile = Math.floor(
-    (100 * durations.reduce((total, duration) => total + (duration <= mean ? 1 : 0), 0)) / durations.length
-  );
-  const twicePercentile = Math.floor(
-    (100 * durations.reduce((total, duration) => total + (duration >= 2 * mean ? 1 : 0), 0)) / durations.length
-  );
-  statistics[instruction] = {
-    count: durations.length,
-    't (ns)': mean, // > 2 * globalMean ? `${red}${mean}${white}` : `${yellow}${mean}${white}`,
-    Δ: variance,
-    '≤t%': meanPercentile,
-    '≤½t%': halfPercentile,
-    '≥2t%': twicePercentile
-  };
-  measurements[instruction] = {
-    durations,
-    mean,
-    variance,
-    meanPercentile,
-    twicePercentile
-  };
-}
-*/
