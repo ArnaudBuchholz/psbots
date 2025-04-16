@@ -30,6 +30,7 @@ class TimeBucket {
   #count = 0;
   #total = 0;
   #ranges = [];
+  #max = 0;
 
   add (duration) {
     ++this.#count;
@@ -42,7 +43,7 @@ class TimeBucket {
     if (!this.#ranges[index]) {
       this.#ranges[index] = 1;
     } else {
-      ++this.#ranges[index];
+      this.#max = Math.max(++this.#ranges[index], this.#max);
     }
   }
 
@@ -53,6 +54,10 @@ class TimeBucket {
         delete this.#ranges[index];
       }
     }
+  }
+
+  ratio (index) {
+    return (this.#ranges[index] ?? 0)/ this.#max;
   }
 }
 
@@ -85,7 +90,16 @@ function analyze() {
     bucket.clean();
     const row = tbody.appendChild(document.createElement('tr'));
     row.appendChild(document.createElement('td')).innerHTML = key;
-    const analysis = row.appendChild(document.createElement('td'));
+    const bars = [];
+    const colors = ['#0000FF', '#00FFFF', '#00FF00', '#FFFF00', '#FF7F00', '#FF0000'];
+    for (let index = 0; index < 100; ++index) {
+      const ratio = bucket.ratio(index);
+      if (ratio > 0) {
+        const color = ratio === 1? colors.at(-1) : colors[Math.floor(ratio * colors.length)];
+        bars.push(`<rect x="${index}" y="0" width="1" height="20" fill="${color}"/>`)
+      }
+    }
+    row.appendChild(document.createElement('td')).innerHTML = `<svg width="100" height="20" version="1.1" xmlns="http://www.w3.org/2000/svg">${bars.join('')}</svg>`;
   }
 
   document.querySelector('.progress').innerHTML = '';
