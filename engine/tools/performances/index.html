@@ -45,6 +45,15 @@ class TimeBucket {
       ++this.#ranges[index];
     }
   }
+
+  clean () {
+    const threshold = Math.ceil(this.#count / 100);
+    for (let index = 0; index < this.#ranges.length; ++index) {
+      if (this.#ranges[index] < threshold) {
+        delete this.#ranges[index];
+      }
+    }
+  }
 }
 
 const buckets = {};
@@ -67,7 +76,19 @@ function analyze() {
       }
     }
   }
-  console.log(buckets);
+
+  const keys = Object.keys(buckets).sort();
+  const tbody = document.querySelector('tbody');
+  tbody.innerHTML = '';
+  for (const key of keys) {
+    const bucket = buckets[key];
+    bucket.clean();
+    const row = tbody.appendChild(document.createElement('tr'));
+    row.appendChild(document.createElement('td')).innerHTML = key;
+    const analysis = row.appendChild(document.createElement('td'));
+  }
+
+  document.querySelector('.progress').innerHTML = '';
 }
 
 /*
@@ -121,8 +142,16 @@ for (const instruction of intructions) {
         <option value="1000">1000</option>
     </select>
     <button onclick="compute()">Compute</button>
-    /* Insert bucket size */    
-    <button onclick="analyze()">Analyze</button>
     <div class="progress"></div>
+    <table>
+      <thead>
+        <tr>
+          <th>instruction</th>
+          <th>bucket</th>
+        </tr>
+      </thead>
+      <tbody>
+      </tbody>
+    </table>
   </body>
 </html>
