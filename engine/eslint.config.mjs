@@ -21,7 +21,7 @@ export default [
     }
   },
   {
-    ignores: ['**/*.mjs', '**/*.spec.ts'],
+    ignores: ['**/*.mjs', '**/*.spec.ts', 'tools/performances/index.js'],
     rules: {
       'no-restricted-syntax': [
         'error',
@@ -49,6 +49,14 @@ export default [
     languageOptions: {
       globals: {
         ...globals.node
+      }
+    }
+  },
+  {
+    files: ['tools/performances/index.js'],
+    languageOptions: {
+      globals: {
+        ...globals.browser
       }
     }
   }

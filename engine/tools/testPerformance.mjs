@@ -3,6 +3,38 @@ import { readdir, readFile, stat, unlink, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { log, serve } from 'reserve';
 
+function getResolution() {
+  const COUNT = 10_000;
+  const measures = Array.from({ length: COUNT }).fill(0);
+  let last = process.hrtime.bigint();
+  for (let index = 0; index < COUNT; ++index) {
+    const now = process.hrtime.bigint();
+    measures[index] = Number(now - last);
+    last = now;
+  }
+  // Transform in power of 10 and group results
+  const powers = [];
+  for (const value of measures) {
+    const powerOf10 = Math.round(Math.log10(value));
+    if (powers[powerOf10]) {
+      ++powers[powerOf10];
+    } else {
+      powers[powerOf10] = 1;
+    }
+  }
+  let powerOf10;
+  let countForPowerOf10 = 0;
+  for (const [index, count] of powers.entries()) {
+    if (count && count > countForPowerOf10) {
+      countForPowerOf10 = count;
+      powerOf10 = index;
+    }
+  }
+  return 10 ** powerOf10;
+}
+
+console.log('Resolution:', getResolution());
+
 async function getLastModifiedTimestamp(path = 'dist') {
   const files = await readdir(path);
   let lastModifiedTimestamp = 0;
@@ -15,28 +47,39 @@ async function getLastModifiedTimestamp(path = 'dist') {
   return lastModifiedTimestamp;
 }
 
+async function shouldGenerate(cachedFilename) {
+  let generate = false;
+  try {
+    const cachedStat = await stat(cachedFilename);
+    const testPerformanceStat = await stat(import.meta.filename);
+    const distributionTimestamp = await getLastModifiedTimestamp();
+    generate = distributionTimestamp > cachedStat.mtimeMs || testPerformanceStat.mtimeMs > cachedStat.mtimeMs;
+  } catch {
+    generate = true;
+  }
+  if (generate) {
+    try {
+      await unlink(cachedFilename);
+    } catch {
+      // The file may not exist
+    }
+  }
+  return generate;
+}
+
 log(
   serve({
     port: 8080,
     mappings: [
       {
+        match: '/resolution',
+        custom: () => [getResolution(), { headers: { 'content-type': 'application/json' } }]
+      },
+      {
         match: '/compute/:loops',
         custom: async (request, response, loops) => {
           const cachedFilename = `perf-${loops}.jsonl`;
-          let generate = false;
-          try {
-            const cachedStat = await stat(cachedFilename);
-            const testPerformanceStat = await stat(import.meta.filename);
-            const distributionTimestamp = await getLastModifiedTimestamp();
-            generate = distributionTimestamp > cachedStat.mtimeMs || testPerformanceStat.mtimeMs > cachedStat.mtimeMs;
-          } catch {
-            generate = true;
-          }
-          if (generate) {
-            try {
-              await unlink(cachedFilename);
-            } catch {}
-          }
+          const generate = await shouldGenerate(cachedFilename);
           response.writeHead(200, {
             'Content-Type': 'text/event-stream',
             'Cache-Control': 'no-cache'
