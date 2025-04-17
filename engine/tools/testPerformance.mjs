@@ -26,13 +26,14 @@ log(
           let generate = false;
           try {
             const cachedStat = await stat(cachedFilename);
+            const testPerformanceStat = await stat(import.meta.filename);
             const distributionTimestamp = await getLastModifiedTimestamp();
-            generate = distributionTimestamp > cachedStat.mtimeMs;
-            if (generate) {
-              await unlink(cachedFilename);
-            }
+            generate = distributionTimestamp > cachedStat.mtimeMs || testPerformanceStat.mtimeMs > cachedStat.mtimeMs;
           } catch {
             generate = true;
+          }
+          if (generate) {
+            await unlink(cachedFilename);
           }
           response.writeHead(200, {
             'Content-Type': 'text/event-stream',
@@ -122,7 +123,7 @@ async function* compute(loops) {
           iterator.next();
           const end = hrtime.bigint();
           const duration = Number(end - start);
-          info.push('=', duration / 100);
+          info.push('=', duration);
           iteration.push(info.join(''));
           timeSpent += duration;
         } else {
@@ -153,7 +154,7 @@ async function* compute(loops) {
   }
 
   // Scalability use cases
-  yield* execute(['[', ...iterate(0, 1000), ']'].join(' '));
+  yield* execute(['[', ...iterate(0, 1000), ']', 'aload'].join(' '));
   yield* execute(['{', ...iterate(0, 1000), '}'].join(' '));
   yield* execute('<<' + [...iterate(0, 1000)].flatMap((value) => [`/value_${value}`, value]).join(' ') + '>>');
 }
