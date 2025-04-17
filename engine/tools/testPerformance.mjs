@@ -33,7 +33,9 @@ log(
             generate = true;
           }
           if (generate) {
-            await unlink(cachedFilename);
+            try {
+              await unlink(cachedFilename);
+            } catch {}
           }
           response.writeHead(200, {
             'Content-Type': 'text/event-stream',
