@@ -18,6 +18,10 @@ buildFunctionOperator(
   },
   ({ operands }, arrayValue) => {
     const { array } = arrayValue;
+    /* TODO: grow the operand stack, loop over the array elements:
+     * - keep the array on top
+     * - popush each element one by one
+     */
     return operands.popush(1, [...enumIArrayValues(array)], arrayValue);
   }
 );
