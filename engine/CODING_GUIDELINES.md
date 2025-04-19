@@ -57,11 +57,14 @@ releaseString(string: string): boolean
 
 * Operators *must* have a **predictable** cycle length : **no iteration** should occur within a cycle, use `operatorState` to iterate.
 
-* To enable debugging, operators *must* leave the engine in a *comprehensive* state when they fail :
+* To enable debugging, operators *must* leave the engine in a *comprehensive* state when they **fail** :
   * the operand stack *must* reflect the operator parameters,
   * the dictionary stack *must* reflect the state *before* the operator was executed,
   * the call stack *might* not be changed.
- 
+
+> [!IMPORTANT]  
+> Some operators may modify the operand stack along the cycles, it is *acceptable* only if they do not fail during those cycles.
+
 > [!IMPORTANT]  
 > When the operator requires several cycles, we must distinguish the two **phases** :
 > 
