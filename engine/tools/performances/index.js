@@ -1,5 +1,4 @@
-const BUCKET_RANGE = 10;
-
+let resolution = 10;
 let data;
 
 function compute() {
@@ -43,7 +42,7 @@ class TimeBucket {
 
   add(duration) {
     ++this.#count;
-    const index = Math.floor(duration / BUCKET_RANGE);
+    const index = Math.floor(duration / resolution);
     if (this.#ranges[index]) {
       ++this.#ranges[index];
     } else {
@@ -143,11 +142,13 @@ function analyze() {
   }
 
   document.querySelector('.progress').innerHTML = '';
-  for (const span of document.querySelectorAll('.bucket_range')) {
-    span.innerHTML = BUCKET_RANGE.toString();
-  }
 }
 
-window.addEventListener('load', () => {
+window.addEventListener('load', async () => {
   document.querySelector('button').addEventListener('click', compute);
+  const resolutionResponse = await fetch('/resolution');
+  resolution = await resolutionResponse.json();
+  for (const span of document.querySelectorAll('.bucket_range')) {
+    span.innerHTML = resolution.toString();
+  }
 });
