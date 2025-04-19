@@ -33,8 +33,6 @@ function getResolution() {
   return 10 ** powerOf10;
 }
 
-console.log('Resolution:', getResolution());
-
 async function getLastModifiedTimestamp(path = 'dist') {
   const files = await readdir(path);
   let lastModifiedTimestamp = 0;
