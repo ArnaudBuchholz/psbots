@@ -256,7 +256,7 @@ Here the list of official POSTSCRIPT operators extracted from this [index](https
 |rectstroke|📄|
 |rectviewclip|📄|
 |renamefile|❓|
-|repeat|🚧|
+|repeat|✅∗|
 |resetfile|❓|
 |resourceforall|❓|
 |resourcestatus|❓|

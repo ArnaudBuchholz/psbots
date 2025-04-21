@@ -4,4 +4,5 @@ import './if.js';
 import './ifelse.js';
 import './loop.js';
 import './openBlock.js';
+import './repeat.js';
 import './stopped.js';
