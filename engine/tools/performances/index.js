@@ -3,7 +3,14 @@ let data;
 
 function compute() {
   const numberOfLoops = document.querySelector('#loopCount').value;
-  const eventSource = new EventSource(`http://localhost:8080/compute/${numberOfLoops}`);
+  const flags = [];
+  if (document.querySelector('#samples').checked) {
+    flags.push('s');
+  }
+  if (document.querySelector('#scalability').checked) {
+    flags.push('S');
+  }
+  const eventSource = new EventSource(`http://localhost:8080/compute/${numberOfLoops}/${flags.join('')}`);
   const progress = document.querySelector('.progress');
   data = [];
 
@@ -80,7 +87,7 @@ function fillBuckets() {
   for (const { measures } of data) {
     for (const measure of measures.split(/[,|]/)) {
       // eslint-disable-next-line security/detect-unsafe-regex
-      const [, type, name /* operatorState */, , baseDuration] = measure.match(/(\w)(?::([^=@]+))?(?:@(-?\d+))?=(\d+)/);
+      const [, type, name, operatorState, baseDuration] = measure.match(/(\w)(?::([^=@]+))?(?:@(-?\d+))?=(\d+)/);
       const duration = Number.parseInt(baseDuration);
       if (type === 'p') {
         if (!buckets['-parser-']) {
@@ -88,10 +95,14 @@ function fillBuckets() {
         }
         buckets['-parser-'].add(duration);
       } else if (type === 'o') {
-        if (!buckets[`-${name}-`]) {
-          buckets[`-${name}-`] = new TimeBucket();
+        let bucketName = `-${name}-`;
+        if (operatorState > 0) {
+          bucketName += `+`;
         }
-        buckets[`-${name}-`].add(duration);
+        if (!buckets[bucketName]) {
+          buckets[bucketName] = new TimeBucket();
+        }
+        buckets[bucketName].add(duration);
       }
     }
   }

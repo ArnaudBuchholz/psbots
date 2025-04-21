@@ -74,16 +74,16 @@ log(
         custom: () => [getResolution(), { headers: { 'content-type': 'application/json' } }]
       },
       {
-        match: '/compute/:loops',
-        custom: async (request, response, loops) => {
-          const cachedFilename = `perf-${loops}.jsonl`;
+        match: '/compute/:loops/:flags',
+        custom: async (request, response, loops, flags) => {
+          const cachedFilename = `perf-${loops}-${flags}.jsonl`;
           const generate = await shouldGenerate(cachedFilename);
           response.writeHead(200, {
             'Content-Type': 'text/event-stream',
             'Cache-Control': 'no-cache'
           });
           if (generate) {
-            const iterator = compute(Number.parseInt(loops));
+            const iterator = compute(Number.parseInt(loops), flags);
             while (true) {
               const next = await iterator.next();
               if (next.done) {
@@ -122,7 +122,7 @@ function* iterate(from, to) {
   }
 }
 
-async function* compute(loops) {
+async function* compute(loops, flags) {
   const { createState, getOperatorDefinitionRegistry, ValueType } = await import('../dist/index.js');
   const { toStringValue, assert } = await import('../dist/sdk/index.js');
 
@@ -186,18 +186,21 @@ async function* compute(loops) {
     };
   }
 
-  yield* execute('version');
-
-  const registry = getOperatorDefinitionRegistry();
-  for (const definition of Object.values(registry)) {
-    for (const sample of definition.samples) {
-      yield* execute(sample.in);
-      yield* execute(sample.out);
+  if (flags.includes('s')) {
+    yield* execute('version');
+    const registry = getOperatorDefinitionRegistry();
+    for (const definition of Object.values(registry)) {
+      for (const sample of definition.samples) {
+        yield* execute(sample.in);
+        yield* execute(sample.out);
+      }
     }
   }
 
-  // Scalability use cases
-  yield* execute(['[', ...iterate(0, 1000), ']', 'aload'].join(' '));
-  yield* execute(['{', ...iterate(0, 1000), '}'].join(' '));
-  yield* execute('<<' + [...iterate(0, 1000)].flatMap((value) => [`/value_${value}`, value]).join(' ') + '>>');
+  if (flags.includes('S')) {
+    // Scalability use cases
+    yield* execute(['[', ...iterate(0, 1000), ']', 'aload'].join(' '));
+    yield* execute(['{', ...iterate(0, 1000), '}'].join(' '));
+    yield* execute('<<' + [...iterate(0, 1000)].flatMap((value) => [`/value_${value}`, value]).join(' ') + '>>');
+  }
 }
