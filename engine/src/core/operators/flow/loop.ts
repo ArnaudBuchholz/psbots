@@ -35,7 +35,10 @@ buildFunctionOperator(
     const { topOperatorState } = calls;
     if (topOperatorState === OPERATOR_STATE_FIRST_CALL) {
       calls.topOperatorState = OPERATOR_STATE_CALL_BEFORE_POP;
-      calls.def(LOOP_BLOCK, codeBlock);
+      const defined = calls.def(LOOP_BLOCK, codeBlock);
+      if (!defined.success) {
+        return defined;
+      }
       operands.pop();
       return calls.push(codeBlock);
     }
