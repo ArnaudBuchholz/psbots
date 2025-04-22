@@ -6,6 +6,7 @@ import { createStateOperator } from './state.js';
 import { createHelpOperator } from './help.js';
 import { createPstackOperator } from './pstack.js';
 import { createDebugOperator } from './debug.js';
+import { createPerfOperator } from './perf.js';
 
 export class ReplHostDictionary implements IReadOnlyDictionary {
   private mappings: Record<string, Value> = {};
@@ -16,6 +17,7 @@ export class ReplHostDictionary implements IReadOnlyDictionary {
     this.mappings['help'] = createHelpOperator(replIO);
     this.mappings['pstack'] = createPstackOperator(replIO);
     this.mappings['debug'] = createDebugOperator(this);
+    this.mappings['perf'] = createPerfOperator(replIO);
   }
 
   get names() {
