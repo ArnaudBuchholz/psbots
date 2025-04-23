@@ -2,11 +2,11 @@ import { getOperatorDefinitionRegistry, createState, ValueType } from '@psbots/e
 import type { Result, Value, IState } from '@psbots/engine';
 import { assert, OperatorType, toStringValue } from '@psbots/engine/sdk';
 import type { IFunctionOperator, IInternalState } from '@psbots/engine/sdk';
-import { cyan, red, yellow, white } from '../colors.js';
+import { cyan, yellow, white } from '../colors.js';
 import type { IReplIO } from '../IReplIo.js';
 
 const MAX_CYCLES = 10 ** 9;
-const TICKS = ['\u280b', '\u2819', '\u2839', '\u2838', '\u283c', '\u2834', '\u2826', '\u2827', '\u2807', '\u280f'];
+const TICKS = ['\u280B', '\u2819', '\u2839', '\u2838', '\u283C', '\u2834', '\u2826', '\u2827', '\u2807', '\u280F'];
 let RESOLUTION = 0;
 
 function getResolution() {
@@ -15,8 +15,11 @@ function getResolution() {
   let last = performance.now() * 1_000_000;
   for (let index = 0; index < COUNT; ++index) {
     const now = performance.now() * 1_000_000;
-    const index = Math.round(Math.log10(now - last));
-    powersOf10[index] = (powersOf10[index] ?? 0) + 1;
+    let powerOf10 = Math.round(Math.log10(now - last));
+    if (powerOf10 === Number.NEGATIVE_INFINITY) {
+      powerOf10 = 0;
+    }
+    powersOf10[powerOf10] = (powersOf10[powerOf10] ?? 0) + 1;
     last = now;
   }
   let powerOf10: number = 1;
@@ -97,7 +100,7 @@ function getMeasureName({ calls }: IState) {
   if (value.type === ValueType.operator) {
     const { topOperatorState } = calls;
     if (topOperatorState !== 0 && topOperatorState !== Number.POSITIVE_INFINITY) {
-      return `-${value.operator.name}-@${ topOperatorState > 0 ? '+' : '-' }`;
+      return `-${value.operator.name}-@${topOperatorState > 0 ? '+' : '-'}`;
     }
     return `-${value.operator.name}-`;
   }
@@ -126,7 +129,7 @@ function execute(value: Value, context: ExecuteContext): void {
     assert(executed);
     const { value: iterator } = executed;
     while (++cycles < MAX_CYCLES) {
-      if (context.lastUpdate === undefined || (Date.now() - context.lastUpdate) > 250) {
+      if (context.lastUpdate === undefined || Date.now() - context.lastUpdate > 250) {
         const tick = context.lastTick ?? 0;
         context.replIO.output(`\r${cyan}${TICKS[tick]}${white}`);
         context.lastUpdate = Date.now();
@@ -163,6 +166,35 @@ function measureAllOperators(context: ExecuteContext) {
   }
 }
 
+/*
+    [ ...iterate(0, 1000) ] aload
+    { ...iterate(0, 1000) }
+    << /value_0 0 ... /value_1000 1000 >>
+*/
+
+function report({ replIO, measures }: ExecuteContext) {
+  const keys = Object.keys(measures).sort();
+  let maxKeyLength = 0;
+  for (const key of keys) {
+    maxKeyLength = Math.max(maxKeyLength, key.length);
+    const bucket = measures[key];
+    if (!bucket) {
+      replIO.output(`❌ missing bucket for ${key}`);
+      continue;
+    }
+    bucket.clean();
+  }
+  for (const key of keys) {
+    const bucket = measures[key];
+    if (!bucket) {
+      continue;
+    }
+    replIO.output(key.padEnd(maxKeyLength, ' ') + ' ');
+    replIO.output(bucket.mean.toString());
+    replIO.output('\r\n');
+  }
+}
+
 export function createPerfOperator(replIO: IReplIO): Value<ValueType.operator> {
   return {
     type: ValueType.operator,
@@ -173,35 +205,32 @@ export function createPerfOperator(replIO: IReplIO): Value<ValueType.operator> {
       type: OperatorType.implementation,
       implementation: (internalState: IInternalState): Result<undefined> => {
         const { operands } = internalState;
-        if (operands.length < 2) {
+        if (operands.length === 0) {
           return { success: false, exception: 'rangeCheck' };
         }
         const value = operands.top;
-        if (
-          (value.type !== ValueType.array || !value.isExecutable) &&
-          (value.type !== ValueType.string || value.string !== 'default')
-        ) {
+        if (value.type !== ValueType.dictionary) {
           return { success: false, exception: 'typeCheck' };
         }
-        const loops = operands.at(1);
-        if (loops.type !== ValueType.integer) {
+        const definition = value.dictionary;
+        const loopsValue = definition.lookup('loops');
+        if (loopsValue.type !== ValueType.integer) {
           return { success: false, exception: 'typeCheck' };
         }
+        const loops = loopsValue.integer;
         if (RESOLUTION === 0) {
           getResolution();
         }
         replIO.output(`${cyan}Resolution: ${yellow}${RESOLUTION.toString()}${cyan}ns${white}\r\n`);
         const context: ExecuteContext = {
-          loops: loops.integer,
+          loops,
           measures: {},
           replIO
         };
-        if (value.type === ValueType.string) {
-          measureAllOperators(context);
-          replIO.output(`\r`);
-        } else {
-          replIO.output(`${red}Not implemented${white}\r\n`);
-        }
+        measureAllOperators(context);
+        replIO.output(`\r`);
+        report(context);
+        operands.pop();
         return { success: true, value: undefined };
       }
     }
