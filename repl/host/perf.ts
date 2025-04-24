@@ -4,17 +4,21 @@ import { assert, OperatorType, toStringValue } from '@psbots/engine/sdk';
 import type { IFunctionOperator, IInternalState } from '@psbots/engine/sdk';
 import { cyan, yellow, white } from '../colors.js';
 import type { IReplIO } from '../IReplIo.js';
+import type { ReplHostDictionary } from './index.js';
 
 const MAX_CYCLES = 10 ** 9;
 const TICKS = ['\u280B', '\u2819', '\u2839', '\u2838', '\u283C', '\u2834', '\u2826', '\u2827', '\u2807', '\u280F'];
 let RESOLUTION = 0;
 
-function getResolution() {
+async function getResolution() {
   const COUNT = 10_000;
   const powersOf10: number[] = [];
   let last = performance.now() * 1_000_000;
   for (let index = 0; index < COUNT; ++index) {
-    const now = performance.now() * 1_000_000;
+    let now: number;
+    do {
+      now = performance.now() * 1_000_000;
+    } while (now === last);
     let powerOf10 = Math.round(Math.log10(now - last));
     if (powerOf10 === Number.NEGATIVE_INFINITY) {
       powerOf10 = 0;
@@ -118,7 +122,7 @@ type ExecuteContext = {
   lastTick?: number;
 };
 
-function execute(value: Value, context: ExecuteContext): void {
+async function evaluate(value: Value, context: ExecuteContext) {
   const { loops, measures } = context;
   let cycles = 0;
   for (let loop = 0; loop < loops; ++loop) {
@@ -134,6 +138,7 @@ function execute(value: Value, context: ExecuteContext): void {
         context.replIO.output(`\r${cyan}${TICKS[tick]}${white}`);
         context.lastUpdate = Date.now();
         context.lastTick = (tick + 1) % TICKS.length;
+        await new Promise((resolve) => setTimeout(resolve, 0));
       }
       const { calls } = state;
       if (calls.length > 0) {
@@ -155,13 +160,13 @@ function execute(value: Value, context: ExecuteContext): void {
   }
 }
 
-function measureAllOperators(context: ExecuteContext) {
-  execute(toStringValue('version', { isExecutable: true }), context);
+async function measureAllOperators(context: ExecuteContext) {
+  await evaluate(toStringValue('version', { isExecutable: true }), context);
   const registry = getOperatorDefinitionRegistry();
   for (const definition of Object.values(registry)) {
     for (const sample of definition.samples) {
-      execute(toStringValue(sample.in, { isExecutable: true }), context);
-      execute(toStringValue(sample.out, { isExecutable: true }), context);
+      await evaluate(toStringValue(sample.in, { isExecutable: true }), context);
+      await evaluate(toStringValue(sample.out, { isExecutable: true }), context);
     }
   }
 }
@@ -195,7 +200,17 @@ function report({ replIO, measures }: ExecuteContext) {
   }
 }
 
-export function createPerfOperator(replIO: IReplIO): Value<ValueType.operator> {
+async function execute(context: ExecuteContext) {
+  if (RESOLUTION === 0) {
+    await getResolution();
+  }
+  context.replIO.output(`${cyan}Resolution: ${yellow}${RESOLUTION.toString()}${cyan}ns${white}\r\n`);
+  await measureAllOperators(context);
+  context.replIO.output(`\r`);
+  report(context);
+}
+
+export function createPerfOperator(host: ReplHostDictionary): Value<ValueType.operator> {
   return {
     type: ValueType.operator,
     isExecutable: true,
@@ -218,19 +233,14 @@ export function createPerfOperator(replIO: IReplIO): Value<ValueType.operator> {
           return { success: false, exception: 'typeCheck' };
         }
         const loops = loopsValue.integer;
-        if (RESOLUTION === 0) {
-          getResolution();
-        }
-        replIO.output(`${cyan}Resolution: ${yellow}${RESOLUTION.toString()}${cyan}ns${white}\r\n`);
         const context: ExecuteContext = {
           loops,
           measures: {},
-          replIO
+          replIO: host.replIO,
         };
-        measureAllOperators(context);
-        replIO.output(`\r`);
-        report(context);
         operands.pop();
+        host.block();
+        execute(context).then(() => host.unblock());
         return { success: true, value: undefined };
       }
     }

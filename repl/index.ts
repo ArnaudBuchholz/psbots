@@ -90,6 +90,7 @@ export async function repl(replIO: IReplIO, debug?: boolean): Promise<void> {
       if (state.exception !== undefined) {
         showException(replIO, state.exception, state.exceptionStack);
       }
+      await hostDictionary.ready;
       replIO.output(
         status(state, {
           cycle,

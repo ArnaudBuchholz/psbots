@@ -11,13 +11,15 @@ import { createPerfOperator } from './perf.js';
 export class ReplHostDictionary implements IReadOnlyDictionary {
   private mappings: Record<string, Value> = {};
 
-  constructor(replIO: IReplIO) {
+  public get replIO() { return this._replIO; }
+
+  constructor(private _replIO: IReplIO) {
     this.mappings['exit'] = createExitOperator(this);
-    this.mappings['state'] = createStateOperator(replIO);
-    this.mappings['help'] = createHelpOperator(replIO);
-    this.mappings['pstack'] = createPstackOperator(replIO);
+    this.mappings['state'] = createStateOperator(this);
+    this.mappings['help'] = createHelpOperator(this);
+    this.mappings['pstack'] = createPstackOperator(this);
     this.mappings['debug'] = createDebugOperator(this);
-    this.mappings['perf'] = createPerfOperator(replIO);
+    this.mappings['perf'] = createPerfOperator(this);
   }
 
   get names() {
@@ -46,5 +48,27 @@ export class ReplHostDictionary implements IReadOnlyDictionary {
 
   debug(on = true) {
     this._debug = on;
+  }
+
+  private _ready = Promise.resolve();
+  get ready() {
+    return this._ready;
+  }
+
+  private _blockCount = 0;
+  private _unblock: (() => void) | undefined;
+  
+  public block() {
+    if (++this._blockCount === 1) {
+      this._ready = new Promise<void>((resolve) => {
+        this._unblock = resolve;
+      });
+    }
+  }
+
+  public unblock() {
+    if (--this._blockCount === 0) {
+      this._unblock?.();
+    }
   }
 }

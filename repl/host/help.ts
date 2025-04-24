@@ -3,9 +3,9 @@ import type { Value } from '@psbots/engine';
 import { OperatorType } from '@psbots/engine/sdk';
 import type { IFunctionOperator } from '@psbots/engine/sdk';
 import { cyan, white, yellow } from '../colors.js';
-import type { IReplIO } from '../IReplIo.js';
+import type { ReplHostDictionary } from './index.js';
 
-export function createHelpOperator(replIO: IReplIO): Value<ValueType.operator> {
+export function createHelpOperator({ replIO }: ReplHostDictionary): Value<ValueType.operator> {
   return {
     type: ValueType.operator,
     isExecutable: true,
