@@ -2,7 +2,7 @@ import { getOperatorDefinitionRegistry, createState, ValueType } from '@psbots/e
 import type { Result, Value, IState } from '@psbots/engine';
 import { assert, OperatorType, toStringValue } from '@psbots/engine/sdk';
 import type { IFunctionOperator, IInternalState } from '@psbots/engine/sdk';
-import { cyan, yellow, white } from '../colors.js';
+import { cyan, yellow, white, green, red } from '../colors.js';
 import type { IReplIO } from '../IReplIo.js';
 import type { ReplHostDictionary } from './index.js';
 
@@ -54,6 +54,10 @@ class TimeBucket {
   }
 
   private _count = 0;
+  get count() {
+    return this._count;
+  }
+
   private _ranges: number[] = [];
   private _maxHits = 0;
 
@@ -81,6 +85,7 @@ class TimeBucket {
       }
     }
     this._mean = Math.floor(sum / count);
+    return count;
   }
 
   ratio(index: number) {
@@ -180,6 +185,7 @@ async function measureAllOperators(context: ExecuteContext) {
 function report({ replIO, measures }: ExecuteContext) {
   const keys = Object.keys(measures).sort();
   let maxKeyLength = 0;
+  let maxMeanLength = 0;
   for (const key of keys) {
     maxKeyLength = Math.max(maxKeyLength, key.length);
     const bucket = measures[key];
@@ -188,14 +194,29 @@ function report({ replIO, measures }: ExecuteContext) {
       continue;
     }
     bucket.clean();
+    maxMeanLength = Math.max(maxMeanLength, bucket.mean.toString().length);
   }
+  const ref = Math.max(measures['-true-']?.mean ?? 1, measures['-false-']?.mean ?? 1);
   for (const key of keys) {
     const bucket = measures[key];
     if (!bucket) {
       continue;
     }
     replIO.output(key.padEnd(maxKeyLength, ' ') + ' ');
-    replIO.output(bucket.mean.toString());
+    const mean = bucket.mean;
+    let color: string;
+    if (mean < 4 * ref) {
+      color = green;
+    } else if (mean < 10 * ref) {
+      color = yellow;
+    } else {
+      color = red;
+    }
+    replIO.output(color);
+    replIO.output(bucket.mean.toString().padStart(maxMeanLength, ' '));
+    replIO.output(white);
+    replIO.output(' x');
+    replIO.output(bucket.count.toString());
     replIO.output('\r\n');
   }
 }
