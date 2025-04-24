@@ -236,7 +236,7 @@ export function createPerfOperator(host: ReplHostDictionary): Value<ValueType.op
         const context: ExecuteContext = {
           loops,
           measures: {},
-          replIO: host.replIO,
+          replIO: host.replIO
         };
         operands.pop();
         host.block();

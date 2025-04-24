@@ -11,7 +11,9 @@ import { createPerfOperator } from './perf.js';
 export class ReplHostDictionary implements IReadOnlyDictionary {
   private mappings: Record<string, Value> = {};
 
-  public get replIO() { return this._replIO; }
+  public get replIO() {
+    return this._replIO;
+  }
 
   constructor(private _replIO: IReplIO) {
     this.mappings['exit'] = createExitOperator(this);
@@ -57,7 +59,7 @@ export class ReplHostDictionary implements IReadOnlyDictionary {
 
   private _blockCount = 0;
   private _unblock: (() => void) | undefined;
-  
+
   public block() {
     if (++this._blockCount === 1) {
       this._ready = new Promise<void>((resolve) => {
