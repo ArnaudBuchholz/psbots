@@ -1,6 +1,6 @@
 import { getOperatorDefinitionRegistry, createState, ValueType } from '@psbots/engine';
-import type { Result, Value, IState } from '@psbots/engine';
-import { assert, OperatorType, toStringValue } from '@psbots/engine/sdk';
+import type { Result, Value, IState, IReadOnlyDictionary, ValueOf } from '@psbots/engine';
+import { assert, OperatorType, toStringValue, valuesOf } from '@psbots/engine/sdk';
 import type { IFunctionOperator, IInternalState } from '@psbots/engine/sdk';
 import { cyan, yellow, white, green, red } from '../colors.js';
 import type { IReplIO } from '../IReplIo.js';
@@ -8,7 +8,6 @@ import type { ReplHostDictionary } from './index.js';
 
 const MAX_CYCLES = 10 ** 9;
 const TICKS = ['\u280B', '\u2819', '\u2839', '\u2838', '\u283C', '\u2834', '\u2826', '\u2827', '\u2807', '\u280F'];
-let RESOLUTION = 0;
 
 async function getResolution() {
   const COUNT = 10_000;
@@ -34,10 +33,12 @@ async function getResolution() {
       powerOf10 = index;
     }
   }
-  RESOLUTION = 10 ** powerOf10;
+  return 10 ** powerOf10;
 }
 
 class TimeBucket {
+  constructor(private _resolution: number) {}
+
   private _min = Number.POSITIVE_INFINITY;
   get min() {
     return this._min;
@@ -63,7 +64,7 @@ class TimeBucket {
 
   add(duration: number) {
     ++this._count;
-    const index = Math.floor(duration / RESOLUTION);
+    const index = Math.floor(duration / this._resolution);
     const rangeHits = (this._ranges[index] ?? 0) + 1;
     this._ranges[index] = rangeHits;
     this._maxHits = Math.max(rangeHits, this._maxHits);
@@ -121,12 +122,16 @@ function getMeasureName({ calls }: IState) {
 
 type ExecuteContext = {
   loops: number;
+  resolution: number;
+  logWithPerformanceApi: boolean;
+  source?: string;
   measures: Measures;
   replIO: IReplIO;
   lastUpdate?: number;
   lastTick?: number;
 };
 
+// eslint-disable-next-line sonarjs/cognitive-complexity -- waiting for a fix
 async function evaluate(value: Value, context: ExecuteContext) {
   const { loops, measures } = context;
   let cycles = 0;
@@ -151,8 +156,11 @@ async function evaluate(value: Value, context: ExecuteContext) {
         const start = performance.now();
         iterator.next();
         const end = performance.now();
+        if (context.logWithPerformanceApi) {
+          performance.measure(measureName, { start, end });
+        }
         if (measures[measureName] === undefined) {
-          measures[measureName] = new TimeBucket();
+          measures[measureName] = new TimeBucket(context.resolution);
         }
         measures[measureName].add(Math.ceil(1_000_000 * (end - start)));
       } else {
@@ -193,10 +201,11 @@ function report({ replIO, measures }: ExecuteContext) {
       replIO.output(`❌ missing bucket for ${key}`);
       continue;
     }
+    console.log(key, bucket);
     bucket.clean();
     maxMeanLength = Math.max(maxMeanLength, bucket.mean.toString().length);
   }
-  const ref = Math.max(measures['-true-']?.mean ?? 1, measures['-false-']?.mean ?? 1);
+  const reference = Math.max(measures['-true-']?.mean ?? 1, measures['-false-']?.mean ?? 1);
   for (const key of keys) {
     const bucket = measures[key];
     if (!bucket) {
@@ -205,9 +214,9 @@ function report({ replIO, measures }: ExecuteContext) {
     replIO.output(key.padEnd(maxKeyLength, ' ') + ' ');
     const mean = bucket.mean;
     let color: string;
-    if (mean < 4 * ref) {
+    if (mean < 4 * reference) {
       color = green;
-    } else if (mean < 10 * ref) {
+    } else if (mean < 10 * reference) {
       color = yellow;
     } else {
       color = red;
@@ -222,14 +231,28 @@ function report({ replIO, measures }: ExecuteContext) {
 }
 
 async function execute(context: ExecuteContext) {
-  if (RESOLUTION === 0) {
-    await getResolution();
+  if (context.resolution === 0) {
+    context.resolution = await getResolution();
   }
-  context.replIO.output(`${cyan}Resolution: ${yellow}${RESOLUTION.toString()}${cyan}ns${white}\r\n`);
-  await measureAllOperators(context);
+  context.replIO.output(`${cyan}Resolution: ${yellow}${context.resolution.toString()}${cyan}ns${white}\r\n`);
+  await (context.source
+    ? evaluate(toStringValue(context.source, { isExecutable: true }), context)
+    : measureAllOperators(context));
   context.replIO.output(`\r`);
   report(context);
 }
+
+const getValue = <T extends ValueType>(
+  dictionary: IReadOnlyDictionary,
+  name: string,
+  expectedType: T
+): undefined | ValueOf<T> => {
+  const value = dictionary.lookup(name);
+  if (value.type !== expectedType) {
+    return undefined;
+  }
+  return valuesOf(value)[0];
+};
 
 export function createPerfOperator(host: ReplHostDictionary): Value<ValueType.operator> {
   return {
@@ -249,14 +272,16 @@ export function createPerfOperator(host: ReplHostDictionary): Value<ValueType.op
           return { success: false, exception: 'typeCheck' };
         }
         const definition = value.dictionary;
-        const loopsValue = definition.lookup('loops');
-        if (loopsValue.type !== ValueType.integer) {
+        const loops = getValue(definition, 'loops', ValueType.integer);
+        if (loops === undefined) {
           return { success: false, exception: 'typeCheck' };
         }
-        const loops = loopsValue.integer;
         const context: ExecuteContext = {
           loops,
+          resolution: getValue(definition, 'resolution', ValueType.integer) ?? 0,
           measures: {},
+          logWithPerformanceApi: getValue(definition, 'performance', ValueType.boolean) ?? false,
+          source: getValue(definition, 'source', ValueType.string),
           replIO: host.replIO
         };
         operands.pop();
