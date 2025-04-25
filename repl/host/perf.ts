@@ -201,11 +201,14 @@ function report({ replIO, measures }: ExecuteContext) {
       replIO.output(`❌ missing bucket for ${key}`);
       continue;
     }
-    console.log(key, bucket);
     bucket.clean();
     maxMeanLength = Math.max(maxMeanLength, bucket.mean.toString().length);
   }
-  const reference = Math.max(measures['-true-']?.mean ?? 1, measures['-false-']?.mean ?? 1);
+  /**
+   * -true- and -false- are supposed to be the fastest
+   * -and- and -or- are fast but with validated parameters
+   */
+  const reference = Math.max(measures['-and-']?.mean ?? 1, measures['-or-']?.mean ?? 1);
   for (const key of keys) {
     const bucket = measures[key];
     if (!bucket) {
@@ -214,9 +217,9 @@ function report({ replIO, measures }: ExecuteContext) {
     replIO.output(key.padEnd(maxKeyLength, ' ') + ' ');
     const mean = bucket.mean;
     let color: string;
-    if (mean < 4 * reference) {
+    if (mean <= reference) {
       color = green;
-    } else if (mean < 10 * reference) {
+    } else if (mean < 2 * reference) {
       color = yellow;
     } else {
       color = red;
@@ -235,9 +238,18 @@ async function execute(context: ExecuteContext) {
     context.resolution = await getResolution();
   }
   context.replIO.output(`${cyan}Resolution: ${yellow}${context.resolution.toString()}${cyan}ns${white}\r\n`);
-  await (context.source
-    ? evaluate(toStringValue(context.source, { isExecutable: true }), context)
-    : measureAllOperators(context));
+  if (context.source) {
+    // Ensure reference values are created
+    for (const first of ['true', 'false']) {
+      for (const second of ['true', 'false']) {
+        await evaluate(toStringValue(`${first} ${second} and`, { isExecutable: true }), context);
+        await evaluate(toStringValue(`${first} ${second} or`, { isExecutable: true }), context);
+      }
+    }
+    await evaluate(toStringValue(context.source, { isExecutable: true }), context)
+  } else {
+    await measureAllOperators(context);
+  }
   context.replIO.output(`\r`);
   report(context);
 }
@@ -268,20 +280,25 @@ export function createPerfOperator(host: ReplHostDictionary): Value<ValueType.op
           return { success: false, exception: 'rangeCheck' };
         }
         const value = operands.top;
-        if (value.type !== ValueType.dictionary) {
+        let loops: number = -1;
+        let definition: IReadOnlyDictionary | undefined;
+        if (value.type === ValueType.integer) {
+          loops = value.integer;
+        } else if (value.type === ValueType.dictionary) {
+          definition = value.dictionary;
+          loops = getValue(definition, 'loops', ValueType.integer) ?? -1;
+        } else {
           return { success: false, exception: 'typeCheck' };
         }
-        const definition = value.dictionary;
-        const loops = getValue(definition, 'loops', ValueType.integer);
-        if (loops === undefined) {
+        if (loops < 0) {
           return { success: false, exception: 'typeCheck' };
         }
         const context: ExecuteContext = {
           loops,
-          resolution: getValue(definition, 'resolution', ValueType.integer) ?? 0,
+          resolution: (definition && getValue(definition, 'resolution', ValueType.integer)) ?? 0,
           measures: {},
-          logWithPerformanceApi: getValue(definition, 'performance', ValueType.boolean) ?? false,
-          source: getValue(definition, 'source', ValueType.string),
+          logWithPerformanceApi: (definition && getValue(definition, 'performance', ValueType.boolean)) ?? false,
+          source: definition && getValue(definition, 'source', ValueType.string),
           replIO: host.replIO
         };
         operands.pop();
