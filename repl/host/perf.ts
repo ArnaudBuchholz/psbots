@@ -246,7 +246,7 @@ async function execute(context: ExecuteContext) {
         await evaluate(toStringValue(`${first} ${second} or`, { isExecutable: true }), context);
       }
     }
-    await evaluate(toStringValue(context.source, { isExecutable: true }), context)
+    await evaluate(toStringValue(context.source, { isExecutable: true }), context);
   } else {
     await measureAllOperators(context);
   }
