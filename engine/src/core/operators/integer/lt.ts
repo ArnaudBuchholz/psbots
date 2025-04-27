@@ -1,5 +1,4 @@
-import { ValueType } from '@api/index.js';
-import { toBooleanValue } from '@sdk/index.js';
+import { ValueType, trueValue, falseValue } from '@api/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 
 buildFunctionOperator(
@@ -22,5 +21,5 @@ buildFunctionOperator(
       }
     ]
   },
-  ({ operands }, { integer: value1 }, { integer: value2 }) => operands.popush(2, toBooleanValue(value1 < value2))
+  ({ operands }, { integer: value1 }, { integer: value2 }) => operands.popush(2, value1 < value2 ? trueValue : falseValue)
 );

@@ -1,19 +1,9 @@
 import { describe, it, expect } from 'vitest';
 import type { Result, Value } from '@api/index.js';
 import { ValueType } from '@api/index.js';
-import { toBooleanValue, toIntegerValue, toNameValue, toStringValue } from './toValue.js';
+import { toIntegerValue, toNameValue, toStringValue } from './toValue.js';
 import { MemoryTracker } from '@core/MemoryTracker.js';
 import { assert } from './assert.js';
-
-it('converts a boolean', () => {
-  const value = toBooleanValue(true);
-  expect(value).toStrictEqual<Value<ValueType.boolean>>({
-    type: ValueType.boolean,
-    isExecutable: false,
-    isReadOnly: true,
-    isSet: true
-  });
-});
 
 describe('toIntegerValue', () => {
   it('converts an integer', () => {

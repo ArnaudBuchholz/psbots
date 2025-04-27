@@ -1,21 +1,20 @@
-import { ValueType } from '@api/index.js';
-import { toBooleanValue } from '@sdk/index.js';
-import { buildConstantOperator } from '../operators.js';
+import { ValueType, trueValue } from '@api/index.js';
+import { buildConstantOperator } from '@core/operators/operators.js';
 
 buildConstantOperator(
   {
     name: 'true',
-    description: 'pushes true in the operand stack',
-    labels: ['value'],
+    description: 'pushes true onto the stack',
+    labels: ['boolean', 'value'],
     signature: {
       output: [{ type: ValueType.boolean }]
     },
     samples: [
       {
-        in: 'true type',
-        out: '/boolean'
+        in: 'true',
+        out: 'true'
       }
     ]
   },
-  toBooleanValue(true)
+  trueValue
 );

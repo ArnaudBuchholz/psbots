@@ -1,5 +1,5 @@
-import { ValueType } from '@api/index.js';
-import { toBooleanValue, valuesOf } from '@sdk/index.js';
+import { ValueType, trueValue, falseValue } from '@api/index.js';
+import { valuesOf } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 
 buildFunctionOperator(
@@ -42,6 +42,6 @@ buildFunctionOperator(
     } else {
       eq = true;
     }
-    return operands.popush(2, toBooleanValue(eq));
+    return operands.popush(2, eq ? trueValue : falseValue);
   }
 );

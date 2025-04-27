@@ -1,5 +1,4 @@
-import { ValueType } from '@api/index.js';
-import { toBooleanValue } from '@sdk/index.js';
+import { ValueType, trueValue, falseValue } from '@api/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 
 buildFunctionOperator(
@@ -24,5 +23,5 @@ buildFunctionOperator(
       }
     ]
   },
-  ({ operands }, value) => operands.popush(1, toBooleanValue(value.isExecutable))
+  ({ operands }, value) => operands.popush(1, value.isExecutable ? trueValue : falseValue)
 );

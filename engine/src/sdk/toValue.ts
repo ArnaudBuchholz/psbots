@@ -1,15 +1,6 @@
 import type { IValueTracker, Result, Value } from '@api/index.js';
 import { ValueType } from '@api/index.js';
 
-export function toBooleanValue(isSet: boolean): Value<ValueType.boolean> {
-  return {
-    type: ValueType.boolean,
-    isExecutable: false,
-    isReadOnly: true,
-    isSet
-  };
-}
-
 export function toIntegerValue(integer: number): Result<Value<ValueType.integer>> {
   if (integer % 1 !== 0 || integer < Number.MIN_SAFE_INTEGER || integer > Number.MAX_SAFE_INTEGER) {
     return { success: false, exception: 'undefinedResult' };

@@ -10,9 +10,9 @@ import type {
   Result,
   Value
 } from '@api/index.js';
-import { nullValue, ValueType } from '@api/index.js';
+import { nullValue, ValueType, trueValue, falseValue } from '@api/index.js';
 import type { IOperator } from '@sdk/index.js';
-import { isObject, OperatorType, toBooleanValue, toIntegerValue, toStringValue, toNameValue } from '@sdk/index.js';
+import { isObject, OperatorType, toIntegerValue, toStringValue, toNameValue } from '@sdk/index.js';
 import { ShareableObject } from '@core/objects/ShareableObject.js';
 
 export type CompatiblePrimitiveValue = string | symbol | number | boolean | Value | (() => void);
@@ -127,7 +127,7 @@ export function toValue(
     return toNameValue(key, { isExecutable });
   }
   if (typeof value === 'boolean') {
-    return toBooleanValue(value);
+    return value ? trueValue : falseValue;
   }
   if (typeof value === 'number') {
     if (value % 1 !== 0) {

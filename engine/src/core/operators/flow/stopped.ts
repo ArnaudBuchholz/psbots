@@ -1,9 +1,8 @@
-import { ValueType } from '@api/index.js';
+import { falseValue, trueValue, ValueType } from '@api/index.js';
 import {
   OPERATOR_STATE_POP,
   OPERATOR_STATE_FIRST_CALL,
   OPERATOR_STATE_CALL_BEFORE_POP,
-  toBooleanValue,
   assert
 } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
@@ -45,11 +44,11 @@ buildFunctionOperator(
     assert(topOperatorState === OPERATOR_STATE_CALL_BEFORE_POP);
     calls.topOperatorState = OPERATOR_STATE_POP;
     if (!state.exception) {
-      return operands.push(toBooleanValue(false));
+      return operands.push(falseValue);
     }
     if (state.exception === 'stop') {
       state.clearException();
-      return operands.push(toBooleanValue(true));
+      return operands.push(trueValue);
     }
     // Unexpected exception
     return { success: true, value: undefined };

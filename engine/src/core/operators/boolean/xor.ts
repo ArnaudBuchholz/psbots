@@ -1,5 +1,4 @@
-import { ValueType } from '@api/index.js';
-import { toBooleanValue } from '@sdk/index.js';
+import { falseValue, trueValue, ValueType } from '@api/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 
 buildFunctionOperator(
@@ -31,5 +30,5 @@ buildFunctionOperator(
     ]
   },
   ({ operands }, { isSet: value1 }, { isSet: value2 }) =>
-    operands.popush(2, toBooleanValue((value1 && !value2) || (!value1 && value2)))
+    operands.popush(2, (value1 && !value2) || (!value1 && value2) ? trueValue : falseValue)
 );
