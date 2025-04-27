@@ -59,8 +59,20 @@ class TimeBucket {
     return this._count;
   }
 
+  private _cleanedCount = 0;
+  get cleanedCount() {
+    return this._cleanedCount;
+  }
+
   private _ranges: number[] = [];
+  get ranges() {
+    return this._ranges;
+  }
+
   private _maxHits = 0;
+  get maxHits() {
+    return this._maxHits;
+  }
 
   add(duration: number) {
     ++this._count;
@@ -86,6 +98,7 @@ class TimeBucket {
       }
     }
     this._mean = Math.floor(sum / count);
+    this._cleanedCount = count;
     return count;
   }
 
@@ -125,6 +138,7 @@ type ExecuteContext = {
   resolution: number;
   logWithPerformanceApi: boolean;
   source?: string;
+  detail?: string;
   measures: Measures;
   replIO: IReplIO;
   lastUpdate?: number;
@@ -190,7 +204,9 @@ async function measureAllOperators(context: ExecuteContext) {
     << /value_0 0 ... /value_1000 1000 >>
 */
 
-function report({ replIO, measures }: ExecuteContext) {
+function report(context: ExecuteContext) {
+  const { replIO, measures, resolution } = context;
+  context.replIO.output(`${cyan}Resolution: ${yellow}${resolution.toString()}${cyan}ns${white}\r\n`);
   const keys = Object.keys(measures).sort();
   let maxKeyLength = 0;
   let maxMeanLength = 0;
@@ -231,13 +247,36 @@ function report({ replIO, measures }: ExecuteContext) {
     replIO.output(bucket.count.toString());
     replIO.output('\r\n');
   }
+  reportDetail(context);
+}
+
+function reportDetail({ replIO, measures, detail, resolution }: ExecuteContext) {
+  if (detail && measures[detail]) {
+    const bucket = measures[detail];
+    replIO.output(
+      `${cyan}Detail for ${white}${detail}: ${green}${bucket.mean.toString()} x ${yellow}${resolution.toString()}${cyan}ns${white}\r\n`
+    );
+    replIO.output(
+      `Count: ${yellow}${bucket.count.toString()}${white}, cleaned count: ${yellow}${bucket.cleanedCount.toString()}${white}\r\n`
+    );
+    const maxWidth = bucket.max.toString().length;
+    const maxHitsWidth = bucket.maxHits.toString().length;
+    const barWidth = Math.min(replIO.width - maxWidth - maxHitsWidth - 4, 50);
+    for (let index = 0; index <= bucket.max; ++index) {
+      const ratio = bucket.ratio(index);
+      replIO.output(`${green}${index.toString().padStart(maxWidth + 1, ' ')}${white} `);
+      if (ratio > 0) {
+        replIO.output(`${'█'.repeat(Math.floor(ratio * barWidth))} ${yellow}${bucket.ranges[index]}`);
+      }
+      replIO.output(`${white}\r\n`);
+    }
+  }
 }
 
 async function execute(context: ExecuteContext) {
   if (context.resolution === 0) {
     context.resolution = await getResolution();
   }
-  context.replIO.output(`${cyan}Resolution: ${yellow}${context.resolution.toString()}${cyan}ns${white}\r\n`);
   if (context.source) {
     // Ensure reference values are created
     for (const first of ['true', 'false']) {
@@ -299,6 +338,7 @@ export function createPerfOperator(host: ReplHostDictionary): Value<ValueType.op
           measures: {},
           logWithPerformanceApi: (definition && getValue(definition, 'performance', ValueType.boolean)) ?? false,
           source: definition && getValue(definition, 'source', ValueType.string),
+          detail: definition && getValue(definition, 'detail', ValueType.string),
           replIO: host.replIO
         };
         operands.pop();
