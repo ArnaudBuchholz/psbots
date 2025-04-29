@@ -251,3 +251,31 @@ describe('string management', () => {
     expect(() => tracker.releaseValue(helloWorldValue)).toThrowError();
   });
 });
+
+describe('Garbage Collector', () => {
+  let tracker: MemoryTracker;
+
+  beforeEach(() => {
+    tracker = new MemoryTracker();
+  });
+
+  it('exposes a boolean flag (initialized to false)', () => {
+    expect(tracker.hasGarbageToCollect).toStrictEqual(false);
+  });
+
+  it('exposes a boolean flag set when the queue is filled', () => {
+    tracker.addToGarbageCollectorQueue({
+      collect() {},
+      total: 1,
+      type: SYSTEM_MEMORY_TYPE
+    });
+    expect(tracker.hasGarbageToCollect).toStrictEqual(true);
+  });
+
+  describe('cycles', () => {
+    beforeEach(() => {
+
+    });
+
+  });
+});

@@ -307,21 +307,25 @@ export class MemoryTracker implements IValueTracker, IMemoryTracker {
 
   /** true when no more garbage collection needed */
   garbageCollect(): boolean {
-    if (this._gcQueue.length === 0) {
+    const [collectible] = this._gcQueue;
+    if (!collectible) {
       return true;
     }
-    const collectible = this._gcQueue[0]!; // verified just before
     collectible.collect();
     if (collectible.total === 0) {
       this._gcQueue.shift();
     }
-    return false;
+    return this._gcQueue.length === 0;
   }
 
   private _gcQueue: IGarbageCollectible[] = [];
 
   addToGarbageCollectorQueue(collectible: IGarbageCollectible): void {
     this._gcQueue.push(collectible);
+  }
+
+  get hasGarbageToCollect () {
+    return this._gcQueue.length !== 0;
   }
 
   // endregion Garbage Collector
