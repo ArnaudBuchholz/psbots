@@ -1,6 +1,6 @@
-import type { ValueType } from '@psbots/engine';
+import type { ValueType, Result, Value, IState, IReadOnlyDictionary, ValueOf } from '@psbots/engine';
 import { getOperatorDefinitionRegistry, createState } from '@psbots/engine';
-import type { Result, Value, IState, IReadOnlyDictionary, ValueOf } from '@psbots/engine';
+
 import { assert, OperatorType, toStringValue, valuesOf } from '@psbots/engine/sdk';
 import type { IFunctionOperator, IInternalState } from '@psbots/engine/sdk';
 import { cyan, yellow, white, green, red } from '../colors.js';
