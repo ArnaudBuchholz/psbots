@@ -1,5 +1,4 @@
 import { it, expect } from 'vitest';
-import { ValueType } from '@api/index.js';
 import { SystemDictionary } from './System.js';
 
 it('always return the same instance', () => {
@@ -21,7 +20,7 @@ it('returns mark', () => {
   if (mark === null) {
     throw new Error('Unexpected null when getting mark');
   }
-  if (mark.type !== ValueType.operator) {
+  if (mark.type !== 'operator') {
     throw new Error('mark should be an operator');
   }
   expect(mark.operator.name).toStrictEqual('mark');
@@ -33,7 +32,7 @@ it('only returns operators', () => {
     if (operator === null) {
       throw new Error(`Unexpected null when getting ${name}`);
     }
-    if (operator.type !== ValueType.operator) {
+    if (operator.type !== 'operator') {
       throw new Error(`${name} should be an operator`);
     }
     expect(operator.operator.name).toStrictEqual(name);

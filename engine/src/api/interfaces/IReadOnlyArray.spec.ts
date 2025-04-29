@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import type { Value } from '@api/index.js';
-import { enumIArrayValues, ValueType } from '@api/index.js';
+import { enumIArrayValues } from '@api/index.js';
 import { toValue } from '@test/index.js';
 
 describe('enumIArrayValues', () => {
@@ -14,19 +14,19 @@ describe('enumIArrayValues', () => {
   it('returns all values of the array', () => {
     expect([...enumIArrayValues(readOnlyArray)]).toStrictEqual<Value[]>([
       {
-        type: ValueType.integer,
+        type: 'integer',
         isReadOnly: true,
         isExecutable: false,
         integer: 1
       },
       {
-        type: ValueType.integer,
+        type: 'integer',
         isReadOnly: true,
         isExecutable: false,
         integer: 2
       },
       {
-        type: ValueType.string,
+        type: 'string',
         isReadOnly: true,
         isExecutable: false,
         string: '3'

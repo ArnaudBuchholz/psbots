@@ -1,5 +1,4 @@
-import type { IOperatorValue, OperatorValue, Result, Value } from '@api/index.js';
-import { ValueType } from '@api/index.js';
+import type { IOperatorValue, OperatorValue, Result, Value, ValueType } from '@api/index.js';
 import type { IInternalState, IFunctionOperator, IOperatorTypeCheck } from '@sdk/index.js';
 import { assert, OperatorType } from '@sdk/index.js';
 
@@ -42,7 +41,7 @@ export type OperatorDefinition<Input = IOperatorTypeCheck[]> = {
 export const registry: {
   [key in string]: {
     definition: OperatorDefinition<IOperatorTypeCheck[]>;
-    value: Value<ValueType.operator>;
+    value: Value<'operator'>;
   };
 } = {};
 
@@ -76,7 +75,7 @@ export function buildFunctionOperator(
     implementation
   };
   const value = {
-    type: ValueType.operator,
+    type: 'operator',
     isExecutable: true,
     isReadOnly: true,
     operator
@@ -111,7 +110,7 @@ export function buildConstantOperator(definition: OperatorDefinition<IOperatorTy
   registry[definition.name] = {
     definition,
     value: {
-      type: ValueType.operator,
+      type: 'operator',
       isExecutable: true,
       isReadOnly: true,
       operator

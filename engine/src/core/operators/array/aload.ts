@@ -1,4 +1,3 @@
-import { ValueType } from '@api/index.js';
 import { OPERATOR_STATE_FIRST_CALL, OPERATOR_STATE_POP } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 import { assert } from '@sdk/assert.js';
@@ -9,7 +8,7 @@ buildFunctionOperator(
     description: 'loads all items of the array in the operand stack',
     labels: ['array'],
     signature: {
-      input: [{ type: ValueType.array }]
+      input: [{ type: 'array' }]
     },
     samples: [
       {
@@ -21,7 +20,7 @@ buildFunctionOperator(
   (state) => {
     const { operands, calls } = state;
     const { top: arrayValue } = operands;
-    assert(arrayValue.type === ValueType.array);
+    assert(arrayValue.type === 'array');
     const { array } = arrayValue;
     if (calls.topOperatorState === OPERATOR_STATE_FIRST_CALL) {
       const reserved = operands.reserve(1 + array.length);

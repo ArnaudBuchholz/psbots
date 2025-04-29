@@ -1,10 +1,5 @@
-import { falseValue, trueValue, ValueType } from '@api/index.js';
-import {
-  OPERATOR_STATE_POP,
-  OPERATOR_STATE_FIRST_CALL,
-  OPERATOR_STATE_CALL_BEFORE_POP,
-  assert
-} from '@sdk/index.js';
+import { falseValue, trueValue } from '@api/index.js';
+import { OPERATOR_STATE_POP, OPERATOR_STATE_FIRST_CALL, OPERATOR_STATE_CALL_BEFORE_POP, assert } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 
 buildFunctionOperator(
@@ -13,7 +8,7 @@ buildFunctionOperator(
     description: 'executes the value. If execution was interrupted with stop, return true, return false otherwise',
     labels: ['flow'],
     signature: {
-      input: [{ type: ValueType.null }]
+      input: [{ type: 'null' }]
     },
     samples: [
       {

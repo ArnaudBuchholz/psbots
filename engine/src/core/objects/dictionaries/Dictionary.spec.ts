@@ -1,6 +1,6 @@
 import { it, expect, beforeEach, afterEach, describe } from 'vitest';
 import type { Value, Result } from '@api/index.js';
-import { nullValue, USER_MEMORY_TYPE, ValueType } from '@api/index.js';
+import { nullValue, USER_MEMORY_TYPE } from '@api/index.js';
 import { assert } from '@sdk/index.js';
 import { MemoryTracker } from '@core/MemoryTracker.js';
 import { Dictionary } from './Dictionary.js';
@@ -36,7 +36,7 @@ describe('IDictionary', () => {
   it('converts to a Value (read-only)', () => {
     const value = dictionary.toValue();
     expect(value).toStrictEqual<Value>({
-      type: ValueType.dictionary,
+      type: 'dictionary',
       isExecutable: false,
       isReadOnly: true,
       dictionary,
@@ -48,7 +48,7 @@ describe('IDictionary', () => {
   it('converts to a Value (read/write)', () => {
     const value = dictionary.toValue({ isReadOnly: false });
     expect(value).toStrictEqual<Value>({
-      type: ValueType.dictionary,
+      type: 'dictionary',
       isExecutable: false,
       isReadOnly: false,
       dictionary,

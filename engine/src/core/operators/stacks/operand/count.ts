@@ -1,4 +1,3 @@
-import { ValueType } from '@api/index.js';
 import { assert, toIntegerValue } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 
@@ -8,7 +7,7 @@ buildFunctionOperator(
     description: 'gives back the size of the operand stack',
     labels: ['operand'],
     signature: {
-      output: [{ type: ValueType.integer }]
+      output: [{ type: 'integer' }]
     },
     samples: [
       {

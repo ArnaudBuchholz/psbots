@@ -1,4 +1,4 @@
-import { ValueType, trueValue } from '@api/index.js';
+import { trueValue } from '@api/index.js';
 import { buildConstantOperator } from '@core/operators/operators.js';
 
 buildConstantOperator(
@@ -7,7 +7,7 @@ buildConstantOperator(
     description: 'pushes true onto the stack',
     labels: ['boolean', 'value'],
     signature: {
-      output: [{ type: ValueType.boolean }]
+      output: [{ type: 'boolean' }]
     },
     samples: [
       {

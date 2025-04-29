@@ -1,4 +1,3 @@
-import { ValueType } from '@api/index.js';
 import { assert, findMarkPos, toIntegerValue } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 
@@ -8,7 +7,7 @@ buildFunctionOperator(
     description: 'count the number of items in the operand stack up to the first mark',
     labels: ['operand'],
     signature: {
-      output: [{ type: ValueType.integer }]
+      output: [{ type: 'integer' }]
     },
     samples: [
       {

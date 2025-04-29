@@ -10,7 +10,7 @@ import type {
   Result,
   Value
 } from '@api/index.js';
-import { nullValue, ValueType, trueValue, falseValue } from '@api/index.js';
+import { nullValue, VALUE_TYPE, trueValue, falseValue } from '@api/index.js';
 import type { IOperator } from '@sdk/index.js';
 import { isObject, OperatorType, toIntegerValue, toStringValue, toNameValue } from '@sdk/index.js';
 import { ShareableObject } from '@core/objects/ShareableObject.js';
@@ -19,7 +19,7 @@ export type CompatiblePrimitiveValue = string | symbol | number | boolean | Valu
 export type CompatibleValue = CompatibleValue[] | { [key in string]: CompatibleValue } | CompatiblePrimitiveValue;
 
 function isValue(value: unknown): value is Value {
-  return isObject(value) && value.type in ValueType;
+  return isObject(value) && value.type in VALUE_TYPE;
 }
 
 function releasePreviousValue(previousValue: Value | undefined): Value {
@@ -100,11 +100,11 @@ function toIDictionary(mapping: ValueDictionary): IDictionary {
   });
 }
 
-export function toValue(value: boolean, permissions?: Partial<IValuePermissions>): Value<ValueType.boolean>;
-export function toValue(value: number, permissions?: Partial<IValuePermissions>): Value<ValueType.integer>;
-export function toValue(value: string, permissions?: Partial<IValuePermissions>): Value<ValueType.string>;
-export function toValue(name: symbol, permissions?: Partial<IValuePermissions>): Value<ValueType.name>;
-export function toValue(value: () => void, permissions?: Partial<IValuePermissions>): Value<ValueType.operator>;
+export function toValue(value: boolean, permissions?: Partial<IValuePermissions>): Value<'boolean'>;
+export function toValue(value: number, permissions?: Partial<IValuePermissions>): Value<'integer'>;
+export function toValue(value: string, permissions?: Partial<IValuePermissions>): Value<'string'>;
+export function toValue(name: symbol, permissions?: Partial<IValuePermissions>): Value<'name'>;
+export function toValue(value: () => void, permissions?: Partial<IValuePermissions>): Value<'operator'>;
 export function toValue(value: CompatibleValue[], permissions?: Partial<IValuePermissions>): ArrayValue;
 export function toValue(
   value: { [key in string]: CompatibleValue },
@@ -143,7 +143,7 @@ export function toValue(
     return {
       isReadOnly: true,
       isExecutable: true,
-      type: ValueType.operator,
+      type: 'operator',
       operator: <IOperator>{
         type: OperatorType.implementation,
         name: value.name,
@@ -154,14 +154,14 @@ export function toValue(
   if (Array.isArray(value)) {
     if (isExecutable) {
       return {
-        type: ValueType.array,
+        type: 'array',
         isExecutable,
         isReadOnly: true,
         array: toIArray(value.map((item) => toValue(item, { isReadOnly, isExecutable })))
       };
     }
     return {
-      type: ValueType.array,
+      type: 'array',
       isExecutable,
       isReadOnly,
       array: toIArray(value.map((item) => toValue(item, { isReadOnly, isExecutable })))
@@ -175,7 +175,7 @@ export function toValue(
     mapping[name] = toValue(item, { isReadOnly, isExecutable });
   }
   return {
-    type: ValueType.dictionary,
+    type: 'dictionary',
     isExecutable: false,
     isReadOnly,
     dictionary: toIDictionary(mapping)
@@ -183,7 +183,7 @@ export function toValue(
 }
 
 const operator: OperatorValue = {
-  type: ValueType.operator,
+  type: 'operator',
   isReadOnly: true,
   isExecutable: true,
   operator: {
@@ -207,7 +207,7 @@ toValue.createSharedObject = (): {
 } => {
   const object = new TestShareableObject();
   const value: Value = {
-    type: ValueType.array,
+    type: 'array',
     isReadOnly: true,
     isExecutable: false,
     tracker: ShareableObject.tracker,

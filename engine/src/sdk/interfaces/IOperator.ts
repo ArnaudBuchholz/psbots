@@ -14,7 +14,7 @@ export interface IConstantOperator extends IAbstractOperator {
 
 export interface IOperatorTypeCheck<Type = ValueType> {
   /**
-   * * ValueType.null indicates any value
+   * * 'null' indicates any value
    * * ValutType.mark indicates mark should be found on the operand stack
    */
   type: Type;
@@ -27,12 +27,12 @@ export interface IFunctionOperator extends IAbstractOperator {
   /**
    * When specified, the collected values are kept valid during the operator lifetime
    * Order is significant, for instance :
-   * [{ type: ValueType.boolean }, { type: ValueType.null }] means top of the stack can be anything but next item must be a boolean
+   * [{ type: 'boolean' }, { type: 'null' }] means top of the stack can be anything but next item must be a boolean
    */
   readonly typeCheck?: IOperatorTypeCheck[];
   /**
    * Values are given in the same order as typeCheck, for instance :
-   * [{ type: ValueType.boolean }, { type: ValueType.null }] means values is [Value<ValueType.boolean>, Value]
+   * [{ type: 'boolean' }, { type: 'null' }] means values is [Value<'boolean'>, Value]
    */
   readonly implementation: (state: IInternalState, ...values: readonly Value[]) => Result<unknown> | void;
 }

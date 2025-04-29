@@ -1,5 +1,5 @@
 import { it, expect, beforeEach, afterEach, beforeAll } from 'vitest';
-import { enumIArrayValues, markValue, ValueType } from '@api/index.js';
+import { enumIArrayValues, markValue } from '@api/index.js';
 import type { Exception, IDebugSource, IDictionary, Value } from '@api/index.js';
 import { toValue, waitForExec } from '@test/index.js';
 import { State } from './State.js';
@@ -101,7 +101,7 @@ it('does not forward debug info to the resolved value if it already contains som
     debugSource: debugSourceOfValue
   });
   const dictionariesTop = state.dictionaries.top;
-  assert(dictionariesTop.type === ValueType.dictionary);
+  assert(dictionariesTop.type === 'dictionary');
   assert((dictionariesTop.dictionary as IDictionary).def('test', value));
   const call = toValue(Symbol.for('test'), { isExecutable: true });
   const debugSource: IDebugSource = {

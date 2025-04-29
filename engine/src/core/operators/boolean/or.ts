@@ -1,4 +1,4 @@
-import { falseValue, trueValue, ValueType } from '@api/index.js';
+import { falseValue, trueValue } from '@api/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 
 buildFunctionOperator(
@@ -7,8 +7,8 @@ buildFunctionOperator(
     description: 'combines two booleans with or',
     labels: ['boolean'],
     signature: {
-      input: [{ type: ValueType.boolean }, { type: ValueType.boolean }],
-      output: [{ type: ValueType.boolean }]
+      input: [{ type: 'boolean' }, { type: 'boolean' }],
+      output: [{ type: 'boolean' }]
     },
     samples: [
       {

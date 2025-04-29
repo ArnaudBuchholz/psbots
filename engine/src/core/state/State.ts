@@ -1,5 +1,5 @@
 import type { Value, IReadOnlyDictionary, Result, IReadOnlyCallStack, Exception } from '@api/index.js';
-import { SYSTEM_MEMORY_TYPE, ValueType } from '@api/index.js';
+import { SYSTEM_MEMORY_TYPE } from '@api/index.js';
 import type { IInternalState } from '@sdk/index.js';
 import { assert } from '@sdk/index.js';
 import { MemoryTracker } from '@core/MemoryTracker.js';
@@ -45,7 +45,7 @@ export class State implements IInternalState {
     const dictionaries = dictionariesResult.value;
     if (settings.hostDictionary) {
       dictionaries.setHost({
-        type: ValueType.dictionary,
+        type: 'dictionary',
         isReadOnly: true,
         isExecutable: false,
         dictionary: settings.hostDictionary
@@ -197,19 +197,19 @@ export class State implements IInternalState {
     const calls = this._calls;
     const { top } = calls;
     if (this._exception) {
-      if (top.type === ValueType.operator) {
+      if (top.type === 'operator') {
         operatorPop(this, top);
       } else {
         calls.pop();
       }
     } else if (top.isExecutable) {
-      if (top.type === ValueType.operator) {
+      if (top.type === 'operator') {
         operatorCycle(this, top);
-      } else if (top.type === ValueType.name) {
+      } else if (top.type === 'name') {
         callCycle(this, top);
-      } else if (top.type === ValueType.array) {
+      } else if (top.type === 'array') {
         blockCycle(this, top);
-      } else if (top.type === ValueType.string) {
+      } else if (top.type === 'string') {
         parseCycle(this, top);
       } else {
         assert(false, 'Unsupported executable value');

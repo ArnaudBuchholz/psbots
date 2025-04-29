@@ -1,4 +1,3 @@
-import { ValueType } from '@api/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 
 buildFunctionOperator(
@@ -7,7 +6,7 @@ buildFunctionOperator(
     description: 'associates key with value in the current dictionary, the one on the top of the dictionary stack',
     labels: ['dictstack'],
     signature: {
-      input: [{ type: ValueType.name }, { type: ValueType.null }]
+      input: [{ type: 'name' }, { type: 'null' }]
     },
     samples: [
       {

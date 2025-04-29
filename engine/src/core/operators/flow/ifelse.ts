@@ -1,4 +1,3 @@
-import { ValueType } from '@api/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 
 buildFunctionOperator(
@@ -7,7 +6,7 @@ buildFunctionOperator(
     description: 'executes the operands based on a condition',
     labels: ['flow'],
     signature: {
-      input: [{ type: ValueType.boolean }, { type: ValueType.null }, { type: ValueType.null }]
+      input: [{ type: 'boolean' }, { type: 'null' }, { type: 'null' }]
     },
     samples: [
       {

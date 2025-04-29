@@ -1,4 +1,3 @@
-import { ValueType } from '@api/index.js';
 import { assert, toIntegerValue } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 
@@ -8,7 +7,7 @@ buildFunctionOperator(
     description: 'retrieves the number of dictionaries in the dictionary stack',
     labels: ['callstack'],
     signature: {
-      output: [{ type: ValueType.integer }]
+      output: [{ type: 'integer' }]
     },
     samples: [
       {

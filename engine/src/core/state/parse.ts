@@ -1,12 +1,12 @@
 import type { Value } from '@api/index.js';
-import { ValueType, parse } from '@api/index.js';
+import { parse } from '@api/index.js';
 import type { IInternalState } from '@sdk/index.js';
 import { OPERATOR_STATE_FIRST_CALL, OPERATOR_STATE_UNKNOWN, valuesOf } from '@sdk/index.js';
 import type { MemoryTracker } from '@core/MemoryTracker.js';
 
 const UNKNOWN_FILENAME = 'unknown';
 
-function getToken(state: IInternalState, value: Value<ValueType.string>): Value | undefined {
+function getToken(state: IInternalState, value: Value<'string'>): Value | undefined {
   const { calls } = state;
   if (calls.topOperatorState === OPERATOR_STATE_UNKNOWN) {
     calls.topOperatorState = OPERATOR_STATE_FIRST_CALL;
@@ -34,7 +34,7 @@ function enqueueToken(state: IInternalState, token: Value) {
     token = tokenWithoutDebugSource;
   }
   let string: string | undefined;
-  if (token.type === ValueType.string || token.type === ValueType.name) {
+  if (token.type === 'string' || token.type === 'name') {
     string = valuesOf(token)[0];
     const result = memoryTracker.addStringRef(string);
     if (!result.success) {
@@ -52,7 +52,7 @@ function enqueueToken(state: IInternalState, token: Value) {
   }
 }
 
-export function parseCycle(state: IInternalState, value: Value<ValueType.string>): void {
+export function parseCycle(state: IInternalState, value: Value<'string'>): void {
   const { calls } = state;
   const token = getToken(state, value);
   if (token) {

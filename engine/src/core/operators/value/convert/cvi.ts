@@ -1,5 +1,4 @@
 import type { Value } from '@api/index.js';
-import { ValueType } from '@api/index.js';
 import { toIntegerValue } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 
@@ -9,8 +8,8 @@ buildFunctionOperator(
     description: 'converts to integer',
     labels: ['value', 'generic', 'conversion'],
     signature: {
-      input: [{ type: ValueType.null }],
-      output: [{ type: ValueType.integer }]
+      input: [{ type: 'null' }],
+      output: [{ type: 'integer' }]
     },
     samples: [
       {
@@ -37,8 +36,8 @@ buildFunctionOperator(
     ]
   },
   ({ operands }, value: Value) => {
-    if (value.type !== ValueType.integer) {
-      if (value.type === ValueType.string) {
+    if (value.type !== 'integer') {
+      if (value.type === 'string') {
         const integer = Number.parseInt(value.string, 10);
         const integerValueResult = toIntegerValue(integer);
         if (!integerValueResult.success) {

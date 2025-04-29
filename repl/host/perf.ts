@@ -1,4 +1,5 @@
-import { getOperatorDefinitionRegistry, createState, ValueType } from '@psbots/engine';
+import type { ValueType } from '@psbots/engine';
+import { getOperatorDefinitionRegistry, createState } from '@psbots/engine';
 import type { Result, Value, IState, IReadOnlyDictionary, ValueOf } from '@psbots/engine';
 import { assert, OperatorType, toStringValue, valuesOf } from '@psbots/engine/sdk';
 import type { IFunctionOperator, IInternalState } from '@psbots/engine/sdk';
@@ -114,20 +115,20 @@ function getMeasureName({ calls }: IState) {
   if (!value.isExecutable) {
     return `literal_${value.type}`;
   }
-  if (value.type === ValueType.string) {
+  if (value.type === 'string') {
     return 'parser';
   }
-  if (value.type === ValueType.array) {
+  if (value.type === 'array') {
     return 'block';
   }
-  if (value.type === ValueType.operator) {
+  if (value.type === 'operator') {
     const { topOperatorState } = calls;
     if (topOperatorState !== 0 && topOperatorState !== Number.POSITIVE_INFINITY) {
       return `-${value.operator.name}-@${topOperatorState > 0 ? '+' : '-'}`;
     }
     return `-${value.operator.name}-`;
   }
-  if (value.type === ValueType.name) {
+  if (value.type === 'name') {
     return `name_${value.name}`;
   }
   throw new Error(`Missing measure name for ${JSON.stringify(value)}`);
@@ -305,9 +306,9 @@ const getValue = <T extends ValueType>(
   return valuesOf(value)[0];
 };
 
-export function createPerfOperator(host: ReplHostDictionary): Value<ValueType.operator> {
+export function createPerfOperator(host: ReplHostDictionary): Value<'operator'> {
   return {
-    type: ValueType.operator,
+    type: 'operator',
     isExecutable: true,
     isReadOnly: true,
     operator: <IFunctionOperator>{
@@ -321,11 +322,11 @@ export function createPerfOperator(host: ReplHostDictionary): Value<ValueType.op
         const value = operands.top;
         let loops: number = -1;
         let definition: IReadOnlyDictionary | undefined;
-        if (value.type === ValueType.integer) {
+        if (value.type === 'integer') {
           loops = value.integer;
-        } else if (value.type === ValueType.dictionary) {
+        } else if (value.type === 'dictionary') {
           definition = value.dictionary;
-          loops = getValue(definition, 'loops', ValueType.integer) ?? -1;
+          loops = getValue(definition, 'loops', 'integer') ?? -1;
         } else {
           return { success: false, exception: 'typeCheck' };
         }
@@ -334,11 +335,11 @@ export function createPerfOperator(host: ReplHostDictionary): Value<ValueType.op
         }
         const context: ExecuteContext = {
           loops,
-          resolution: (definition && getValue(definition, 'resolution', ValueType.integer)) ?? 0,
+          resolution: (definition && getValue(definition, 'resolution', 'integer')) ?? 0,
           measures: {},
-          logWithPerformanceApi: (definition && getValue(definition, 'performance', ValueType.boolean)) ?? false,
-          source: definition && getValue(definition, 'source', ValueType.string),
-          detail: definition && getValue(definition, 'detail', ValueType.string),
+          logWithPerformanceApi: (definition && getValue(definition, 'performance', 'boolean')) ?? false,
+          source: definition && getValue(definition, 'source', 'string'),
+          detail: definition && getValue(definition, 'detail', 'string'),
           replIO: host.replIO
         };
         operands.pop();

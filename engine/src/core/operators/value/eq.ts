@@ -1,4 +1,4 @@
-import { ValueType, trueValue, falseValue } from '@api/index.js';
+import { trueValue, falseValue } from '@api/index.js';
 import { valuesOf } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 
@@ -8,8 +8,8 @@ buildFunctionOperator(
     description: 'compares two values and return true if they are strictly equal',
     labels: ['generic', 'comparison'],
     signature: {
-      input: [{ type: ValueType.null }, { type: ValueType.null }],
-      output: [{ type: ValueType.boolean }]
+      input: [{ type: 'null' }, { type: 'null' }],
+      output: [{ type: 'boolean' }]
     },
     samples: [
       {

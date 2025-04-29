@@ -1,5 +1,4 @@
 import { it, expect, vi } from 'vitest';
-import { ValueType } from '@api/index.js';
 import type { Exception } from '@api/index.js';
 import { assert } from '@sdk/index.js';
 import { State } from '@core/state/State.js';
@@ -32,7 +31,7 @@ it('forwards Array::set error', async () => {
   const originaArraySet = ValueArray.prototype.set;
   const arraySet = vi.spyOn(ValueArray.prototype, 'set');
   arraySet.mockImplementation(function (this: ValueArray, index, value) {
-    if (index === 1 && value.type === ValueType.string) {
+    if (index === 1 && value.type === 'string') {
       return { success: false, exception: 'limitcheck' };
     }
     return originaArraySet.call(this, index, value);

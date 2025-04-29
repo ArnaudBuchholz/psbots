@@ -1,4 +1,3 @@
-import { ValueType } from '@api/index.js';
 import { assert, toNameValue } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 import { MemoryTracker } from '@core/MemoryTracker.js';
@@ -9,8 +8,8 @@ buildFunctionOperator(
     description: 'converts to name',
     labels: ['value', 'generic', 'conversion'],
     signature: {
-      input: [{ type: ValueType.string }],
-      output: [{ type: ValueType.name }]
+      input: [{ type: 'string' }],
+      output: [{ type: 'name' }]
     },
     samples: [
       {

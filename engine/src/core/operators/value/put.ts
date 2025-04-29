@@ -1,5 +1,4 @@
-import type { IArray, IDictionary, Result, Value } from '@api/index.js';
-import { ValueType } from '@api/index.js';
+import type { IArray, IDictionary, Result, Value, ValueType } from '@api/index.js';
 import { assert, checkPos, toStringValue } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 import { MemoryTracker } from '@core/MemoryTracker.js';
@@ -7,9 +6,9 @@ import { MemoryTracker } from '@core/MemoryTracker.js';
 /** Returned value is addRef'ed */
 const implementations: { [type in ValueType]?: (container: Value<type>, index: Value, value: Value) => Result<Value> } =
   {
-    [ValueType.string]: ({ string, tracker }, index, value) => {
+    string: ({ string, tracker }, index, value) => {
       assert(tracker instanceof MemoryTracker);
-      if (value.type !== ValueType.integer) {
+      if (value.type !== 'integer') {
         return { success: false, exception: 'typeCheck' };
       }
       const { integer: charCode } = value;
@@ -31,7 +30,7 @@ const implementations: { [type in ValueType]?: (container: Value<type>, index: V
       return { success: true, value: toStringValue(stringResult, { tracker }) };
     },
 
-    [ValueType.array]: (container, index, value) => {
+    array: (container, index, value) => {
       const { array, isReadOnly } = container;
       if (isReadOnly) {
         return { success: false, exception: 'invalidAccess' };
@@ -48,12 +47,12 @@ const implementations: { [type in ValueType]?: (container: Value<type>, index: V
       return { success: true, value: container };
     },
 
-    [ValueType.dictionary]: (container, index, value) => {
+    dictionary: (container, index, value) => {
       const { dictionary, isReadOnly } = container;
       if (isReadOnly) {
         return { success: false, exception: 'invalidAccess' };
       }
-      if (index.type !== ValueType.name) {
+      if (index.type !== 'name') {
         return { success: false, exception: 'typeCheck' };
       }
       const { name } = index;
@@ -73,8 +72,8 @@ buildFunctionOperator(
     postScriptDeviation: 'returns the modified object or a new string',
     labels: ['generic'],
     signature: {
-      input: [{ type: ValueType.null }, { type: ValueType.null }, { type: ValueType.null }],
-      output: [{ type: ValueType.null }]
+      input: [{ type: 'null' }, { type: 'null' }, { type: 'null' }],
+      output: [{ type: 'null' }]
     },
     samples: [
       {

@@ -1,6 +1,5 @@
 import { describe, it, expect } from 'vitest';
 import type { OperatorValue, StringValue, Value, IValuePermissions, IntegerValue, NameValue } from '@api/index.js';
-import { ValueType } from '@api/index.js';
 import { testIsFunction, enumVariantsOf, values, toValue } from '@test/index.js';
 import {
   isIntegerValue,
@@ -94,7 +93,7 @@ describe('isNameValue', () => {
 
 describe('isOperatorValue', () => {
   const operatorValue: OperatorValue = {
-    type: ValueType.operator,
+    type: 'operator',
     isReadOnly: true,
     isExecutable: true,
     operator: {
@@ -109,7 +108,7 @@ describe('isOperatorValue', () => {
       ...values.all,
       ...enumVariantsOf(operatorValue),
       {
-        type: ValueType.operator,
+        type: 'operator',
         isReadOnly: true,
         isExecutable: true,
         operator: {

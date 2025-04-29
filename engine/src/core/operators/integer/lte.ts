@@ -1,4 +1,4 @@
-import { ValueType, trueValue, falseValue } from '@api/index.js';
+import { trueValue, falseValue } from '@api/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 
 buildFunctionOperator(
@@ -7,8 +7,8 @@ buildFunctionOperator(
     description: 'compares two integers to see if lower than or equal',
     labels: ['integer', 'math', 'comparison'],
     signature: {
-      input: [{ type: ValueType.integer }, { type: ValueType.integer }],
-      output: [{ type: ValueType.boolean }]
+      input: [{ type: 'integer' }, { type: 'integer' }],
+      output: [{ type: 'boolean' }]
     },
     samples: [
       {
@@ -25,5 +25,6 @@ buildFunctionOperator(
       }
     ]
   },
-  ({ operands }, { integer: value1 }, { integer: value2 }) => operands.popush(2, value1 <= value2 ? trueValue : falseValue)
+  ({ operands }, { integer: value1 }, { integer: value2 }) =>
+    operands.popush(2, value1 <= value2 ? trueValue : falseValue)
 );

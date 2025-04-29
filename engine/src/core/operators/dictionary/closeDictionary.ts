@@ -1,5 +1,5 @@
 import type { NameValue } from '@api/index.js';
-import { USER_MEMORY_TYPE, ValueType } from '@api/index.js';
+import { USER_MEMORY_TYPE } from '@api/index.js';
 import { findMarkPos, valuesOf } from '@sdk/index.js';
 import type { IInternalState } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
@@ -14,7 +14,7 @@ buildFunctionOperator(
     description: 'finalizes a dictionary',
     labels: ['dictionary', 'mark'],
     signature: {
-      output: [{ type: ValueType.dictionary, permissions: { isExecutable: false, isReadOnly: false } }]
+      output: [{ type: 'dictionary', permissions: { isExecutable: false, isReadOnly: false } }]
     },
     samples: [
       {
@@ -76,7 +76,7 @@ buildFunctionOperator(
     }
     for (let operandIndex = 1; operandIndex < markPos; operandIndex += 2) {
       const name = operands.at(operandIndex);
-      if (name.type !== ValueType.name) {
+      if (name.type !== 'name') {
         return { success: false, exception: 'typeCheck' };
       }
     }
@@ -89,7 +89,7 @@ buildFunctionOperator(
     for (let operandIndex = 0; operandIndex < markPos; operandIndex += 2) {
       const value = operands.at(operandIndex);
       const nameValue = operands.at(operandIndex + 1);
-      const [name] = valuesOf<ValueType.name>(nameValue as NameValue); // checked before
+      const [name] = valuesOf<'name'>(nameValue as NameValue); // checked before
       const defined = dictionary.def(name, value);
       if (!defined.success) {
         return defined;

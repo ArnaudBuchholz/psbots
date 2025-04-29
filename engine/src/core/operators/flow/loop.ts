@@ -1,4 +1,3 @@
-import { ValueType } from '@api/index.js';
 import { OPERATOR_STATE_POP, OPERATOR_STATE_FIRST_CALL, OPERATOR_STATE_CALL_BEFORE_POP, assert } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 
@@ -10,7 +9,7 @@ buildFunctionOperator(
     description: 'repeatedly executes proc until proc executes the stop operator',
     labels: ['flow', 'loop'],
     signature: {
-      input: [{ type: ValueType.array, permissions: { isExecutable: true } }]
+      input: [{ type: 'array', permissions: { isExecutable: true } }]
     },
     samples: [
       {

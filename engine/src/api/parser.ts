@@ -1,4 +1,3 @@
-import { ValueType } from './values/ValueType.js';
 import type { Value } from './values/Value.js';
 import { nullValue } from './values/NullValue.js';
 import { assert } from '@sdk/assert.js';
@@ -41,7 +40,7 @@ function* parseString(options: ParseOptionsWithSource) {
   }
   yield addDebugSource(
     {
-      type: ValueType.string,
+      type: 'string',
       isReadOnly: true,
       isExecutable: false,
       string: source.slice(pos + 1, endPos)
@@ -63,7 +62,7 @@ function* parseNumber(options: ParseOptionsWithSource) {
     // This is a name
     yield addDebugSource(
       {
-        type: ValueType.name,
+        type: 'name',
         isReadOnly: true,
         isExecutable: true,
         name: first
@@ -74,7 +73,7 @@ function* parseNumber(options: ParseOptionsWithSource) {
   }
   yield addDebugSource(
     {
-      type: ValueType.integer,
+      type: 'integer',
       isReadOnly: true,
       isExecutable: false,
       integer: Number.parseInt(source.slice(pos, endPos))
@@ -92,7 +91,7 @@ function* parseName(options: ParseOptionsWithSource) {
   if ('[]{}«»'.includes(first)) {
     yield addDebugSource(
       {
-        type: ValueType.name,
+        type: 'name',
         isReadOnly: true,
         isExecutable: true,
         name: first
@@ -105,7 +104,7 @@ function* parseName(options: ParseOptionsWithSource) {
     yield first === '/'
       ? addDebugSource(
           {
-            type: ValueType.name,
+            type: 'name',
             isReadOnly: true,
             isExecutable: true,
             name: ''
@@ -114,7 +113,7 @@ function* parseName(options: ParseOptionsWithSource) {
         )
       : addDebugSource(
           {
-            type: ValueType.name,
+            type: 'name',
             isReadOnly: true,
             isExecutable: true,
             name: first
@@ -129,7 +128,7 @@ function* parseName(options: ParseOptionsWithSource) {
   if (first === second && '<>'.includes(first)) {
     yield addDebugSource(
       {
-        type: ValueType.name,
+        type: 'name',
         isReadOnly: true,
         isExecutable: true,
         name: first === '<' ? '<<' : '>>'
@@ -149,7 +148,7 @@ function* parseName(options: ParseOptionsWithSource) {
   yield first === '/'
     ? addDebugSource(
         {
-          type: ValueType.name,
+          type: 'name',
           isReadOnly: true,
           isExecutable: false,
           name: source.slice(pos + 1, endPos)
@@ -158,7 +157,7 @@ function* parseName(options: ParseOptionsWithSource) {
       )
     : addDebugSource(
         {
-          type: ValueType.name,
+          type: 'name',
           isReadOnly: true,
           isExecutable: true,
           name: source.slice(pos, endPos)

@@ -1,4 +1,4 @@
-import { nullValue, ValueType } from '@psbots/engine';
+import { nullValue } from '@psbots/engine';
 import type { Value, IReadOnlyDictionary } from '@psbots/engine';
 
 import type { IOperator } from '@psbots/engine/sdk';
@@ -22,14 +22,14 @@ const HOST_BALL_SPEED_Y = 'ball_speed_y';
 const HOST_PADDLE_UP = 'paddle_up';
 const HOST_PADDLE_DOWN = 'paddle_down';
 
-const safeToIntegerValue = (value: number): Value<ValueType.integer> => {
+const safeToIntegerValue = (value: number): Value<'integer'> => {
   const result = toIntegerValue(value);
   assert(result);
   return result.value;
 };
 
 const buildIntegerOperatorValue = (name: string, impl: () => number): Value => ({
-  type: ValueType.operator,
+  type: 'operator',
   isExecutable: true,
   isReadOnly: true,
   operator: <IOperator>{
@@ -40,7 +40,7 @@ const buildIntegerOperatorValue = (name: string, impl: () => number): Value => (
 });
 
 const buildModifierOperatorValue = (name: string, implementation: () => void): Value => ({
-  type: ValueType.operator,
+  type: 'operator',
   isExecutable: true,
   isReadOnly: true,
   operator: <IOperator>{
