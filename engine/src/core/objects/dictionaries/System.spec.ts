@@ -1,5 +1,4 @@
 import { it, expect } from 'vitest';
-import { ValueType } from '@api/index.js';
 import { SystemDictionary } from './System.js';
 
 it('always return the same instance', () => {

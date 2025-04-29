@@ -8,9 +8,9 @@ import type {
   IDictionary,
   IValuePermissions,
   IntegerValue,
-  NameValue
+  NameValue,
+  ValueType
 } from '@api/index.js';
-import { ValueType } from '@api/index.js';
 import { isObject } from '@sdk/checks/isObject.js';
 
 const expectedFlags: { [key in ValueType]?: Partial<IAbstractValue> } = {

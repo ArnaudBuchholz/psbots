@@ -1,5 +1,4 @@
 import { it, expect, vi } from 'vitest';
-import { ValueType } from '@api/index.js';
 import type { Exception } from '@api/index.js';
 import { assert } from '@sdk/index.js';
 import { State } from '@core/state/State.js';

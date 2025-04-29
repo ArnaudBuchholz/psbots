@@ -1,6 +1,6 @@
 import { it, expect, beforeEach, afterEach, describe } from 'vitest';
 import type { Value, Result } from '@api/index.js';
-import { nullValue, USER_MEMORY_TYPE, ValueType } from '@api/index.js';
+import { nullValue, USER_MEMORY_TYPE } from '@api/index.js';
 import { assert } from '@sdk/index.js';
 import { MemoryTracker } from '@core/MemoryTracker.js';
 import { Dictionary } from './Dictionary.js';

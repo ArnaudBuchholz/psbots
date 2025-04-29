@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import type { Exception } from '@api/index.js';
-import { enumIArrayValues, markValue, ValueType } from '@api/index.js';
+import { enumIArrayValues, markValue } from '@api/index.js';
 import type { IFunctionOperator, IInternalState, IOperator } from '@sdk/index.js';
 import {
   OPERATOR_STATE_FIRST_CALL,
@@ -82,9 +82,7 @@ describe('With parameters', () => {
       pushFunctionOperatorToCallStack({
         implementation({ operands }, ...values) {
           assert(
-            operands.push(
-              toValue(values.length === 1 && values[0]?.type === 'integer' && values[0]?.integer === 123)
-            )
+            operands.push(toValue(values.length === 1 && values[0]?.type === 'integer' && values[0]?.integer === 123))
           );
         },
         typeCheck: [{ type: 'integer' }]

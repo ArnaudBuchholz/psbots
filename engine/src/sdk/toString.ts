@@ -1,5 +1,5 @@
-import type { IDebugSource, IReadOnlyCallStack, Value } from '@api/index.js';
-import { ValueType, parse } from '@api/index.js';
+import type { IDebugSource, IReadOnlyCallStack, Value, ValueType } from '@api/index.js';
+import { parse } from '@api/index.js';
 import {
   OPERATOR_STATE_CALL_BEFORE_POP,
   OPERATOR_STATE_FIRST_CALL,
@@ -107,10 +107,10 @@ function decorate(
 }
 
 const implementations: { [type in ValueType]: (container: Value<type>, options: ToStringOptions) => string } = {
-  ['null']: ({ debugSource }, options) => decorate(TOSTRING_NULL, debugSource, options),
-  ['boolean']: ({ isSet, debugSource }, options) => decorate(isSet ? 'true' : 'false', debugSource, options),
-  ['integer']: ({ integer, debugSource }, options) => decorate(integer.toString(), debugSource, options),
-  ['string']: ({ isExecutable, string, debugSource }, options) => {
+  null: ({ debugSource }, options) => decorate(TOSTRING_NULL, debugSource, options),
+  boolean: ({ isSet, debugSource }, options) => decorate(isSet ? 'true' : 'false', debugSource, options),
+  integer: ({ integer, debugSource }, options) => decorate(integer.toString(), debugSource, options),
+  string: ({ isExecutable, string, debugSource }, options) => {
     let stringified: string | undefined;
     if (isExecutable) {
       const { operatorState } = options;
@@ -134,15 +134,15 @@ const implementations: { [type in ValueType]: (container: Value<type>, options: 
     }
     return decorate(stringified, debugSource, options);
   },
-  ['name']: ({ isExecutable, name, debugSource }, options) => {
+  name: ({ isExecutable, name, debugSource }, options) => {
     let stringified: string = name.replaceAll(' ', '␣');
     if (!isExecutable) {
       stringified = `/${stringified}`;
     }
     return decorate(stringified, debugSource, options);
   },
-  ['mark']: ({ debugSource }, options) => decorate('--mark--', debugSource, options),
-  ['operator']: ({ operator, debugSource }, options) => {
+  mark: ({ debugSource }, options) => decorate('--mark--', debugSource, options),
+  operator: ({ operator, debugSource }, options) => {
     let stringified = `-${operator.name}-`;
     const { operatorState } = options;
     if (operatorState !== undefined && operatorState !== OPERATOR_STATE_UNKNOWN) {
@@ -158,7 +158,7 @@ const implementations: { [type in ValueType]: (container: Value<type>, options: 
     }
     return decorate(stringified, debugSource, options);
   },
-  ['array']: ({ isExecutable, array, debugSource }, options) => {
+  array: ({ isExecutable, array, debugSource }, options) => {
     const output: string[] = [];
     if (isExecutable) {
       output.push('{');
@@ -190,7 +190,7 @@ const implementations: { [type in ValueType]: (container: Value<type>, options: 
     }
     return decorate(output.join(' '), debugSource, options);
   },
-  ['dictionary']: ({ dictionary, isReadOnly, debugSource }, options) => {
+  dictionary: ({ dictionary, isReadOnly, debugSource }, options) => {
     const namesCount = dictionary.names.length.toString();
     let namesDescription = namesCount.toString();
     if (!isReadOnly) {

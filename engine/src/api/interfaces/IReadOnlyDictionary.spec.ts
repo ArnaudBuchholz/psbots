@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import type { Value } from '@api/index.js';
-import { ValueType, enumIDictionaryValues, convertIDictionaryToObject } from '@api/index.js';
+import { enumIDictionaryValues, convertIDictionaryToObject } from '@api/index.js';
 import { toValue } from '@test/index.js';
 
 const readOnlyDictionary = toValue({ a: 1, b: 2, c: '3' }, { isReadOnly: true }).dictionary;

@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { enumIArrayValues, ValueType } from '@api/index.js';
+import { enumIArrayValues } from '@api/index.js';
 import type { Result, Value, Exception, MemoryType } from '@api/index.js';
 import { State } from './State.js';
 import { toValue, waitForExec } from '@test/index.js';

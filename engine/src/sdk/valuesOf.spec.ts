@@ -16,23 +16,19 @@ it('handles two parameters', () => {
 });
 
 it('handles three parameters', () => {
-  const [number, string, boolean] = valuesOf<'integer', 'string', 'boolean'>(
-    toValue(1),
-    toValue('a'),
-    toValue(true)
-  );
+  const [number, string, boolean] = valuesOf<'integer', 'string', 'boolean'>(toValue(1), toValue('a'), toValue(true));
   expect(number).toStrictEqual(1);
   expect(string).toStrictEqual('a');
   expect(boolean).toStrictEqual(true);
 });
 
 it('handles four parameters', () => {
-  const [number, string, boolean, array] = valuesOf<
-    'integer',
-    'string',
-    'boolean',
-    'array'
-  >(toValue(1), toValue('a'), toValue(true), toValue([1, 'a', true]));
+  const [number, string, boolean, array] = valuesOf<'integer', 'string', 'boolean', 'array'>(
+    toValue(1),
+    toValue('a'),
+    toValue(true),
+    toValue([1, 'a', true])
+  );
   expect(number).toStrictEqual(1);
   expect(string).toStrictEqual('a');
   expect(boolean).toStrictEqual(true);

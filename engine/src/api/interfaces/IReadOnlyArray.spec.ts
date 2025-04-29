@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import type { Value } from '@api/index.js';
-import { enumIArrayValues, ValueType } from '@api/index.js';
+import { enumIArrayValues } from '@api/index.js';
 import { toValue } from '@test/index.js';
 
 describe('enumIArrayValues', () => {

@@ -1,5 +1,5 @@
 import { it, expect, beforeEach, afterEach, beforeAll } from 'vitest';
-import { enumIArrayValues, markValue, ValueType } from '@api/index.js';
+import { enumIArrayValues, markValue } from '@api/index.js';
 import type { Exception, IDebugSource, IDictionary, Value } from '@api/index.js';
 import { toValue, waitForExec } from '@test/index.js';
 import { State } from './State.js';

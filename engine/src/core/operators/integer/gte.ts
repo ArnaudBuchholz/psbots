@@ -25,5 +25,6 @@ buildFunctionOperator(
       }
     ]
   },
-  ({ operands }, { integer: value1 }, { integer: value2 }) => operands.popush(2, value1 >= value2 ? trueValue : falseValue)
+  ({ operands }, { integer: value1 }, { integer: value2 }) =>
+    operands.popush(2, value1 >= value2 ? trueValue : falseValue)
 );

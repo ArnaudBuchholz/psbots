@@ -16,11 +16,7 @@ export const CALLS_EXCEPTION = 'exception';
 const CALLS_EXCEPTION_STACK = 'stack';
 export const OPERATOR_STATE_POPPING = -2;
 
-function firstCall(
-  state: IInternalState,
-  codeBlock: Value<'array'>,
-  finalBlock: Value<'array'>
-): Result<unknown> {
+function firstCall(state: IInternalState, codeBlock: Value<'array'>, finalBlock: Value<'array'>): Result<unknown> {
   const { operands, calls } = state;
   const finalBlockDefined = calls.def(CALLS_BLOCK, finalBlock);
   if (!finalBlockDefined.success) {

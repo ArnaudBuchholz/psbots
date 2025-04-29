@@ -1,12 +1,11 @@
-import type { Value } from '@api/index.js';
-import { ValueType } from '@api/index.js';
+import type { Value, ValueType } from '@api/index.js';
 import { assert, toIntegerValue } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 
 const implementations: { [type in ValueType]?: (container: Value<type>) => number } = {
-  ['string']: ({ string }) => string.length,
-  ['array']: ({ array }) => array.length,
-  ['dictionary']: ({ dictionary }) => dictionary.names.length
+  string: ({ string }) => string.length,
+  array: ({ array }) => array.length,
+  dictionary: ({ dictionary }) => dictionary.names.length
 };
 
 buildFunctionOperator(

@@ -23,5 +23,5 @@ buildFunctionOperator(
       }
     ]
   },
-  ({ operands }, value) => operands.popush(1, !value.isReadOnly ? trueValue : falseValue)
+  ({ operands }, value) => operands.popush(1, value.isReadOnly ? falseValue : trueValue)
 );

@@ -1,16 +1,15 @@
-import type { Value, ValueOf } from '@api/index.js';
-import { ValueType } from '@api/index.js';
+import type { Value, ValueOf, ValueType } from '@api/index.js';
 
 const values: { [type in ValueType]: (value: Value<type>) => unknown } = {
-  ['null']: () => null,
-  ['boolean']: (value) => value.isSet,
-  ['integer']: (value) => value.integer,
-  ['string']: (value) => value.string,
-  ['name']: (value) => value.name,
-  ['mark']: () => null,
-  ['operator']: (value) => value.operator,
-  ['array']: (value) => value.array,
-  ['dictionary']: (value) => value.dictionary
+  null: () => null,
+  boolean: (value) => value.isSet,
+  integer: (value) => value.integer,
+  string: (value) => value.string,
+  name: (value) => value.name,
+  mark: () => null,
+  operator: (value) => value.operator,
+  array: (value) => value.array,
+  dictionary: (value) => value.dictionary
 };
 
 function getValueOf(value: Value): unknown {

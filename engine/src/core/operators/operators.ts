@@ -1,5 +1,4 @@
-import type { IOperatorValue, OperatorValue, Result, Value } from '@api/index.js';
-import { ValueType } from '@api/index.js';
+import type { IOperatorValue, OperatorValue, Result, Value, ValueType } from '@api/index.js';
 import type { IInternalState, IFunctionOperator, IOperatorTypeCheck } from '@sdk/index.js';
 import { assert, OperatorType } from '@sdk/index.js';
 

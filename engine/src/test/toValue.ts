@@ -19,7 +19,7 @@ export type CompatiblePrimitiveValue = string | symbol | number | boolean | Valu
 export type CompatibleValue = CompatibleValue[] | { [key in string]: CompatibleValue } | CompatiblePrimitiveValue;
 
 function isValue(value: unknown): value is Value {
-  return isObject(value) && value.type in Object.keys(VALUE_TYPE);
+  return isObject(value) && Object.keys(VALUE_TYPE).includes(value.type);
 }
 
 function releasePreviousValue(previousValue: Value | undefined): Value {
