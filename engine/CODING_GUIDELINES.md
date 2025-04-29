@@ -45,6 +45,27 @@ addStringRef(string: string): Result<number>
 releaseString(string: string): boolean
 ```
 
+### Garbage collection
+
+As they are allocated by chunks, dictionaries and arrays require significant time to completely release their memory.
+Furthermore, stored values may themselves require deallocation after being released, which implies iteration over values.
+
+As a consequence, when an object is released - for instance when being popped from the operand stack - the deallocation may not be triggered immediately to ensure
+consistent timings in the engine cycles.
+Instead, the object is added to a garbage collection queue with information about memory type and total memory allocated.
+
+When a `vmOverflow` error is raised or after some thresholds are met (total memory to garbage collect), the engine enters a special phase by adding the `gc` operator on the call stack.
+
+> An operator should fail with `vmOverflow` in the first step to make sure it can retry once memory has been garbage collected.
+
+Garbage collection can also be explicitely requested using `gc` operator.
+
+This operator iterates over the queue of objects to release until the queue is empty.
+
+> [!NOTE]  
+> This memory is considered deallocated even if not effectively done.
+> As a consequence, when saving the engine state, no information is tracked about the garbage collector.
+
 ## Error management
 
 * When a method *may* fail either because of its direct content or its subsequent calls, it *must* returns a `Result`.
