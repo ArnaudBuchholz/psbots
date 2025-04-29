@@ -1,13 +1,13 @@
-import { getOperatorDefinitionRegistry, ValueType } from '@psbots/engine';
+import { getOperatorDefinitionRegistry } from '@psbots/engine';
 import type { Value } from '@psbots/engine';
 import { OperatorType } from '@psbots/engine/sdk';
 import type { IFunctionOperator } from '@psbots/engine/sdk';
 import { cyan, white, yellow } from '../colors.js';
 import type { ReplHostDictionary } from './index.js';
 
-export function createHelpOperator({ replIO }: ReplHostDictionary): Value<ValueType.operator> {
+export function createHelpOperator({ replIO }: ReplHostDictionary): Value<'operator'> {
   return {
-    type: ValueType.operator,
+    type: 'operator',
     isExecutable: true,
     isReadOnly: true,
     operator: <IFunctionOperator>{

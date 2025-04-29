@@ -1,5 +1,5 @@
 import type { Value, IDictionary, MemoryType, DictionaryValue, IValuePermissions, Result } from '@api/index.js';
-import { ValueType, nullValue } from '@api/index.js';
+import { nullValue } from '@api/index.js';
 import { addMemorySize } from '@core/MemoryTracker.js';
 import type { MemoryPointer, MemorySize, MemoryTracker } from '@core/MemoryTracker.js';
 import { ShareableObject } from '@core/objects/ShareableObject.js';
@@ -27,7 +27,7 @@ export class Dictionary extends ShareableObject implements IDictionary {
   toValue({ isReadOnly = true, isExecutable }: Partial<IValuePermissions> = {}): DictionaryValue {
     assert(isExecutable !== true, 'Unsupported permissions');
     return {
-      type: ValueType.dictionary,
+      type: 'dictionary',
       isReadOnly,
       isExecutable: false,
       tracker: ShareableObject.tracker,
@@ -137,7 +137,7 @@ export class Dictionary extends ShareableObject implements IDictionary {
       if (previousValue.tracker?.releaseValue(previousValue) === false) {
         previousValue = nullValue;
       }
-      if (value.type === ValueType.null) {
+      if (value.type === 'null') {
         if (slot.pointer !== this._pointer) {
           this._memoryTracker.release(slot.pointer, this);
         }
@@ -145,7 +145,7 @@ export class Dictionary extends ShareableObject implements IDictionary {
         delete this._slots[name];
         return { success: true, value: previousValue };
       }
-    } else if (value.type !== ValueType.null) {
+    } else if (value.type !== 'null') {
       const slotAllocated = this._getNewValueSlot(name);
       if (!slotAllocated.success) {
         return slotAllocated;

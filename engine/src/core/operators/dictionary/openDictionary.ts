@@ -1,4 +1,3 @@
-import { ValueType } from '@api/index.js';
 import type { IInternalState } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 import { openWithMark } from '@core/operators/openClose.js';
@@ -10,7 +9,7 @@ buildFunctionOperator(
     description: 'marks the beginning of a dictionary',
     labels: ['dictionary', 'mark'],
     signature: {
-      output: [{ type: ValueType.mark }]
+      output: [{ type: 'mark' }]
     },
     samples: [
       {

@@ -1,5 +1,5 @@
 import type { Result, Value } from '@api/index.js';
-import { USER_MEMORY_TYPE, ValueType, markValue } from '@api/index.js';
+import { USER_MEMORY_TYPE, markValue } from '@api/index.js';
 import { assert, findMarkPos, OPERATOR_STATE_FIRST_CALL, OPERATOR_STATE_POP, toIntegerValue } from '@sdk/index.js';
 import type { IInternalState, IStack } from '@sdk/index.js';
 import { ValueArray } from '@core/objects/ValueArray.js';
@@ -72,7 +72,7 @@ export function closeToMark(state: IInternalState, { isExecutable }: { isExecuta
     return defined;
   }
   const markPosValue = calls.lookup(CALLS_MARKPOS);
-  assert(markPosValue.type === ValueType.integer);
+  assert(markPosValue.type === 'integer');
   const markPos = markPosValue.integer;
   if (calls.topOperatorState === OPERATOR_STATE_ALLOC_ARRAY) {
     const arrayResult = ValueArray.create(memoryTracker as MemoryTracker, USER_MEMORY_TYPE, Math.max(markPos, 1), 1);
@@ -89,7 +89,7 @@ export function closeToMark(state: IInternalState, { isExecutable }: { isExecuta
     return defined;
   }
   const arrayValue = calls.lookup(CALLS_ARRAY);
-  assert(arrayValue.type === ValueType.array);
+  assert(arrayValue.type === 'array');
   const array = arrayValue.array;
   assert(array instanceof ValueArray);
   const index = calls.topOperatorState - OPERATOR_STATE_FILL_ARRAY;

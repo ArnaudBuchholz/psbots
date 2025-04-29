@@ -1,8 +1,7 @@
 import type { Result, Value } from '@api/index.js';
-import { ValueType } from '@api/index.js';
 
 export function checkPos(index: Value, length: number): Result<number> {
-  if (index.type !== ValueType.integer) {
+  if (index.type !== 'integer') {
     return { success: false, exception: 'typeCheck' };
   }
   const { integer: pos } = index;

@@ -1,5 +1,5 @@
 import type { Value } from '@api/index.js';
-import { SYSTEM_MEMORY_TYPE, ValueType } from '@api/index.js';
+import { SYSTEM_MEMORY_TYPE } from '@api/index.js';
 import {
   OPERATOR_STATE_UNKNOWN,
   OPERATOR_STATE_FIRST_CALL,
@@ -11,7 +11,7 @@ import type { IFunctionOperator, IInternalState, IOperator } from '@sdk/index.js
 import type { MemoryPointer } from '@core/MemoryTracker.js';
 import { MemoryTracker } from '@core/MemoryTracker.js';
 
-export function operatorPop(state: IInternalState, value: Value<ValueType.operator>): void {
+export function operatorPop(state: IInternalState, value: Value<'operator'>): void {
   const { calls } = state;
   const operator = value.operator as IFunctionOperator;
   if (calls.topOperatorState >= OPERATOR_STATE_FIRST_CALL || calls.topOperatorState === OPERATOR_STATE_POP) {
@@ -44,7 +44,7 @@ function handleFunctionOperatorTypeCheck(state: IInternalState, operator: IFunct
     const value = operands.at(--length);
     const { isReadOnly, isExecutable } = permissions ?? {};
     if (
-      (type === ValueType.null || type === value.type) &&
+      (type === 'null' || type === value.type) &&
       (isReadOnly === undefined || isReadOnly === value.isReadOnly) &&
       (isExecutable === undefined || isExecutable === value.isExecutable)
     ) {
@@ -102,7 +102,7 @@ function handleFunctionOperator(state: IInternalState, operator: IFunctionOperat
   }
 }
 
-export function operatorCycle(state: IInternalState, value: Value<ValueType.operator>): void {
+export function operatorCycle(state: IInternalState, value: Value<'operator'>): void {
   const { operands, calls } = state;
   if (calls.topOperatorState <= OPERATOR_STATE_FIRST_CALL) {
     operatorPop(state, value);

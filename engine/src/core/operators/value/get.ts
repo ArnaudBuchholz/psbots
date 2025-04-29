@@ -6,7 +6,7 @@ import { MemoryTracker } from '@core/MemoryTracker.js';
 
 /** Returned value is addRef'ed */
 const implementations: { [type in ValueType]?: (container: Value<type>, index: Value) => Result<Value> } = {
-  [ValueType.string]: ({ string, tracker }, index) => {
+  ['string']: ({ string, tracker }, index) => {
     assert(tracker instanceof MemoryTracker);
     const posResult = checkPos(index, string.length);
     if (!posResult.success) {
@@ -20,7 +20,7 @@ const implementations: { [type in ValueType]?: (container: Value<type>, index: V
     return { success: true, value: toStringValue(stringResult, { tracker }) };
   },
 
-  [ValueType.array]: ({ array }, index) => {
+  ['array']: ({ array }, index) => {
     const posResult = checkPos(index, array.length);
     if (!posResult.success) {
       return posResult;
@@ -30,8 +30,8 @@ const implementations: { [type in ValueType]?: (container: Value<type>, index: V
     return { success: true, value };
   },
 
-  [ValueType.dictionary]: ({ dictionary }, index) => {
-    if (index.type !== ValueType.name) {
+  ['dictionary']: ({ dictionary }, index) => {
+    if (index.type !== 'name') {
       return { success: false, exception: 'typeCheck' };
     }
     const { name } = index;
@@ -50,8 +50,8 @@ buildFunctionOperator(
     description: 'returns an indexed item from the value',
     labels: ['generic'],
     signature: {
-      input: [{ type: ValueType.null }, { type: ValueType.null }],
-      output: [{ type: ValueType.null }]
+      input: [{ type: 'null' }, { type: 'null' }],
+      output: [{ type: 'null' }]
     },
     samples: [
       {

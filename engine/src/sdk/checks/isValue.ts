@@ -14,10 +14,10 @@ import { ValueType } from '@api/index.js';
 import { isObject } from '@sdk/checks/isObject.js';
 
 const expectedFlags: { [key in ValueType]?: Partial<IAbstractValue> } = {
-  [ValueType.string]: {
+  ['string']: {
     isReadOnly: true
   },
-  [ValueType.operator]: {
+  ['operator']: {
     isReadOnly: true,
     isExecutable: true
   }
@@ -63,20 +63,20 @@ function isInteger(value: unknown): value is number {
 }
 
 export function isIntegerValue(value: unknown): value is IntegerValue {
-  return is(ValueType.integer, value, undefined, ({ integer }) => isInteger(integer));
+  return is('integer', value, undefined, ({ integer }) => isInteger(integer));
 }
 
 export function isStringValue(value: unknown, flags?: { isExecutable?: boolean }): value is StringValue {
-  return is(ValueType.string, value, flags, ({ string }) => typeof string === 'string');
+  return is('string', value, flags, ({ string }) => typeof string === 'string');
 }
 
 export function isNameValue(value: unknown, flags?: { isExecutable?: boolean }): value is NameValue {
-  return is(ValueType.name, value, flags, ({ name }) => typeof name === 'string');
+  return is('name', value, flags, ({ name }) => typeof name === 'string');
 }
 
 export function isOperatorValue(value: unknown): value is OperatorValue {
   return is(
-    ValueType.operator,
+    'operator',
     value,
     undefined,
     ({ operator }) => operator !== undefined && typeof operator.name === 'string'
@@ -90,7 +90,7 @@ const isPositiveInteger = (value: unknown): boolean => isInteger(value) && value
 
 export function isArrayValue(value: unknown, flags?: Partial<IValuePermissions>): value is ArrayValue {
   return is(
-    ValueType.array,
+    'array',
     value,
     flags,
     ({ isReadOnly, array }) =>
@@ -102,7 +102,7 @@ export function isArrayValue(value: unknown, flags?: Partial<IValuePermissions>)
 }
 
 export function isDictionaryValue(value: unknown, flags?: Partial<IValuePermissions>): value is DictionaryValue {
-  return is(ValueType.dictionary, value, flags, ({ isReadOnly, dictionary }) => {
+  return is('dictionary', value, flags, ({ isReadOnly, dictionary }) => {
     if (dictionary === undefined) {
       return false;
     }

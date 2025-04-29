@@ -1,4 +1,3 @@
-import { ValueType } from '@api/index.js';
 import type { IInternalState } from '@sdk/index.js';
 import { OPERATOR_STATE_FIRST_CALL } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
@@ -10,7 +9,7 @@ buildFunctionOperator(
     description: 'finalizes a block',
     labels: ['flow', 'mark'],
     signature: {
-      output: [{ type: ValueType.array, permissions: { isExecutable: true, isReadOnly: true } }]
+      output: [{ type: 'array', permissions: { isExecutable: true, isReadOnly: true } }]
     },
     samples: [
       {

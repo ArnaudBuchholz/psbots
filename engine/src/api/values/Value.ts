@@ -1,4 +1,3 @@
-import type { ValueType } from '@api/values/ValueType.js';
 import type { NullValue } from '@api/values/NullValue.js';
 import type { BooleanValue } from '@api/values/BooleanValue.js';
 import type { IntegerValue } from '@api/values/IntegerValue.js';
@@ -15,23 +14,23 @@ import type { IReadOnlyDictionary } from '@api/interfaces/IReadOnlyDictionary.js
 import type { IDictionary } from '@api/interfaces/IDictionary.js';
 
 /** Generic Value */
-export type Value<T = unknown> = T extends ValueType.null
+export type Value<T = unknown> = T extends 'null'
   ? NullValue
-  : T extends ValueType.boolean
+  : T extends 'boolean'
     ? BooleanValue
-    : T extends ValueType.integer
+    : T extends 'integer'
       ? IntegerValue
-      : T extends ValueType.string
+      : T extends 'string'
         ? StringValue
-        : T extends ValueType.name
+        : T extends 'name'
           ? NameValue
-          : T extends ValueType.mark
+          : T extends 'mark'
             ? MarkValue
-            : T extends ValueType.operator
+            : T extends 'operator'
               ? OperatorValue
-              : T extends ValueType.array
+              : T extends 'array'
                 ? ArrayValue
-                : T extends ValueType.dictionary
+                : T extends 'dictionary'
                   ? DictionaryValue
                   :
                       | NullValue
@@ -44,20 +43,20 @@ export type Value<T = unknown> = T extends ValueType.null
                       | ArrayValue
                       | DictionaryValue;
 
-export type ValueOf<T> = T extends ValueType.boolean
+export type ValueOf<T> = T extends 'boolean'
   ? boolean
-  : T extends ValueType.integer
+  : T extends 'integer'
     ? number
-    : T extends ValueType.string
+    : T extends 'string'
       ? string
-      : T extends ValueType.name
+      : T extends 'name'
         ? string
-        : T extends ValueType.mark
+        : T extends 'mark'
           ? null
-          : T extends ValueType.operator
+          : T extends 'operator'
             ? IAbstractOperator
-            : T extends ValueType.array
+            : T extends 'array'
               ? IReadOnlyArray | IArray
-              : T extends ValueType.dictionary
+              : T extends 'dictionary'
                 ? IReadOnlyDictionary | IDictionary
                 : never;

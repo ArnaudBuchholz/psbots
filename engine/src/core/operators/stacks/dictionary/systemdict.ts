@@ -1,4 +1,3 @@
-import { ValueType } from '@api/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 
 buildFunctionOperator(
@@ -7,7 +6,7 @@ buildFunctionOperator(
     description: 'retrieves the system dictionary from the dictionary stack',
     labels: ['dictstack'],
     signature: {
-      output: [{ type: ValueType.dictionary }]
+      output: [{ type: 'dictionary' }]
     },
     samples: [
       {

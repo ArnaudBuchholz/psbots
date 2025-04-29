@@ -42,7 +42,7 @@ export type OperatorDefinition<Input = IOperatorTypeCheck[]> = {
 export const registry: {
   [key in string]: {
     definition: OperatorDefinition<IOperatorTypeCheck[]>;
-    value: Value<ValueType.operator>;
+    value: Value<'operator'>;
   };
 } = {};
 
@@ -76,7 +76,7 @@ export function buildFunctionOperator(
     implementation
   };
   const value = {
-    type: ValueType.operator,
+    type: 'operator',
     isExecutable: true,
     isReadOnly: true,
     operator
@@ -111,7 +111,7 @@ export function buildConstantOperator(definition: OperatorDefinition<IOperatorTy
   registry[definition.name] = {
     definition,
     value: {
-      type: ValueType.operator,
+      type: 'operator',
       isExecutable: true,
       isReadOnly: true,
       operator

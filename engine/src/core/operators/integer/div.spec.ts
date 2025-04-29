@@ -21,7 +21,7 @@ it('fails if the resulting reminder is not valid', async () => {
     if (value === 0) {
       return { success: false, exception: 'limitcheck' };
     }
-    return { success: true, value: { type: ValueType.integer, isExecutable: false, isReadOnly: true, integer: 1 } };
+    return { success: true, value: { type: 'integer', isExecutable: false, isReadOnly: true, integer: 1 } };
   });
   await waitForExec(state.exec(toValue('1 1 div', { isExecutable: true })));
   expect(state.exception).toStrictEqual<Exception>('limitcheck');
@@ -35,7 +35,7 @@ it('fails if the resulting dividend is not valid', async () => {
     if (value === 1) {
       return { success: false, exception: 'limitcheck' };
     }
-    return { success: true, value: { type: ValueType.integer, isExecutable: false, isReadOnly: true, integer: 0 } };
+    return { success: true, value: { type: 'integer', isExecutable: false, isReadOnly: true, integer: 0 } };
   });
   await waitForExec(state.exec(toValue('1 1 div', { isExecutable: true })));
   expect(state.exception).toStrictEqual<Exception>('limitcheck');

@@ -1,4 +1,4 @@
-import { ValueType, trueValue, falseValue } from '@api/index.js';
+import { trueValue, falseValue } from '@api/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 
 buildFunctionOperator(
@@ -7,8 +7,8 @@ buildFunctionOperator(
     description: 'checks if value is writable',
     labels: ['value', 'generic', 'permission'],
     signature: {
-      input: [{ type: ValueType.null }],
-      output: [{ type: ValueType.boolean }]
+      input: [{ type: 'null' }],
+      output: [{ type: 'boolean' }]
     },
     samples: [
       {

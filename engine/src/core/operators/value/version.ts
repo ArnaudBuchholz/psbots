@@ -1,4 +1,3 @@
-import { ValueType } from '@api/index.js';
 import { toStringValue } from '@sdk/index.js';
 import { buildConstantOperator } from '../operators.js';
 
@@ -10,7 +9,7 @@ buildConstantOperator(
     description: 'returns a string that identifies the version of the engine',
     labels: ['value'],
     signature: {
-      output: [{ type: ValueType.string }]
+      output: [{ type: 'string' }]
     },
     samples: [
       {

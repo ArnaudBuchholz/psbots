@@ -16,7 +16,7 @@ describe('enumIDictionaryValues', () => {
       {
         name: 'a',
         value: {
-          type: ValueType.integer,
+          type: 'integer',
           isReadOnly: true,
           isExecutable: false,
 
@@ -26,7 +26,7 @@ describe('enumIDictionaryValues', () => {
       {
         name: 'b',
         value: {
-          type: ValueType.integer,
+          type: 'integer',
           isReadOnly: true,
           isExecutable: false,
 
@@ -36,7 +36,7 @@ describe('enumIDictionaryValues', () => {
       {
         name: 'c',
         value: {
-          type: ValueType.string,
+          type: 'string',
           isReadOnly: true,
           isExecutable: false,
 
@@ -51,21 +51,21 @@ describe('convertIDictionaryToObject', () => {
   it('returns an object', () => {
     expect(convertIDictionaryToObject(readOnlyDictionary)).toStrictEqual<{ [key in string]: Value }>({
       a: {
-        type: ValueType.integer,
+        type: 'integer',
         isReadOnly: true,
         isExecutable: false,
 
         integer: 1
       },
       b: {
-        type: ValueType.integer,
+        type: 'integer',
         isReadOnly: true,
         isExecutable: false,
 
         integer: 2
       },
       c: {
-        type: ValueType.string,
+        type: 'string',
         isReadOnly: true,
         isExecutable: false,
 

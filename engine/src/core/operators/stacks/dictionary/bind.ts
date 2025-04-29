@@ -1,5 +1,4 @@
 import type { Result, Value } from '@api/index.js';
-import { ValueType } from '@api/index.js';
 import type { IInternalState } from '@sdk/index.js';
 import { assert, isArrayValue, OPERATOR_STATE_POP } from '@sdk/index.js';
 import { ValueArray } from '@core/objects/ValueArray.js';
@@ -44,10 +43,10 @@ function bindValue(state: IInternalState, array: ValueArray, index: number): Res
     calls.topOperatorState = index + 1;
     return { success: true, value: undefined };
   }
-  if (value.type === ValueType.name) {
+  if (value.type === 'name') {
     return bindName(state, array, index, value.name);
   }
-  assert(value.type === ValueType.array);
+  assert(value.type === 'array');
   return bindArray(state, array, index, value);
 }
 
@@ -57,8 +56,8 @@ export const bind = buildFunctionOperator(
     description: 'binds the block calls to their value by resolving the names from the dictionary stack',
     labels: ['dictstack', 'flow'],
     signature: {
-      input: [{ type: ValueType.array, permissions: { isExecutable: true } }],
-      output: [{ type: ValueType.array, permissions: { isExecutable: true } }]
+      input: [{ type: 'array', permissions: { isExecutable: true } }],
+      output: [{ type: 'array', permissions: { isExecutable: true } }]
     },
     samples: [
       {

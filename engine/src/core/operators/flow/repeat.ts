@@ -1,5 +1,4 @@
 import type { IntegerValue, Result, Value } from '@api/index.js';
-import { ValueType } from '@api/index.js';
 import type { IInternalState } from '@sdk/index.js';
 import { OPERATOR_STATE_POP, OPERATOR_STATE_FIRST_CALL, assert } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
@@ -37,7 +36,7 @@ function repeat(state: IInternalState): Result<unknown> {
   const { calls } = state;
   const { topOperatorState } = state.calls;
   const storedCountValue = calls.lookup(REPEAT_COUNT);
-  assert(storedCountValue.type === ValueType.integer);
+  assert(storedCountValue.type === 'integer');
   const { integer: count } = storedCountValue;
   assert(topOperatorState <= count);
   if (topOperatorState < count) {
@@ -59,7 +58,7 @@ buildFunctionOperator(
     description: 'executes the operand n times, where n is a non-negative integer',
     labels: ['flow', 'loop'],
     signature: {
-      input: [{ type: ValueType.integer }, { type: ValueType.null }]
+      input: [{ type: 'integer' }, { type: 'null' }]
     },
     samples: [
       {

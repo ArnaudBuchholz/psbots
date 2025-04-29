@@ -30,7 +30,7 @@ describe('Constant operator', () => {
   beforeEach(() => {
     assert(
       state.calls.push({
-        type: ValueType.operator,
+        type: 'operator',
         isExecutable: true,
         isReadOnly: true,
         operator: <IOperator>{
@@ -52,7 +52,7 @@ describe('Constant operator', () => {
 function pushFunctionOperatorToCallStack(operator: Partial<IFunctionOperator>) {
   assert(
     state.calls.push({
-      type: ValueType.operator,
+      type: 'operator',
       isExecutable: true,
       isReadOnly: true,
       operator: {
@@ -83,11 +83,11 @@ describe('With parameters', () => {
         implementation({ operands }, ...values) {
           assert(
             operands.push(
-              toValue(values.length === 1 && values[0]?.type === ValueType.integer && values[0]?.integer === 123)
+              toValue(values.length === 1 && values[0]?.type === 'integer' && values[0]?.integer === 123)
             )
           );
         },
-        typeCheck: [{ type: ValueType.integer }]
+        typeCheck: [{ type: 'integer' }]
       });
     });
 
@@ -115,7 +115,7 @@ describe('With parameters', () => {
         implementation({ operands }, ...values) {
           assert(operands.push(toValue(values.length === 1)));
         },
-        typeCheck: [{ type: ValueType.null }]
+        typeCheck: [{ type: 'null' }]
       });
     });
 
@@ -141,15 +141,15 @@ describe('With parameters', () => {
             operands.push(
               toValue(
                 values.length === 2 &&
-                  values[0]?.type === ValueType.integer &&
+                  values[0]?.type === 'integer' &&
                   values[0]?.integer === 123 &&
-                  values[1]?.type === ValueType.boolean &&
+                  values[1]?.type === 'boolean' &&
                   values[1]?.isSet === true
               )
             )
           );
         },
-        typeCheck: [{ type: ValueType.integer }, { type: ValueType.boolean }]
+        typeCheck: [{ type: 'integer' }, { type: 'boolean' }]
       });
     });
 
@@ -190,7 +190,7 @@ describe('With parameters', () => {
           implementation({ operands }) {
             assert(operands.push(toValue(true)));
           },
-          typeCheck: [{ type: ValueType.array, permissions: { isReadOnly: true } }]
+          typeCheck: [{ type: 'array', permissions: { isReadOnly: true } }]
         });
       });
 
@@ -214,7 +214,7 @@ describe('With parameters', () => {
           implementation({ operands }) {
             assert(operands.push(toValue(true)));
           },
-          typeCheck: [{ type: ValueType.array, permissions: { isExecutable: true } }]
+          typeCheck: [{ type: 'array', permissions: { isExecutable: true } }]
         });
       });
 
@@ -272,7 +272,7 @@ describe('With parameters', () => {
             calls.topOperatorState = OPERATOR_STATE_POP;
           }
         },
-        typeCheck: [{ type: ValueType.null }]
+        typeCheck: [{ type: 'null' }]
       });
       assert(state.operands.push(toValue(123)));
     });

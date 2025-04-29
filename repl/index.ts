@@ -1,5 +1,5 @@
 import type { IDebugSource } from '@psbots/engine';
-import { createState, ValueType } from '@psbots/engine';
+import { createState } from '@psbots/engine';
 import { assert, run, toStringValue } from '@psbots/engine/sdk';
 import type { IReplIO } from './IReplIo.js';
 import { cyan, green, magenta, red, white, yellow } from './colors.js';
@@ -19,7 +19,7 @@ function showVersion(replIO: IReplIO): boolean {
   const { value: state } = stateResult;
   run(state.exec(toStringValue('version', { isExecutable: true })));
   const version = state.operands.at(0);
-  assert(version.type === ValueType.string);
+  assert(version.type === 'string');
   replIO.output(`${cyan}Welcome to 🤖${magenta}${version.string}${white}\r\n`);
   return true;
 }

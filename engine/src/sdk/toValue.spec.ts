@@ -1,6 +1,5 @@
 import { describe, it, expect } from 'vitest';
 import type { Result, Value } from '@api/index.js';
-import { ValueType } from '@api/index.js';
 import { toIntegerValue, toNameValue, toStringValue } from './toValue.js';
 import { MemoryTracker } from '@core/MemoryTracker.js';
 import { assert } from './assert.js';
@@ -10,8 +9,8 @@ describe('toIntegerValue', () => {
     const valueResult = toIntegerValue(1);
     assert(valueResult);
     const { value } = valueResult;
-    expect(value).toStrictEqual<Value<ValueType.integer>>({
-      type: ValueType.integer,
+    expect(value).toStrictEqual<Value<'integer'>>({
+      type: 'integer',
       isExecutable: false,
       isReadOnly: true,
       integer: 1
@@ -63,8 +62,8 @@ describe('toIntegerValue', () => {
 
 it('converts a string (no tracker)', () => {
   const value = toStringValue('abc');
-  expect(value).toStrictEqual<Value<ValueType.string>>({
-    type: ValueType.string,
+  expect(value).toStrictEqual<Value<'string'>>({
+    type: 'string',
     isExecutable: false,
     isReadOnly: true,
     string: 'abc'
@@ -74,8 +73,8 @@ it('converts a string (no tracker)', () => {
 it('converts a string (tracker)', () => {
   const tracker = new MemoryTracker();
   const value = toStringValue('abc', { tracker });
-  expect(value).toStrictEqual<Value<ValueType.string>>({
-    type: ValueType.string,
+  expect(value).toStrictEqual<Value<'string'>>({
+    type: 'string',
     isExecutable: false,
     isReadOnly: true,
     string: 'abc',
@@ -85,8 +84,8 @@ it('converts a string (tracker)', () => {
 
 it('converts an executable string', () => {
   const value = toStringValue('abc', { isExecutable: true });
-  expect(value).toStrictEqual<Value<ValueType.string>>({
-    type: ValueType.string,
+  expect(value).toStrictEqual<Value<'string'>>({
+    type: 'string',
     isExecutable: true,
     isReadOnly: true,
     string: 'abc'
@@ -95,8 +94,8 @@ it('converts an executable string', () => {
 
 it('converts a name (no tracker)', () => {
   const value = toNameValue('abc');
-  expect(value).toStrictEqual<Value<ValueType.name>>({
-    type: ValueType.name,
+  expect(value).toStrictEqual<Value<'name'>>({
+    type: 'name',
     isExecutable: false,
     isReadOnly: true,
     name: 'abc'
@@ -106,8 +105,8 @@ it('converts a name (no tracker)', () => {
 it('converts a string (tracker)', () => {
   const tracker = new MemoryTracker();
   const value = toNameValue('abc', { tracker });
-  expect(value).toStrictEqual<Value<ValueType.name>>({
-    type: ValueType.name,
+  expect(value).toStrictEqual<Value<'name'>>({
+    type: 'name',
     isExecutable: false,
     isReadOnly: true,
     name: 'abc',
@@ -117,8 +116,8 @@ it('converts a string (tracker)', () => {
 
 it('converts an executable string', () => {
   const value = toNameValue('abc', { isExecutable: true });
-  expect(value).toStrictEqual<Value<ValueType.name>>({
-    type: ValueType.name,
+  expect(value).toStrictEqual<Value<'name'>>({
+    type: 'name',
     isExecutable: true,
     isReadOnly: true,
     name: 'abc'

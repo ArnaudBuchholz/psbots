@@ -1,4 +1,3 @@
-import { ValueType } from '@api/index.js';
 import { assert, toNameValue } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 import { MemoryTracker } from '@core/MemoryTracker.js';
@@ -9,8 +8,8 @@ buildFunctionOperator(
     description: 'pushes the type of the value in the operand stack',
     labels: ['value', 'generic'],
     signature: {
-      input: [{ type: ValueType.null }],
-      output: [{ type: ValueType.name }]
+      input: [{ type: 'null' }],
+      output: [{ type: 'name' }]
     },
     samples: [
       {

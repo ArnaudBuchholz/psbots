@@ -117,7 +117,7 @@ describe('memory', () => {
     expect(state.memoryTracker.byType[STRING_MEMORY_TYPE]).toStrictEqual(0);
     waitForExec(state.exec(toValue('"123"', { isExecutable: true })));
     const value = state.operands.at(0);
-    expect(value?.type).toStrictEqual(ValueType.string);
+    expect(value?.type).toStrictEqual('string');
     expect(value?.tracker).not.toBeUndefined();
     expect(state.memoryTracker.byType[STRING_MEMORY_TYPE]).not.toStrictEqual(0);
   });
@@ -202,7 +202,7 @@ describe('host dictionary', () => {
 describe('exception handling', () => {
   it('detects invalid executable value', () => {
     const invalidValue = {
-      type: ValueType.boolean,
+      type: 'boolean',
       isExecutable: true,
       isReadOnly: true,
       isSet: true
@@ -215,7 +215,7 @@ describe('exception handling', () => {
     const error = new Error('KO');
     assert(
       state.calls.push({
-        type: ValueType.operator,
+        type: 'operator',
         isExecutable: true,
         isReadOnly: true,
         operator: <IFunctionOperator>{
@@ -233,7 +233,7 @@ describe('exception handling', () => {
   it('adds call stack information', () => {
     assert(
       state.calls.push({
-        type: ValueType.string,
+        type: 'string',
         isExecutable: true,
         isReadOnly: true,
         string: 'step1'
@@ -241,7 +241,7 @@ describe('exception handling', () => {
     );
     assert(
       state.calls.push({
-        type: ValueType.string,
+        type: 'string',
         isExecutable: true,
         isReadOnly: true,
         string: 'step2'
@@ -251,7 +251,7 @@ describe('exception handling', () => {
     state.calls.topOperatorState = 5;
     assert(
       state.calls.push({
-        type: ValueType.operator,
+        type: 'operator',
         isExecutable: true,
         isReadOnly: true,
         operator: <IFunctionOperator>{

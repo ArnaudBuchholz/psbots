@@ -1,5 +1,5 @@
 import type { ArrayValue, IReadOnlyArray, IValuePermissions, MemoryType, Result, Value } from '@api/index.js';
-import { nullValue, ValueType } from '@api/index.js';
+import { nullValue } from '@api/index.js';
 import { assert } from '@sdk/index.js';
 import type { MemoryPointer, MemorySize, MemoryTracker } from '@core/MemoryTracker.js';
 import { addMemorySize } from '@core/MemoryTracker.js';
@@ -8,7 +8,7 @@ import { ShareableObject } from '@core/objects/ShareableObject.js';
 export abstract class AbstractValueContainer extends ShareableObject implements IReadOnlyArray {
   protected _toValue({ isReadOnly, isExecutable }: IValuePermissions): ArrayValue {
     return {
-      type: ValueType.array,
+      type: 'array',
       isReadOnly,
       isExecutable,
       tracker: ShareableObject.tracker,
@@ -162,7 +162,7 @@ export abstract class AbstractValueContainer extends ShareableObject implements 
 
   private _pop(): Value {
     let value = this.popImpl();
-    if (value.type !== ValueType.null && value.tracker?.releaseValue(value) === false) {
+    if (value.type !== 'null' && value.tracker?.releaseValue(value) === false) {
       value = nullValue;
     }
     return value;

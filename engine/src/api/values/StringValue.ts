@@ -1,8 +1,7 @@
-import type { ValueType } from '@api/values/ValueType.js';
 import type { IAbstractValue } from '@api/interfaces/IAbstractValue.js';
 
 interface IStringValue extends IAbstractValue {
-  readonly type: ValueType.string;
+  readonly type: 'string';
   readonly isReadOnly: true;
   readonly string: string;
 }

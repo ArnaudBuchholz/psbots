@@ -1,4 +1,4 @@
-import { markValue, ValueType } from '@api/index.js';
+import { markValue } from '@api/index.js';
 import { buildConstantOperator } from '../operators.js';
 
 buildConstantOperator(
@@ -7,7 +7,7 @@ buildConstantOperator(
     description: 'pushes a mark in the operand stack',
     labels: ['value', 'mark'],
     signature: {
-      output: [{ type: ValueType.mark }]
+      output: [{ type: 'mark' }]
     },
     samples: [
       {

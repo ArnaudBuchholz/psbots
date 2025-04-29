@@ -1,5 +1,5 @@
 import type { Value } from '@api/index.js';
-import { SYSTEM_MEMORY_TYPE, ValueType } from '@api/index.js';
+import { SYSTEM_MEMORY_TYPE } from '@api/index.js';
 import { assert } from '@sdk/assert.js';
 import { MemoryTracker } from '@core/MemoryTracker.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
@@ -10,7 +10,7 @@ buildFunctionOperator(
     description: 'performs a circular shift of the values on the operand stack by a given amount',
     labels: ['operand'],
     signature: {
-      input: [{ type: ValueType.integer }, { type: ValueType.integer }]
+      input: [{ type: 'integer' }, { type: 'integer' }]
     },
     samples: [
       {

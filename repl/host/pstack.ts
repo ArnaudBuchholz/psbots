@@ -1,13 +1,12 @@
-import { ValueType } from '@psbots/engine';
 import type { Value } from '@psbots/engine';
 import { OperatorType } from '@psbots/engine/sdk';
 import type { IFunctionOperator } from '@psbots/engine/sdk';
 import { enumAndDisplay } from '../format.js';
 import type { ReplHostDictionary } from './index.js';
 
-export function createPstackOperator({ replIO }: ReplHostDictionary): Value<ValueType.operator> {
+export function createPstackOperator({ replIO }: ReplHostDictionary): Value<'operator'> {
   return {
-    type: ValueType.operator,
+    type: 'operator',
     isExecutable: true,
     isReadOnly: true,
     operator: <IFunctionOperator>{

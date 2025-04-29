@@ -1,5 +1,5 @@
 import type { Value, DictionaryValue, Result, MemoryType, NullValue } from '@api/index.js';
-import { SYSTEM_MEMORY_TYPE, ValueType } from '@api/index.js';
+import { SYSTEM_MEMORY_TYPE } from '@api/index.js';
 import type { DictionaryStackWhereResult, IDictionaryStack } from '@sdk/index.js';
 import { assert } from '@sdk/index.js';
 import type { MemoryTracker } from '@core/MemoryTracker.js';
@@ -33,25 +33,25 @@ export class DictionaryStack extends ValueStack implements IDictionaryStack {
   ) {
     super(tracker, memoryType, initialCapacity, capacityIncrement);
     this.begin({
-      type: ValueType.dictionary,
+      type: 'dictionary',
       isExecutable: false,
       isReadOnly: true,
       dictionary: EmptyDictionary.instance
     });
     this.begin({
-      type: ValueType.dictionary,
+      type: 'dictionary',
       isExecutable: false,
       isReadOnly: true,
       dictionary: SystemDictionary.instance
     });
     this.begin({
-      type: ValueType.dictionary,
+      type: 'dictionary',
       isExecutable: false,
       isReadOnly: false,
       dictionary: EmptyDictionary.instance
     });
     this.begin({
-      type: ValueType.dictionary,
+      type: 'dictionary',
       isExecutable: false,
       isReadOnly: false,
       dictionary: EmptyDictionary.instance
@@ -60,7 +60,7 @@ export class DictionaryStack extends ValueStack implements IDictionaryStack {
 
   protected getDictionaryValue(indexFromBottom: number): DictionaryValue {
     const value = this._values[this._values.length + indexFromBottom];
-    assert(!!value && value.type === ValueType.dictionary);
+    assert(!!value && value.type === 'dictionary');
     return value;
   }
 
@@ -121,7 +121,7 @@ export class DictionaryStack extends ValueStack implements IDictionaryStack {
     for (const dictionaryValue of this._values) {
       const { dictionary } = dictionaryValue as DictionaryValue;
       const value = dictionary.lookup(name);
-      if (value.type !== ValueType.null) {
+      if (value.type !== 'null') {
         return {
           dictionary,
           value

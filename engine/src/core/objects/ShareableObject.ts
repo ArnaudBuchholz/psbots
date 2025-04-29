@@ -1,13 +1,12 @@
 import type { Value, IValueTracker } from '@api/index.js';
-import { ValueType } from '@api/index.js';
 import { assert } from '@sdk/index.js';
 import type { MemorySize } from '@core/MemoryTracker.js';
 
 const getShareableObject = (value: Value): ShareableObject => {
-  if (value.type === ValueType.array) {
+  if (value.type === 'array') {
     return value.array as unknown as ShareableObject;
   }
-  if (value.type === ValueType.dictionary) {
+  if (value.type === 'dictionary') {
     return value.dictionary as unknown as ShareableObject;
   }
   assert(false, 'Invalid value type');

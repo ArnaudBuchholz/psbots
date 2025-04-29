@@ -4,9 +4,9 @@ import { assert, toIntegerValue } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 
 const implementations: { [type in ValueType]?: (container: Value<type>) => number } = {
-  [ValueType.string]: ({ string }) => string.length,
-  [ValueType.array]: ({ array }) => array.length,
-  [ValueType.dictionary]: ({ dictionary }) => dictionary.names.length
+  ['string']: ({ string }) => string.length,
+  ['array']: ({ array }) => array.length,
+  ['dictionary']: ({ dictionary }) => dictionary.names.length
 };
 
 buildFunctionOperator(
@@ -15,8 +15,8 @@ buildFunctionOperator(
     description: 'returns the length of the value',
     labels: ['generic'],
     signature: {
-      input: [{ type: ValueType.null }],
-      output: [{ type: ValueType.integer }]
+      input: [{ type: 'null' }],
+      output: [{ type: 'integer' }]
     },
     samples: [
       {

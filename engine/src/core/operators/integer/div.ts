@@ -1,4 +1,3 @@
-import { ValueType } from '@api/index.js';
 import { toIntegerValue } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 
@@ -8,8 +7,8 @@ buildFunctionOperator(
     description: 'realizes an euclidean division with two integers',
     labels: ['integer', 'math'],
     signature: {
-      input: [{ type: ValueType.integer }, { type: ValueType.integer }],
-      output: [{ type: ValueType.integer }, { type: ValueType.integer }]
+      input: [{ type: 'integer' }, { type: 'integer' }],
+      output: [{ type: 'integer' }, { type: 'integer' }]
     },
     samples: [
       {

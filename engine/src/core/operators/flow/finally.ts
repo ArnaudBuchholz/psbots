@@ -1,5 +1,5 @@
 import type { Exception, IReadOnlyCallStack, Result, Value } from '@api/index.js';
-import { nullValue, ValueType } from '@api/index.js';
+import { nullValue } from '@api/index.js';
 import type { IInternalState } from '@sdk/index.js';
 import {
   OPERATOR_STATE_POP,
@@ -18,8 +18,8 @@ export const OPERATOR_STATE_POPPING = -2;
 
 function firstCall(
   state: IInternalState,
-  codeBlock: Value<ValueType.array>,
-  finalBlock: Value<ValueType.array>
+  codeBlock: Value<'array'>,
+  finalBlock: Value<'array'>
 ): Result<unknown> {
   const { operands, calls } = state;
   const finalBlockDefined = calls.def(CALLS_BLOCK, finalBlock);
@@ -51,7 +51,7 @@ function callBeforePop(state: IInternalState): Result<unknown> {
     state.clearException();
   }
   const finalBlock = calls.lookup(CALLS_BLOCK);
-  assert(finalBlock.type !== ValueType.null);
+  assert(finalBlock.type !== 'null');
   return calls.push(finalBlock);
 }
 
@@ -60,9 +60,9 @@ function popping(state: IInternalState): Result<unknown> {
   if (state.exception === undefined) {
     const exception = calls.lookup(CALLS_EXCEPTION);
     if (exception !== nullValue) {
-      assert(exception.type === ValueType.string);
+      assert(exception.type === 'string');
       const exceptionStack = calls.lookup(CALLS_EXCEPTION_STACK);
-      assert(exceptionStack.type === ValueType.array);
+      assert(exceptionStack.type === 'array');
       state.raiseException(exception.string as Exception, exceptionStack.array as IReadOnlyCallStack);
     }
   }
@@ -77,8 +77,8 @@ buildFunctionOperator(
     labels: ['flow'],
     signature: {
       input: [
-        { type: ValueType.array, permissions: { isExecutable: true } },
-        { type: ValueType.array, permissions: { isExecutable: true } }
+        { type: 'array', permissions: { isExecutable: true } },
+        { type: 'array', permissions: { isExecutable: true } }
       ]
     },
     samples: [
