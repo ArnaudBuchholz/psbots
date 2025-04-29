@@ -96,6 +96,12 @@ export default [
       'unicorn/no-null': 'off',
       'unicorn/prefer-switch': 'off',
       'unicorn/no-empty-file': 'warn',
+      'unicorn/prefer-number-properties': [
+        'error',
+        {
+          checkInfinity: true
+        }
+      ],
       'sonarjs/todo-tag': 'warn'
     }
   },

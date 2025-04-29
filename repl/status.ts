@@ -5,7 +5,7 @@ import { blue, cyan, green, red, white, yellow } from './colors.js';
 export function memory(state: IState): string {
   const { used, peak, total } = state.memoryTracker;
   const usage = formatBytes(used) + ' (top:' + formatBytes(peak) + ')' + blue + '/';
-  if (total === Infinity) {
+  if (total === Number.POSITIVE_INFINITY) {
     return usage + '∞' + white;
   }
   return usage + formatBytes(total) + white;

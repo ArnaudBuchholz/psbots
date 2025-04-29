@@ -78,7 +78,7 @@ export interface IGarbageCollectible {
 }
 
 export class MemoryTracker implements IValueTracker, IMemoryTracker {
-  private readonly _total: number = Infinity;
+  private readonly _total: number = Number.POSITIVE_INFINITY;
   private _used: number = 0;
   private _peak: number = 0;
   private _byType: { [type in MemoryType]: number } = {
@@ -90,7 +90,7 @@ export class MemoryTracker implements IValueTracker, IMemoryTracker {
   private _byContainers: WeakMap<object, ContainerRegisters> | undefined;
 
   constructor(options: MemoryTrackerOptions = {}) {
-    const { total = Infinity } = options;
+    const { total = Number.POSITIVE_INFINITY } = options;
     this._total = total;
     if (options.debug) {
       this._byContainers = new WeakMap();
