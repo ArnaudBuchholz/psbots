@@ -1,5 +1,6 @@
 import './closeBlock.js';
 import './finally.js';
+import './gc.js';
 import './if.js';
 import './ifelse.js';
 import './loop.js';
