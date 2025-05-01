@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach, beforeAll } from 'vitest';
-import type { IGarbageCollectible, MemoryPointer, MemorySize } from './MemoryTracker.js';
+import { describe, it, expect, beforeEach } from 'vitest';
+import type { MemoryPointer, MemorySize } from './MemoryTracker.js';
 import {
   addMemorySize,
   INTEGER_BYTES,
@@ -271,14 +271,18 @@ describe('Garbage Collector', () => {
 
   it('exposes a boolean flag set when the queue is filled', () => {
     tracker.addToGarbageCollectorQueue({
-      collect() { return true; },
+      collect() {
+        return true;
+      }
     });
     expect(tracker.hasGarbageToCollect).toStrictEqual(true);
   });
 
   it('loops until collect is true (false)', () => {
     tracker.addToGarbageCollectorQueue({
-      collect() { return false; },
+      collect() {
+        return false;
+      }
     });
     expect(tracker.hasGarbageToCollect).toStrictEqual(true);
     expect(tracker.garbageCollect()).toStrictEqual(false); // still has garbage
@@ -287,7 +291,9 @@ describe('Garbage Collector', () => {
 
   it('loops until collect is true (true)', () => {
     tracker.addToGarbageCollectorQueue({
-      collect() { return true; },
+      collect() {
+        return true;
+      }
     });
     expect(tracker.hasGarbageToCollect).toStrictEqual(true);
     expect(tracker.garbageCollect()).toStrictEqual(true);

@@ -7,10 +7,12 @@ buildFunctionOperator(
     name: 'gc',
     description: 'forces garbage collection',
     labels: ['flow'],
-    samples: [{
-      in: 'mark gc',
-      out: 'mark'
-    }]
+    samples: [
+      {
+        in: 'mark gc',
+        out: 'mark'
+      }
+    ]
   },
   ({ memoryTracker, calls }) => {
     assert(memoryTracker instanceof MemoryTracker);
