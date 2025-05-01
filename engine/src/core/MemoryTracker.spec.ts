@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import type { MemoryPointer, MemorySize } from './MemoryTracker.js';
+import { describe, it, expect, beforeEach, beforeAll } from 'vitest';
+import type { IGarbageCollectible, MemoryPointer, MemorySize } from './MemoryTracker.js';
 import {
   addMemorySize,
   INTEGER_BYTES,
@@ -263,19 +263,34 @@ describe('Garbage Collector', () => {
     expect(tracker.hasGarbageToCollect).toStrictEqual(false);
   });
 
+  it('does nothing when empty', () => {
+    expect(tracker.hasGarbageToCollect).toStrictEqual(false);
+    expect(tracker.garbageCollect()).toStrictEqual(true);
+    expect(tracker.hasGarbageToCollect).toStrictEqual(false);
+  });
+
   it('exposes a boolean flag set when the queue is filled', () => {
     tracker.addToGarbageCollectorQueue({
-      collect() {},
-      total: 1,
-      type: SYSTEM_MEMORY_TYPE
+      collect() { return true; },
     });
     expect(tracker.hasGarbageToCollect).toStrictEqual(true);
   });
 
-  describe('cycles', () => {
-    beforeEach(() => {
-
+  it('loops until collect is true (false)', () => {
+    tracker.addToGarbageCollectorQueue({
+      collect() { return false; },
     });
+    expect(tracker.hasGarbageToCollect).toStrictEqual(true);
+    expect(tracker.garbageCollect()).toStrictEqual(false); // still has garbage
+    expect(tracker.hasGarbageToCollect).toStrictEqual(true);
+  });
 
+  it('loops until collect is true (true)', () => {
+    tracker.addToGarbageCollectorQueue({
+      collect() { return true; },
+    });
+    expect(tracker.hasGarbageToCollect).toStrictEqual(true);
+    expect(tracker.garbageCollect()).toStrictEqual(true);
+    expect(tracker.hasGarbageToCollect).toStrictEqual(false);
   });
 });

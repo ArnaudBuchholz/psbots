@@ -70,11 +70,8 @@ type ContainerRegisters = {
 };
 
 export interface IGarbageCollectible {
-  type: MemoryType;
-  /** This gives an estimate of how much memory can be released, it may not include memory of inner values */
-  total: number;
-  /** Collection stops when total reaches 0 */
-  collect(): void;
+  /** Nothing more to collect when true is returned */
+  collect(): boolean;
 }
 
 export class MemoryTracker implements IValueTracker, IMemoryTracker {
@@ -311,8 +308,7 @@ export class MemoryTracker implements IValueTracker, IMemoryTracker {
     if (!collectible) {
       return true;
     }
-    collectible.collect();
-    if (collectible.total === 0) {
+    if (collectible.collect()) {
       this._gcQueue.shift();
     }
     return this._gcQueue.length === 0;
@@ -324,8 +320,8 @@ export class MemoryTracker implements IValueTracker, IMemoryTracker {
     this._gcQueue.push(collectible);
   }
 
-  get hasGarbageToCollect () {
-    return this._gcQueue.length !== 0;
+  get hasGarbageToCollect() {
+    return this._gcQueue.length > 0;
   }
 
   // endregion Garbage Collector
