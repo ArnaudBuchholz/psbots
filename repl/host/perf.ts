@@ -6,6 +6,7 @@ import type { IFunctionOperator, IInternalState } from '@psbots/engine/sdk';
 import { cyan, yellow, white, green, red } from '../colors.js';
 import type { IReplIO } from '../IReplIo.js';
 import type { ReplHostDictionary } from './index.js';
+import { buildOptions } from '../options.js';
 
 const MAX_CYCLES = 10 ** 9;
 const TICKS = ['\u280B', '\u2819', '\u2839', '\u2838', '\u283C', '\u2834', '\u2826', '\u2827', '\u2807', '\u280F'];
@@ -139,6 +140,7 @@ type ExecuteContext = {
   resolution: number;
   logWithPerformanceApi: boolean;
   source?: string;
+  options?: string[];
   detail?: string;
   measures: Measures;
   replIO: IReplIO;
@@ -151,7 +153,7 @@ async function evaluate(value: Value, context: ExecuteContext) {
   const { loops, measures } = context;
   let cycles = 0;
   for (let loop = 0; loop < loops; ++loop) {
-    const stateCreated = createState();
+    const stateCreated = createState(buildOptions(context.options ?? []));
     assert(stateCreated);
     const { value: state } = stateCreated;
     const executed = state.exec(value);
@@ -340,6 +342,7 @@ export function createPerfOperator(host: ReplHostDictionary): Value<'operator'> 
           logWithPerformanceApi: (definition && getValue(definition, 'performance', 'boolean')) ?? false,
           source: definition && getValue(definition, 'source', 'string'),
           detail: definition && getValue(definition, 'detail', 'string'),
+          options: definition && getValue(definition, 'options', 'string')?.split(' '),
           replIO: host.replIO
         };
         operands.pop();

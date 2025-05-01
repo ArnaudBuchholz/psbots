@@ -27,6 +27,7 @@ type MemoryTrackerOptions = {
   total?: number;
   /** Keep track of register */
   debug?: boolean;
+  experimentalGarbageCollector?: boolean;
 };
 
 export type MemorySize = {
@@ -86,12 +87,18 @@ export class MemoryTracker implements IValueTracker, IMemoryTracker {
   private _containers: WeakRef<object>[] = [];
   private _byContainers: WeakMap<object, ContainerRegisters> | undefined;
 
+  private _experimentalGarbageCollector: boolean;
+  public get experimentalGarbageCollector() {
+    return this._experimentalGarbageCollector;
+  }
+
   constructor(options: MemoryTrackerOptions = {}) {
     const { total = Number.POSITIVE_INFINITY } = options;
     this._total = total;
     if (options.debug) {
       this._byContainers = new WeakMap();
     }
+    this._experimentalGarbageCollector = options.experimentalGarbageCollector ?? false;
   }
 
   /** Check if the requested memory size can be allocated, returns the equivalent number of bytes */

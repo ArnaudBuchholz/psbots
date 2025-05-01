@@ -37,7 +37,8 @@ export class State implements IInternalState {
   static create(settings: StateFactorySettings = {}): Result<State> {
     const memoryTracker = new MemoryTracker({
       total: settings.maxMemoryBytes,
-      debug: settings.debugMemory
+      debug: settings.debugMemory,
+      experimentalGarbageCollector: settings.experimentalGarbageCollector
     });
     const dictionariesResult = DictionaryStack.create(memoryTracker, SYSTEM_MEMORY_TYPE, 10, 1);
     if (!dictionariesResult.success) {

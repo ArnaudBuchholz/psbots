@@ -153,10 +153,14 @@ export abstract class AbstractValueContainer extends ShareableObject implements 
   protected abstract popImpl(): Value;
 
   protected reduceCapacityIfNeeded(maxCapacity = this._values.length) {
-    while (this._pointers.length > 1 && this.capacity - this._capacityIncrement >= maxCapacity) {
-      const pointer = this._pointers.at(-1)!; // length has been tested
-      this._pointers.pop();
-      this._memoryTracker.release(pointer, this);
+    if (this._memoryTracker.experimentalGarbageCollector) {
+      // ignore for now
+    } else {
+      while (this._pointers.length > 1 && this.capacity - this._capacityIncrement >= maxCapacity) {
+        const pointer = this._pointers.at(-1)!; // length has been tested
+        this._pointers.pop();
+        this._memoryTracker.release(pointer, this);
+      }
     }
   }
 

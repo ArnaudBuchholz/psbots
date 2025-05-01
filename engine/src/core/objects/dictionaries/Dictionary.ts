@@ -162,13 +162,17 @@ export class Dictionary extends ShareableObject implements IDictionary {
   // endregion IWritableDictionary
 
   protected _dispose(): void {
-    for (const [name, slot] of Object.entries(this._slots)) {
-      this._memoryTracker.releaseString(name);
-      slot.value.tracker?.releaseValue(slot.value);
-      if (slot.pointer !== this._pointer) {
-        this._memoryTracker.release(slot.pointer, this);
+    if (this._memoryTracker.experimentalGarbageCollector) {
+      // Ignore for now
+    } else {
+      for (const [name, slot] of Object.entries(this._slots)) {
+        this._memoryTracker.releaseString(name);
+        slot.value.tracker?.releaseValue(slot.value);
+        if (slot.pointer !== this._pointer) {
+          this._memoryTracker.release(slot.pointer, this);
+        }
       }
+      this._memoryTracker.release(this._pointer, this);
     }
-    this._memoryTracker.release(this._pointer, this);
   }
 }

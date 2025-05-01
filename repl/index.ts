@@ -2,12 +2,13 @@ import type { IDebugSource } from '@psbots/engine';
 import { createState } from '@psbots/engine';
 import { assert, run, toStringValue } from '@psbots/engine/sdk';
 import type { IReplIO } from './IReplIo.js';
-import { cyan, green, magenta, red, white, yellow } from './colors.js';
+import { cyan, magenta, red, white, yellow } from './colors.js';
 import { ReplHostDictionary } from './host/index.js';
 import { status } from './status.js';
 import { buildInputHandler, InputError } from './inputHandler.js';
 import { showError, failed, showException } from './showError.js';
 import { runWithDebugger } from './debug.js';
+import { buildOptions } from './options.js';
 
 export * from './IReplIo.js';
 
@@ -24,28 +25,16 @@ function showVersion(replIO: IReplIO): boolean {
   return true;
 }
 
-const checkOption = (replIO: IReplIO, options: string[], option: string): boolean => {
-  if (options.includes(option)) {
-    replIO.output(`${green}💡${option} is set${white}\r\n`);
-    return true;
-  }
-  return false;
-};
-
 // eslint-disable-next-line sonarjs/cognitive-complexity -- very little value / interest in refactoring this function
 export async function repl(replIO: IReplIO, options: string[] = []): Promise<void> {
   if (!showVersion(replIO)) {
     return;
   }
 
-  const debugMemory = checkOption(replIO, options, 'debug-memory');
-  const experimentalGarbageCollector = checkOption(replIO, options, 'experimental-garbage-collector');
-
   const hostDictionary = new ReplHostDictionary(replIO);
   const stateResult = createState({
-    hostDictionary,
-    debugMemory,
-    experimentalGarbageCollector
+    ...buildOptions(options, replIO),
+    hostDictionary
   });
   if (failed(replIO, stateResult, { message: 'Unable to allocate state' })) {
     return;
