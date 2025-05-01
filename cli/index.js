@@ -5,6 +5,8 @@ import { stdin, stdout } from 'node:process';
 
 stdin.setRawMode(true);
 
+const options = process.argv.filter((argument) => argument.startsWith('--')).map((argument) => argument.slice(2));
+
 await repl(
   {
     get width() {
@@ -20,7 +22,7 @@ await repl(
       stdout.write(text);
     }
   },
-  process.argv.includes('--debug')
+  options
 ).catch((error) => {
   console.error(error);
   process.exitCode = -1;

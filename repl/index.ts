@@ -24,25 +24,34 @@ function showVersion(replIO: IReplIO): boolean {
   return true;
 }
 
+const checkOption = (replIO: IReplIO, options: string[], option: string): boolean => {
+  if (options.includes(option)) {
+    replIO.output(`${green}💡${option} is set${white}\r\n`);
+    return true;
+  }
+  return false;
+};
+
 // eslint-disable-next-line sonarjs/cognitive-complexity -- very little value / interest in refactoring this function
-export async function repl(replIO: IReplIO, debug?: boolean): Promise<void> {
+export async function repl(replIO: IReplIO, options: string[] = []): Promise<void> {
   if (!showVersion(replIO)) {
     return;
   }
 
+  const debugMemory = checkOption(replIO, options, 'debug-memory');
+  const experimentalGarbageCollector = checkOption(replIO, options, 'experimental-garbage-collector');
+
   const hostDictionary = new ReplHostDictionary(replIO);
   const stateResult = createState({
     hostDictionary,
-    debugMemory: debug
+    debugMemory,
+    experimentalGarbageCollector
   });
   if (failed(replIO, stateResult, { message: 'Unable to allocate state' })) {
     return;
   }
   const { value: state } = stateResult;
 
-  if (debug === true) {
-    replIO.output(`${green}DEBUG mode enabled${white}\r\n`);
-  }
   replIO.output(`${cyan}Use '${yellow}exit${cyan}'  to quit${white}\r\n`);
   replIO.output(`${cyan}Use '${yellow}state${cyan}' to print a state summary${white}\r\n`);
   replIO.output(`${cyan}Use '${yellow}help${cyan}'  to display help${white}\r\n`);

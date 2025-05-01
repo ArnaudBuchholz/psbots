@@ -19,6 +19,7 @@ export interface StateFactorySettings {
   maxMemoryBytes?: number;
   /** Instruct memoryTracker to retain calls */
   debugMemory?: boolean;
+  experimentalGarbageCollector?: boolean;
 }
 
 export class State implements IInternalState {
