@@ -318,7 +318,7 @@ export class MemoryTracker implements IValueTracker, IMemoryTracker {
     if (!collectible.collectGarbage()) {
       this._gcQueue.shift();
     }
-    return this._gcQueue.length !== 0;
+    return this._gcQueue.length > 0;
   }
 
   private _gcQueue: IGarbageCollectible[] = [];
