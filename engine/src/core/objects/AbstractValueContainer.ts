@@ -1,5 +1,5 @@
 import type { ArrayValue, IReadOnlyArray, IValuePermissions, MemoryType, Result, Value } from '@api/index.js';
-import { nullValue, trueValue } from '@api/index.js';
+import { nullValue } from '@api/index.js';
 import { assert } from '@sdk/index.js';
 import type { IGarbageCollectible, MemoryPointer, MemorySize, MemoryTracker } from '@core/MemoryTracker.js';
 import { addMemorySize } from '@core/MemoryTracker.js';
