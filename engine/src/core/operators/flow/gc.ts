@@ -21,7 +21,7 @@ buildFunctionOperator(
     } else {
       ++calls.topOperatorState;
     }
-    if (memoryTracker.collectGarbage()) {
+    if (!memoryTracker.collectGarbage()) {
       calls.topOperatorState = OPERATOR_STATE_POP;
     }
   }
