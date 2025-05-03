@@ -29,5 +29,5 @@ buildFunctionOperator(
       }
     ]
   },
-  ({ operands }, value) => operands.popush(0, toNameValue(value.type))
+  ({ operands }, value) => operands.popush(1, toNameValue(value.type))
 );
