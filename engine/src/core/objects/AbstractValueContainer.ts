@@ -1,11 +1,11 @@
 import type { ArrayValue, IReadOnlyArray, IValuePermissions, MemoryType, Result, Value } from '@api/index.js';
-import { nullValue } from '@api/index.js';
+import { nullValue, trueValue } from '@api/index.js';
 import { assert } from '@sdk/index.js';
-import type { MemoryPointer, MemorySize, MemoryTracker } from '@core/MemoryTracker.js';
+import type { IGarbageCollectible, MemoryPointer, MemorySize, MemoryTracker } from '@core/MemoryTracker.js';
 import { addMemorySize } from '@core/MemoryTracker.js';
 import { ShareableObject } from '@core/objects/ShareableObject.js';
 
-export abstract class AbstractValueContainer extends ShareableObject implements IReadOnlyArray {
+export abstract class AbstractValueContainer extends ShareableObject implements IReadOnlyArray, IGarbageCollectible {
   protected _toValue({ isReadOnly, isExecutable }: IValuePermissions): ArrayValue {
     return {
       type: 'array',
@@ -152,14 +152,25 @@ export abstract class AbstractValueContainer extends ShareableObject implements 
   /** pops the value from the right place */
   protected abstract popImpl(): Value;
 
-  protected reduceCapacityIfNeeded(maxCapacity = this._values.length) {
+  public collectGarbage(): boolean {
+    if (this._pointers.length > 1 && this.capacity - this._capacityIncrement >= this._values.length) {
+      const pointer = this._pointers.at(-1)!; // length has been tested
+      this._pointers.pop();
+      this._memoryTracker.release(pointer, this);
+      return true;
+    }
+    if (this._disposed) {
+      this._memoryTracker.release(this._pointers[0]!, this);
+    }
+    return false;
+  }
+
+  protected reduceCapacityIfNeeded() {
     if (this._memoryTracker.experimentalGarbageCollector) {
-      // ignore for now
+      this._memoryTracker.addToGarbageCollectorQueue(this);
     } else {
-      while (this._pointers.length > 1 && this.capacity - this._capacityIncrement >= maxCapacity) {
-        const pointer = this._pointers.at(-1)!; // length has been tested
-        this._pointers.pop();
-        this._memoryTracker.release(pointer, this);
+      while (this.collectGarbage()) {
+        // do nothing
       }
     }
   }
@@ -214,8 +225,15 @@ export abstract class AbstractValueContainer extends ShareableObject implements 
     this.reduceCapacityIfNeeded();
   }
 
+  private _disposed = false;
+
   protected _dispose(): void {
     this.clear();
-    this._memoryTracker.release(this._pointers[0]!, this);
+    this._disposed = true;
+    if (this._memoryTracker.experimentalGarbageCollector) {
+      this._memoryTracker.addToGarbageCollectorQueue(this);
+    } else {
+      this._memoryTracker.release(this._pointers[0]!, this);
+    }
   }
 }

@@ -265,38 +265,38 @@ describe('Garbage Collector', () => {
 
   it('does nothing when empty', () => {
     expect(tracker.hasGarbageToCollect).toStrictEqual(false);
-    expect(tracker.garbageCollect()).toStrictEqual(true);
+    expect(tracker.collectGarbage()).toStrictEqual(false);
     expect(tracker.hasGarbageToCollect).toStrictEqual(false);
   });
 
   it('exposes a boolean flag set when the queue is filled', () => {
     tracker.addToGarbageCollectorQueue({
-      collect() {
-        return true;
-      }
-    });
-    expect(tracker.hasGarbageToCollect).toStrictEqual(true);
-  });
-
-  it('loops until collect is true (false)', () => {
-    tracker.addToGarbageCollectorQueue({
-      collect() {
+      collectGarbage() {
         return false;
       }
     });
     expect(tracker.hasGarbageToCollect).toStrictEqual(true);
-    expect(tracker.garbageCollect()).toStrictEqual(false); // still has garbage
-    expect(tracker.hasGarbageToCollect).toStrictEqual(true);
   });
 
-  it('loops until collect is true (true)', () => {
+  it('loops until collectGarbage is false (true)', () => {
     tracker.addToGarbageCollectorQueue({
-      collect() {
+      collectGarbage() {
         return true;
       }
     });
     expect(tracker.hasGarbageToCollect).toStrictEqual(true);
-    expect(tracker.garbageCollect()).toStrictEqual(true);
+    expect(tracker.collectGarbage()).toStrictEqual(true); // still has garbage
+    expect(tracker.hasGarbageToCollect).toStrictEqual(true);
+  });
+
+  it('loops until collect is false (false)', () => {
+    tracker.addToGarbageCollectorQueue({
+      collectGarbage() {
+        return false;
+      }
+    });
+    expect(tracker.hasGarbageToCollect).toStrictEqual(true);
+    expect(tracker.collectGarbage()).toStrictEqual(false);
     expect(tracker.hasGarbageToCollect).toStrictEqual(false);
   });
 });

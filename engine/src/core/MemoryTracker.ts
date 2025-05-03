@@ -71,8 +71,8 @@ type ContainerRegisters = {
 };
 
 export interface IGarbageCollectible {
-  /** Nothing more to collect when true is returned */
-  collect(): boolean;
+  /** Nothing more to collect when false is returned */
+  collectGarbage(): boolean;
 }
 
 export class MemoryTracker implements IValueTracker, IMemoryTracker {
@@ -309,16 +309,16 @@ export class MemoryTracker implements IValueTracker, IMemoryTracker {
 
   // region Garbage Collector
 
-  /** true when no more garbage collection needed */
-  garbageCollect(): boolean {
+  /** false when no more garbage collection needed */
+  collectGarbage(): boolean {
     const [collectible] = this._gcQueue;
     if (!collectible) {
-      return true;
+      return false;
     }
-    if (collectible.collect()) {
+    if (!collectible.collectGarbage()) {
       this._gcQueue.shift();
     }
-    return this._gcQueue.length === 0;
+    return this._gcQueue.length !== 0;
   }
 
   private _gcQueue: IGarbageCollectible[] = [];
