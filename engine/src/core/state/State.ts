@@ -148,8 +148,12 @@ export class State implements IInternalState {
     this._operands.release();
     this._dictionaries.release();
     this._destroyed = true;
-    const { used } = this._memoryTracker;
-    assert(used === 0, 'Memory leaks detected');
+    if (this._memoryTracker.experimentalGarbageCollector) {
+      // TODO: garbage collect and check for memory leaks
+    } else {
+      const { used } = this._memoryTracker;
+      assert(used === 0, 'Memory leaks detected');
+    }
   }
 
   // endregion IState
