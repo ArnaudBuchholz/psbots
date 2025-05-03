@@ -1,5 +1,5 @@
 import type { Value } from '@api/index.js';
-import { parse } from '@api/index.js';
+import { parse, VALUE_TYPE } from '@api/index.js';
 import type { IInternalState } from '@sdk/index.js';
 import { OPERATOR_STATE_FIRST_CALL, OPERATOR_STATE_UNKNOWN, valuesOf } from '@sdk/index.js';
 import type { MemoryTracker } from '@core/MemoryTracker.js';
@@ -34,7 +34,8 @@ function enqueueToken(state: IInternalState, token: Value) {
     token = tokenWithoutDebugSource;
   }
   let string: string | undefined;
-  if (token.type === 'string' || token.type === 'name') {
+  // Known value types names are not tracked
+  if (token.type === 'string' || (token.type === 'name' && !Object.keys(VALUE_TYPE).includes(token.name))) {
     string = valuesOf(token)[0];
     const result = memoryTracker.addStringRef(string);
     if (!result.success) {

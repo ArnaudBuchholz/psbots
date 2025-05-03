@@ -45,6 +45,23 @@ addStringRef(string: string): Result<number>
 releaseString(string: string): boolean
 ```
 
+### `name` type
+
+All names' values must be allocated and released through `addStringRef` amd `releaseString`, *but* the following ones :
+
+* `null`
+* `boolean`
+* `integer`
+* `string`
+* `name`
+* `mark`
+* `operator`
+* `array`
+* `dictionary`
+
+> [!NOTE]
+> They correspond to value types and are considered pre-allocated.
+
 ### Garbage collection
 
 As they are allocated by chunks, dictionaries and arrays require significant time to completely release their memory.
