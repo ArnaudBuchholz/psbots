@@ -152,7 +152,6 @@ export abstract class AbstractValueContainer extends ShareableObject implements 
   /** pops the value from the right place */
   protected abstract popImpl(): Value;
 
-
   private _inGarbageCollector = false;
 
   public collectGarbage(): boolean {

@@ -14,16 +14,17 @@ const nullDefinition: OperatorDefinition = {
   samples: []
 };
 
-function executeOperatorsTests (settings: Partial<StateFactorySettings> = {}) {
-  const settingsStr = JSON.stringify(settings);
-  const label = settingsStr !== '{}' ? `executing in & out using debug ${settingsStr}` : 'executing in & out using debug'
+function executeOperatorsTests(settings: Partial<StateFactorySettings> = {}) {
+  const settingsString = JSON.stringify(settings);
+  const label =
+    settingsString === '{}' ? 'executing in & out using debug' : `executing in & out using debug ${settingsString}`;
   describe(label, () => {
     for (const operatorName of Object.keys(registry).sort()) {
       describe(`operators/${operatorName}`, () => {
         const definition: OperatorDefinition = registry[operatorName]?.definition ?? nullDefinition;
         let state: State;
         let expectedState: State;
-  
+
         beforeEach(() => {
           const stateResult = State.create({ debugMemory: true });
           assert(stateResult);
@@ -32,16 +33,16 @@ function executeOperatorsTests (settings: Partial<StateFactorySettings> = {}) {
           assert(expectedStateResult);
           expectedState = expectedStateResult.value;
         });
-  
+
         afterEach(() => {
           expectedState.destroy();
           state.destroy();
         });
-  
+
         it('exposes a definition', () => {
           expect(definition).not.toStrictEqual(nullDefinition);
         });
-  
+
         for (const [index, sample] of definition.samples.entries()) {
           const missingOperators = [...parse(sample.in), ...parse(sample.out)]
             .filter((value) => value.type === 'string' && value.isExecutable)
