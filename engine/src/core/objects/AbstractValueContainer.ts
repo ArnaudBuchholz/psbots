@@ -152,6 +152,9 @@ export abstract class AbstractValueContainer extends ShareableObject implements 
   /** pops the value from the right place */
   protected abstract popImpl(): Value;
 
+
+  private _inGarbageCollector = false;
+
   public collectGarbage(): boolean {
     if (this._pointers.length > 1 && this.capacity - this._capacityIncrement >= this._values.length) {
       const pointer = this._pointers.at(-1)!; // length has been tested
@@ -162,12 +165,16 @@ export abstract class AbstractValueContainer extends ShareableObject implements 
     if (this._disposed) {
       this._memoryTracker.release(this._pointers[0]!, this);
     }
+    this._inGarbageCollector = false;
     return false;
   }
 
   protected reduceCapacityIfNeeded() {
     if (this._memoryTracker.experimentalGarbageCollector) {
-      this._memoryTracker.addToGarbageCollectorQueue(this);
+      if (!this._inGarbageCollector) {
+        this._memoryTracker.addToGarbageCollectorQueue(this);
+        this._inGarbageCollector = true;
+      }
     } else {
       while (this.collectGarbage()) {
         // do nothing
@@ -231,7 +238,10 @@ export abstract class AbstractValueContainer extends ShareableObject implements 
     this.clear();
     this._disposed = true;
     if (this._memoryTracker.experimentalGarbageCollector) {
-      this._memoryTracker.addToGarbageCollectorQueue(this);
+      if (!this._inGarbageCollector) {
+        this._memoryTracker.addToGarbageCollectorQueue(this);
+        this._inGarbageCollector = true;
+      }
     } else {
       this._memoryTracker.release(this._pointers[0]!, this);
     }
