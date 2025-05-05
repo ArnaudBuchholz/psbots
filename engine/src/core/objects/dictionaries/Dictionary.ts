@@ -1,7 +1,7 @@
 import type { Value, IDictionary, MemoryType, DictionaryValue, IValuePermissions, Result } from '@api/index.js';
 import { nullValue } from '@api/index.js';
 import { addMemorySize } from '@core/MemoryTracker.js';
-import type { MemoryPointer, MemorySize, MemoryTracker } from '@core/MemoryTracker.js';
+import type { IGarbageCollectible, MemoryPointer, MemorySize, MemoryTracker } from '@core/MemoryTracker.js';
 import { ShareableObject } from '@core/objects/ShareableObject.js';
 import { assert } from '@sdk/index.js';
 
@@ -22,7 +22,7 @@ type ValueSlot = {
  * the allocated memory is not freed or reclaimed. It will be released only when the object is destroyed.
  * Any key allocated beyond initial capacity is allocated and released one by one.
  */
-export class Dictionary extends ShareableObject implements IDictionary {
+export class Dictionary extends ShareableObject implements IDictionary, IGarbageCollectible {
   /** returned value is not addValueRef'ed */
   toValue({ isReadOnly = true, isExecutable }: Partial<IValuePermissions> = {}): DictionaryValue {
     assert(isExecutable !== true, 'Unsupported permissions');
@@ -161,18 +161,29 @@ export class Dictionary extends ShareableObject implements IDictionary {
 
   // endregion IWritableDictionary
 
+  public collectGarbage(): boolean {
+    const entries = Object.entries(this._slots);
+    if (entries.length > 0) {
+      const [name, slot] = entries[0]!; // validated
+      this._memoryTracker.releaseString(name);
+      slot.value.tracker?.releaseValue(slot.value);
+      if (slot.pointer !== this._pointer) {
+        this._memoryTracker.release(slot.pointer, this);
+      }
+      delete this._slots[name];
+      return true;
+    }
+    this._memoryTracker.release(this._pointer, this);
+    return false;
+  }
+
   protected _dispose(): void {
     if (this._memoryTracker.experimentalGarbageCollector) {
-      // Ignore for now
+      this._memoryTracker.addToGarbageCollectorQueue(this);
     } else {
-      for (const [name, slot] of Object.entries(this._slots)) {
-        this._memoryTracker.releaseString(name);
-        slot.value.tracker?.releaseValue(slot.value);
-        if (slot.pointer !== this._pointer) {
-          this._memoryTracker.release(slot.pointer, this);
-        }
+      while (this.collectGarbage()) {
+        // do nothing
       }
-      this._memoryTracker.release(this._pointer, this);
     }
   }
 }
