@@ -195,7 +195,9 @@ async function dumpMemory(replIO: IReplIO, state: IState, waitForChar: DebugPara
   while ('ust '.includes(c)) {
     replIO.output(clearDisplay);
     replIO.output(`${cyan}memory : ${yellow}${formatBytes(state.memoryTracker.used)}${white} / ${yellow}`);
-    replIO.output(state.memoryTracker.total === Number.POSITIVE_INFINITY ? '∞' : formatBytes(state.memoryTracker.total));
+    replIO.output(
+      state.memoryTracker.total === Number.POSITIVE_INFINITY ? '∞' : formatBytes(state.memoryTracker.total)
+    );
     replIO.output(`${white}\r\n`);
     replIO.output(`${shortcut}u${blue}ser   : ${yellow}${formatBytes(state.memoryTracker.byType.user)}${white}\r\n`);
     replIO.output(`${shortcut}s${blue}trings: ${yellow}${formatBytes(state.memoryTracker.byType.string)}${white}\r\n`);
