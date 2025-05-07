@@ -1,19 +1,28 @@
 import { enumIArrayValues } from '@psbots/engine';
 import type { IReadOnlyArray, IState } from '@psbots/engine';
+import type { ICallStack, ToStringOptions } from '@psbots/engine/sdk';
 import { toString } from '@psbots/engine/sdk';
 import type { IReplIO } from './IReplIo.js';
 import { blue, cyan, white, /* green, red, white, */ yellow } from './colors.js';
 import { memory } from './status.js';
 
 type EnumAndDisplayOptions = {
-  includeDebugSource: boolean;
-  includeIndex: boolean;
+  includeDebugSource?: boolean;
+  includeIndex?: boolean;
+  callstack?: boolean;
+  format?: (output: string) => string;
 };
 
-export function enumAndDisplay(replIO: IReplIO, values: IReadOnlyArray, options?: EnumAndDisplayOptions): void {
-  const { includeDebugSource, includeIndex } = {
+export function enumAndDisplay(
+  replIO: IReplIO,
+  values: IReadOnlyArray | ICallStack,
+  options?: EnumAndDisplayOptions
+): void {
+  const { includeDebugSource, includeIndex, callstack, format } = {
     includeDebugSource: true,
     includeIndex: true,
+    callstack: false,
+    format: (text: string) => text,
     ...options
   };
   let index = 0;
@@ -23,7 +32,11 @@ export function enumAndDisplay(replIO: IReplIO, values: IReadOnlyArray, options?
     if (includeIndex) {
       maxWidth -= formattedIndex.length + 1;
     }
-    const formatted = toString(value, { includeDebugSource, maxWidth });
+    let operatorState: ToStringOptions['operatorState'] | undefined;
+    if (callstack) {
+      operatorState = (values as ICallStack).operatorStateAt(index);
+    }
+    const formatted = toString(value, { includeDebugSource, maxWidth, operatorState });
     const withDebugInfo = formatted.match(/^(.*)@([^:@]+:\d+:\d+)$/);
     let instruction = formatted;
     let debugInfo = '';
@@ -31,11 +44,7 @@ export function enumAndDisplay(replIO: IReplIO, values: IReadOnlyArray, options?
       instruction = withDebugInfo[1]!;
       debugInfo = `${blue}@${withDebugInfo[2]}`;
     }
-    if (includeIndex) {
-      replIO.output(`${formattedIndex} ${instruction}${debugInfo}${white}\r\n`);
-    } else {
-      replIO.output(`${instruction}${debugInfo}${white}\r\n`);
-    }
+    replIO.output(format(`${includeIndex ? formattedIndex + ' ' : ''}${instruction}${debugInfo}${white}\r\n`));
     ++index;
   }
 }
