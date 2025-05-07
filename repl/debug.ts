@@ -184,7 +184,7 @@ function dumpOperands(replIO: IReplIO, state: IState, waitForChar: DebugParamete
 function dumpCallStack(replIO: IReplIO, state: IState, waitForChar: DebugParameters['waitForChar']) {
   replIO.output(clearDisplay);
   replIO.output(`${cyan}call stack: ${yellow}${state.calls.length}${white}\r\n`);
-  enumAndDisplay(replIO, state.calls);
+  enumAndDisplay(replIO, state.calls, { callstack: true, format: colorize });
   replIO.output(`${shortcut}any${white} key to continue`);
   return waitForChar();
 }
@@ -211,7 +211,7 @@ async function dumpMemory(replIO: IReplIO, state: IState, waitForChar: DebugPara
     replIO.output(
       `${blue}sys${shortcut}t${blue}em : ${yellow}${formatBytes(state.memoryTracker.byType.system)}${white}\r\n`
     );
-    replIO.output(`${shortcut}c${white}ontinue`);
+    replIO.output(`${shortcut}any${white} key to continue`);
     c = await waitForChar();
   }
 }
@@ -247,7 +247,7 @@ export async function runWithDebugger({
     });
     renderOperandAndCallStacks({ replIO, state, operandsWidth, callStackWidth });
 
-    replIO.output(`${shortcut}c${white}ontinue ${shortcut}q${white}uit`);
+    replIO.output(`${shortcut}q${white}uit, ${shortcut}any${white} key to continue`);
 
     lastOperandsCount = state.operands.length;
     lastUsedMemory = state.memoryTracker.used;
@@ -257,13 +257,13 @@ export async function runWithDebugger({
     replIO.output('\b \b');
     if (step === 'o') {
       await dumpOperands(replIO, state, waitForChar);
-      break;
+      continue;
     } else if (step === 'a') {
       await dumpCallStack(replIO, state, waitForChar);
-      break;
+      continue;
     } else if (step === 'm') {
       await dumpMemory(replIO, state, waitForChar);
-      break;
+      continue;
     } else if (step === 'q') {
       hostDictionary.debug(false);
       break;
