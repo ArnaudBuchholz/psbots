@@ -1,9 +1,9 @@
 import type { IState } from '@psbots/engine';
 import type { IReplIO } from './IReplIo.js';
 import { toString, TOSTRING_BEGIN_MARKER, TOSTRING_END_MARKER } from '@psbots/engine/sdk';
-import { blue, /* cyan, */ green, magenta, red, white, yellow } from './colors.js';
+import { blue, cyan, /* cyan, */ green, magenta, red, white, yellow } from './colors.js';
 import { formatCountVariation, formatMemoryVariation } from './status.js';
-import { operands } from './format.js';
+import { enumAndDisplay, operands } from './format.js';
 import { formatBytes } from './formatBytes.js';
 import type { ReplHostDictionary } from 'host/index.js';
 
@@ -17,6 +17,7 @@ type DebugParameters = {
 
 const border = magenta;
 const shortcut = green;
+const clearDisplay = '\u001B[1;1H\u001B[J';
 
 function colorize(string: string): string {
   const chars = [...string];
@@ -173,6 +174,46 @@ function renderOperandAndCallStacks({
   replIO.output(`${border}└${''.padStart(operandsWidth, '─')}┴${''.padStart(callStackWidth, '─')}┘`);
 }
 
+function dumpOperands(replIO: IReplIO, state: IState, waitForChar: DebugParameters['waitForChar']) {
+  replIO.output(clearDisplay);
+  operands(replIO, state);
+  replIO.output(`${shortcut}any${white} key to continue`);
+  return waitForChar();
+}
+
+function dumpCallStack(replIO: IReplIO, state: IState, waitForChar: DebugParameters['waitForChar']) {
+  replIO.output(clearDisplay);
+  replIO.output(`${cyan}call stack: ${yellow}${state.calls.length}${white}\r\n`);
+  enumAndDisplay(replIO, state.calls);
+  replIO.output(`${shortcut}any${white} key to continue`);
+  return waitForChar();
+}
+
+async function dumpMemory(replIO: IReplIO, state: IState, waitForChar: DebugParameters['waitForChar']) {
+  const snapshot = state.memoryTracker.snapshot();
+  let c = ' ';
+  while ('ust '.includes(c)) {
+    replIO.output(clearDisplay);
+    replIO.output(`${cyan}memory : ${yellow}${formatBytes(state.memoryTracker.used)}${white} / ${yellow}`);
+    replIO.output(state.memoryTracker.total === Number.POSITIVE_INFINITY ? '∞' : formatBytes(state.memoryTracker.total));
+    replIO.output(`${white}\r\n`);
+    replIO.output(`${shortcut}u${blue}ser   : ${yellow}${formatBytes(state.memoryTracker.byType.user)}${white}\r\n`);
+    replIO.output(`${shortcut}s${blue}trings: ${yellow}${formatBytes(state.memoryTracker.byType.string)}${white}\r\n`);
+    if (c === 's') {
+      for (const stringInfo of snapshot.string) {
+        replIO.output(
+          `${stringInfo.references}x ${yellow}${stringInfo.string}${white} (${yellow}${formatBytes(stringInfo.size)}${white})\r\n`
+        );
+      }
+    }
+    replIO.output(
+      `${blue}sys${shortcut}t${blue}em : ${yellow}${formatBytes(state.memoryTracker.byType.system)}${white}\r\n`
+    );
+    replIO.output(`${shortcut}c${white}ontinue`);
+    c = await waitForChar();
+  }
+}
+
 export async function runWithDebugger({
   replIO,
   state,
@@ -192,7 +233,7 @@ export async function runWithDebugger({
       return 0;
     }
 
-    replIO.output('\u001B[1;1H\u001B[J'); // clear display
+    replIO.output(clearDisplay);
     const cycleInfoLength = renderCycleAndMemoryInfo({ replIO, state, cycle, width, lastUsedMemory });
     const { operandsWidth, callStackWidth } = renderOperandAndCallStacksTitle({
       replIO,
@@ -213,7 +254,14 @@ export async function runWithDebugger({
     const step = await waitForChar();
     replIO.output('\b \b');
     if (step === 'o') {
-      operands(replIO, state);
+      await dumpOperands(replIO, state, waitForChar);
+      break;
+    } else if (step === 'a') {
+      await dumpCallStack(replIO, state, waitForChar);
+      break;
+    } else if (step === 'm') {
+      await dumpMemory(replIO, state, waitForChar);
+      break;
     } else if (step === 'q') {
       hostDictionary.debug(false);
       break;
@@ -225,6 +273,6 @@ export async function runWithDebugger({
       break;
     }
   }
-  replIO.output('\u001B[1;1H\u001B[J'); // clear display
+  replIO.output(clearDisplay);
   return cycle;
 }
