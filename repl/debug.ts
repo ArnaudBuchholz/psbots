@@ -191,8 +191,8 @@ function dumpCallStack(replIO: IReplIO, state: IState, waitForChar: DebugParamet
 
 async function dumpMemory(replIO: IReplIO, state: IState, waitForChar: DebugParameters['waitForChar']) {
   const snapshot = state.memoryTracker.snapshot();
-  let c = ' ';
-  while ('ust '.includes(c)) {
+  let key = ' ';
+  while ('ust '.includes(key)) {
     replIO.output(clearDisplay);
     replIO.output(`${cyan}memory : ${yellow}${formatBytes(state.memoryTracker.used)}${white} / ${yellow}`);
     replIO.output(
@@ -201,7 +201,7 @@ async function dumpMemory(replIO: IReplIO, state: IState, waitForChar: DebugPara
     replIO.output(`${white}\r\n`);
     replIO.output(`${shortcut}u${blue}ser   : ${yellow}${formatBytes(state.memoryTracker.byType.user)}${white}\r\n`);
     replIO.output(`${shortcut}s${blue}trings: ${yellow}${formatBytes(state.memoryTracker.byType.string)}${white}\r\n`);
-    if (c === 's') {
+    if (key === 's') {
       for (const stringInfo of snapshot.string) {
         replIO.output(
           `${stringInfo.references}x ${yellow}${stringInfo.string}${white} (${yellow}${formatBytes(stringInfo.size)}${white})\r\n`
@@ -212,7 +212,22 @@ async function dumpMemory(replIO: IReplIO, state: IState, waitForChar: DebugPara
       `${blue}sys${shortcut}t${blue}em : ${yellow}${formatBytes(state.memoryTracker.byType.system)}${white}\r\n`
     );
     replIO.output(`${shortcut}any${white} key to continue`);
-    c = await waitForChar();
+    key = await waitForChar();
+    key = key.toLowerCase();
+  }
+}
+
+async function dumpDictionaries(replIO: IReplIO, state: IState, waitForChar: DebugParameters['waitForChar']) {
+  let key = ' ';
+  while ('0123456789 '.includes(key)) {
+    replIO.output(clearDisplay);
+    replIO.output(`${cyan}dictionaries: ${yellow}${state.dictionaries.length}${white}\r\n`);
+    enumAndDisplay(replIO, state.dictionaries);
+    replIO.output(
+      `[${shortcut}0${white}...${shortcut}9${white}] to inspect dictionary, ${shortcut}any${white} key to continue`
+    );
+    key = await waitForChar();
+    key = key.toLowerCase();
   }
 }
 
@@ -247,16 +262,22 @@ export async function runWithDebugger({
     });
     renderOperandAndCallStacks({ replIO, state, operandsWidth, callStackWidth });
 
-    replIO.output(`${shortcut}q${white}uit, ${shortcut}any${white} key to continue`);
+    replIO.output(
+      `${shortcut}D${white}ictionaries (${state.dictionaries.length}), ${shortcut}q${white}uit, ${shortcut}any${white} key to continue`
+    );
 
     lastOperandsCount = state.operands.length;
     lastUsedMemory = state.memoryTracker.used;
     lastCallStackSize = state.calls.length;
 
-    const step = await waitForChar();
+    const key = await waitForChar();
+    const step = key.toLowerCase();
     replIO.output('\b \b');
     if (step === 'o') {
       await dumpOperands(replIO, state, waitForChar);
+      continue;
+    } else if (step === 'd') {
+      await dumpDictionaries(replIO, state, waitForChar);
       continue;
     } else if (step === 'a') {
       await dumpCallStack(replIO, state, waitForChar);
