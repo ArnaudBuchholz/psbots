@@ -6,6 +6,7 @@ Here the list of official POSTSCRIPT operators extracted from this [index](https
 |---|---|
 |✅| implemented |
 |✅∗| implemented but non compliant |
+|➕| extension of standard |
 |⚙️| implemented in REPL |
 |🚧| implementation to come |
 |❓| status to be determined |
@@ -166,6 +167,7 @@ Here the list of official POSTSCRIPT operators extracted from this [index](https
 |gstate|📄|
 |gt|✅∗|
 |handleerror|❓|
+|hostdict|➕|
 |identmatrix|📄|
 |idiv|🚧|
 |idtransform|📄|

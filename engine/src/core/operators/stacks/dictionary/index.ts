@@ -5,5 +5,6 @@ import './currentdict.js';
 import './def.js';
 import './end.js';
 import './globaldict.js';
+import './hostdict.js';
 import './systemdict.js';
 import './userdict.js';
