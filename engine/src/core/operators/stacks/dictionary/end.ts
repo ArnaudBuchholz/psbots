@@ -10,8 +10,13 @@ buildFunctionOperator(
       {
         in: '<< /test 1 >> begin end test',
         out: 'undefined'
+      },
+      {
+        description: 'popping the default dictionaries is forbidden',
+        in: 'end',
+        out: 'dictstackunderflow'
       }
     ]
   },
-  ({ dictionaries }) => dictionaries.pop()
+  ({ dictionaries }) => dictionaries.end()
 );
