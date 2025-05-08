@@ -32,24 +32,28 @@ export class DictionaryStack extends ValueStack implements IDictionaryStack {
     capacityIncrement: number
   ) {
     super(tracker, memoryType, initialCapacity, capacityIncrement);
+    // Host
     this.begin({
       type: 'dictionary',
       isExecutable: false,
       isReadOnly: true,
       dictionary: EmptyDictionary.instance
     });
+    // systemdict
     this.begin({
       type: 'dictionary',
       isExecutable: false,
       isReadOnly: true,
       dictionary: SystemDictionary.instance
     });
+    // globaldict
     this.begin({
       type: 'dictionary',
       isExecutable: false,
       isReadOnly: false,
       dictionary: EmptyDictionary.instance
     });
+    // userdict
     this.begin({
       type: 'dictionary',
       isExecutable: false,
