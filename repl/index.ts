@@ -44,6 +44,7 @@ export async function repl(replIO: IReplIO, options: string[] = []): Promise<voi
   replIO.output(`${cyan}Use '${yellow}exit${cyan}'  to quit${white}\r\n`);
   replIO.output(`${cyan}Use '${yellow}state${cyan}' to print a state summary${white}\r\n`);
   replIO.output(`${cyan}Use '${yellow}help${cyan}'  to display help${white}\r\n`);
+  replIO.output(`${cyan}Use '${yellow}debug${cyan}' to use inbuilt debugger${white}\r\n`);
 
   let replIndex = 0;
   const { waitForLines, waitForChar } = buildInputHandler(replIO);
