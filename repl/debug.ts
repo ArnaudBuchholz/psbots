@@ -1,4 +1,4 @@
-import type { IState } from '@psbots/engine';
+import type { IMemorySnapshot, IState } from '@psbots/engine';
 import type { IReplIO } from './IReplIo.js';
 import { assert, toString, TOSTRING_BEGIN_MARKER, TOSTRING_END_MARKER } from '@psbots/engine/sdk';
 import { blue, cyan, /* cyan, */ green, magenta, red, white, yellow } from './colors.js';
@@ -189,6 +189,19 @@ function dumpCallStack(replIO: IReplIO, state: IState, waitForChar: DebugParamet
   return waitForChar();
 }
 
+function dumpMemoryContainers(replIO: IReplIO, snapshot: IMemorySnapshot, type: 'user' | 'system') {
+  const containerSnapshots = snapshot[type];
+  if (containerSnapshots.length === 0 && snapshot.byType[type] !== 0) {
+    replIO.output(`${red}No memory containers registered, use --debug-memory${white}\r\n`);
+    return;
+  }
+  for (const containerSnapshot of containerSnapshots) {
+    replIO.output(
+      `${white}${containerSnapshot.container.class}: ${yellow}${formatBytes(containerSnapshot.total)}${white}\r\n`
+    );
+  }
+}
+
 async function dumpMemory(replIO: IReplIO, state: IState, waitForChar: DebugParameters['waitForChar']) {
   const snapshot = state.memoryTracker.snapshot();
   let key = ' ';
@@ -200,6 +213,9 @@ async function dumpMemory(replIO: IReplIO, state: IState, waitForChar: DebugPara
     );
     replIO.output(`${white}\r\n`);
     replIO.output(`${shortcut}u${blue}ser   : ${yellow}${formatBytes(state.memoryTracker.byType.user)}${white}\r\n`);
+    if (key === 'u') {
+      dumpMemoryContainers(replIO, snapshot, 'user');
+    }
     replIO.output(`${shortcut}s${blue}trings: ${yellow}${formatBytes(state.memoryTracker.byType.string)}${white}\r\n`);
     if (key === 's') {
       for (const stringInfo of snapshot.string) {
@@ -211,6 +227,9 @@ async function dumpMemory(replIO: IReplIO, state: IState, waitForChar: DebugPara
     replIO.output(
       `${blue}sys${shortcut}t${blue}em : ${yellow}${formatBytes(state.memoryTracker.byType.system)}${white}\r\n`
     );
+    if (key === 't') {
+      dumpMemoryContainers(replIO, snapshot, 'system');
+    }
     replIO.output(`${shortcut}any${white} key to continue`);
     key = await waitForChar();
     key = key.toLowerCase();
