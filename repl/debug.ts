@@ -1,6 +1,6 @@
 import type { IState } from '@psbots/engine';
 import type { IReplIO } from './IReplIo.js';
-import { toString, TOSTRING_BEGIN_MARKER, TOSTRING_END_MARKER } from '@psbots/engine/sdk';
+import { assert, toString, TOSTRING_BEGIN_MARKER, TOSTRING_END_MARKER } from '@psbots/engine/sdk';
 import { blue, cyan, /* cyan, */ green, magenta, red, white, yellow } from './colors.js';
 import { formatCountVariation, formatMemoryVariation } from './status.js';
 import { enumAndDisplay, operands } from './format.js';
@@ -221,8 +221,27 @@ async function dumpDictionaries(replIO: IReplIO, state: IState, waitForChar: Deb
   let key = ' ';
   while ('0123456789 '.includes(key)) {
     replIO.output(clearDisplay);
-    replIO.output(`${cyan}dictionaries: ${yellow}${state.dictionaries.length}${white}\r\n`);
-    enumAndDisplay(replIO, state.dictionaries);
+    if (key === ' ') {
+      replIO.output(`${cyan}dictionaries: ${yellow}${state.dictionaries.length}${white}\r\n`);
+      enumAndDisplay(replIO, state.dictionaries);
+    } else {
+      const index = Number.parseInt(key, 10);
+      if (index < state.dictionaries.length) {
+        const dictionaryValue = state.dictionaries.at(index);
+        replIO.output(`${cyan}${index}${white} ${toString(dictionaryValue)}\r\n`);
+        assert(dictionaryValue.type === 'dictionary');
+        const { dictionary } = dictionaryValue;
+        const names = dictionary.names;
+        for (const name of names) {
+          const value = dictionary.lookup(name);
+          replIO.output(
+            `${yellow}${name}${white}: ${toString(value, { maxWidth: replIO.width - name.length - 3 })}\r\n`
+          );
+        }
+      } else {
+        replIO.output(`${red}No dictionary${white}\r\n`);
+      }
+    }
     replIO.output(
       `[${shortcut}0${white}...${shortcut}9${white}] to inspect dictionary, ${shortcut}any${white} key to continue`
     );
