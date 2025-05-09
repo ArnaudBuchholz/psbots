@@ -26,10 +26,10 @@ function executeOperatorsTests(settings: Partial<StateFactorySettings> = {}) {
         let expectedState: State;
 
         beforeEach(() => {
-          const stateResult = State.create({ debugMemory: true });
+          const stateResult = State.create({ ...settings, debugMemory: true });
           assert(stateResult);
           state = stateResult.value;
-          const expectedStateResult = State.create({ debugMemory: true });
+          const expectedStateResult = State.create({ ...settings, debugMemory: true });
           assert(expectedStateResult);
           expectedState = expectedStateResult.value;
         });
@@ -63,6 +63,9 @@ function executeOperatorsTests(settings: Partial<StateFactorySettings> = {}) {
               } else {
                 expect(state.exception).toBeUndefined();
                 expect(state.operands.length).toStrictEqual(expectedState.operands.length);
+                // triggers garbage collection
+                waitForExec(state.exec(toValue('gc', { isExecutable: true })));
+                waitForExec(expectedState.exec(toValue('gc', { isExecutable: true })));
                 // flatten differences between the two memory trackers
                 Object.assign(state.memoryTracker, { _peak: 0 });
                 Object.assign(expectedState.memoryTracker, { _peak: 0 });
