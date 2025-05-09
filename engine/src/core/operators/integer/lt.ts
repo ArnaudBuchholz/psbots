@@ -4,7 +4,7 @@ import { buildFunctionOperator } from '@core/operators/operators.js';
 buildFunctionOperator(
   {
     name: 'lt',
-    description: 'compares two integers to see if lower than',
+    description: 'returns true of if the next integer is lower than the top one',
     labels: ['integer', 'math', 'comparison'],
     signature: {
       input: [{ type: 'integer' }, { type: 'integer' }],

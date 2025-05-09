@@ -3,7 +3,7 @@ import { buildFunctionOperator } from '@core/operators/operators.js';
 buildFunctionOperator(
   {
     name: 'exch',
-    description: 'swaps the first two items of the operand stack',
+    description: 'swaps the first two values of the operand stack',
     labels: ['operand'],
     signature: {
       input: [{ type: 'null' }, { type: 'null' }],

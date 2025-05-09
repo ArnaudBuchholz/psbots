@@ -4,7 +4,7 @@ import { buildFunctionOperator } from '@core/operators/operators.js';
 buildFunctionOperator(
   {
     name: 'count',
-    description: 'gives back the size of the operand stack',
+    description: 'returns the size of the operand stack',
     labels: ['operand'],
     signature: {
       output: [{ type: 'integer' }]

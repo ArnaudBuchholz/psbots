@@ -4,7 +4,7 @@ import { buildFunctionOperator } from '@core/operators/operators.js';
 buildFunctionOperator(
   {
     name: 'counttomark',
-    description: 'count the number of items in the operand stack up to the first mark',
+    description: 'returns the number of items in the operand stack up to the first mark',
     labels: ['operand'],
     signature: {
       output: [{ type: 'integer' }]

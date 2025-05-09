@@ -6,7 +6,7 @@ const LOOP_BLOCK = 'block';
 buildFunctionOperator(
   {
     name: 'loop',
-    description: 'repeatedly executes proc until proc executes the stop operator',
+    description: 'repeatedly executes the block until it calls stop',
     labels: ['flow', 'loop'],
     signature: {
       input: [{ type: 'array', permissions: { isExecutable: true } }]

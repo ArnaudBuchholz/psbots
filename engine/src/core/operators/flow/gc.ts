@@ -5,7 +5,7 @@ import { MemoryTracker } from '@core/MemoryTracker.js';
 buildFunctionOperator(
   {
     name: 'gc',
-    description: 'forces garbage collection',
+    description: 'triggers garbage collection',
     labels: ['flow'],
     samples: [
       {

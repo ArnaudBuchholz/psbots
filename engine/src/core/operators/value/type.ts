@@ -4,7 +4,7 @@ import { buildFunctionOperator } from '@core/operators/operators.js';
 buildFunctionOperator(
   {
     name: 'type',
-    description: 'pushes the type of the value in the operand stack',
+    description: 'returns the type of the value',
     labels: ['value', 'generic'],
     signature: {
       input: [{ type: 'null' }],

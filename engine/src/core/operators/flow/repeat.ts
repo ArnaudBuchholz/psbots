@@ -55,7 +55,7 @@ function repeat(state: IInternalState): Result<unknown> {
 buildFunctionOperator(
   {
     name: 'repeat',
-    description: 'executes the operand n times, where n is a non-negative integer',
+    description: 'executes the top value n times, where n is a non-negative integer',
     labels: ['flow', 'loop'],
     signature: {
       input: [{ type: 'integer' }, { type: 'null' }]

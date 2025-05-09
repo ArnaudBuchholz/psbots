@@ -3,7 +3,7 @@ import { buildFunctionOperator } from '@core/operators/operators.js';
 export const pop = buildFunctionOperator(
   {
     name: 'pop',
-    description: 'removes the top item of the operand stack',
+    description: 'removes the top value of the operand stack',
     labels: ['operand'],
     signature: {
       input: [{ type: 'null' }]

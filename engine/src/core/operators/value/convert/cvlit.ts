@@ -4,7 +4,7 @@ import { buildFunctionOperator } from '@core/operators/operators.js';
 buildFunctionOperator(
   {
     name: 'cvlit',
-    description: 'removes executable flag',
+    description: 'converts to non executable',
     labels: ['value', 'generic', 'conversion'],
     signature: {
       input: [{ type: 'null' }],

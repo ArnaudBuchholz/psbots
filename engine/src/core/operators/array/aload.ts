@@ -5,7 +5,7 @@ import { assert } from '@sdk/assert.js';
 buildFunctionOperator(
   {
     name: 'aload',
-    description: 'loads all items of the array in the operand stack',
+    description: 'loads the items of the array in the operand stack and pushes the array itself',
     labels: ['array'],
     signature: {
       input: [{ type: 'array' }]

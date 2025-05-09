@@ -4,7 +4,7 @@ import { buildFunctionOperator } from '@core/operators/operators.js';
 buildFunctionOperator(
   {
     name: 'xcheck',
-    description: 'checks if value is executable',
+    description: 'returns true if value is executable',
     labels: ['value', 'generic', 'permission'],
     signature: {
       input: [{ type: 'null' }],

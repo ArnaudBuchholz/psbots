@@ -5,7 +5,7 @@ import { buildFunctionOperator } from '@core/operators/operators.js';
 buildFunctionOperator(
   {
     name: 'eq',
-    description: 'compares two values and return true if they are strictly equal',
+    description: 'returns true if the two values are strictly equal',
     labels: ['generic', 'comparison'],
     signature: {
       input: [{ type: 'null' }, { type: 'null' }],

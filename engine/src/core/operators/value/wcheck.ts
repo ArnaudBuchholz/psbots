@@ -4,7 +4,7 @@ import { buildFunctionOperator } from '@core/operators/operators.js';
 buildFunctionOperator(
   {
     name: 'wcheck',
-    description: 'checks if value is writable',
+    description: 'returns true if the value is writable',
     labels: ['value', 'generic', 'permission'],
     signature: {
       input: [{ type: 'null' }],

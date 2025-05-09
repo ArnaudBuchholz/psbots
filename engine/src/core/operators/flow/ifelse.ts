@@ -3,7 +3,7 @@ import { buildFunctionOperator } from '@core/operators/operators.js';
 buildFunctionOperator(
   {
     name: 'ifelse',
-    description: 'executes the operands based on a condition',
+    description: 'executes one of the two top operands based on the next boolean',
     labels: ['flow'],
     signature: {
       input: [{ type: 'boolean' }, { type: 'null' }, { type: 'null' }]

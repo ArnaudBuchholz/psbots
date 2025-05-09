@@ -4,7 +4,7 @@ import { buildFunctionOperator } from '@core/operators/operators.js';
 buildFunctionOperator(
   {
     name: 'div',
-    description: 'realizes an euclidean division with two integers',
+    description: 'returns quotient and remainder of the euclidean division of two integers',
     labels: ['integer', 'math'],
     signature: {
       input: [{ type: 'integer' }, { type: 'integer' }],

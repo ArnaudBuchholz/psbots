@@ -4,7 +4,7 @@ import { buildFunctionOperator } from '@core/operators/operators.js';
 buildFunctionOperator(
   {
     name: 'dup',
-    description: 'duplicates the top item of the operand stack',
+    description: 'duplicates the top value of the operand stack',
     labels: ['operand'],
     signature: {
       input: [{ type: 'null' }],

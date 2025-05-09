@@ -4,7 +4,7 @@ import { buildFunctionOperator } from '@core/operators/operators.js';
 buildFunctionOperator(
   {
     name: 'abs',
-    description: 'returns absolute values of an integer',
+    description: 'returns the absolute value of an integer',
     labels: ['integer', 'math'],
     signature: {
       input: [{ type: 'integer' }],

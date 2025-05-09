@@ -4,7 +4,7 @@ import { buildFunctionOperator } from '@core/operators/operators.js';
 buildFunctionOperator(
   {
     name: 'countdictstack',
-    description: 'retrieves the number of dictionaries in the dictionary stack',
+    description: 'returns the number of dictionaries in the dictionary stack',
     labels: ['dictstack'],
     signature: {
       output: [{ type: 'integer' }]

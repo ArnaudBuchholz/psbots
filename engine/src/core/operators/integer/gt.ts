@@ -4,7 +4,7 @@ import { buildFunctionOperator } from '@core/operators/operators.js';
 buildFunctionOperator(
   {
     name: 'gt',
-    description: 'compares two integers to see if greater than',
+    description: 'returns true of if the next integer is greater than the top one',
     labels: ['integer', 'math', 'comparison'],
     signature: {
       input: [{ type: 'integer' }, { type: 'integer' }],
