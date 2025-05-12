@@ -3,8 +3,8 @@ import type { IInternalState } from '@sdk/index.js';
 import { OPERATOR_STATE_POP, OPERATOR_STATE_FIRST_CALL, assert } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 
-const REPEAT_VALUE = 'value';
-const REPEAT_COUNT = 'count';
+export const REPEAT_VALUE = 'value';
+export const REPEAT_COUNT = 'count';
 
 function firstCall(state: IInternalState, countValue: IntegerValue, value: Value): Result<unknown> {
   const { operands, calls } = state;
@@ -38,12 +38,12 @@ function repeat(state: IInternalState): Result<unknown> {
   const storedCountValue = calls.lookup(REPEAT_COUNT);
   assert(storedCountValue.type === 'integer');
   const { integer: count } = storedCountValue;
-  assert(topOperatorState <= count);
-  if (topOperatorState < count) {
-    ++calls.topOperatorState;
-  } else {
+  // As we can't revert OPERATOR_STATE_POP, we need an additional step
+  if (topOperatorState > count) {
     calls.topOperatorState = OPERATOR_STATE_POP;
+    return { success: true, value: undefined };
   }
+  ++calls.topOperatorState;
   const pushed = calls.push(calls.lookup(REPEAT_VALUE));
   if (!pushed.success) {
     calls.topOperatorState = topOperatorState;
