@@ -236,12 +236,7 @@ export abstract class AbstractValueContainer extends ShareableObject implements 
   protected _dispose(): void {
     this.clear();
     this._disposed = true;
-    if (this._memoryTracker.experimentalGarbageCollector) {
-      if (!this._inGarbageCollector) {
-        this._memoryTracker.addToGarbageCollectorQueue(this);
-        this._inGarbageCollector = true;
-      }
-    } else {
+    if (!this._memoryTracker.experimentalGarbageCollector) {
       this._memoryTracker.release(this._pointers[0]!, this);
     }
   }
