@@ -5,31 +5,24 @@ import { State } from '@core/state/State.js';
 import { CallStack } from '@core/objects/stacks/CallStack.js';
 import { ValueStack } from '@core/objects/stacks/ValueStack.js';
 import { toValue, waitForExec } from '@test/index.js';
-import { REPEAT_VALUE, REPEAT_COUNT } from './repeat.js';
+import { REPEAT_VALUE } from './repeat.js';
 
-const names = {
-  REPEAT_VALUE,
-  REPEAT_COUNT
-};
-
-for (const [constant, constantValue] of Object.entries(names)) {
-  it(`forwards CallStack::def error (${constant})`, async () => {
-    const stateResult = State.create();
-    assert(stateResult);
-    const { value: state } = stateResult;
-    const nativeMethod = CallStack.prototype.def;
-    const methodSpy = vi.spyOn(CallStack.prototype, 'def');
-    methodSpy.mockImplementation(function (this: CallStack, name, value) {
-      if (name === constantValue) {
-        return { success: false, exception: 'limitcheck' };
-      }
-      return nativeMethod.call(this, name, value);
-    });
-    await waitForExec(state.exec(toValue('1 1 repeat', { isExecutable: true })));
-    methodSpy.mockRestore();
-    expect(state.exception).toStrictEqual<Exception>('limitcheck');
+it(`forwards CallStack::def error`, async () => {
+  const stateResult = State.create();
+  assert(stateResult);
+  const { value: state } = stateResult;
+  const nativeMethod = CallStack.prototype.def;
+  const methodSpy = vi.spyOn(CallStack.prototype, 'def');
+  methodSpy.mockImplementation(function (this: CallStack, name, value) {
+    if (name === REPEAT_VALUE) {
+      return { success: false, exception: 'limitcheck' };
+    }
+    return nativeMethod.call(this, name, value);
   });
-}
+  await waitForExec(state.exec(toValue('1 1 repeat', { isExecutable: true })));
+  methodSpy.mockRestore();
+  expect(state.exception).toStrictEqual<Exception>('limitcheck');
+});
 
 it('forwards Value::popush error', async () => {
   const stateResult = State.create();

@@ -1,10 +1,9 @@
 import type { IntegerValue, Result, Value } from '@api/index.js';
 import type { IInternalState } from '@sdk/index.js';
-import { OPERATOR_STATE_POP, OPERATOR_STATE_FIRST_CALL, assert } from '@sdk/index.js';
+import { OPERATOR_STATE_POP, OPERATOR_STATE_FIRST_CALL } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 
 export const REPEAT_VALUE = 'value';
-export const REPEAT_COUNT = 'count';
 
 function firstCall(state: IInternalState, countValue: IntegerValue, value: Value): Result<unknown> {
   const { operands, calls } = state;
@@ -17,36 +16,27 @@ function firstCall(state: IInternalState, countValue: IntegerValue, value: Value
     if (!valueDefined.success) {
       return valueDefined;
     }
-    const countDefined = calls.def(REPEAT_COUNT, countValue);
-    if (!countDefined.success) {
-      return countDefined;
-    }
   }
   const popushed = operands.popush(2);
   if (!popushed.success) {
     return popushed;
   }
-  if (count !== 0) {
-    calls.topOperatorState = 1;
-  }
+  calls.topOperatorState = count + 1;
   return { success: true, value: undefined };
 }
 
 function repeat(state: IInternalState): Result<unknown> {
   const { calls } = state;
-  const { topOperatorState } = state.calls;
-  const storedCountValue = calls.lookup(REPEAT_COUNT);
-  assert(storedCountValue.type === 'integer');
-  const { integer: count } = storedCountValue;
+  const { topOperatorState: count } = state.calls;
   // As we can't revert OPERATOR_STATE_POP, we need an additional step
-  if (topOperatorState > count) {
+  if (count === 1) {
     calls.topOperatorState = OPERATOR_STATE_POP;
     return { success: true, value: undefined };
   }
-  ++calls.topOperatorState;
+  --calls.topOperatorState;
   const pushed = calls.push(calls.lookup(REPEAT_VALUE));
   if (!pushed.success) {
-    calls.topOperatorState = topOperatorState;
+    calls.topOperatorState = count;
     return pushed;
   }
   return { success: true, value: undefined };
