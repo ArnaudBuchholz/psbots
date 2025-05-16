@@ -106,6 +106,11 @@ export abstract class AbstractValueContainer extends ShareableObject implements 
     return this._initialCapacity + (this._pointers.length - 1) * this._capacityIncrement;
   }
 
+  reserve(count: number): Result<undefined> {
+    assert(count > 0);
+    return this.increaseCapacityIfNeeded(this.capacity + count);
+  }
+
   protected increaseCapacityIfNeeded(minCapacity: number): Result<undefined> {
     const missingCapacity = minCapacity - this.capacity;
     if (missingCapacity > 0) {
@@ -193,6 +198,13 @@ export abstract class AbstractValueContainer extends ShareableObject implements 
     const value = this._pop();
     this.reduceCapacityIfNeeded();
     return value;
+  }
+
+  swap(indexA: number, indexB: number): void {
+    assert(indexA >= 0 && indexA < this.length && indexB >= 0 && indexB < this.length);
+    const valueA = this.at(indexA);
+    this._values[indexA] = this.at(indexB);
+    this._values[indexB] = valueA;
   }
 
   popush(count: number): { success: true; value: number };

@@ -1,7 +1,7 @@
 import type { Result, Value } from '@api/index.js';
 import { USER_MEMORY_TYPE, markValue } from '@api/index.js';
 import { assert, findMarkPos, OPERATOR_STATE_FIRST_CALL, OPERATOR_STATE_POP, toIntegerValue } from '@sdk/index.js';
-import type { IInternalState, IStack } from '@sdk/index.js';
+import type { IInternalState, IOperandStack } from '@sdk/index.js';
 import { ValueArray } from '@core/objects/ValueArray.js';
 import type { MemoryTracker } from '@core/MemoryTracker.js';
 
@@ -26,7 +26,7 @@ export function pushOpenClosedValueWithDebugInfo({
   mark,
   closeOp
 }: {
-  operands: IStack;
+  operands: IOperandStack;
   popCount: number;
   value: Value;
   mark: Value;
