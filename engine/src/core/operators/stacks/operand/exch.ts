@@ -13,8 +13,12 @@ buildFunctionOperator(
       {
         in: '1 2 3 exch',
         out: '1 3 2'
+      },
+      {
+        in: 'mark [] <<>> exch',
+        out: 'mark <<>> []'
       }
     ]
   },
-  ({ operands }, value1, value2) => operands.popush(2, value2, value1)
+  ({ operands }) => operands.swap(0, 1)
 );
