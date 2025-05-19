@@ -1,8 +1,80 @@
-import type { Value } from '@api/index.js';
-import { SYSTEM_MEMORY_TYPE } from '@api/index.js';
-import { assert } from '@sdk/assert.js';
-import { MemoryTracker } from '@core/MemoryTracker.js';
+import type { IntegerValue, Result } from '@api/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
+import type { IInternalState } from '@sdk/index.js';
+import { assert, toIntegerValue, OPERATOR_STATE_FIRST_CALL, OPERATOR_STATE_POP } from '@sdk/index.js';
+
+/* Position first value to its right place, then consider then one that has been moved.
+        3 1 roll      3 -1 roll     5 1 roll            5 2 roll
+        0-2 0-1       0-1 0-2       0-4 0-3 0-2 0-1     0-3 0-1 0-4 0-2
+    a    c   b         b   c         e   d   c   b       d   b   e   c
+    b    b   c         a   a         b   b   b   c       b   d   d   d
+    c    a   a         c   b         c   c   d   d       c   c   c   e
+    d                                d   e   e   e       a   a   a   a
+    e                                a   a   a   a       e   e   b   b
+*/
+
+const SHIFT = 'shift';
+const COUNT = 'count';
+const POS = 'pos';
+
+function initialize(
+  { operands, calls }: IInternalState,
+  { integer: count }: IntegerValue,
+  { integer: shift }: IntegerValue
+): Result<unknown> {
+  if (count <= 0 || count > operands.length - 2) {
+    return { success: false, exception: 'rangeCheck' };
+  }
+  if (count === 2) {
+    operands.popush(2);
+    operands.swap(0, 1);
+    return { success: true, value: undefined };
+  }
+  const shiftResult = toIntegerValue(shift);
+  assert(shiftResult);
+  const shiftDefined = calls.def(SHIFT, shiftResult.value);
+  if (!shiftDefined.success) {
+    return shiftDefined;
+  }
+  const countResult = toIntegerValue(count);
+  assert(countResult);
+  const countDefined = calls.def(COUNT, countResult.value);
+  if (!countDefined.success) {
+    return countDefined;
+  }
+  const posDefined = calls.def(POS, countResult.value);
+  if (!posDefined.success) {
+    return posDefined;
+  }
+  calls.topOperatorState = count;
+  return operands.popush(2);
+}
+
+function roll({ operands, calls }: IInternalState): Result<unknown> {
+  const shiftValue = calls.lookup(SHIFT);
+  assert(shiftValue.type === 'integer');
+  const shift = shiftValue.integer;
+  const countValue = calls.lookup(COUNT);
+  assert(countValue.type === 'integer');
+  const count = countValue.integer;
+  const posValue = calls.lookup(POS);
+  assert(posValue.type === 'integer');
+  let pos = posValue.integer;
+  pos = (pos - shift) % count;
+  if (pos < 0) {
+    pos += count;
+  }
+  operands.swap(0, pos);
+  if (--calls.topOperatorState === 1) {
+    calls.topOperatorState = OPERATOR_STATE_POP;
+  } else {
+    const posResult = toIntegerValue(pos);
+    assert(posResult);
+    const posDefined = calls.def(POS, posResult.value);
+    assert(posDefined); // Same slot, no additional memory
+  }
+  return { success: true, value: undefined };
+}
 
 buildFunctionOperator(
   {
@@ -30,6 +102,14 @@ buildFunctionOperator(
         out: '"b" "c" "a"'
       },
       {
+        in: '{} <<>> 2 1 roll',
+        out: '<<>> {}'
+      },
+      {
+        in: '<<>> {} 2 -1 roll',
+        out: '{} <<>>'
+      },
+      {
         description: 'fails if the number of values to roll is invalid',
         in: '100 200 300 0 0 roll',
         out: '100 200 300 0 0 rangecheck'
@@ -51,33 +131,10 @@ buildFunctionOperator(
       }
     ]
   },
-  ({ operands, memoryTracker }, { integer: count }, { integer: shift }) => {
-    if (count <= 0 || count > operands.length - 2) {
-      return { success: false, exception: 'rangeCheck' };
+  (state, countValue: IntegerValue, shiftValue: IntegerValue) => {
+    if (state.calls.topOperatorState === OPERATOR_STATE_FIRST_CALL) {
+      return initialize(state, countValue, shiftValue);
     }
-    assert(memoryTracker instanceof MemoryTracker);
-    const arrayAllocated = memoryTracker.allocate({ values: count }, SYSTEM_MEMORY_TYPE, operands);
-    if (!arrayAllocated.success) {
-      return arrayAllocated;
-    }
-    const values: Value[] = [];
-    let offset = (count - 1 + shift) % count;
-    if (offset < 0) {
-      offset += count;
-    }
-    for (let index = 0; index < count; ++index) {
-      const value = operands.at(2 + offset);
-      if (--offset < 0) {
-        offset += count;
-      }
-      value.tracker?.addValueRef(value);
-      values.push(value);
-    }
-    const moved = operands.popush(2 + count, values);
-    for (const value of values) {
-      value.tracker?.releaseValue(value);
-    }
-    memoryTracker.release(arrayAllocated.value, operands);
-    return moved;
+    return roll(state);
   }
 );
