@@ -21,22 +21,22 @@ afterEach(() => {
 });
 
 describe('error handling', () => {
-  let run: Generator;
+  let gen: Generator;
 
   beforeEach(async () => {
     await waitForExec(state.exec(toValue('{ clear { bind } }', { isExecutable: true })));
     const execResult = state.exec(toValue('bind', { isExecutable: true }));
     assert(execResult);
-    run = execResult.value;
-    run.next(); // parser to name
-    run.next(); // name to operator
+    gen = execResult.value;
+    gen.next(); // parser to name
+    gen.next(); // name to operator
   });
 
   afterEach(() => {
     let maxIterations = 100;
-    let { done } = run.next();
+    let { done } = gen.next();
     while (!done && --maxIterations) {
-      done = run.next().done;
+      done = gen.next().done;
     }
     expect(maxIterations).toBeGreaterThan(0);
   });
@@ -44,7 +44,7 @@ describe('error handling', () => {
   it('fails if not able to store an item in the array', () => {
     const set = vi.spyOn(ValueArray.prototype, 'set');
     set.mockImplementation(() => ({ success: false, exception: 'limitcheck' }));
-    run.next();
+    gen.next();
     expect(state.exception).toStrictEqual<Exception>('limitcheck');
     expect(state.calls.operatorStateAt(0)).toStrictEqual(OPERATOR_STATE_FIRST_CALL);
     set.mockRestore();
@@ -52,13 +52,13 @@ describe('error handling', () => {
 
   describe('recursivity', () => {
     beforeEach(() => {
-      run.next();
+      gen.next();
     });
 
     it('fails if not able to store an item in the operand stack', () => {
       const push = vi.spyOn(ValueStack.prototype, 'push');
       push.mockImplementation(() => ({ success: false, exception: 'limitcheck' }));
-      run.next();
+      gen.next();
       expect(state.exception).toStrictEqual<Exception>('limitcheck');
       expect(state.calls.operatorStateAt(0)).toStrictEqual(2);
       push.mockRestore();
@@ -67,7 +67,7 @@ describe('error handling', () => {
     it('fails if not able to store pop in the call stack', () => {
       const push = vi.spyOn(CallStack.prototype, 'push');
       push.mockImplementation(() => ({ success: false, exception: 'limitcheck' }));
-      run.next();
+      gen.next();
       expect(state.exception).toStrictEqual<Exception>('limitcheck');
       expect(state.calls.operatorStateAt(0)).toStrictEqual(2);
       push.mockRestore();
@@ -82,7 +82,7 @@ describe('error handling', () => {
         }
         return originalPush.call(this, value);
       });
-      run.next();
+      gen.next();
       expect(state.exception).toStrictEqual<Exception>('limitcheck');
       push.mockRestore();
     });

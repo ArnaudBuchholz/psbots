@@ -41,22 +41,22 @@ it('forwards debug info', async () => {
 });
 
 describe('error handling', () => {
-  let run: Generator;
+  let gen: Generator;
 
   beforeEach(async () => {
     await waitForExec(state.exec(toValue('[ 1 ', { isExecutable: true })));
     const execResult = state.exec(toValue(']', { isExecutable: true }));
     assert(execResult);
-    run = execResult.value;
-    run.next(); // parser to name
-    run.next(); // name to operator
+    gen = execResult.value;
+    gen.next(); // parser to name
+    gen.next(); // name to operator
   });
 
   afterEach(() => {
     let maxIterations = 100;
-    let { done } = run.next();
+    let { done } = gen.next();
     while (!done && --maxIterations) {
-      done = run.next().done;
+      done = gen.next().done;
     }
     expect(maxIterations).toBeGreaterThan(0);
     expect(state.operands.at(0)).toStrictEqual(toValue(1));
@@ -66,7 +66,7 @@ describe('error handling', () => {
   it('fails if not able to store mark position in stack', () => {
     const methodSpy = vi.spyOn(CallStack.prototype, 'def');
     methodSpy.mockImplementation(() => ({ success: false, exception: 'limitcheck' }));
-    run.next();
+    gen.next();
     expect(state.exception).toStrictEqual<Exception>('limitcheck');
     // Reset operator state
     expect(state.calls.operatorStateAt(0)).toStrictEqual(OPERATOR_STATE_FIRST_CALL);
@@ -75,13 +75,13 @@ describe('error handling', () => {
 
   describe('OPERATOR_STATE_ALLOC_ARRAY', () => {
     beforeEach(() => {
-      run.next();
+      gen.next();
     });
 
     it('fails if the array cannot be created', async () => {
       const create = vi.spyOn(ValueArray, 'create');
       create.mockImplementation(() => ({ success: false, exception: 'limitcheck' }));
-      run.next();
+      gen.next();
       expect(state.exception).toStrictEqual<Exception>('limitcheck');
       // Reset operator state
       expect(state.calls.operatorStateAt(0)).toStrictEqual(OPERATOR_STATE_ALLOC_ARRAY);
@@ -91,7 +91,7 @@ describe('error handling', () => {
     it('fails if not able to store array in stack', () => {
       const methodSpy = vi.spyOn(CallStack.prototype, 'def');
       methodSpy.mockImplementation(() => ({ success: false, exception: 'limitcheck' }));
-      run.next();
+      gen.next();
       expect(state.exception).toStrictEqual<Exception>('limitcheck');
       // Reset operator state
       expect(state.calls.operatorStateAt(0)).toStrictEqual(OPERATOR_STATE_ALLOC_ARRAY);
@@ -101,14 +101,14 @@ describe('error handling', () => {
 
   describe('setting array items', () => {
     beforeEach(() => {
-      run.next();
-      run.next();
+      gen.next();
+      gen.next();
     });
 
     it('fails if not able to store an item in the array', () => {
       const set = vi.spyOn(ValueArray.prototype, 'set');
       set.mockImplementation(() => ({ success: false, exception: 'limitcheck' }));
-      run.next();
+      gen.next();
       expect(state.exception).toStrictEqual<Exception>('limitcheck');
       // Reset operator state
       expect(state.calls.operatorStateAt(0)).toStrictEqual(OPERATOR_STATE_ALLOC_ARRAY);
@@ -118,15 +118,15 @@ describe('error handling', () => {
 
   describe('final step', () => {
     beforeEach(() => {
-      run.next();
-      run.next();
-      run.next();
+      gen.next();
+      gen.next();
+      gen.next();
     });
 
     it('fails if not able to add the array in the operands stack', () => {
       const popush = vi.spyOn(ValueStack.prototype, 'popush');
       popush.mockImplementation(() => ({ success: false, exception: 'limitcheck' }));
-      run.next();
+      gen.next();
       expect(state.exception).toStrictEqual<Exception>('limitcheck');
       // Reset operator state
       expect(state.calls.operatorStateAt(0)).toStrictEqual(OPERATOR_STATE_ALLOC_ARRAY);
