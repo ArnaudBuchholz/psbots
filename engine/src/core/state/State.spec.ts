@@ -2,9 +2,9 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { enumIArrayValues } from '@api/index.js';
 import type { Result, Value, Exception, MemoryType } from '@api/index.js';
 import { State } from './State.js';
-import { toValue, waitForExec } from '@test/index.js';
+import { toValue } from '@test/index.js';
 import type { IFunctionOperator, IInternalState } from '@sdk/index.js';
-import { assert, callStackToString, OPERATOR_STATE_FIRST_CALL, OperatorType } from '@sdk/index.js';
+import { assert, callStackToString, OPERATOR_STATE_FIRST_CALL, OperatorType, run } from '@sdk/index.js';
 import type { MemoryTracker } from '@core/MemoryTracker.js';
 import { STRING_MEMORY_TYPE } from '@core/MemoryTracker.js';
 import { DictionaryStack } from '@core/objects/stacks/DictionaryStack.js';
@@ -81,7 +81,7 @@ describe('exec', () => {
     expect(state.idle).toStrictEqual(true);
     const generator = state.exec(toValue('123', { isExecutable: true }));
     expect(state.idle).toStrictEqual(false);
-    waitForExec(generator);
+    run(generator);
     expect(state.idle).toStrictEqual(true);
     expect([...enumIArrayValues(state.operands)]).toStrictEqual<Value[]>([toValue(123)]);
   });
@@ -115,7 +115,7 @@ describe('IInternalState', () => {
 describe('memory', () => {
   it('ensures memory is handled for strings', () => {
     expect(state.memoryTracker.byType[STRING_MEMORY_TYPE]).toStrictEqual(0);
-    waitForExec(state.exec(toValue('"123"', { isExecutable: true })));
+    run(state.exec(toValue('"123"', { isExecutable: true })), { maxIterations: 1000 });
     const value = state.operands.at(0);
     expect(value?.type).toStrictEqual('string');
     expect(value?.tracker).not.toBeUndefined();
@@ -123,7 +123,7 @@ describe('memory', () => {
   });
 
   it('releases memory when the string is popped', () => {
-    waitForExec(state.exec(toValue('"123"', { isExecutable: true })));
+    run(state.exec(toValue('"123"', { isExecutable: true })), { maxIterations: 1000 });
     state.operands.pop();
     expect(state.memoryTracker.byType[STRING_MEMORY_TYPE]).toStrictEqual(0);
   });
@@ -132,7 +132,7 @@ describe('memory', () => {
     const stateResult = State.create();
     assert(stateResult);
     const productionState = stateResult.value;
-    waitForExec(productionState.exec(toValue('"123"', { isExecutable: true })));
+    run(productionState.exec(toValue('"123"', { isExecutable: true })), { maxIterations: 1000 });
     const value = productionState.operands.top;
     value.tracker?.addValueRef(value); // will leak
     expect(() => productionState.destroy()).toThrowError('Memory leaks detected');
@@ -185,6 +185,28 @@ describe('memory', () => {
       callStackCreate.mockRestore();
     });
   });
+
+  describe.skip('garbage collector', () => {
+    beforeEach(() => {
+      run(state.exec(toValue('[ 1 2 3 4 5 6 7 8 9 10 ]', { isExecutable: true })), { maxIterations: 1000 });
+      const { used } = state.memoryTracker;
+      state.destroy();
+      const stateResult = State.create({ debugMemory: true, maxMemoryBytes: used, experimentalGarbageCollector: true });
+      assert(stateResult);
+      state = stateResult.value;
+    });
+
+    it('triggers garbage collector automatically', () => {
+      run(state.exec(toValue('[ 1 2 3 4 5 6 7 8 9 10 ]', { isExecutable: true })), { maxIterations: 1000 });
+      console.log('A', state.operands.at(0), state.memoryTracker.byType);
+      run(state.exec(toValue('pop', { isExecutable: true })), { maxIterations: 1000 });
+      console.log('B', state.operands.at(0), state.memoryTracker.byType);
+      run(state.exec(toValue('[ 1 2 3 4 5 6 7 8 9 10 ]', { isExecutable: true })), { maxIterations: 1000 });
+      console.log('C', state.operands.at(0), state.memoryTracker.byType);
+    });
+  });
+
+  // TODO: add test to elaborate on what happens when vmOverflow is triggered
 });
 
 describe('host dictionary', () => {
@@ -194,7 +216,7 @@ describe('host dictionary', () => {
     assert(stateResult);
     const { value: state } = stateResult;
     const generator = state.exec(toValue('host', { isExecutable: true }));
-    waitForExec(generator);
+    run(generator);
     expect(state.operands.at(0)).toStrictEqual(toValue('host'));
   });
 });
