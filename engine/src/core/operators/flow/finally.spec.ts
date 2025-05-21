@@ -1,7 +1,8 @@
 import { it, expect, beforeEach, afterEach, vi, describe } from 'vitest';
 import type { Exception } from '@api/index.js';
+import { run } from '@api/index.js';
 import { assert, OPERATOR_STATE_CALL_BEFORE_POP, OPERATOR_STATE_FIRST_CALL } from '@sdk/index.js';
-import { toValue, waitForExec } from '@test/index.js';
+import { toValue } from '@test/index.js';
 import { State } from '@core/state/State.js';
 import { CallStack } from '@core/objects/stacks/CallStack.js';
 import { CALLS_EXCEPTION, OPERATOR_STATE_POPPING } from './finally.js';
@@ -17,8 +18,8 @@ beforeEach(() => {
 describe('error handling', () => {
   let gen: Generator;
 
-  beforeEach(async () => {
-    await waitForExec(state.exec(toValue('{ undefined } { 1 }', { isExecutable: true })));
+  beforeEach(() => {
+    run(state, '{ undefined } { 1 }');
     const execResult = state.exec(toValue('finally', { isExecutable: true }));
     assert(execResult);
     gen = execResult.value;

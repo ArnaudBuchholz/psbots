@@ -1,5 +1,5 @@
 import type { Exception, IState, Value } from '@api/index.js';
-import { toStringValue } from '@sdk/index.js';
+import { toStringValue } from '@sdk/toValue.js'; // avoid circular dependency
 
 const DEFAULT_MAX_CYCLES = 1000;
 
@@ -41,10 +41,7 @@ export function run(state: IState, value: string | Value | Generator, options?: 
     }
     iterator = execResult.value;
   }
-  const {
-    maxCycles = DEFAULT_MAX_CYCLES,
-    throwException = false
-  } = options ?? {};
+  const { maxCycles = DEFAULT_MAX_CYCLES, throwException = false } = options ?? {};
   if (maxCycles <= 0) {
     return 0;
   }

@@ -1,10 +1,9 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { enumIArrayValues, parse } from '@api/index.js';
+import { enumIArrayValues, parse, run } from '@api/index.js';
 import type { OperatorDefinition } from './operators.js';
 import { registry } from './operators.js';
 import type { StateFactorySettings } from '@core/state/State.js';
 import { State } from '@core/state/State.js';
-import { toValue, waitForExec } from '@test/index.js';
 import { assert } from '@sdk/index.js';
 
 const nullDefinition: OperatorDefinition = {
@@ -55,8 +54,8 @@ function executeOperatorsTests(settings: Partial<StateFactorySettings> = {}) {
             it.skip(`[${sampleId}] ${description} (⚠️ ${missingOperators})`);
           } else {
             it(`[${sampleId}] ${description}`, () => {
-              waitForExec(state.exec(toValue(sample.in, { isExecutable: true })));
-              waitForExec(expectedState.exec(toValue(sample.out, { isExecutable: true })));
+              run(state, sample.in);
+              run(expectedState, sample.out);
               if (expectedState.exception) {
                 expect(state.exception).not.toBeUndefined();
                 expect(state.exception).toStrictEqual(expectedState.exception);
@@ -64,8 +63,8 @@ function executeOperatorsTests(settings: Partial<StateFactorySettings> = {}) {
                 expect(state.exception).toBeUndefined();
                 expect(state.operands.length).toStrictEqual(expectedState.operands.length);
                 // triggers garbage collection
-                waitForExec(state.exec(toValue('gc', { isExecutable: true })));
-                waitForExec(expectedState.exec(toValue('gc', { isExecutable: true })));
+                run(state, 'gc');
+                run(expectedState, 'gc');
                 // flatten differences between the two memory trackers
                 Object.assign(state.memoryTracker, { _peak: 0 });
                 Object.assign(expectedState.memoryTracker, { _peak: 0 });

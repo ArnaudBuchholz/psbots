@@ -1,7 +1,8 @@
 import { it, expect, beforeEach, afterEach, vi, describe } from 'vitest';
 import type { Exception, Value } from '@api/index.js';
+import { run } from '@api/index.js';
 import { assert, OPERATOR_STATE_FIRST_CALL } from '@sdk/index.js';
-import { toValue, waitForExec } from '@test/index.js';
+import { toValue } from '@test/index.js';
 import { bind } from './bind.js';
 import { State } from '@core/state/State.js';
 import { CallStack } from '@core/objects/stacks/CallStack.js';
@@ -23,8 +24,8 @@ afterEach(() => {
 describe('error handling', () => {
   let gen: Generator;
 
-  beforeEach(async () => {
-    await waitForExec(state.exec(toValue('{ clear { bind } }', { isExecutable: true })));
+  beforeEach(() => {
+    run(state, '{ clear { bind } }');
     const execResult = state.exec(toValue('bind', { isExecutable: true }));
     assert(execResult);
     gen = execResult.value;

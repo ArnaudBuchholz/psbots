@@ -1,8 +1,8 @@
 import { it, expect, beforeEach, afterEach, vi, describe } from 'vitest';
 import type { Exception, IDebugSource } from '@api/index.js';
-import { markValue } from '@api/index.js';
+import { markValue, run } from '@api/index.js';
 import { assert, OPERATOR_STATE_FIRST_CALL } from '@sdk/index.js';
-import { toValue, waitForExec } from '@test/index.js';
+import { toValue } from '@test/index.js';
 import { State } from '@core/state/State.js';
 import { CallStack } from '@core/objects/stacks/CallStack.js';
 import { ValueArray } from '@core/objects/ValueArray.js';
@@ -21,7 +21,7 @@ afterEach(() => {
   state.destroy();
 });
 
-it('forwards debug info', async () => {
+it('forwards debug info', () => {
   const source = '[ 1 2 3 ]';
   const debugSource = {
     filename: 'test',
@@ -29,13 +29,12 @@ it('forwards debug info', async () => {
     length: 9,
     source
   } satisfies IDebugSource;
-  await waitForExec(
-    state.exec(
-      Object.assign({
-        debugSource,
-        ...toValue(source, { isExecutable: true })
-      })
-    )
+  run(
+    state,
+    Object.assign({
+      debugSource,
+      ...toValue(source, { isExecutable: true })
+    })
   );
   expect(state.operands.top.debugSource).toStrictEqual<IDebugSource>(debugSource);
 });
@@ -43,8 +42,8 @@ it('forwards debug info', async () => {
 describe('error handling', () => {
   let gen: Generator;
 
-  beforeEach(async () => {
-    await waitForExec(state.exec(toValue('[ 1 ', { isExecutable: true })));
+  beforeEach(() => {
+    run(state, '[ 1 ');
     const execResult = state.exec(toValue(']', { isExecutable: true }));
     assert(execResult);
     gen = execResult.value;

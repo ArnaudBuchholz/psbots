@@ -1,13 +1,13 @@
 import { it, expect, vi } from 'vitest';
 import type { Exception } from '@api/index.js';
+import { run } from '@api/index.js';
 import { assert } from '@sdk/index.js';
 import { State } from '@core/state/State.js';
-import { toValue, waitForExec } from '@test/index.js';
 import { MemoryTracker } from '@core/MemoryTracker.js';
 import { Dictionary } from '@core/objects/dictionaries/Dictionary.js';
 import { ValueArray } from '@core/objects/ValueArray.js';
 
-it('fails when no more memory is available', async () => {
+it('fails when no more memory is available', () => {
   const stateResult = State.create();
   assert(stateResult);
   const { value: state } = stateResult;
@@ -19,12 +19,12 @@ it('fails when no more memory is available', async () => {
     }
     return originalMethod.call(this, string);
   });
-  await waitForExec(state.exec(toValue('"123" 0 97 put', { isExecutable: true })));
+  run(state, '"123" 0 97 put');
   methodSpy.mockRestore();
   expect(state.exception).toStrictEqual<Exception>('vmOverflow');
 });
 
-it('forwards Array::set error', async () => {
+it('forwards Array::set error', () => {
   const stateResult = State.create();
   assert(stateResult);
   const { value: state } = stateResult;
@@ -36,18 +36,18 @@ it('forwards Array::set error', async () => {
     }
     return originaArraySet.call(this, index, value);
   });
-  await waitForExec(state.exec(toValue('[ 1 2 3 ] 1 "a" put', { isExecutable: true })));
+  run(state, '[ 1 2 3 ] 1 "a" put');
   arraySet.mockRestore();
   expect(state.exception).toStrictEqual<Exception>('limitcheck');
 });
 
-it('forwards Dictionary::def error', async () => {
+it('forwards Dictionary::def error', () => {
   const stateResult = State.create();
   assert(stateResult);
   const { value: state } = stateResult;
   const methodSpy = vi.spyOn(Dictionary.prototype, 'def');
   methodSpy.mockImplementation(() => ({ success: false, exception: 'limitcheck' }));
-  await waitForExec(state.exec(toValue('userdict /test 123 put', { isExecutable: true })));
+  run(state, 'userdict /test 123 put');
   methodSpy.mockRestore();
   expect(state.exception).toStrictEqual<Exception>('limitcheck');
 });

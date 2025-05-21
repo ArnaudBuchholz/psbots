@@ -1,13 +1,13 @@
 import { it, expect, vi } from 'vitest';
 import type { Exception } from '@api/index.js';
+import { run } from '@api/index.js';
 import { assert } from '@sdk/index.js';
 import { State } from '@core/state/State.js';
 import { CallStack } from '@core/objects/stacks/CallStack.js';
 import { ValueStack } from '@core/objects/stacks/ValueStack.js';
-import { toValue, waitForExec } from '@test/index.js';
 import { REPEAT_VALUE } from './repeat.js';
 
-it(`forwards CallStack::def error`, async () => {
+it(`forwards CallStack::def error`, () => {
   const stateResult = State.create();
   assert(stateResult);
   const { value: state } = stateResult;
@@ -19,23 +19,23 @@ it(`forwards CallStack::def error`, async () => {
     }
     return nativeMethod.call(this, name, value);
   });
-  await waitForExec(state.exec(toValue('1 1 repeat', { isExecutable: true })));
+  run(state, '1 1 repeat');
   methodSpy.mockRestore();
   expect(state.exception).toStrictEqual<Exception>('limitcheck');
 });
 
-it('forwards Value::popush error', async () => {
+it('forwards Value::popush error', () => {
   const stateResult = State.create();
   assert(stateResult);
   const { value: state } = stateResult;
   const methodSpy = vi.spyOn(ValueStack.prototype, 'popush');
   methodSpy.mockImplementation(() => ({ success: false, exception: 'limitcheck' }));
-  await waitForExec(state.exec(toValue('1 1 repeat', { isExecutable: true })));
+  run(state, '1 1 repeat');
   methodSpy.mockRestore();
   expect(state.exception).toStrictEqual<Exception>('limitcheck');
 });
 
-it('forwards CallStack::push error', async () => {
+it('forwards CallStack::push error', () => {
   const stateResult = State.create();
   assert(stateResult);
   const { value: state } = stateResult;
@@ -47,7 +47,7 @@ it('forwards CallStack::push error', async () => {
     }
     return nativeMethod.call(this, value);
   });
-  await waitForExec(state.exec(toValue('1 1 repeat', { isExecutable: true })));
+  run(state, '1 1 repeat');
   methodSpy.mockRestore();
   expect(state.exception).toStrictEqual<Exception>('limitcheck');
 });

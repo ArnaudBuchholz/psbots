@@ -1,12 +1,12 @@
 import { it, expect, vi } from 'vitest';
 import type { Exception } from '@api/index.js';
+import { run } from '@api/index.js';
 import { assert } from '@sdk/index.js';
 import { State } from '@core/state/State.js';
 import { CallStack } from '@core/objects/stacks/CallStack.js';
-import { toValue, waitForExec } from '@test/index.js';
 import { LOOP_BLOCK } from './loop.js';
 
-it('forwards CallStack::def error', async () => {
+it('forwards CallStack::def error', () => {
   const stateResult = State.create();
   assert(stateResult);
   const { value: state } = stateResult;
@@ -18,7 +18,7 @@ it('forwards CallStack::def error', async () => {
     }
     return nativeMethod.call(this, name, value);
   });
-  await waitForExec(state.exec(toValue('{} loop', { isExecutable: true })));
+  run(state, '{} loop');
   methodSpy.mockRestore();
   expect(state.exception).toStrictEqual<Exception>('limitcheck');
 });

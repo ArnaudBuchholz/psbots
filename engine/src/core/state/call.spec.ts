@@ -1,7 +1,7 @@
 import { it, expect, beforeEach, afterEach, beforeAll } from 'vitest';
-import { enumIArrayValues, markValue } from '@api/index.js';
+import { enumIArrayValues, markValue, run } from '@api/index.js';
 import type { Exception, IDebugSource, IDictionary, Value } from '@api/index.js';
-import { toValue, waitForExec } from '@test/index.js';
+import { toValue } from '@test/index.js';
 import { State } from './State.js';
 import { SystemDictionary } from '@core/objects/dictionaries/System.js';
 import { assert } from '@sdk/index.js';
@@ -72,7 +72,7 @@ it('*always* execute { and } even if it changes callEnabled', () => {
 });
 
 it('*always* execute { and } (cumulated)', () => {
-  waitForExec(state.exec(toValue('{ { } { } }', { isExecutable: true })));
+  run(state, '{ { } { } }');
   expect(state.callEnabled).toStrictEqual(true);
 });
 
