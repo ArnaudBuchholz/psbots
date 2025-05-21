@@ -33,12 +33,12 @@ describe('error handling', () => {
   });
 
   afterEach(() => {
-    let maxIterations = 100;
+    let maxCycles = 100;
     let { done } = gen.next();
-    while (!done && --maxIterations) {
+    while (!done && --maxCycles) {
       done = gen.next().done;
     }
-    expect(maxIterations).toBeGreaterThan(0);
+    expect(maxCycles).toBeGreaterThan(0);
   });
 
   it('fails if not able to store an item in the array', () => {

@@ -1,10 +1,10 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { enumIArrayValues } from '@api/index.js';
 import type { Result, Value, Exception, MemoryType } from '@api/index.js';
+import { enumIArrayValues, run } from '@api/index.js';
 import { State } from './State.js';
 import { toValue } from '@test/index.js';
 import type { IFunctionOperator, IInternalState } from '@sdk/index.js';
-import { assert, callStackToString, OPERATOR_STATE_FIRST_CALL, OperatorType, run } from '@sdk/index.js';
+import { assert, callStackToString, OPERATOR_STATE_FIRST_CALL, OperatorType } from '@sdk/index.js';
 import type { MemoryTracker } from '@core/MemoryTracker.js';
 import { STRING_MEMORY_TYPE } from '@core/MemoryTracker.js';
 import { DictionaryStack } from '@core/objects/stacks/DictionaryStack.js';
@@ -79,9 +79,10 @@ describe('IState', () => {
 describe('exec', () => {
   it('executes an executable string', () => {
     expect(state.idle).toStrictEqual(true);
-    const generator = state.exec(toValue('123', { isExecutable: true }));
+    const executed = state.exec(toValue('123', { isExecutable: true }));
+    assert(executed);
     expect(state.idle).toStrictEqual(false);
-    run(generator);
+    run(state, executed.value);
     expect(state.idle).toStrictEqual(true);
     expect([...enumIArrayValues(state.operands)]).toStrictEqual<Value[]>([toValue(123)]);
   });
@@ -115,7 +116,7 @@ describe('IInternalState', () => {
 describe('memory', () => {
   it('ensures memory is handled for strings', () => {
     expect(state.memoryTracker.byType[STRING_MEMORY_TYPE]).toStrictEqual(0);
-    run(state.exec(toValue('"123"', { isExecutable: true })), { maxIterations: 1000 });
+    run(state, '"123"');
     const value = state.operands.at(0);
     expect(value?.type).toStrictEqual('string');
     expect(value?.tracker).not.toBeUndefined();
@@ -123,7 +124,7 @@ describe('memory', () => {
   });
 
   it('releases memory when the string is popped', () => {
-    run(state.exec(toValue('"123"', { isExecutable: true })), { maxIterations: 1000 });
+    run(state, '"123"');
     state.operands.pop();
     expect(state.memoryTracker.byType[STRING_MEMORY_TYPE]).toStrictEqual(0);
   });
@@ -132,7 +133,7 @@ describe('memory', () => {
     const stateResult = State.create();
     assert(stateResult);
     const productionState = stateResult.value;
-    run(productionState.exec(toValue('"123"', { isExecutable: true })), { maxIterations: 1000 });
+    run(productionState, '"123"');
     const value = productionState.operands.top;
     value.tracker?.addValueRef(value); // will leak
     expect(() => productionState.destroy()).toThrowError('Memory leaks detected');
@@ -188,7 +189,7 @@ describe('memory', () => {
 
   describe.skip('garbage collector', () => {
     beforeEach(() => {
-      run(state.exec(toValue('[ 1 2 3 4 5 6 7 8 9 10 ]', { isExecutable: true })), { maxIterations: 1000 });
+      run(state, '[ 1 2 3 4 5 6 7 8 9 10 ]');
       const { used } = state.memoryTracker;
       state.destroy();
       const stateResult = State.create({ debugMemory: true, maxMemoryBytes: used, experimentalGarbageCollector: true });
@@ -197,11 +198,11 @@ describe('memory', () => {
     });
 
     it('triggers garbage collector automatically', () => {
-      run(state.exec(toValue('[ 1 2 3 4 5 6 7 8 9 10 ]', { isExecutable: true })), { maxIterations: 1000 });
+      run(state, '[ 1 2 3 4 5 6 7 8 9 10 ]');
       console.log('A', state.operands.at(0), state.memoryTracker.byType);
-      run(state.exec(toValue('pop', { isExecutable: true })), { maxIterations: 1000 });
+      run(state, 'pop');
       console.log('B', state.operands.at(0), state.memoryTracker.byType);
-      run(state.exec(toValue('[ 1 2 3 4 5 6 7 8 9 10 ]', { isExecutable: true })), { maxIterations: 1000 });
+      run(state, '[ 1 2 3 4 5 6 7 8 9 10 ]');
       console.log('C', state.operands.at(0), state.memoryTracker.byType);
     });
   });
@@ -212,11 +213,10 @@ describe('memory', () => {
 describe('host dictionary', () => {
   it('extends the context', async () => {
     const { dictionary: hostDictionary } = toValue({ host: toValue('host') }, { isReadOnly: true });
-    const stateResult = State.create({ hostDictionary });
-    assert(stateResult);
-    const { value: state } = stateResult;
-    const generator = state.exec(toValue('host', { isExecutable: true }));
-    run(generator);
+    const created = State.create({ hostDictionary });
+    assert(created);
+    const { value: state } = created;
+    run(state, 'host');
     expect(state.operands.at(0)).toStrictEqual(toValue('host'));
   });
 });

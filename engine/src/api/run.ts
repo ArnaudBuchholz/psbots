@@ -1,12 +1,12 @@
 import type { Exception, IState, Value } from '@api/index.js';
 import { toStringValue } from '@sdk/index.js';
 
-const DEFAULT_MAX_ITERATIONS = 1000;
+const DEFAULT_MAX_CYCLES = 1000;
 
 type RunOptions = {
   /** Defaulted to 1000, can be set to Number.POSITIVE_INFINITY but at your own risks */
-  maxIterations?: number;
-  /** Only throws if an exception is raised *after* engine execution or *after* the max iterations */
+  maxCycles?: number;
+  /** Only throws if an exception is raised *after* engine execution or *after* the max cycles */
   throwException?: boolean;
 };
 
@@ -21,27 +21,37 @@ export class RunError extends Error {
   }
 }
 
-/** Returns the number of iterations */
-export function run(state: IState, value: string | Value, options?: RunOptions): number {
-  if (typeof value === 'string') {
-    value = toStringValue(value, { isExecutable: true });
-  }
-  const execResult = state.exec(value);
-  if (!execResult.success) {
-    throw new RunError(execResult.exception);
+/** Executes the source in the engine, returns the number of executed cycles */
+export function run(state: IState, value: string, options?: RunOptions): number;
+/** Executes the value in the engine, returns the number of executed cycles */
+export function run(state: IState, value: Value, options?: RunOptions): number;
+/** Iterates on the generator, returns the number of executed cycles */
+export function run(state: IState, value: Generator, options?: RunOptions): number;
+export function run(state: IState, value: string | Value | Generator, options?: RunOptions): number {
+  let iterator: Generator;
+  if (typeof value === 'object' && 'next' in value) {
+    iterator = value;
+  } else {
+    if (typeof value === 'string') {
+      value = toStringValue(value, { isExecutable: true });
+    }
+    const execResult = state.exec(value);
+    if (!execResult.success) {
+      throw new RunError(execResult.exception);
+    }
+    iterator = execResult.value;
   }
   const {
-    maxIterations = DEFAULT_MAX_ITERATIONS,
+    maxCycles = DEFAULT_MAX_CYCLES,
     throwException = false
   } = options ?? {};
-  if (maxIterations <= 0) {
+  if (maxCycles <= 0) {
     return 0;
   }
-  const iterator = execResult.value;
-  let iterations = 0;
-  while (iterations < maxIterations) {
+  let cycles = 0;
+  while (cycles < maxCycles) {
     const { done } = iterator.next();
-    ++iterations;
+    ++cycles;
     if (done === true) {
       break;
     }
@@ -49,5 +59,5 @@ export function run(state: IState, value: string | Value, options?: RunOptions):
   if (throwException && state.exception) {
     throw new RunError(state.exception);
   }
-  return iterations;
+  return cycles;
 }

@@ -28,13 +28,22 @@ it('stops after the maximum number of iterations', () => {
 });
 
 it('does not run if max iterations is negative', () => {
-  run(state, '50 "a" repeat', { maxIterations: -1 });
+  run(state, '50 "a" repeat', { maxCycles: -1 });
   expect(state.operands.length).toStrictEqual(0);
 });
 
 it('supports value as input', () => {
   run(state, toValue(0));
   expect(state.operands.at(0)).toStrictEqual(toValue(0));
+});
+
+it('supports generator as input', () => {
+  const generator = function* () {
+    yield 1;
+    yield 2;
+    yield 3;
+  };
+  expect(run(state, generator())).toStrictEqual(4);
 });
 
 describe('exception handling', () => {
