@@ -11,8 +11,14 @@ const checkOption = (options: string[], replIO: IReplIO | undefined, option: str
 };
 
 export const buildOptions = (options: string[], replIO?: IReplIO): StateFactorySettings => {
+  let maxMemoryBytes: number | undefined;
+  const maxMemory = options.find((option) => option.startsWith('max-memory='));
+  if (maxMemory) {
+    maxMemoryBytes = parseInt(maxMemory.split('=')[1]!, 10); // = exists
+  }
   return {
     debugMemory: checkOption(options, replIO, 'debug-memory'),
+    maxMemoryBytes,
     experimentalGarbageCollector: checkOption(options, replIO, 'experimental-garbage-collector')
   };
 };
