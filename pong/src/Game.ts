@@ -1,6 +1,6 @@
-import { createState, enumIArrayValues } from '@psbots/engine';
 import type { IState } from '@psbots/engine';
-import { assert, callStackToString, run, toString, toStringValue } from '@psbots/engine/sdk';
+import { createState, enumIArrayValues, run } from '@psbots/engine';
+import { assert, callStackToString, toString, toStringValue } from '@psbots/engine/sdk';
 import { MAX_POINTS } from './constants.js';
 import { State } from './State.js';
 import { PaddleHost } from './PaddleHost.js';
@@ -62,7 +62,7 @@ export class Game {
     this._maxPoints = maxPoints;
     for (let paddleIndex = 0; paddleIndex < 2; ++paddleIndex) {
       const engine = this._allocateEngine(paddleIndex);
-      run(engine.exec(toStringValue(scripts[paddleIndex], { isExecutable: true })));
+      run(engine, scripts[paddleIndex]);
       const runResult = engine.exec(toStringValue('main', { isExecutable: true }));
       this._state.paddles[paddleIndex].running = true;
       assert(runResult);
