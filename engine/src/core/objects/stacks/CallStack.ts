@@ -142,4 +142,8 @@ export class CallStack extends ValueStack implements ICallStack {
   }
 
   // endregion
+
+  resetTopOperatorState(): void {
+    this._steps[0] = OPERATOR_STATE_UNKNOWN;
+  }
 }
