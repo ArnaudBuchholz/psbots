@@ -14,7 +14,7 @@ export const buildOptions = (options: string[], replIO?: IReplIO): StateFactoryS
   let maxMemoryBytes: number | undefined;
   const maxMemory = options.find((option) => option.startsWith('max-memory='));
   if (maxMemory) {
-    maxMemoryBytes = parseInt(maxMemory.split('=')[1]!, 10); // = exists
+    maxMemoryBytes = Number.parseInt(maxMemory.split('=')[1]!, 10); // = exists
   }
   return {
     debugMemory: checkOption(options, replIO, 'debug-memory'),
