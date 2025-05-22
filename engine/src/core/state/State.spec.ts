@@ -187,23 +187,24 @@ describe('memory', () => {
     });
   });
 
-  describe.skip('garbage collector', () => {
+  describe('garbage collector', () => {
     beforeEach(() => {
-      run(state, '[ 1 2 3 4 5 6 7 8 9 10 ]');
-      const { used } = state.memoryTracker;
       state.destroy();
-      const stateResult = State.create({ debugMemory: true, maxMemoryBytes: used, experimentalGarbageCollector: true });
+      let stateResult = State.create({ debugMemory: true, experimentalGarbageCollector: true });
+      assert(stateResult);
+      state = stateResult.value;
+      run(state, '[ 1 2 3 4 5 6 7 8 9 10 ] pop');
+      const { peak } = state.memoryTracker;
+      console.log('peak', peak);
+      stateResult = State.create({ debugMemory: true, maxMemoryBytes: peak, experimentalGarbageCollector: true });
       assert(stateResult);
       state = stateResult.value;
     });
 
     it('triggers garbage collector automatically', () => {
-      run(state, '[ 1 2 3 4 5 6 7 8 9 10 ]');
-      console.log('A', state.operands.at(0), state.memoryTracker.byType);
-      run(state, 'pop');
-      console.log('B', state.operands.at(0), state.memoryTracker.byType);
-      run(state, '[ 1 2 3 4 5 6 7 8 9 10 ]');
-      console.log('C', state.operands.at(0), state.memoryTracker.byType);
+      run(state, '[ 1 2 3 4 5 6 7 8 9 10 ] pop', { throwException: true });
+      run(state, '[ 1 2 3 4 5 6 7 8 9 10 ]', { throwException: true });
+      expect(state.operands.at(0).type).toStrictEqual('array');
     });
   });
 

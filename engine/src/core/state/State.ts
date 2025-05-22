@@ -11,6 +11,7 @@ import { operatorPop, operatorCycle } from './operator.js';
 import { callCycle } from './call.js';
 import { blockCycle } from './block.js';
 import { parseCycle } from './parse.js';
+import { SystemDictionary } from '@core/objects/dictionaries/System.js';
 
 export interface StateFactorySettings {
   /** Augment the list of known names */
@@ -172,6 +173,14 @@ export class State implements IInternalState {
       const snapshotResult = this._calls.snapshot();
       assert(snapshotResult);
       this._exceptionStack = snapshotResult.value;
+    }
+    if (exception === 'vmOverflow' && this._memoryTracker.hasGarbageToCollect) {
+      this.calls.resetTopOperatorState();
+      const gc = SystemDictionary.instance.lookup('gc');
+      assert(gc.type !== 'null');
+      const gcPushed = this._calls.push(gc);
+      assert(gcPushed);
+      this._resetException();
     }
   }
 
