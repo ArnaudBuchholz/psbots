@@ -195,7 +195,6 @@ describe('memory', () => {
       state = stateResult.value;
       run(state, '[ 1 2 3 4 5 6 7 8 9 10 ] pop');
       const { peak } = state.memoryTracker;
-      console.log('peak', peak);
       stateResult = State.create({ debugMemory: true, maxMemoryBytes: peak, experimentalGarbageCollector: true });
       assert(stateResult);
       state = stateResult.value;
