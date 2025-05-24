@@ -10,6 +10,8 @@
     "build:docs": "npm run build && rm -rf docs/pong/* docs/repl/* && cp -r wi/dist/* docs/repl && cp -r pong/dist/* docs/pong",
     "start:docs": "reserve",
     "cli": "node ./cli/index.js",
+    "cli:record": "terminalizer record tmp/cliterm.yaml --config cli",
+    "cli:render": "terminalizer render tmp/cliterm.yaml",
     "cli:debug": "node ./cli/index.js --debug",
     "wi": "npm run dev --workspace wi"
   },
@@ -45,6 +47,7 @@
     "globals": "^16.1.0",
     "npm-check-updates": "^17.1.18",
     "reserve": "^2.2.0",
+    "terminalizer": "^0.12.0",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.32.1",
     "vitest": "^3.1.4"
