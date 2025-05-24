@@ -2,13 +2,15 @@ import type { IDebugSource } from '@psbots/engine';
 import { createState, run } from '@psbots/engine';
 import { assert, toStringValue } from '@psbots/engine/sdk';
 import type { IReplIO } from './IReplIo.js';
-import { cyan, magenta, red, white, yellow } from './colors.js';
+import { cyan, green, magenta, red, white, yellow } from './colors.js';
 import { ReplHostDictionary } from './host/index.js';
 import { status } from './status.js';
 import { buildInputHandler, InputError } from './inputHandler.js';
 import { showError, failed, showException } from './showError.js';
 import { runWithDebugger } from './debug.js';
 import { buildOptions } from './options.js';
+
+class AbortError extends InputError {}
 
 export * from './IReplIo.js';
 
@@ -56,6 +58,7 @@ export async function repl(replIO: IReplIO, options: string[] = []): Promise<voi
       const lastOperandsCount = state.operands.length;
       const lastUsedMemory = state.memoryTracker.used;
       let cycle = 0;
+      let lastCycleCheck = 0;
 
       const execResult = state.exec(
         Object.assign(
@@ -79,6 +82,19 @@ export async function repl(replIO: IReplIO, options: string[] = []): Promise<voi
           cycle += await runWithDebugger({ replIO, state, hostDictionary, iterator, waitForChar });
         } else {
           ++cycle;
+        }
+        if (cycle - lastCycleCheck >= 100_000) {
+          replIO.output(
+            `⮔ The engine has completed ${yellow}${cycle}${white} cycles, ${green}a${white}bort or ${green}any${white} key to continue`
+          );
+          const key = await waitForChar();
+          if (key !== '\n') {
+            replIO.output('\n');
+          }
+          if (key === 'a') {
+            throw new AbortError();
+          }
+          lastCycleCheck = cycle;
         }
         const next = iterator.next();
         done = next.done;
