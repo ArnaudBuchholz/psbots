@@ -73,7 +73,7 @@ cursorStyle: block
 # Font family
 # You can use any font that is installed on your machine
 # in CSS-like syntax
-fontFamily: "Monaco, Lucida Console, Ubuntu Mono, Monospace"
+fontFamily: "'Cascadia code', Consolas, 'Courier New', monospace"
 
 # The size of the font
 fontSize: 12
