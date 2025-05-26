@@ -45,8 +45,5 @@
     "engine"
   ],
   "author": "Arnaud Buchholz <arnaud.buchholz@free.fr>",
-  "license": "MIT",
-  "devDependencies": {
-    "reserve": "^2.2.0"
-  }
+  "license": "MIT"
 }
