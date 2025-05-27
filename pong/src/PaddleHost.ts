@@ -96,7 +96,7 @@ export class PaddleHost implements IReadOnlyDictionary {
         dx: 0,
         dy: 0,
         frames: 60,
-        className: 'paddle_action',
+        className: 'paddle-action',
         content: '⬆'
       });
       this._state.paddles[this._paddleIndex].dy = -1;
@@ -108,7 +108,7 @@ export class PaddleHost implements IReadOnlyDictionary {
         dx: 0,
         dy: 0,
         frames: 60,
-        className: 'paddle_action',
+        className: 'paddle-action',
         content: '⬇'
       });
       this._state.paddles[this._paddleIndex].dy = 1;

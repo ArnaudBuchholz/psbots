@@ -125,7 +125,7 @@ export class Game {
         dx: 0,
         dy: 0,
         frames: 60 * this._speed,
-        className: 'ball_spark'
+        className: 'ball-spark'
       });
     }
   }

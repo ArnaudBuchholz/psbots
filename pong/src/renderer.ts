@@ -54,24 +54,24 @@ export const start = (game: Game) => {
   document.body.innerHTML = `
     <div class="status"></div>
     <div class="board">
-      <div class="code player_1">This is an example source code</div>
-      <div class="paddle player_1"></div>
-      <div class="score player_1">0</div>
-      <div class="coords player_1">0,0</div>
-      <div class="code player_2">This is an example source code</div>
-      <div class="paddle player_2"></div>
-      <div class="score player_2">0</div>
-      <div class="coords player_2">0,0</div>
+      <div class="code player1">This is an example source code</div>
+      <div class="paddle player1"></div>
+      <div class="score player1">0</div>
+      <div class="coords player1">0,0</div>
+      <div class="code player2">This is an example source code</div>
+      <div class="paddle player2"></div>
+      <div class="score player2">0</div>
+      <div class="coords player2">0,0</div>
       <div class="coords ball">0,0</div>
       <div class='sprite ball'>
-        <div class="ball_effect"></div>
+        <div class="ball-effect"></div>
       </div>
     </div>
   `;
-  paddles = [$('.paddle.player_1'), $('.paddle.player_2')];
-  scores = [$('.score.player_1'), $('.player_2')];
-  codes = [$('.code.player_1'), $('.code.player_2')];
-  coords = [$('.coords.player_1'), $('.coords.player_2'), $('.coords.ball')];
+  paddles = [$('.paddle.player1'), $('.paddle.player2')];
+  scores = [$('.score.player1'), $('.player2')];
+  codes = [$('.code.player1'), $('.code.player2')];
+  coords = [$('.coords.player1'), $('.coords.player2'), $('.coords.ball')];
   board = $('.board');
   ball = $('.sprite.ball');
   status = $('.status');
