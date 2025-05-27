@@ -22,7 +22,7 @@ The classical [pong](https://en.wikipedia.org/wiki/Pong) game but with a twist :
 > 🚧 This demo is a proof of concept
 >
 > The game starts immediately, use left / right arrow to speed up / down frames.
-> 
+>
 > Each paddle is controlled with a different script :
 >
 > * Left paddle (follow the ball) :

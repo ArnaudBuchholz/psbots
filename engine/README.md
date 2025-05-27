@@ -35,7 +35,7 @@ The engine **parser** recognizes only **three** type of tokens, usually separate
 
 * Integers : `1`, `-2` ...
 * Strings : `"Hello World !"`, `"an escaped quote is \""`, `"abc"` ...
-* Names *(or executable strings)* : `add`, `.`, `-`, `a"b` ... 
+* Names *(or executable strings)* : `add`, `.`, `-`, `a"b` ...
   * Almost anything that is not an integer or does not start with `"`
   * The following names are **explicitely** identified and extracted **separately** even without space between them :
     * `[` and `]` for arrays
@@ -49,7 +49,7 @@ Special operators are designed to build complex objects :
 * Arrays : `[ 1 2 3 ]`
 
 * Blocks of code : `{ 1 2 add }`
-  *  While composing a block, **no** names (other than `{`, `}`, `<<`, `«`, `>>` and `»`) are executed.
+  * While composing a block, **no** names (other than `{`, `}`, `<<`, `«`, `>>` and `»`) are executed.
 
 * Dictionaries : `<< test 123 method { 1 2 add } >>`
-  *  While composing a dictionary, no names (other than `{`, `}`, `<<`, `«`, `>>` and `»`) are executed.
+  * While composing a dictionary, no names (other than `{`, `}`, `<<`, `«`, `>>` and `»`) are executed.

@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "check": "tsc --noEmit && dpdm ./src/** -T --no-tree --no-warning && eslint . --fix",
+    "check": "markdownlint **/*.md --fix && tsc --noEmit && dpdm ./src/** -T --no-tree --no-warning && eslint . --fix",
     "build": "tsc && vite build",
     "preview": "vite preview"
   },
@@ -12,16 +12,5 @@
     "@psbots/repl": "0.0.1",
     "@xterm/addon-fit": "^0.10.0",
     "@xterm/xterm": "^5.5.0"
-  },
-  "devDependencies": {
-    "@stylistic/eslint-plugin-js": "^4.4.0",
-    "@types/node": "^22.15.21",
-    "dpdm": "^3.14.0",
-    "eslint-config-prettier": "^10.1.5",
-    "eslint-plugin-import": "^2.31.0",
-    "eslint-plugin-prettier": "^5.4.0",
-    "typescript": "^5.8.3",
-    "typescript-eslint": "^8.32.1",
-    "vite": "^6.3.5"
   }
 }

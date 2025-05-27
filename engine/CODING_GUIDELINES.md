@@ -99,17 +99,12 @@ Garbage collection can also be explicitely requested using `gc` operator.
   * the dictionary stack *must* reflect the state *before* the operator was executed,
   * the call stack *might* not be changed.
 
-> [!IMPORTANT]  
-> Some operators may modify the operand stack along the cycles, it is *acceptable* only if they do not fail during those cycles.
+* Some operators *may* modify the operand stack along the cycles, it is *acceptable* only if they do not fail during those cycles.
 
-> [!IMPORTANT]  
-> When the operator requires several cycles, we must distinguish the two **phases** :
-> 
-> * `calling` : any failure *must* leave the engine as it was *before* executing the operator. Yet, the `operatorState` and call stack specific dictionary *might* be altered.
->
-> * `popping` : as soon as the calling phase is completed, the operator already **impacted** the state of the engine.
-> As a consequence, it is nearly impossible to revert the changes.
->
-> When failing, the operator state *must* reflect *which* phase failed.
+* When the operator requires several cycles, we must distinguish two **phases** :
 
+  * `calling` : any failure *must* leave the engine as it was *before* executing the operator. Yet, the `operatorState` and call stack specific dictionary *might* be altered.
 
+  * `popping` : as soon as the calling phase is completed, the operator already **impacted** the state of the engine. As a consequence, it is nearly impossible to revert the changes.
+
+  * When failing, the operator state *must* reflect *which* phase failed.

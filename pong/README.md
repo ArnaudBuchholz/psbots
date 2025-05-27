@@ -28,7 +28,7 @@ Several constraints are defined :
   * Output :
     * direction (`paddle_up` or `paddle_down`)
 * The match can either be watched in real time or simulated for faster resolution
-   
+
 ## Example psbot
 
 ```postscript

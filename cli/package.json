@@ -4,7 +4,7 @@
   "description": "Command line interface for the engine",
   "type": "module",
   "scripts": {
-    "check": "eslint . --fix",
+    "check": "markdownlint **/*.md --fix && eslint . --fix",
     "build": ""
   },
   "keywords": [

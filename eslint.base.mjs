@@ -4,7 +4,7 @@ import prettier from 'eslint-plugin-prettier';
 import security from 'eslint-plugin-security';
 import noOnlyTests from 'eslint-plugin-no-only-tests';
 import importPlugin from 'eslint-plugin-import';
-import stylisticJs from '@stylistic/eslint-plugin-js';
+import stylistic from '@stylistic/eslint-plugin';
 import eslintPluginUnicorn from 'eslint-plugin-unicorn';
 import sonarjs from 'eslint-plugin-sonarjs';
 import path from 'node:path';
@@ -29,7 +29,7 @@ export default [
       prettier,
       security,
       'no-only-tests': noOnlyTests,
-      '@stylistic/js': stylisticJs
+      stylistic
     },
     languageOptions: {
       globals: {
