@@ -37,6 +37,8 @@
   "author": "Arnaud Buchholz <arnaud.buchholz@free.fr>",
   "license": "MIT",
   "devDependencies": {
+    "@html-eslint/eslint-plugin": "^0.41.0",
+    "@html-eslint/parser": "^0.41.0",
     "@stylistic/eslint-plugin": "^4.4.0",
     "@stylistic/eslint-plugin-js": "^4.4.0",
     "@types/node": "^22.15.21",

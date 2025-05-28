@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "check": "markdownlint **/*.md --fix && stylelint src/style.css --fix && tsc --noEmit && dpdm ./src/** -T --no-tree --no-warning && eslint . --fix",
+    "check": "markdownlint **/*.md --fix && stylelint src/style.css --fix && tsc --noEmit && dpdm ./src/** -T --no-tree --no-warning && eslint . --fix && eslint --config ../eslint.html.mjs --fix",
     "build": "tsc && vite build",
     "preview": "vite preview"
   },
