@@ -1,3 +1,3 @@
-import { setupRepl } from './repl';
+import { define } from './psbot';
 
-setupRepl();
+define();
