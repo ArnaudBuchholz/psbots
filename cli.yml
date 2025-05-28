@@ -76,7 +76,7 @@ cursorStyle: block
 fontFamily: "'Cascadia code', Consolas, 'Courier New', monospace"
 
 # The size of the font
-fontSize: 12
+fontSize: 14
 
 # The height of lines
 lineHeight: 1
