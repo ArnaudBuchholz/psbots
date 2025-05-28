@@ -3,9 +3,13 @@
   "version": "0.0.1",
   "description": "A project about a PostScript based programming language for robots",
   "scripts": {
+    "clean": "rm -rf **/node_modules **/dist **/coverage",
     "update": "ncu --deep -i --format group",
+    "precheck": "npm run build:min",
     "check": "markdownlint *.md --fix && markdownlint docs/**/*.md --fix && eslint ./tools/*.mjs *.mjs --fix && npm run check --workspaces",
+    "pretest": "npm run build:min",
     "test": "npm run test --workspaces --if-present",
+    "build:min": "npm run build -w engine -w repl",
     "build": "npm run build --workspaces",
     "build:docs": "npm run build && rm -rf docs/pong/* docs/repl/* && cp -r wi/dist/* docs/repl && cp -r pong/dist/* docs/pong",
     "start:docs": "reserve",
