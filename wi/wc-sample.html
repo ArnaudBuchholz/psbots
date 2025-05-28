@@ -1,0 +1,54 @@
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Web Component Sample</title>
+    <script type="module">
+class MyComponent extends HTMLElement {
+  connectedCallback() {
+    const shadow = this.attachShadow({ mode: 'open' });
+    const style = document.createElement('style');
+    style.textContent = `
+      :root {
+        display: block;
+  
+      }
+    `;
+    shadow.appendChild(style);
+    const div = document.createElement('div');
+    div.textContent = 'Hello, this is my custom web component!';
+    shadow.appendChild(div);
+
+    const resizeObserver = new ResizeObserver(() => {
+      console.log('Resizing', {
+        width: div.offsetWidth,
+        height: div.offsetHeight
+      });
+    });
+    resizeObserver.observe(div);
+  }
+}
+customElements.define('my-component', MyComponent);
+    </script>
+    <style>
+.fifty-fifty {
+  height: 50%;
+  width: 50%;
+}
+
+div {
+  display: inline-block;
+  margin: 10px;
+  color: blue;
+  font-size: 20px;
+  border: 1px solid black;
+  padding: 10px;
+}        
+    </style>
+  </head>
+  <body>
+    <h1>Web Component Sample</h1>
+    <p>This is a simple example of a web component.</p>
+    <div class="fifty-fifty">Example</div>
+    <my-component style="background-color: yellow;" class="fifty-fifty"/>
+  </body>
+</html>
