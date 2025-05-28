@@ -1,21 +1,23 @@
-html {
-  height: 100%;
-  margin: 0;
-  padding: 0;
+:root {
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  font-size: 16px;
+  color-scheme: light dark;
 }
 
 body {
-  font-family: Verdana, Geneva, Tahoma, sans-serif;
-  white-space: pre;
-  background-color: black;
-  color: white;
-  margin: 0;
-  padding: 0;
-  height: 100%;
-  overflow: hidden;
+  padding: 24px;
+  display: grid;
+  justify-content: center;
+  align-content: center;
+  background-color: oklch(0.967 0.001 286.375);
 }
 
-#terminal {
-  padding: 1em;
-  height: calc(100% - 3em);
+@media (prefers-color-scheme: dark) {
+  body {
+    background-color: oklch(0.141 0.005 285.823);
+  }
+}
+
+ps-bots {
+  margin: 4rem auto;
 }
