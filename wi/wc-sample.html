@@ -4,34 +4,63 @@
     <title>Web Component Sample</title>
     <script type="module">
 class MyComponent extends HTMLElement {
-  connectedCallback() {
-    const shadow = this.attachShadow({ mode: 'open' });
+  #shadow /*: HTMLElement */;
+
+  constructor() {
+    super();
+    this.#shadow = this.attachShadow({ mode: 'open' /* closed for PROD */ });
+  }
+
+  static observedAttributes = ['class', 'style', 'width', 'height'];
+
+  attributeChangedCallback(name, oldValue, newValue) {
+    console.log(`Attribute changed: ${name} from ${oldValue} to ${newValue}`);
+    if (this.isConnected && this.#root) {
+      this.#update();
+    }
+  }
+
+  #root /*: HTMLElement */;
+
+  #render() {
     const style = document.createElement('style');
     style.textContent = `
       :root {
-        display: block;
-  
+        display: inline-block;
       }
     `;
-    shadow.appendChild(style);
-    const div = document.createElement('div');
-    div.textContent = 'Hello, this is my custom web component!';
-    shadow.appendChild(div);
+    this.#shadow.appendChild(style);
+    this.#root = document.createElement('div');
+    this.#root.textContent = 'Hello, this is my custom web component!';
+    this.#shadow.appendChild(this.#root);
+    this.#update();
+  }
 
-    const resizeObserver = new ResizeObserver(() => {
-      console.log('Resizing', {
-        width: div.offsetWidth,
-        height: div.offsetHeight
-      });
-    });
-    resizeObserver.observe(div);
+  #update() {
+    this.#root.setAttribute('style', this.getAttribute('style') || '');
+    const width = this.getAttribute('width');
+    if (width) {
+      this.#root.style.width = width;
+    }
+    const height = this.getAttribute('height');
+    if (height) {
+      this.#root.style.height = height;
+    }
+    this.#root.className = this.getAttribute('class') || '';
+  }
+
+  connectedCallback() {
+    console.log('MyComponent added to the document');
+    if (!this.#root) {
+      this.#render();
+    }
   }
 }
 customElements.define('my-component', MyComponent);
     </script>
     <style>
 .fifty-fifty {
-  height: 50%;
+  height: 300px;
   width: 50%;
 }
 
