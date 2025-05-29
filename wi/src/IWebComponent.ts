@@ -8,6 +8,9 @@ export interface IWebComponent {
   /** Invoked when the custom element is moved to a new document */
   adoptedCallback?: () => void
 
-  /** Invoked when one of the custom element's attributes is added, removed, or changed */
-  attributeChangedCallback?: () => void
+  /**
+   * Invoked when one of the custom element's attributes is added, removed, or changed.
+   * Use static observedAttributes: string[]; to specify which attributes to observe.
+   */
+  attributeChangedCallback?: (name: string, oldValue: string, newValue: string) => void
 }
