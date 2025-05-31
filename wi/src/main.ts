@@ -1,3 +1,1 @@
-import { define } from './psbot';
-
-define();
+import './terminal';

@@ -90,6 +90,4 @@ class PsbotsTerminal extends HTMLElement implements IWebComponent {
   }
 }
 
-export function define(): void {
-  customElements.define('psbots-terminal', PsbotsTerminal);
-}
+customElements.define('psbots-terminal', PsbotsTerminal);
