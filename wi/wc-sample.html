@@ -3,6 +3,10 @@
     <meta charset="UTF-8">
     <title>Web Component Sample</title>
     <script type="module">
+window.addEventListener('error', (e) => {
+  document.getElementById('error').textContent = `Error: ${e.message}`;
+});
+
 class MyComponent extends HTMLElement {
   #shadow /*: HTMLElement */;
 
@@ -25,8 +29,9 @@ class MyComponent extends HTMLElement {
   #render() {
     const style = document.createElement('style');
     style.textContent = `
-      :root {
-        display: inline-block;
+      div {
+        display: block;
+        background-color: #f0f0f0;
       }
     `;
     this.#shadow.appendChild(style);
@@ -64,12 +69,15 @@ customElements.define('my-component', MyComponent);
   width: 50%;
 }
 
-div {
+.border {
+  border: 1px solid black;
+}
+
+.example {
   display: inline-block;
   margin: 10px;
   color: blue;
   font-size: 20px;
-  border: 1px solid black;
   padding: 10px;
 }        
     </style>
@@ -77,7 +85,8 @@ div {
   <body>
     <h1>Web Component Sample</h1>
     <p>This is a simple example of a web component.</p>
-    <div class="fifty-fifty">Example</div>
-    <my-component style="background-color: yellow;" class="fifty-fifty"/>
+    <div id="error"></div>
+    <div class="example fifty-fifty border">Example</div>
+    <my-component/>
   </body>
 </html>
