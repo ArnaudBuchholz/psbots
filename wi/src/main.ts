@@ -26,7 +26,7 @@ globalThis.addEventListener('DOMContentLoaded', () => {
     });
   };
 
-  checkableOption('garbage-collector', 'experimental-garbage-collector');
+  checkableOption('garbage-collection', 'experimental-garbage-collector');
   checkableOption('debug-memory');
 
   document.querySelector('#size')?.addEventListener('change', (event) => {
