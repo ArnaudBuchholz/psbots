@@ -51,7 +51,7 @@ export async function repl(replIO: IReplIO, options: string[] = []): Promise<voi
   let replIndex = 0;
   const { waitForLines, waitForChar } = buildInputHandler(replIO);
 
-  while (true) {
+  while (!replIO.abort?.aborted) {
     replIO.output('? ');
     try {
       const source = await waitForLines();
@@ -77,7 +77,7 @@ export async function repl(replIO: IReplIO, options: string[] = []): Promise<voi
       const { value: iterator } = execResult;
 
       let { done } = iterator.next();
-      while (done === false) {
+      while (done === false && !replIO.abort?.aborted) {
         if (hostDictionary.debugIsOn) {
           cycle += await runWithDebugger({ replIO, state, hostDictionary, iterator, waitForChar });
         } else {
