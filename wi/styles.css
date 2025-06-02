@@ -7,14 +7,13 @@
 body {
   padding: 24px;
   display: grid;
-  justify-content: center;
-  align-content: center;
-  background-color: oklch(0.967 0.001 286.375);
+  place-content: center center;
+  background-color: oklch(96.7% 0.001 286.375deg);
 }
 
 @media (prefers-color-scheme: dark) {
   body {
-    background-color: oklch(0.141 0.005 285.823);
+    background-color: oklch(14.1% 0.005 285.823deg);
   }
 }
 

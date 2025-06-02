@@ -1,0 +1,42 @@
+@import url("https://cdn.jsdelivr.net/npm/@xterm/xterm/css/xterm.min.css");
+
+* {
+  box-sizing: border-box;
+}
+
+::-webkit-scrollbar {
+  width: 0.5rem;
+}
+
+::-webkit-scrollbar:horizontal {
+  height: 0;
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 30px;
+  background-color: oklch(55.2% 0.016 285.938deg);
+}
+
+::-webkit-scrollbar-button {
+  background-color: transparent;
+  width: 30px;
+}
+
+::-webkit-scrollbar-track {
+  border-radius: 30px;
+  background-color: oklch(37% 0.013 285.805deg);
+}
+
+.terminal {
+  &>.xterm-viewport {
+    border-radius: 10px
+  }
+
+  &>.xterm-screen {
+    margin: 10px;
+
+    &>.xterm-rows {
+      overflow-x: auto;
+    }
+  }
+}

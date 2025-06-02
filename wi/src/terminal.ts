@@ -1,73 +1,67 @@
 import { Terminal } from '@xterm/xterm';
 import { FitAddon } from '@xterm/addon-fit';
+import type { IReplIO } from '@psbots/repl';
 import { repl } from '@psbots/repl';
 import type { IWebComponent } from './IWebComponent';
+import styles from './styles.css?raw';
 
 class PsbotsTerminal extends HTMLElement implements IWebComponent {
+  private _root: ShadowRoot;
+  private _terminalContainer: HTMLElement;
 
-  connectedCallback() {
-    const shadowRoot = this.attachShadow({ mode: 'open' });
-    shadowRoot.innerHTML = `<style>
-@import "https://cdn.jsdelivr.net/npm/@xterm/xterm/css/xterm.min.css";
-
-* {
-  box-sizing: border-box;
-}
-
-::-webkit-scrollbar {
-  width: 0.5rem;
-}
-
-::-webkit-scrollbar:horizontal {
-  height: 0;
-}
-
-::-webkit-scrollbar-thumb {
-  border-radius: 30px;
-  background-color: oklch(0.552 0.016 285.938);
-}
-
-::-webkit-scrollbar-button {
-  background-color: transparent;
-  width: 30px;
-}
-
-::-webkit-scrollbar-track {
-  border-radius: 30px;
-  background-color: oklch(0.37 0.013 285.805);
-}
-
-.terminal {
-  &>.xterm-viewport {
-    border-radius: 10px
+  constructor() {
+    super();
+    this._root = this.attachShadow({ mode: 'open' });
+    this._root.innerHTML = `<style>${styles}</style><div class="terminal"></div>`;
+    this._terminalContainer = this._root.querySelector('.terminal') as HTMLElement;
   }
 
-  &>.xterm-screen {
-    margin: 10px;
+  static readonly observedAttributes = ['width', 'height', 'options'];
 
-    &>.xterm-rows {
-      overflow-x: auto;
+  attributeChangedCallback(name: string) {
+    if (name === 'options') {
+      this._reset();
+    } else {
+      this._resize();
     }
   }
-}
-</style>
-<div class="terminal">
-</div>`;
 
-    const terminalContainer = shadowRoot.querySelector('.terminal') as HTMLElement;
+  private _resize() {
+    const width = this.getAttribute('width');
+    const height = this.getAttribute('height');
+    this._terminalContainer.style = [
+      width ? `width: ${width};` : '',
+      height ? `height: ${height};` : ''
+    ].join('; ');
+  }
 
-    const term = new Terminal({ cursorBlink: true });
-    const fitAddon = new FitAddon();
-    term.loadAddon(fitAddon);
-    term.open(terminalContainer);
-    fitAddon.fit();    
+  connectedCallback() {
+    this._reset();
+  }
+
+  private _terminal: Terminal | null = null;
+  private _lastReplIO: IReplIO | null = null;
+
+  private _reset() {
+    if (!this._terminal) {
+      this._terminal = new Terminal({ cursorBlink: true });
+      const fitAddon = new FitAddon();
+      this._terminal.loadAddon(fitAddon);
+      this._terminal.open(this._terminalContainer);
+      fitAddon.fit();
+    }
+
+    if (this._lastReplIO) {
+      this._lastReplIO.abort?.abort();
+    }
+
 
     repl({
       get width() {
-        return term.cols;
+        return this._terminal.cols;
       },
       get height() {
-        return term.rows;
+        return this._terminal.rows;
       },
       input(callback) {
         term.onData(callback);
@@ -75,18 +69,9 @@ class PsbotsTerminal extends HTMLElement implements IWebComponent {
       output(text) {
         term.write(text);
       }
-    }).catch(error => {
+    }).catch((error) => {
       console.error(error);
     });
-
-    // Handle resize events
-    const resizeObserver = new ResizeObserver(() => {
-      console.log('Resizing terminal', {
-        width: terminalContainer.offsetWidth,
-        height: terminalContainer.offsetHeight
-      });
-    });
-    resizeObserver.observe(terminalContainer);
   }
 }
 
