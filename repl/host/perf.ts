@@ -152,14 +152,14 @@ type ExecuteContext = {
 async function evaluate(value: Value, context: ExecuteContext) {
   const { loops, measures, replIO } = context;
   let cycles = 0;
-  for (let loop = 0; loop < loops && !replIO.abort?.aborted; ++loop) {
+  for (let loop = 0; loop < loops && !replIO.abortSignal?.aborted; ++loop) {
     const stateCreated = createState(buildOptions(context.options ?? []));
     assert(stateCreated);
     const { value: state } = stateCreated;
     const executed = state.exec(value);
     assert(executed);
     const { value: iterator } = executed;
-    while (++cycles < MAX_CYCLES && !replIO.abort?.aborted) {
+    while (++cycles < MAX_CYCLES && !replIO.abortSignal?.aborted) {
       if (context.lastUpdate === undefined || Date.now() - context.lastUpdate > 250) {
         const tick = context.lastTick ?? 0;
         context.replIO.output(`\r${cyan}${TICKS[tick]}${white}`);
