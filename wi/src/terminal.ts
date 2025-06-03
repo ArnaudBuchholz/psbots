@@ -83,15 +83,20 @@ class PsbotsTerminal extends HTMLElement implements IWebComponent {
 
   private _reset() {
     if (!this._terminal) {
-      this._terminal = new Terminal({ cursorBlink: true });
+      // TODO: if cols & rows, remove the fit addon
+      this._terminal = new Terminal({ cursorBlink: true/*, cols: 80, rows: 25 */});
       const fitAddon = new FitAddon();
       this._terminal.loadAddon(fitAddon);
       this._terminal.open(this._terminalContainer);
       fitAddon.fit();
+      const resizeObserver = new ResizeObserver(() => {
+        fitAddon.fit();
+      });
+      resizeObserver.observe(this._terminalContainer);
     }
     if (this._replIO) {
       this._replIO.abort();
-      this._terminal.write('\u001Bc');
+      this._terminal.write('\u001Bc'); // clear
     }
     this._replIO = new AbortableReplIO(this._terminal);
     const options = this.getAttribute('options')?.split(',') || [];
