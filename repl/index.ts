@@ -83,6 +83,7 @@ export async function repl(replIO: IReplIO, options: string[] = []): Promise<voi
           cycle += await runWithDebugger({ replIO, state, hostDictionary, iterator, waitForChar });
         } else {
           ++cycle;
+          replIO.on?.('cycle', { state });
         }
         if (cycle - lastCycleCheck >= 100_000) {
           replIO.output(
@@ -130,4 +131,5 @@ export async function repl(replIO: IReplIO, options: string[] = []): Promise<voi
     showError(replIO, error);
   }
   replIO.output(`${red}terminated.${white}\r\n`);
+  replIO.on?.('terminated', { state });
 }

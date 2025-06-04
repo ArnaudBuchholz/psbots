@@ -330,6 +330,7 @@ export async function runWithDebugger({
 
     ++cycle;
     const { done } = iterator.next();
+    replIO.on?.('cycle', { state });
     if (done) {
       break;
     }
