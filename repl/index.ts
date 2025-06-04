@@ -52,6 +52,7 @@ export async function repl(replIO: IReplIO, options: string[] = []): Promise<voi
   const { waitForLines, waitForChar } = buildInputHandler(replIO);
 
   while (!replIO.abortSignal?.aborted) {
+    replIO.on?.('ready', { state });
     replIO.output('? ');
     try {
       const source = await waitForLines();
