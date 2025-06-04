@@ -1,4 +1,4 @@
-import type { ITerminalInitOnlyOptions, ITerminalOptions } from '@xterm/xterm';
+import type { IDisposable, ITerminalInitOnlyOptions, ITerminalOptions } from '@xterm/xterm';
 import { Terminal } from '@xterm/xterm';
 import { FitAddon } from '@xterm/addon-fit';
 import type { IReplIO } from '@psbots/repl';
@@ -13,6 +13,8 @@ class AbortableReplIO implements IReplIO {
 
   abort() {
     this._aborted = true;
+    this._disposableInput?.dispose();
+    this._disposableInput = null;
     this._controller.abort();
   }
 
@@ -35,11 +37,10 @@ class AbortableReplIO implements IReplIO {
     this._terminal.dispatchEvent(htmlEvent);
   }
 
+  private _disposableInput: IDisposable | null = null;
+
   input(callback: (data: string) => void) {
-    if (this._aborted) {
-      throw new Error('ReplIO has been aborted');
-    }
-    this._terminal.xterm.onData(callback);
+    this._disposableInput = this._terminal.xterm.onData(callback);
   }
 
   output(text: string) {
