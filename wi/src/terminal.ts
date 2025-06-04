@@ -1,9 +1,11 @@
+import type { ITerminalInitOnlyOptions, ITerminalOptions } from '@xterm/xterm';
 import { Terminal } from '@xterm/xterm';
 import { FitAddon } from '@xterm/addon-fit';
 import type { IReplIO } from '@psbots/repl';
 import { repl } from '@psbots/repl';
 import type { IWebComponent } from './IWebComponent';
 import styles from './styles.css?raw';
+import { IState } from '../../engine/dist/api';
 
 class AbortableReplIO implements IReplIO {
   private _controller: AbortController = new AbortController();
@@ -14,32 +16,37 @@ class AbortableReplIO implements IReplIO {
     this._controller.abort();
   }
 
-  constructor(private _terminal: Terminal) {}
+  constructor(private _terminal: PsbotsTerminal) {}
 
   get abortSignal() {
     return this._controller.signal;
   }
 
   get width() {
-    return this._terminal.cols;
+    return this._terminal.xterm.cols;
   }
 
   get height() {
-    return this._terminal.rows;
+    return this._terminal.xterm.rows;
   }
-  
+
+  on(event: string, detail: { state: IState; }) {
+    const htmlEvent = new CustomEvent(event, { bubbles: true, detail });
+    this._terminal.dispatchEvent(htmlEvent);
+  }
+
   input(callback: (data: string) => void) {
     if (this._aborted) {
       throw new Error('ReplIO has been aborted');
     }
-    this._terminal.onData(callback);
+    this._terminal.xterm.onData(callback);
   }
 
   output(text: string) {
     if (this._aborted) {
       console.warn('ReplIO has been aborted, ignoring output:', text);
     } else {
-      this._terminal.write(text);
+      this._terminal.xterm.write(text);
     }
   }
 }
@@ -55,23 +62,14 @@ class PsbotsTerminal extends HTMLElement implements IWebComponent {
     this._terminalContainer = this._root.querySelector('.terminal') as HTMLElement;
   }
 
-  static readonly observedAttributes = ['width', 'height', 'options'];
+  static readonly observedAttributes = ['rows', 'options'];
 
   attributeChangedCallback(name: string) {
     if (name === 'options') {
       this._reset();
     } else {
-      this._resize();
+      this._recreate();
     }
-  }
-
-  private _resize() {
-    const width = this.getAttribute('width');
-    const height = this.getAttribute('height');
-    this._terminalContainer.style = [
-      width ? `width: ${width};` : '',
-      height ? `height: ${height};` : ''
-    ].join('; ');
   }
 
   connectedCallback() {
@@ -81,16 +79,48 @@ class PsbotsTerminal extends HTMLElement implements IWebComponent {
   private _terminal: Terminal | null = null;
   private _replIO: AbortableReplIO | null = null;
 
+  get xterm() {
+    if (!this._terminal) {
+      this._reset();
+    }
+    return this._terminal!;
+  }
+
+  private _recreate() {
+    if (this._terminal) {
+      this._terminal.dispose();
+      this._terminal = null;
+    }
+    this._reset();
+  }
+
   private _reset() {
     if (!this._terminal) {
-      // TODO: if cols & rows, remove the fit addon
-      this._terminal = new Terminal({ cursorBlink: true/*, cols: 80, rows: 25 */});
+      const terminalOptions: ITerminalOptions & ITerminalInitOnlyOptions = {
+        cursorBlink: true
+      };
+      const rows = this.getAttribute('rows');
+      if (rows) {
+        terminalOptions.rows = Number.parseInt(rows);
+      }
+      this._terminal = new Terminal(terminalOptions);
       const fitAddon = new FitAddon();
       this._terminal.loadAddon(fitAddon);
       this._terminal.open(this._terminalContainer);
       fitAddon.fit();
       const resizeObserver = new ResizeObserver(() => {
+        if (!this._terminal) {
+          return;
+        }
         fitAddon.fit();
+        const event = new CustomEvent('resize', {
+          bubbles: true,
+          detail: {
+            width: this._terminal.cols,
+            height: this._terminal.rows
+          }
+        });
+        this.dispatchEvent(event);
       });
       resizeObserver.observe(this._terminalContainer);
     }
@@ -98,12 +128,11 @@ class PsbotsTerminal extends HTMLElement implements IWebComponent {
       this._replIO.abort();
       this._terminal.write('\u001Bc'); // clear
     }
-    this._replIO = new AbortableReplIO(this._terminal);
+    this._replIO = new AbortableReplIO(this);
     const options = this.getAttribute('options')?.split(',') || [];
-    repl(this._replIO, options)
-      .catch((error) => {
-        console.error(error);
-      });
+    repl(this._replIO, options).catch((error) => {
+      console.error(error);
+    });
   }
 }
 

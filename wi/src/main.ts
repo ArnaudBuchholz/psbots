@@ -3,6 +3,9 @@ import './terminal.js';
 globalThis.addEventListener('DOMContentLoaded', () => {
   const terminal = document.querySelector('psbots-terminal') as HTMLElement;
 
+  terminal.addEventListener('resize', (event) => console.log('resize', event.detail));
+  terminal.addEventListener('ready', (event: any) => console.log('ready', event.detail));
+
   const getOptions = (filter: (option: string) => boolean = () => true): string[] => {
     return terminal.getAttribute('options')?.split(',')?.filter(filter) ?? [];
   };
@@ -29,11 +32,12 @@ globalThis.addEventListener('DOMContentLoaded', () => {
   checkableOption('garbage-collection', 'experimental-garbage-collector');
   checkableOption('debug-memory');
 
-  document.querySelector('#size')?.addEventListener('change', (event) => {
-    const size = (event.target as HTMLInputElement).value;
-    if (size === '') {
-      terminal.removeAttribute('width');
-      terminal.removeAttribute('height');
+  document.querySelector('#rows')?.addEventListener('change', (event) => {
+    const rows = (event.target as HTMLInputElement).value;
+    if (rows === '') {
+      terminal.removeAttribute('rows');
+    } else {
+      terminal.setAttribute('rows', rows);
     }
   });
 });
