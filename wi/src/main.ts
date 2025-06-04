@@ -5,6 +5,8 @@ globalThis.addEventListener('DOMContentLoaded', () => {
 
   terminal.addEventListener('resize', (event) => console.log('resize', event.detail));
   terminal.addEventListener('ready', (event: any) => console.log('ready', event.detail));
+  terminal.addEventListener('cycle', (event: any) => console.log('cycle', event.detail));
+  terminal.addEventListener('terminated', (event: any) => console.log('terminated', event.detail));
 
   const getOptions = (filter: (option: string) => boolean = () => true): string[] => {
     return terminal.getAttribute('options')?.split(',')?.filter(filter) ?? [];
