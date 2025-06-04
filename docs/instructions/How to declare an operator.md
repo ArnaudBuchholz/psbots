@@ -6,12 +6,13 @@ This document provides step-by-step instructions on how to declare a new operato
 
 1. **Import Required Modules**
    - Import necessary modules and utilities. For example:
+
      ```typescript
      import { buildFunctionOperator } from '@core/operators/operators.js';
      ```
 
 2. **Define the Operator**
-   
+
    - Based on the user input, use the `buildFunctionOperator` function to define the operator. Provide the following details:
      - `name`: The name of the operator.
      - `description`: A brief description of what the operator does.
@@ -20,6 +21,7 @@ This document provides step-by-step instructions on how to declare a new operato
      - `samples`: Provide example inputs and expected outputs.
 
      Example (Boolean Operator):
+
      ```typescript
      buildFunctionOperator(
        {
@@ -47,6 +49,7 @@ This document provides step-by-step instructions on how to declare a new operato
      ```
 
      Example (Integer Operator):
+
      ```typescript
      buildFunctionOperator(
        {
@@ -82,11 +85,13 @@ This document provides step-by-step instructions on how to declare a new operato
      - Pushes the result back to the operands stack.
 
      Example (Boolean Logic):
+
      ```typescript
      ({ operands }, { isSet: value1 }, { isSet: value2 }) => operands.popush(2, value1 && value2 ? trueValue : falseValue)
      ```
 
      Example (Integer Logic):
+
      ```typescript
      (state, { integer: value1 }, { integer: value2 }) => {
        const { operands } = state;
@@ -103,11 +108,13 @@ This document provides step-by-step instructions on how to declare a new operato
 
 5. **Check implementation**
    - Use the following command to verify that the code complies with coding guidelines :
+
      ```bash
      npm run check -w engine
      ```
 
    - Use the following command to test the implementation:
+
      ```bash
      npm run test -w engine
      ```

@@ -7,6 +7,7 @@ Who ?
 I am a seasoned developer with 100+ projects on [GitHub](https://github.com/ArnaudBuchholz/).
 
 My most relevant projects are :
+
 * [REserve](https://github.com/ArnaudBuchholz/reserve) : a lightweight, fast and flexible web server,
 * [ui5-test-runner](https://github.com/ArnaudBuchholz/ui5-test-runner) : a test runner for [UI5](https://ui5.sap.com/) applications enabling parallel execution of test,
 * [punyexpr](https://github.com/ArnaudBuchholz/punyexpr) : a minimalist expression compiler and evaluator,
@@ -38,6 +39,5 @@ I first discovered Postscript almost 20 years ago. I was working for a document 
 
 At that time, I have been fascinated by the power of this language.
 With very simple concepts, it was possible to resolve complex problems.
-
 
 [psbots]: <https://github.com/ArnaudBuchholz/psbots>
