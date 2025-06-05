@@ -59,8 +59,8 @@ class PsbotsTerminal extends HTMLElement implements IWebComponent {
   constructor() {
     super();
     this._root = this.attachShadow({ mode: 'open' });
-    this._root.innerHTML = `<style>${styles}</style><div class="terminal"></div>`;
-    this._terminalContainer = this._root.querySelector('.terminal') as HTMLElement;
+    this._root.innerHTML = `<style>${styles}</style><div class="terminal-container"></div>`;
+    this._terminalContainer = this._root.querySelector('.terminal-container') as HTMLElement;
   }
 
   static readonly observedAttributes = ['rows', 'options'];

@@ -22,17 +22,3 @@
   border-radius: 30px;
   background-color: oklch(37% 0.013 285.805deg);
 }
-
-.terminal {
-  &>.xterm-viewport {
-    border-radius: 10px;
-  }
-
-  &>.xterm-screen {
-    margin: 10px;
-
-    &>.xterm-rows {
-      overflow-x: auto;
-    }
-  }
-}
