@@ -6,17 +6,22 @@
 
 body {
   padding: 24px;
-  display: grid;
   place-content: center center;
   background-color: oklch(96.7% 0.001 286.375deg);
 }
 
-@media (prefers-color-scheme: dark) {
-  body {
-    background-color: oklch(14.1% 0.005 285.823deg);
-  }
+.terminal-header {
+  padding: 8px;
+  border-radius: 8px;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  background-color: #888;
 }
 
-psbots-terminal {
-  margin: 4rem auto;
+.terminal {
+  border-radius: 8px;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+  padding: 8px;
+  background-color: #000;
 }

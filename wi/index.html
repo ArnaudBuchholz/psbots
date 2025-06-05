@@ -4,11 +4,11 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>🤖 psbots</title>
-    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="styles.css" />
     <script type="module" src="/src/main.ts"></script>
   </head>
   <body>
-    <div class="options">
+    <div class="terminal-header">
       <label for="memory">Memory:</label>
       <select id="memory">
         <option value="" selected>No limit</option>
@@ -20,7 +20,6 @@
       <label for="garbage-collection">Garbage Collection</label>
       <input type="checkbox" id="debug-memory" />
       <label for="debug-memory">Debug Memory</label>
-      <br/>
       <label for="rows">Rows:</label>
       <select id="rows">
         <option value="" selected>Default</option>
@@ -28,6 +27,8 @@
         <option value="50">50</option>
       </select>
     </div>
-    <psbots-terminal/>
+    <div class="terminal">
+      <psbots-terminal></psbots-terminal>
+    </div>
   </body>
 </html>
