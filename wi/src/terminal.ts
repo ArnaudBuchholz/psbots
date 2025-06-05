@@ -5,7 +5,7 @@ import type { IReplIO } from '@psbots/repl';
 import { repl } from '@psbots/repl';
 import type { IWebComponent } from './IWebComponent';
 import styles from './styles.css?raw';
-import { IState } from '../../engine/dist/api';
+import type { IState } from '../../engine/dist/api';
 
 class AbortableReplIO implements IReplIO {
   private _controller: AbortController = new AbortController();
@@ -32,7 +32,7 @@ class AbortableReplIO implements IReplIO {
     return this._terminal.xterm.rows;
   }
 
-  on(event: string, detail: { state: IState; }) {
+  on(event: string, detail: { state: IState }) {
     const htmlEvent = new CustomEvent(event, { bubbles: true, detail });
     this._terminal.dispatchEvent(htmlEvent);
   }

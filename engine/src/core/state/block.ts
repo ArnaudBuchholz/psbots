@@ -13,7 +13,7 @@ export function blockCycle({ calls, operands }: IInternalState, { array }: Value
     calls.pop();
   } else {
     const step = calls.topOperatorState;
-    const value = array.at(step)!; // length has been checked
+    const value = array.at(step); // length has been checked
     if (!value.isExecutable || value.type === 'array') {
       operands.push(value);
     } else {

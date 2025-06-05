@@ -4,7 +4,7 @@ import globals from 'globals';
 export default [
   ...base,
   {
-    files: ['tools/*.mjs'],
+    files: ['tools/*.mjs', 'eslint.base.mjs'],
     languageOptions: {
       globals: {
         ...globals.node

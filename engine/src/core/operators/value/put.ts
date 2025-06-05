@@ -39,7 +39,7 @@ const implementations: { [type in ValueType]?: (container: Value<type>, index: V
       if (!posResult.success) {
         return posResult;
       }
-      const setResult = (array as IArray).set(posResult.value, value);
+      const setResult = array.set(posResult.value, value);
       if (!setResult.success) {
         return setResult;
       }
@@ -56,7 +56,7 @@ const implementations: { [type in ValueType]?: (container: Value<type>, index: V
         return { success: false, exception: 'typeCheck' };
       }
       const { name } = index;
-      const defined = (dictionary as IDictionary).def(name, value);
+      const defined = dictionary.def(name, value);
       if (!defined.success) {
         return defined;
       }

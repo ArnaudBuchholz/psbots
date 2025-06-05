@@ -21,6 +21,16 @@ const compat = new FlatCompat({
 
 export default [
   ...tseslint.config(eslint.configs.recommended, tseslint.configs.recommended, importPlugin.flatConfigs.recommended),
+  ...tseslint.configs.recommendedTypeCheckedOnly.map((config) => ({
+    ...config,
+    ignores: ['**/*.spec.ts', '**/*.[cm]js'],
+    languageOptions: {
+      parserOptions: {
+        projectService: true,
+        tsconfigRootDir: process.cwd()
+      }
+    }
+  })),
   ...compat.extends('plugin:prettier/recommended', 'prettier'),
   eslintPluginUnicorn.configs.recommended,
   sonarjs.configs.recommended,
