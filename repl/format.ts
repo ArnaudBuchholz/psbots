@@ -1,6 +1,6 @@
 import { enumIArrayValues } from '@psbots/engine';
-import type { IReadOnlyArray, IState } from '@psbots/engine';
-import type { ICallStack, ToStringOptions } from '@psbots/engine/sdk';
+import type { IReadOnlyArray, IReadOnlyCallStack, IState } from '@psbots/engine';
+import type { ToStringOptions } from '@psbots/engine/sdk';
 import { toString } from '@psbots/engine/sdk';
 import type { IReplIO } from './IReplIo.js';
 import { blue, cyan, white, /* green, red, white, */ yellow } from './colors.js';
@@ -15,7 +15,7 @@ type EnumAndDisplayOptions = {
 
 export function enumAndDisplay(
   replIO: IReplIO,
-  values: IReadOnlyArray | ICallStack,
+  values: IReadOnlyArray | IReadOnlyCallStack,
   options?: EnumAndDisplayOptions
 ): void {
   const { includeDebugSource, includeIndex, callstack, format } = {
@@ -26,7 +26,7 @@ export function enumAndDisplay(
     ...options
   };
   let index = 0;
-  for (const value of enumIArrayValues(values)) {
+  for (const value of enumIArrayValues(values as IReadOnlyArray)) {
     const formattedIndex = index.toString();
     let maxWidth = replIO.width;
     if (includeIndex) {
@@ -34,10 +34,10 @@ export function enumAndDisplay(
     }
     let operatorState: ToStringOptions['operatorState'] | undefined;
     if (callstack) {
-      operatorState = (values as ICallStack).operatorStateAt(index);
+      operatorState = (values as IReadOnlyCallStack).operatorStateAt(index);
     }
     const formatted = toString(value, { includeDebugSource, maxWidth, operatorState });
-    const withDebugInfo = formatted.match(/^(.*)@([^:@]+:\d+:\d+)$/);
+    const withDebugInfo = /^(.*)@([^:@]+:\d+:\d+)$/.exec(formatted);
     let instruction = formatted;
     let debugInfo = '';
     if (withDebugInfo) {

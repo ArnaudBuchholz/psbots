@@ -1,4 +1,4 @@
-import type { IArray, IDictionary, Result, Value, ValueType } from '@api/index.js';
+import type { Result, Value, ValueType } from '@api/index.js';
 import { assert, checkPos, toStringValue } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 import { MemoryTracker } from '@core/MemoryTracker.js';

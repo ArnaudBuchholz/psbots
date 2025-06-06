@@ -55,7 +55,13 @@ function is<T extends ValueType>(
   flags: Partial<IValuePermissions> | undefined,
   check: (value: Value<T>) => boolean
 ): boolean {
-  return isObject(value) && value.type === type && !hasInvalidFlag(value) && checkFlags(value, flags) && check(value);
+  return (
+    isObject<Value<T>>(value) &&
+    value.type === type &&
+    !hasInvalidFlag(value) &&
+    checkFlags(value, flags) &&
+    check(value)
+  );
 }
 
 function isInteger(value: unknown): value is number {
@@ -79,6 +85,7 @@ export function isOperatorValue(value: unknown): value is OperatorValue {
     'operator',
     value,
     undefined,
+    // eslint-disable-next-line sonarjs/different-types-comparison -- because operator might be missing
     ({ operator }) => operator !== undefined && typeof operator.name === 'string'
   );
 }
@@ -94,6 +101,7 @@ export function isArrayValue(value: unknown, flags?: Partial<IValuePermissions>)
     value,
     flags,
     ({ isReadOnly, array }) =>
+      // eslint-disable-next-line sonarjs/different-types-comparison -- because array  might be missing
       array !== undefined &&
       isPositiveInteger(array.length) &&
       isFunction(array.at, 1) &&
@@ -103,6 +111,7 @@ export function isArrayValue(value: unknown, flags?: Partial<IValuePermissions>)
 
 export function isDictionaryValue(value: unknown, flags?: Partial<IValuePermissions>): value is DictionaryValue {
   return is('dictionary', value, flags, ({ isReadOnly, dictionary }) => {
+    // eslint-disable-next-line sonarjs/different-types-comparison -- because dictionary might be missing
     if (dictionary === undefined) {
       return false;
     }

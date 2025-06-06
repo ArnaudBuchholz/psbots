@@ -15,7 +15,7 @@ export function createHelpOperator({ replIO }: ReplHostDictionary): Value<'opera
       type: OperatorType.implementation,
       implementation: (/*internalState: IInternalState*/) => {
         const operators = getOperatorDefinitionRegistry();
-        const names = Object.keys(operators).sort();
+        const names = Object.keys(operators).sort((a, b) => a.localeCompare(b));
         for (const name of names) {
           const definition = operators[name];
           replIO.output(`${yellow}${name}${cyan} ${definition?.description}${white}\r\n`);

@@ -4,9 +4,9 @@ globalThis.addEventListener('DOMContentLoaded', () => {
   const terminal = document.querySelector('psbots-terminal') as HTMLElement;
 
   terminal.addEventListener('resize', (event) => console.log('resize', event.detail));
-  terminal.addEventListener('ready', (event: any) => console.log('ready', event.detail));
-  terminal.addEventListener('cycle', (event: any) => console.log('cycle', event.detail));
-  terminal.addEventListener('terminated', (event: any) => console.log('terminated', event.detail));
+  terminal.addEventListener('ready', (event) => console.log('ready', (event as CustomEvent).detail));
+  terminal.addEventListener('cycle', (event) => console.log('cycle', (event as CustomEvent).detail));
+  terminal.addEventListener('terminated', (event) => console.log('terminated', (event as CustomEvent).detail));
 
   const getOptions = (filter: (option: string) => boolean = () => true): string[] => {
     return terminal.getAttribute('options')?.split(',')?.filter(filter) ?? [];

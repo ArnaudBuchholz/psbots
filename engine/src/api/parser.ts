@@ -28,7 +28,7 @@ function addDebugSource(value: Value, { source, filename, pos, length }: AddDebu
       length
     },
     ...value
-  });
+  }) as Value;
 }
 
 function* parseString(options: ParseOptionsWithSource) {

@@ -19,7 +19,7 @@ export type CompatiblePrimitiveValue = string | symbol | number | boolean | Valu
 export type CompatibleValue = CompatibleValue[] | { [key in string]: CompatibleValue } | CompatiblePrimitiveValue;
 
 function isValue(value: unknown): value is Value {
-  return isObject(value) && value.type in VALUE_TYPE;
+  return isObject<Value>(value) && value.type in VALUE_TYPE;
 }
 
 function releasePreviousValue(previousValue: Value | undefined): Value {
@@ -135,7 +135,7 @@ export function toValue(
     }
     const integerResult = toIntegerValue(value);
     if (!integerResult.success) {
-      throw integerResult.exception;
+      throw new Error(`Failed to convert ${value} to integer: ${integerResult.exception}`);
     }
     return integerResult.value;
   }

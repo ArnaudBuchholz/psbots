@@ -1,4 +1,3 @@
-/* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-export function isObject(value: unknown): value is any {
+export function isObject<T extends object>(value: unknown): value is T {
   return typeof value === 'object' && value !== null;
 }

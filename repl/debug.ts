@@ -150,12 +150,8 @@ function renderOperandAndCallStacks({
     replIO.output(`${border}│${white}`);
 
     const operand = state.operands.at(index);
-    if (null === operand) {
-      replIO.output(''.padStart(operandsWidth, ' '));
-    } else {
-      const operandInfo = toString(operand, { maxWidth: operandsWidth, includeDebugSource: true });
-      replIO.output(`${colorize(operandInfo)}${''.padStart(operandsWidth - operandInfo.length, ' ')}`);
-    }
+    const operandInfo = toString(operand, { maxWidth: operandsWidth, includeDebugSource: true });
+    replIO.output(`${colorize(operandInfo)}${''.padStart(operandsWidth - operandInfo.length, ' ')}`);
 
     replIO.output(`${border}│${white}`);
 

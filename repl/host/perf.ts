@@ -11,7 +11,7 @@ import { buildOptions } from '../options.js';
 const MAX_CYCLES = 10 ** 9;
 const TICKS = ['\u280B', '\u2819', '\u2839', '\u2838', '\u283C', '\u2834', '\u2826', '\u2827', '\u2807', '\u280F'];
 
-async function getResolution() {
+function getResolution() {
   const COUNT = 10_000;
   const powersOf10: number[] = [];
   let last = performance.now() * 1_000_000;
@@ -88,16 +88,19 @@ class TimeBucket {
     const threshold = Math.ceil(this._count / 100);
     let sum = 0;
     let count = 0;
-    for (let index = 0; index < this._ranges.length; ++index) {
-      const value = this._ranges[index] ?? 0;
+    const removeIndexes: number[] = [];
+    for (const [index, value] of this._ranges.entries()) {
       if (value < threshold) {
-        delete this._ranges[index];
+        removeIndexes.push(index);
       } else {
         this._min = Math.min(this._min, index);
         this._max = Math.max(this._max, index);
         sum += value * index;
         count += value;
       }
+    }
+    for (const index of removeIndexes.toReversed()) {
+      this._ranges.splice(index, 1);
     }
     this._mean = Math.floor(sum / count);
     this._cleanedCount = count;
@@ -154,7 +157,7 @@ async function evaluate(value: Value, context: ExecuteContext) {
   let cycles = 0;
   for (let loop = 0; loop < loops && !replIO.abortSignal?.aborted; ++loop) {
     const stateCreated = createState(buildOptions(context.options ?? []));
-    assert(stateCreated);
+    assert<IState>(stateCreated);
     const { value: state } = stateCreated;
     const executed = state.exec(value);
     assert(executed);
@@ -210,7 +213,7 @@ async function measureAllOperators(context: ExecuteContext) {
 function report(context: ExecuteContext) {
   const { replIO, measures, resolution } = context;
   context.replIO.output(`${cyan}Resolution: ${yellow}${resolution.toString()}${cyan}ns${white}\r\n`);
-  const keys = Object.keys(measures).sort();
+  const keys = Object.keys(measures).sort((a, b) => a.localeCompare(b));
   let maxKeyLength = 0;
   let maxMeanLength = 0;
   for (const key of keys) {
@@ -278,7 +281,7 @@ function reportDetail({ replIO, measures, detail, resolution }: ExecuteContext) 
 
 async function execute(context: ExecuteContext) {
   if (context.resolution === 0) {
-    context.resolution = await getResolution();
+    context.resolution = getResolution();
   }
   if (context.source) {
     // Ensure reference values are created
@@ -347,7 +350,7 @@ export function createPerfOperator(host: ReplHostDictionary): Value<'operator'> 
         };
         operands.pop();
         host.block();
-        execute(context).then(() => host.unblock());
+        void execute(context).then(() => host.unblock());
         return { success: true, value: undefined };
       }
     }
