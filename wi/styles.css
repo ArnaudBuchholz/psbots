@@ -11,6 +11,7 @@ body {
 }
 
 .terminal-header {
+  position: relative;
   padding: 8px;
   border-radius: 8px;
   border-bottom-left-radius: 0;
@@ -19,6 +20,12 @@ body {
   background-color: oklch(55.2% 0.016 285.938deg);
   font-family: Verdana, Geneva, Tahoma, sans-serif;
   color: white;
+}
+
+.terminal-header .size {
+  position: absolute;
+  top: 3rem;
+  z-index: 1;
 }
 
 .terminal {

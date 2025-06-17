@@ -9,6 +9,7 @@
   </head>
   <body>
     <div class="terminal-header">
+      <span class="size"></span>
       <span>🔴🟡🟢</span>
       <label for="memory" title="Maximum memory">🐏</label>
       <select id="memory">
@@ -31,9 +32,9 @@
         <option value="50">50</option>
       </select>
       <span title="Memory monitor">| 🐏</span>
-      <canvas id="monitor-memory" width="180" height="16"></canvas>
+      <canvas id="monitor-memory" width="60" height="16"></canvas>
       <span title="CPU monitor">| ⚙️</span>
-      <canvas id="monitor-cpu" width="180" height="16"></canvas>
+      <canvas id="monitor-cpu" width="60" height="16"></canvas>
     </div>
     <div class="terminal">
       <psbots-terminal></psbots-terminal>

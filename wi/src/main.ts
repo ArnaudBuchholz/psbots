@@ -3,7 +3,22 @@ import './terminal.js';
 globalThis.addEventListener('DOMContentLoaded', () => {
   const terminal = document.querySelector('psbots-terminal') as HTMLElement;
 
-  terminal.addEventListener('resize', (event) => console.log('resize', event.detail));
+  const sizeElement = document.querySelector('.terminal-header .size');
+  if (!sizeElement) {
+    throw new Error('Size element not found');
+  }
+  let sizeTimeout: ReturnType<typeof setTimeout> | null = null;
+  terminal.addEventListener('resize', (event: UIEvent) => {
+    const { width, height } = event.detail as any;
+    sizeElement.setAttribute('style', '');
+    if (sizeTimeout) {
+      clearTimeout(sizeTimeout);
+    }
+    sizeTimeout = setTimeout(() => {
+      sizeElement.setAttribute('style', 'display: none;');
+    }, 500);
+    sizeElement.textContent = `🖵 ${width}x${height}`;
+  });
   terminal.addEventListener('ready', (event) => console.log('ready', (event as CustomEvent).detail));
   terminal.addEventListener('cycle', (event) => console.log('cycle', (event as CustomEvent).detail));
   terminal.addEventListener('terminated', (event) => console.log('terminated', (event as CustomEvent).detail));
