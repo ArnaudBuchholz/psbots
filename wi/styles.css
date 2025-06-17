@@ -15,7 +15,10 @@ body {
   border-radius: 8px;
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
-  background-color: #888;
+  border: 1px solid #000;
+  background-color: oklch(55.2% 0.016 285.938deg);
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  color: white;
 }
 
 .terminal {
@@ -24,4 +27,10 @@ body {
   border-top-right-radius: 0;
   padding: 8px;
   background-color: #000;
+}
+
+canvas {
+  border: 1px solid #000;
+  vertical-align: middle;
+  margin-bottom: 1px;
 }

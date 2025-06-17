@@ -9,23 +9,31 @@
   </head>
   <body>
     <div class="terminal-header">
-      <label for="memory">Memory:</label>
+      <span>🔴🟡🟢</span>
+      <label for="memory" title="Maximum memory">🐏</label>
       <select id="memory">
         <option value="" selected>No limit</option>
         <option value="2048">2 KB</option>
         <option value="65536">64 KB</option>
         <option value="1048576">1 MB</option>
       </select>
-      <input type="checkbox" id="garbage-collection" />
-      <label for="garbage-collection">Garbage Collection</label>
+      <span>|</span>
       <input type="checkbox" id="debug-memory" />
-      <label for="debug-memory">Debug Memory</label>
-      <label for="rows">Rows:</label>
+      <label for="debug-memory" title="Additional memory information">🔎</label>
+      <span>|</span>
+      <input type="checkbox" id="garbage-collection" />
+      <label for="garbage-collection" title="Use garbage collection">🗑️</label>
+      <span>|</span>
+      <label for="rows" title="Number of rows">🖵</label>
       <select id="rows">
         <option value="" selected>Default</option>
         <option value="25">25</option>
         <option value="50">50</option>
       </select>
+      <span title="Memory monitor">| 🐏</span>
+      <canvas id="monitor-memory" width="180" height="16"></canvas>
+      <span title="CPU monitor">| ⚙️</span>
+      <canvas id="monitor-cpu" width="180" height="16"></canvas>
     </div>
     <div class="terminal">
       <psbots-terminal></psbots-terminal>
