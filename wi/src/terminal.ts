@@ -32,9 +32,11 @@ class AbortableReplIO implements IReplIO {
     return this._terminal.xterm.rows;
   }
 
-  on(event: string, detail: { state: IState }) {
+  on(event: string, detail: { state: IState, wait?: Promise<void> }) {
     const htmlEvent = new CustomEvent(event, { bubbles: true, detail });
     this._terminal.dispatchEvent(htmlEvent);
+    // The event may receive a promise to wait on
+    return htmlEvent.detail.wait;
   }
 
   private _disposableInput: IDisposable | null = null;

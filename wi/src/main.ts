@@ -1,7 +1,19 @@
+import { IState } from '../../engine/dist/api/index.js';
 import './terminal.js';
 
 globalThis.addEventListener('DOMContentLoaded', () => {
   const terminal = document.querySelector('psbots-terminal') as HTMLElement;
+  const status = document.querySelector('.terminal-header .status') as HTMLElement;
+
+  let lastMonitorTick = Date.now();
+
+  const monitor = (state: IState): void | Promise<void> => {
+    const now = Date.now();
+    if (now - lastMonitorTick > 100) {
+      lastMonitorTick = now;
+      return new Promise<void>((resolve) => setTimeout(resolve, 0))
+    }
+  }
 
   const sizeElement = document.querySelector('.terminal-header .size');
   if (!sizeElement) {
@@ -19,9 +31,19 @@ globalThis.addEventListener('DOMContentLoaded', () => {
     }, 500);
     sizeElement.textContent = `🖵 ${width}x${height}`;
   });
-  terminal.addEventListener('ready', (event) => console.log('ready', (event as CustomEvent).detail));
-  terminal.addEventListener('cycle', (event) => console.log('cycle', (event as CustomEvent).detail));
-  terminal.addEventListener('terminated', (event) => console.log('terminated', (event as CustomEvent).detail));
+  terminal.addEventListener('ready', (event) => {
+    const terminalEvent = event as CustomEvent;
+    terminalEvent.detail.wait = monitor(terminalEvent.detail.state)
+    status.innerHTML = '🟢';
+  });
+  terminal.addEventListener('cycle', (event) => {
+    const terminalEvent = event as CustomEvent;
+    terminalEvent.detail.wait = monitor(terminalEvent.detail.state)
+    status.innerHTML = '🟡';
+  });
+  terminal.addEventListener('terminated', () => {
+    status.innerHTML = '🔴';
+  });
 
   const getOptions = (filter: (option: string) => boolean = () => true): string[] => {
     return terminal.getAttribute('options')?.split(',')?.filter(filter) ?? [];
@@ -57,4 +79,6 @@ globalThis.addEventListener('DOMContentLoaded', () => {
       terminal.setAttribute('rows', rows);
     }
   });
+
+  terminal.setAttribute('options', '');
 });
