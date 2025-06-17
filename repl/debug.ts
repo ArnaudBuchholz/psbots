@@ -115,8 +115,8 @@ function renderOperandAndCallStacksTitle({
   let exceptionInfo = '';
   let exceptionInfoSize = 0;
   if (state.exception) {
-    exceptionInfo = ` ${red}❌${state.exception}`;
-    exceptionInfoSize = state.exception.length + 2;
+    exceptionInfo = ` ${red}❌ ${state.exception}`;
+    exceptionInfoSize = state.exception.length + 3;
   }
   if (callStackInfoSize + callStackVariation.length + exceptionInfoSize < callStackWidth) {
     callStackInfo += callStackVariation.formatted + exceptionInfo;

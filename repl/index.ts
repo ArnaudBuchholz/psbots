@@ -23,7 +23,7 @@ function showVersion(replIO: IReplIO): boolean {
   run(state, 'version');
   const version = state.operands.at(0);
   assert(version.type === 'string');
-  replIO.output(`${cyan}Welcome to 🤖${magenta}${version.string}${white}\r\n`);
+  replIO.output(`${cyan}Welcome to 🤖 ${magenta}${version.string}${white}\r\n`);
   return true;
 }
 
