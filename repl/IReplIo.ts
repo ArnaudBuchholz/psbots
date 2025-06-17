@@ -4,7 +4,7 @@ export interface IReplIO {
   readonly abortSignal?: AbortSignal;
   readonly width: number;
   readonly height: number;
-  readonly on?: (event: 'ready' | 'cycle' | 'terminated', detail: { state: IState }) => void;
+  readonly on?: (event: 'ready' | 'cycle' | 'terminated', detail: { state: IState }) => void | Promise<void>;
   input: (onData: (data: string) => void) => void;
   output: (text: string) => void;
 }

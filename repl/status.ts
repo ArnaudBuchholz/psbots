@@ -73,7 +73,7 @@ export function status(state: IState, options: StatusOptions): string {
     flags += ` ${red}!call`;
   }
   if (state.exception) {
-    flags += ` ${red}❌${state.exception}`;
+    flags += ` ${red}❌ ${state.exception}`;
   }
   return [
     `${cyan}${cycleLabel}${yellow}${options.cycle}`,
