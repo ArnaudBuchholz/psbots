@@ -1,15 +1,57 @@
-import { IState } from '../../engine/dist/api/index.js';
+import { IMemoryByType, IState } from '../../engine/dist/api/index.js';
 import './terminal.js';
 
 globalThis.addEventListener('DOMContentLoaded', () => {
   const terminal = document.querySelector('psbots-terminal') as HTMLElement;
   const status = document.querySelector('.terminal-header .status') as HTMLElement;
 
-  let lastMonitorTick = Date.now();
+  const MONITOR_WIDTH = 60;
+  const MONITOR_HEIGHT = 15;
+  const memoryMonitor = document.querySelector('.terminal-header #monitor-memory') as HTMLCanvasElement;
+  const cpuMonitor = document.querySelector('.terminal-header #monitor-cpu') as HTMLCanvasElement;
+  memoryMonitor.setAttribute('width', MONITOR_WIDTH.toString());
+  memoryMonitor.setAttribute('height', MONITOR_HEIGHT.toString());
+  const memoryCanvas = memoryMonitor.getContext('2d')!;
+  cpuMonitor.setAttribute('width', MONITOR_WIDTH.toString());
+  cpuMonitor.setAttribute('height', MONITOR_HEIGHT.toString());
+  // const cpuCanvas = cpuMonitor.getContext('2d');
 
-  const monitor = (state: IState): void | Promise<void> => {
+  let lastMonitorTick = Date.now();
+  const MONITOR_SAMPLE_RESOLUTION = 10; // number of cycles displayed as in pixel in the monitor
+  const MONITOR_SAMPLE_SIZE = MONITOR_SAMPLE_RESOLUTION * MONITOR_WIDTH;
+  const memory: IMemoryByType[] = [];
+
+  const monitor = (state: IState, forceRender = false): void | Promise<void> => {
     const now = Date.now();
-    if (now - lastMonitorTick > 100) {
+    if (memory.length >= MONITOR_SAMPLE_SIZE) {
+      memory.shift();
+    }
+    memory.push({ ...state.memoryTracker.byType });
+    if (now - lastMonitorTick > 100 || forceRender) {
+      memoryCanvas.clearRect(0, 0, MONITOR_WIDTH, MONITOR_HEIGHT);
+      const { peak: maxMemory } = state.memoryTracker;
+      for (let index = 0; index < MONITOR_WIDTH && index * MONITOR_SAMPLE_RESOLUTION < memory.length; ++index) {
+        let totalOfString = 0;
+        let totalOfSystem = 0;
+        let totalOfUser = 0;
+        for (let i = 0; i < MONITOR_SAMPLE_RESOLUTION && index * MONITOR_SAMPLE_RESOLUTION + i < memory.length; ++i) {
+          const sample = memory[index * MONITOR_SAMPLE_RESOLUTION + i];
+          totalOfString += sample.string;
+          totalOfSystem += sample.system;
+          totalOfUser += sample.user;
+        }
+        const total = totalOfString + totalOfSystem + totalOfUser;
+        const height = (MONITOR_HEIGHT * total) / (maxMemory * MONITOR_SAMPLE_RESOLUTION);
+        const heightString = (MONITOR_HEIGHT * totalOfString) / (maxMemory * MONITOR_SAMPLE_RESOLUTION);
+        const heightSystem = (MONITOR_HEIGHT * totalOfSystem) / (maxMemory * MONITOR_SAMPLE_RESOLUTION);
+        const heightUser = (MONITOR_HEIGHT * totalOfUser) / (maxMemory * MONITOR_SAMPLE_RESOLUTION);
+        memoryCanvas.fillStyle = '#f00';
+        memoryCanvas.fillRect(index, MONITOR_HEIGHT - height,  1, heightSystem);
+        memoryCanvas.fillStyle = '#00f';
+        memoryCanvas.fillRect(index, MONITOR_HEIGHT - height + heightSystem,  1, heightString);
+        memoryCanvas.fillStyle = '#0f0';
+        memoryCanvas.fillRect(index, MONITOR_HEIGHT - height + heightSystem + heightString,  1, heightUser);
+      }
       lastMonitorTick = now;
       return new Promise<void>((resolve) => setTimeout(resolve, 0))
     }
@@ -33,7 +75,7 @@ globalThis.addEventListener('DOMContentLoaded', () => {
   });
   terminal.addEventListener('ready', (event) => {
     const terminalEvent = event as CustomEvent;
-    terminalEvent.detail.wait = monitor(terminalEvent.detail.state)
+    terminalEvent.detail.wait = monitor(terminalEvent.detail.state, true);
     status.innerHTML = '🟢';
   });
   terminal.addEventListener('cycle', (event) => {
