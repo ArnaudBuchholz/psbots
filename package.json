@@ -20,7 +20,7 @@
     "wi": "npm run dev --workspace wi"
   },
   "engines": {
-    "node": ">=20.17.0"
+    "node": ">=22.0.0"
   },
   "workspaces": [
     "./engine",
