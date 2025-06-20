@@ -26,7 +26,13 @@ globalThis.addEventListener('DOMContentLoaded', () => {
     if (memory.length >= MONITOR_SAMPLE_SIZE) {
       memory.shift();
     }
-    memory.push({ ...state.memoryTracker.byType });
+    const byType = { ...state.memoryTracker.byType };
+    memoryMonitor.title = `System: ${byType.system}
+String: ${byType.string}
+User: ${byType.user}
+Total: ${state.memoryTracker.used}
+Peak: ${state.memoryTracker.peak}`;
+    memory.push(byType);
     if (now - lastMonitorTick > 100 || forceRender) {
       memoryCanvas.clearRect(0, 0, MONITOR_WIDTH, MONITOR_HEIGHT);
       const { peak: maxMemory } = state.memoryTracker;
@@ -57,6 +63,13 @@ globalThis.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  terminal.addEventListener('start', (event) => {
+    const terminalEvent = event as CustomEvent;
+    memory.length = 0;
+    terminalEvent.detail.wait = monitor(terminalEvent.detail.state)
+    status.innerHTML = '⭕';
+  });
+
   const sizeElement = document.querySelector('.terminal-header .size');
   if (!sizeElement) {
     throw new Error('Size element not found');
@@ -73,16 +86,19 @@ globalThis.addEventListener('DOMContentLoaded', () => {
     }, 500);
     sizeElement.textContent = `🖵 ${width}x${height}`;
   });
+
   terminal.addEventListener('ready', (event) => {
     const terminalEvent = event as CustomEvent;
     terminalEvent.detail.wait = monitor(terminalEvent.detail.state, true);
     status.innerHTML = '🟢';
   });
+
   terminal.addEventListener('cycle', (event) => {
     const terminalEvent = event as CustomEvent;
     terminalEvent.detail.wait = monitor(terminalEvent.detail.state)
     status.innerHTML = '🟡';
   });
+
   terminal.addEventListener('terminated', () => {
     status.innerHTML = '🔴';
   });
