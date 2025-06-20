@@ -43,6 +43,8 @@ export async function repl(replIO: IReplIO, options: string[] = []): Promise<voi
   }
   const { value: state } = stateResult;
 
+  await replIO.on?.('start', { state });
+
   replIO.output(`${cyan}Use '${yellow}exit${cyan}'  to quit${white}\r\n`);
   replIO.output(`${cyan}Use '${yellow}state${cyan}' to print a state summary${white}\r\n`);
   replIO.output(`${cyan}Use '${yellow}help${cyan}'  to display help${white}\r\n`);
