@@ -17,7 +17,7 @@
     "cli:record": "terminalizer record tmp/cliterm --config cli",
     "cli:render": "terminalizer render tmp/cliterm",
     "cli:debug": "node ./cli/index.js --debug",
-    "wi": "npm run dev --workspace wi"
+    "wi": "npm start --workspace wi"
   },
   "engines": {
     "node": ">=22.0.0"
