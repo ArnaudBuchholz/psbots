@@ -87,13 +87,13 @@ export async function repl(replIO: IReplIO, options: string[] = []): Promise<voi
           ++cycle;
           await replIO.on?.('cycle', { state });
         }
-        if (cycle - lastCycleCheck >= 100_000) {
+        if (cycle - lastCycleCheck >= 1_000_000) {
           replIO.output(
-            `⮔ The engine has completed ${yellow}${cycle}${white} cycles, ${green}a${white}bort or ${green}any${white} key to continue`
+            `\u001B[s⮔ The engine has completed ${yellow}${cycle}${white} cycles, ${green}a${white}bort or ${green}any${white} key to continue`
           );
           const key = await waitForChar();
           if (key !== '\n') {
-            replIO.output('\n');
+            replIO.output('\u001B[2K\u001B[u');
           }
           if (key === 'a') {
             throw new AbortError();
