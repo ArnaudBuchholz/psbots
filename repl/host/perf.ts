@@ -90,7 +90,7 @@ class TimeBucket {
     let count = 0;
     const removeIndexes: number[] = [];
     for (const [index, value] of this._ranges.entries()) {
-      if (value < threshold) {
+      if (!value || value < threshold) {
         removeIndexes.push(index);
       } else {
         this._min = Math.min(this._min, index);
