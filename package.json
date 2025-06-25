@@ -37,6 +37,8 @@
   "author": "Arnaud Buchholz <arnaud.buchholz@free.fr>",
   "license": "MIT",
   "devDependencies": {
+    "@babel/generator": "^7.27.5",
+    "@babel/parser": "^7.27.5",
     "@html-eslint/eslint-plugin": "^0.41.0",
     "@html-eslint/parser": "^0.41.0",
     "@stylistic/eslint-plugin": "^4.4.1",
@@ -52,6 +54,7 @@
     "eslint-plugin-security": "^3.0.1",
     "eslint-plugin-sonarjs": "^3.0.3",
     "eslint-plugin-unicorn": "^59.0.1",
+    "esquery": "^1.6.0",
     "globals": "^16.2.0",
     "markdownlint-cli": "^0.45.0",
     "npm-check-updates": "^18.0.1",
