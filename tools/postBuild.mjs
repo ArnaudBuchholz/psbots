@@ -42,7 +42,7 @@ await removeAliases(basePath);
 
 const assertCallExpression = esquery.parse('ExpressionStatement[expression.callee.name=assert]');
 
-function forEachMatch(ast, matches, callback/*parent, member, match*/) {
+function forEachMatch(ast, selector, callback/*parent, member, match*/) {
   function traverseArray(array) {
     for (let i = array.length - 1; i >= 0; i--) {
       if (matches.includes(array[i])) {
@@ -55,7 +55,7 @@ function forEachMatch(ast, matches, callback/*parent, member, match*/) {
 
   function traverse(node) {
     for (const key in node) {
-      value = node[key];
+      const value = node[key];
       if (Array.isArray(value)) {
         traverseArray(value);
       } else if (typeof value === 'object' && value) {
@@ -68,6 +68,7 @@ function forEachMatch(ast, matches, callback/*parent, member, match*/) {
     }
   }
 
+  const matches = esquery.match(ast, selector);
   if (matches.length) {
     traverse(ast);
   }
