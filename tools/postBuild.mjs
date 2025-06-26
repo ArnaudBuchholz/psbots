@@ -85,6 +85,9 @@ const yellow = '\u001B[33m';
 const white = '\u001B[37m';
 
 async function optimize(basePath, path = basePath) {
+  if (path.match(/\bperf\b/)) {
+    return;
+  }
   const names = await readdir(path);
   const perfPath = path.replace(/\bdist\b/, 'dist/perf');
   await mkdir(perfPath, { recursive: true });
