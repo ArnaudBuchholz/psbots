@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
-import { createState, getOperatorDefinitionRegistry, run } from '../dist/index.js';
+import * as distribution from '../dist/index.js';
+import * as optimized from '../dist/perf/index.js';
 
 function compareIArrays(actual, expected) {
   assert.strictEqual(actual.length, expected.length);
@@ -38,47 +39,92 @@ function compareValues(actual, expected) {
   }
 }
 
-let count = 0;
-const start = performance.now();
-for (const [name, definition] of Object.entries(getOperatorDefinitionRegistry())) {
-  let index = 0;
-  for (const { in: inSource, out: outSource } of definition.samples) {
-    try {
-      const inResult = createState({ debugMemory: true });
-      if (inResult.exception) {
-        throw inResult.exception;
-      }
-      const inState = inResult.value;
-      const outResult = createState({ debugMemory: true });
-      if (outResult.exception) {
-        throw outResult.exception;
-      }
-      const outState = outResult.value;
+const ITERATIONS = 10;
 
-      run(inState, inSource);
-      run(outState, outSource);
-      if (outState.exception) {
-        assert.strictEqual(inState.exception, outState.exception);
-      } else {
-        assert.strictEqual(inState.exception, undefined);
-        // flatten differences between the two memory trackers
-        Object.assign(inState.memoryTracker, { _peak: 0 });
-        Object.assign(outState.memoryTracker, { _peak: 0 });
-        assert.deepStrictEqual(inState.memoryTracker.byType, outState.memoryTracker.byType);
-        compareIArrays(inState.operands, outState.operands);
-      }
+// eslint-disable-next-line sonarjs/cognitive-complexity -- testing purpose
+function runTests(impl) {
+  let min = Number.POSITIVE_INFINITY;
+  let max = 0;
+  let sum = 0;
+  let count;
+  let errors = 0;
 
-      inState.destroy();
-      outState.destroy();
-    } catch (e) {
-      console.log(`❌${name}#${index}:`, e);
+  for (let iteration = 0; iteration < ITERATIONS && errors === 0; ++iteration) {
+    count = 0;
+    const start = performance.now();
+    for (const [name, definition] of Object.entries(impl.getOperatorDefinitionRegistry())) {
+      let index = 0;
+      for (const { in: inSource, out: outSource } of definition.samples) {
+        try {
+          const inResult = impl.createState({ debugMemory: true });
+          if (inResult.exception) {
+            throw inResult.exception;
+          }
+          const inState = inResult.value;
+          const outResult = impl.createState({ debugMemory: true });
+          if (outResult.exception) {
+            throw outResult.exception;
+          }
+          const outState = outResult.value;
+
+          impl.run(inState, inSource);
+          impl.run(outState, outSource);
+          if (outState.exception) {
+            assert.strictEqual(inState.exception, outState.exception);
+          } else {
+            assert.strictEqual(inState.exception, undefined);
+            // flatten differences between the two memory trackers
+            Object.assign(inState.memoryTracker, { _peak: 0 });
+            Object.assign(outState.memoryTracker, { _peak: 0 });
+            assert.deepStrictEqual(inState.memoryTracker.byType, outState.memoryTracker.byType);
+            compareIArrays(inState.operands, outState.operands);
+          }
+
+          inState.destroy();
+          outState.destroy();
+        } catch (error) {
+          console.log(`❌${name}#${index}:`, error);
+          ++errors;
+        }
+        ++index;
+        ++count;
+      }
     }
-    ++index;
-    ++count;
+    const end = performance.now();
+
+    const duration = Math.floor(1000 * (end - start)) / 1000;
+    min = Math.min(min, duration);
+    max = Math.max(max, duration);
+    sum += duration;
   }
+
+  return {
+    count,
+    min,
+    max,
+    mean: Math.floor((1000 * sum) / ITERATIONS) / 1000,
+    errors
+  };
 }
 
-const end = performance.now()
-
-console.log('🧪 tests count:', count)
-console.log('⏳ time spent :', Math.floor(end - start), 'ms')
+const perfOfDistribution = runTests(distribution);
+if (!perfOfDistribution.errors) {
+  console.log('🧪 tests count     :', perfOfDistribution.count);
+  console.log(
+    '⏳ time spent (ms) :',
+    perfOfDistribution.min.toFixed(3),
+    '≤',
+    perfOfDistribution.mean.toFixed(3),
+    '≤',
+    perfOfDistribution.max.toFixed(3)
+  );
+  const perfOfOptimized = runTests(optimized);
+  console.log(
+    '⚡ time spent (ms) :',
+    perfOfOptimized.min.toFixed(3),
+    '≤',
+    perfOfOptimized.mean.toFixed(3),
+    '≤',
+    perfOfOptimized.max.toFixed(3)
+  );
+}
