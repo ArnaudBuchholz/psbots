@@ -41,6 +41,8 @@ async function removeAliases(basePath, path = basePath) {
 await removeAliases(basePath);
 
 const assertCallExpression = esquery.parse('ExpressionStatement[expression.callee.name=assert]');
+const functionDeclaration = esquery.parse('FunctionDeclaration');
+const callFunctionExpression = esquery.parse('CallExpression[callee.type=Identifier]');
 
 function forEachMatch(ast, selector, callback/*parent, member, match*/) {
   function traverseArray(array) {
@@ -74,7 +76,15 @@ function forEachMatch(ast, selector, callback/*parent, member, match*/) {
   }
 }
 
-async function removeAsserts(basePath, path = basePath) {
+const red = '\u001B[31m';
+// const green = '\u001B[32m';
+const yellow = '\u001B[33m';
+// const blue = '\u001B[34m';
+// const magenta = '\u001B[35m';
+// const cyan = '\u001B[36m';
+const white = '\u001B[37m';
+
+async function optimize(basePath, path = basePath) {
   const names = await readdir(path);
   const perfPath = path.replace(/\bdist\b/, 'dist/perf');
   await mkdir(perfPath, { recursive: true });
@@ -92,13 +102,25 @@ async function removeAsserts(basePath, path = basePath) {
         parent.splice(member, 1);
       });
 
+      let dumpFilePath = true;
+      forEachMatch(ast, functionDeclaration, (parent, _, functionAst) => {
+        if (dumpFilePath) {
+          console.log(`${yellow}${itemPath}${white}:`)
+          dumpFilePath = false;
+        }
+        console.log(`\t${parent.type === 'ExportNamedDeclaration' ? `${red}export${white} ` : ''}${functionAst.async ? 'async ': '' }function ${functionAst.generator ? '* ': '' }${functionAst.id.name}`)
+        forEachMatch(functionAst, callFunctionExpression, (parent, _, callAst) => {
+          console.log(`\t  → ${parent.type === 'YieldExpression' ? 'yield ' : '' }${callAst.callee.name}`);
+        });
+      });
+
       await writeFile(join(perfPath, name), generate(ast).code, { encoding: 'utf8' });
     } else {
       const itemStat = await stat(itemPath);
       if (itemStat.isDirectory()) {
-        await removeAsserts(basePath, itemPath);
+        await optimize(basePath, itemPath);
       }
     }
   }
 }
-await removeAsserts(basePath);
+await optimize(basePath);
