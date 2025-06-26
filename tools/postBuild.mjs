@@ -1,5 +1,5 @@
 /* eslint-env node */
-import { readdir, readFile, stat, writeFile } from 'node:fs/promises';
+import { readdir, readFile, stat, writeFile, mkdir } from 'node:fs/promises';
 import { join, relative } from 'node:path';
 import { parse } from '@babel/parser';
 import { generate } from '@babel/generator';
@@ -76,12 +76,14 @@ function forEachMatch(ast, selector, callback/*parent, member, match*/) {
 
 async function removeAsserts(basePath, path = basePath) {
   const names = await readdir(path);
+  const perfPath = path.replace(/\bdist\b/, 'dist/perf');
+  await mkdir(perfPath, { recursive: true });
   for (const name of names) {
     const itemPath = join(path, name);
-    if (name.endsWith('.js') && !name.endsWith('.ast.js')) {
+    if (name.endsWith('.js')) {
       const source = await readFile(itemPath, 'utf8');
       const ast = parse(source, { sourceType: 'module' });
-      await writeFile(itemPath.replace('.js', '.ast'), JSON.stringify(ast, null, 2), { encoding: 'utf8' });
+      await writeFile(join(perfPath, name.replace('.js', '.ast')), JSON.stringify(ast, null, 2), { encoding: 'utf8' });
 
       forEachMatch(ast, assertCallExpression, (parent, member, match) => {
         if (!Array.isArray(parent)) {
@@ -90,7 +92,7 @@ async function removeAsserts(basePath, path = basePath) {
         parent.splice(member, 1);
       });
 
-      await writeFile(itemPath.replace('.js', '.ast.js'), generate(ast).code, { encoding: 'utf8' });
+      await writeFile(join(perfPath, name), generate(ast).code, { encoding: 'utf8' });
     } else {
       const itemStat = await stat(itemPath);
       if (itemStat.isDirectory()) {
