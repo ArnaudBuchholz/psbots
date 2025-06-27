@@ -3,7 +3,8 @@ import { readdir, readFile, stat, writeFile, mkdir } from 'node:fs/promises';
 import { join, relative } from 'node:path';
 import { parse } from '@babel/parser';
 import { generate } from '@babel/generator';
-import esquery from 'esquery';
+import _traverse from '@babel/traverse';
+const traverse = _traverse.default;
 
 const tsconfig = JSON.parse(await readFile('tsconfig.json'));
 const aliases = tsconfig.compilerOptions.paths;
@@ -40,42 +41,6 @@ async function removeAliases(basePath, path = basePath) {
 }
 await removeAliases(basePath);
 
-const assertCallExpression = esquery.parse('ExpressionStatement[expression.callee.name=assert]');
-const functionDeclaration = esquery.parse('FunctionDeclaration');
-const callFunctionExpression = esquery.parse('CallExpression[callee.type=Identifier]');
-
-function forEachMatch(ast, selector, callback/*parent, member, match*/) {
-  function traverseArray(array) {
-    for (let i = array.length - 1; i >= 0; i--) {
-      if (matches.includes(array[i])) {
-        callback(array, i, array[i]);
-      } else {
-        traverse(array[i]);
-      }
-    }
-  }
-
-  function traverse(node) {
-    for (const key in node) {
-      const value = node[key];
-      if (Array.isArray(value)) {
-        traverseArray(value);
-      } else if (typeof value === 'object' && value) {
-        if (matches.includes(value)) {
-          callback(node, key, value);
-        } else {
-          traverse(value);
-        }
-      }
-    }
-  }
-
-  const matches = esquery.match(ast, selector);
-  if (matches.length) {
-    traverse(ast);
-  }
-}
-
 const red = '\u001B[31m';
 // const green = '\u001B[32m';
 const yellow = '\u001B[33m';
@@ -98,24 +63,36 @@ async function optimize(basePath, path = basePath) {
       const ast = parse(source, { sourceType: 'module' });
       await writeFile(join(perfPath, name.replace('.js', '.ast')), JSON.stringify(ast, null, 2), { encoding: 'utf8' });
 
-      forEachMatch(ast, assertCallExpression, (parent, member, match) => {
-        if (!Array.isArray(parent)) {
-          throw new Error('Unexpected');
+      // Remove calls to assert
+      traverse(ast, {
+        enter(path) {
+          const { node, parent, key } = path
+          if (node.type === 'ExpressionStatement'
+            && node.expression?.callee?.name === 'assert'
+          ) {
+            path.remove();
+          }
         }
-        parent.splice(member, 1);
-      });
+      })
 
-      let dumpFilePath = true;
-      forEachMatch(ast, functionDeclaration, (parent, _, functionAst) => {
-        if (dumpFilePath) {
-          console.log(`${yellow}${itemPath}${white}:`)
-          dumpFilePath = false;
-        }
-        console.log(`\t${parent.type === 'ExportNamedDeclaration' ? `${red}export${white} ` : ''}${functionAst.async ? 'async ': '' }function ${functionAst.generator ? '* ': '' }${functionAst.id.name}`)
-        forEachMatch(functionAst, callFunctionExpression, (parent, _, callAst) => {
-          console.log(`\t  → ${parent.type === 'YieldExpression' ? 'yield ' : '' }${callAst.callee.name}`);
-        });
-      });
+      // forEachMatch(ast, assertCallExpression, (parent, member, match) => {
+      //   if (!Array.isArray(parent)) {
+      //     throw new Error('Unexpected');
+      //   }
+      //   parent.splice(member, 1);
+      // });
+
+      // let dumpFilePath = true;
+      // forEachMatch(ast, functionDeclaration, (parent, _, functionAst) => {
+      //   if (dumpFilePath) {
+      //     console.log(`${yellow}${itemPath}${white}:`)
+      //     dumpFilePath = false;
+      //   }
+      //   console.log(`\t${parent.type === 'ExportNamedDeclaration' ? `${red}export${white} ` : ''}${functionAst.async ? 'async ': '' }function ${functionAst.generator ? '* ': '' }${functionAst.id.name}`)
+      //   forEachMatch(functionAst, callFunctionExpression, (parent, _, callAst) => {
+      //     console.log(`\t  → ${parent.type === 'YieldExpression' ? 'yield ' : '' }${callAst.callee.name}`);
+      //   });
+      // });
 
       await writeFile(join(perfPath, name), generate(ast).code, { encoding: 'utf8' });
     } else {
