@@ -42,15 +42,12 @@ async function removeAliases(basePath, path = basePath) {
 await removeAliases(basePath);
 
 const red = '\u001B[31m';
-// const green = '\u001B[32m';
 const yellow = '\u001B[33m';
-// const blue = '\u001B[34m';
-// const magenta = '\u001B[35m';
-// const cyan = '\u001B[36m';
 const white = '\u001B[37m';
 
+// eslint-disable-next-line sonarjs/cognitive-complexity -- not relevant for this function
 async function optimize(basePath, path = basePath) {
-  if (path.match(/\bperf\b/)) {
+  if (/\bperf\b/.test(path)) {
     return;
   }
   const names = await readdir(path);
@@ -66,33 +63,62 @@ async function optimize(basePath, path = basePath) {
       // Remove calls to assert
       traverse(ast, {
         enter(path) {
-          const { node, parent, key } = path
-          if (node.type === 'ExpressionStatement'
-            && node.expression?.callee?.name === 'assert'
-          ) {
+          // TODO: check how assert is imported and remove statement
+          const { node } = path;
+          if (node.type === 'ExpressionStatement' && node.expression?.callee?.name === 'assert') {
             path.remove();
           }
         }
-      })
+      });
 
-      // forEachMatch(ast, assertCallExpression, (parent, member, match) => {
-      //   if (!Array.isArray(parent)) {
-      //     throw new Error('Unexpected');
-      //   }
-      //   parent.splice(member, 1);
-      // });
-
-      // let dumpFilePath = true;
-      // forEachMatch(ast, functionDeclaration, (parent, _, functionAst) => {
-      //   if (dumpFilePath) {
-      //     console.log(`${yellow}${itemPath}${white}:`)
-      //     dumpFilePath = false;
-      //   }
-      //   console.log(`\t${parent.type === 'ExportNamedDeclaration' ? `${red}export${white} ` : ''}${functionAst.async ? 'async ': '' }function ${functionAst.generator ? '* ': '' }${functionAst.id.name}`)
-      //   forEachMatch(functionAst, callFunctionExpression, (parent, _, callAst) => {
-      //     console.log(`\t  → ${parent.type === 'YieldExpression' ? 'yield ' : '' }${callAst.callee.name}`);
-      //   });
-      // });
+      // Analyze functions to attempt inlining
+      const functions = new Map();
+      traverse(ast, {
+        enter(path) {
+          const { node, parent, scope } = path;
+          // TODO: check for anonymous functions (like in operators)
+          if (node.type === 'FunctionDeclaration') {
+            const name = node.id.name;
+            const exported = parent.type === 'ExportNamedDeclaration';
+            const calls = new Map();
+            scope.traverse(node, {
+              enter({ node, parent }) {
+                if (node.type === 'CallExpression' && node.callee?.name) {
+                  const { name } = node.callee;
+                  const yielded = parent.type === 'YieldExpression';
+                  if (calls.has(name)) {
+                    ++calls.get(name).count;
+                  } else {
+                    calls.set(name, { yielded, count: 1 });
+                  }
+                }
+              }
+            });
+            functions.set(name, { node, exported, calls });
+          }
+        }
+      });
+      if (functions.size > 0) {
+        let canInline = false;
+        let infos = [`${yellow}${itemPath}${white}:`];
+        for (const [name, { node, exported, calls }] of functions.entries()) {
+          infos.push(
+            `\t${exported ? red + 'export' + white + ' ' : ''}${node.async ? 'async ' : ''}function ${node.generator ? '* ' : ''}${name}`
+          );
+          if (calls.size > 0) {
+            for (const [name, { yielded, count }] of calls.entries()) {
+              const moduleFunction = functions.get(name);
+              if (moduleFunction && !moduleFunction.exported) {
+                infos.push(`\t  → ${yielded ? 'yield ' : ''}${name}${count > 1 ? ' (' + count + ')' : ''}`);
+                canInline = true;
+              }
+            }
+          }
+        }
+        if (canInline) {
+          console.log(infos.join('\n'));
+        }
+      }
 
       await writeFile(join(perfPath, name), generate(ast).code, { encoding: 'utf8' });
     } else {
