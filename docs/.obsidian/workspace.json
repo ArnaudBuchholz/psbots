@@ -1,0 +1,179 @@
+{
+  "main": {
+    "id": "0067ce711cbfd8b9",
+    "type": "split",
+    "children": [
+      {
+        "id": "9c253bb21cc51681",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "09ecf81215c20318",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "OPERATORS.md",
+                "mode": "preview",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "OPERATORS"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "9916d4cc10929873",
+    "type": "split",
+    "children": [
+      {
+        "id": "d247c5e23ce9e746",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "2abc915a5b1b3d39",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Files"
+            }
+          },
+          {
+            "id": "40d7cb8803b2c881",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Search"
+            }
+          },
+          {
+            "id": "669c1d492824f7d0",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Bookmarks"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "13d92111ec7db2aa",
+    "type": "split",
+    "children": [
+      {
+        "id": "38b4f8b5bd1a3ec3",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "a5a2f0fad49200b0",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "OPERATORS.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Backlinks for OPERATORS"
+            }
+          },
+          {
+            "id": "7d9f8c6a667cab99",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "OPERATORS.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Outgoing links from OPERATORS"
+            }
+          },
+          {
+            "id": "d2967cc596b3ff55",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Tags"
+            }
+          },
+          {
+            "id": "69f8210cadff3c19",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "OPERATORS.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Outline of OPERATORS"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false
+    }
+  },
+  "active": "09ecf81215c20318",
+  "lastOpenFiles": [
+    "instructions/How to declare an operator.md",
+    "chronicles/The 5 Ws.md",
+    "chronicles/README.md",
+    "README.md",
+    "SAMPLES.md"
+  ]
+}
