@@ -33,10 +33,12 @@ function parseNumber(source: string, pos: number): Parsed {
   const first = source[pos];
   assert(first !== undefined);
   let endPos = pos + 1;
-  while (endPos < source.length && '0123456789'.includes(source[endPos]!)) {
-    ++endPos;
+  // c is undefined if going over source length, undefined makes the following condition false
+  let c = source[endPos]!;
+  while (c >= '0' && c <= '9') {
+    c = source[++endPos]!;
   }
-  if (endPos === pos + 1 && '+-'.includes(first)) {
+  if (endPos === pos + 1 && (first === '+' || first === '-')) {
     // This is a name
     return {
       endPos,
@@ -59,11 +61,14 @@ function parseNumber(source: string, pos: number): Parsed {
   };
 }
 
+const ONE_CHAR_OLNY_NAMES = new Set('[]{}«»');
+const NAME_DELIMITERS = new Set(' \t\r\n%[]{}«»<>');
+
 function parseName(source: string, pos: number): Parsed {
   const { length } = source;
   const first = source[pos];
   assert(first !== undefined);
-  if ('[]{}«»'.includes(first)) {
+  if (ONE_CHAR_OLNY_NAMES.has(first)) {
     return {
       endPos: pos + 1,
       value: {
@@ -96,7 +101,7 @@ function parseName(source: string, pos: number): Parsed {
   let endPos = pos + 1;
   const second = source[endPos];
   assert(second !== undefined);
-  if (first === second && '<>'.includes(first)) {
+  if (first === second && (first === '<' || first === '>')) {
     return {
       endPos: endPos + 1,
       value: {
@@ -110,7 +115,7 @@ function parseName(source: string, pos: number): Parsed {
   while (endPos < length) {
     const char = source[endPos];
     assert(char !== undefined);
-    if (' \t\r\n%[]{}«»<>'.includes(char)) {
+    if (NAME_DELIMITERS.has(char)) {
       break;
     }
     ++endPos;
@@ -134,6 +139,8 @@ function parseName(source: string, pos: number): Parsed {
   };
 }
 
+const FORMATTING_CHARS = new Set(' \t\r\n')
+
 /** Returns nullValue if a syntax error is detected */
 export function* parse(source: string, options?: ParseOptions): Generator<Value> {
   options = options ?? {};
@@ -143,7 +150,7 @@ export function* parse(source: string, options?: ParseOptions): Generator<Value>
   while (pos < length) {
     const char = source[pos];
     assert(char !== undefined);
-    if (' \t\r\n'.includes(char)) {
+    if (FORMATTING_CHARS.has(char)) {
       ++pos;
       continue;
     }
@@ -158,7 +165,7 @@ export function* parse(source: string, options?: ParseOptions): Generator<Value>
     let parsed: Parsed;
     if (char === '"') {
       parsed = parseString(source, pos);
-    } else if ('-+0123456789'.includes(char)) {
+    } else if ((char >= '0' && char <= '9') || char === '-' || char === '+') {
       parsed = parseNumber(source, pos);
     } else {
       parsed = parseName(source, pos);
