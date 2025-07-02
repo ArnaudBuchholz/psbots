@@ -7,51 +7,29 @@ type ParseOptions = {
   filename?: string;
 };
 
-type ParseOptionsWithSource = ParseOptions &
-  Required<Pick<ParseOptions, 'pos'>> & {
-    source: string;
-  };
-
-type AddDebugSourceOptions = ParseOptionsWithSource & {
-  length: number;
+type Parsed = {
+  endPos: number;
+  value: Value;
 };
 
-function addDebugSource(value: Value, { source, filename, pos, length }: AddDebugSourceOptions): Value {
-  if (filename === undefined) {
-    return value;
-  }
-  return Object.assign({
-    debugSource: {
-      source,
-      filename,
-      pos,
-      length
-    },
-    ...value
-  }) as Value;
-}
-
-function* parseString(options: ParseOptionsWithSource) {
-  const { source, pos } = options;
+function parseString(source: string, pos: number): Parsed {
   const endPos = source.indexOf('"', pos + 1);
   if (endPos === -1) {
-    yield addDebugSource(nullValue, { ...options, length: 1 });
-    return source.length;
+    // TODO: that should be an error
+    return { endPos: source.length, value: nullValue };
   }
-  yield addDebugSource(
-    {
+  return {
+    endPos: endPos + 1,
+    value: {
       type: 'string',
       isReadOnly: true,
       isExecutable: false,
       string: source.slice(pos + 1, endPos)
-    },
-    { ...options, length: endPos - pos + 1 }
-  );
-  return endPos + 1;
+    }
+  };
 }
 
-function* parseNumber(options: ParseOptionsWithSource) {
-  const { source, pos } = options;
+function parseNumber(source: string, pos: number): Parsed {
   const first = source[pos];
   assert(first !== undefined);
   let endPos = pos + 1;
@@ -60,82 +38,74 @@ function* parseNumber(options: ParseOptionsWithSource) {
   }
   if (endPos === pos + 1 && '+-'.includes(first)) {
     // This is a name
-    yield addDebugSource(
-      {
+    return {
+      endPos,
+      value: {
         type: 'name',
         isReadOnly: true,
         isExecutable: true,
         name: first
-      },
-      { ...options, length: 1 }
-    );
-    return endPos;
+      }
+    };
   }
-  yield addDebugSource(
-    {
+  return {
+    endPos,
+    value: {
       type: 'integer',
       isReadOnly: true,
       isExecutable: false,
       integer: Number.parseInt(source.slice(pos, endPos))
-    },
-    { ...options, length: endPos - pos }
-  );
-  return endPos;
+    }
+  };
 }
 
-function* parseName(options: ParseOptionsWithSource) {
-  const { source, pos } = options;
+function parseName(source: string, pos: number): Parsed {
   const { length } = source;
   const first = source[pos];
   assert(first !== undefined);
   if ('[]{}«»'.includes(first)) {
-    yield addDebugSource(
-      {
+    return {
+      endPos: pos + 1,
+      value: {
         type: 'name',
         isReadOnly: true,
         isExecutable: true,
         name: first
-      },
-      { ...options, length: 1 }
-    );
-    return pos + 1;
+      }
+    };
   }
   if (pos === length - 1) {
-    yield first === '/'
-      ? addDebugSource(
-          {
-            type: 'name',
-            isReadOnly: true,
-            isExecutable: true,
-            name: ''
-          },
-          { ...options, length: 1 }
-        )
-      : addDebugSource(
-          {
-            type: 'name',
-            isReadOnly: true,
-            isExecutable: true,
-            name: first
-          },
-          { ...options, length: 1 }
-        );
-    return pos + 1;
+    return {
+      endPos: pos + 1,
+      value:
+        first === '/'
+          ? {
+              type: 'name',
+              isReadOnly: true,
+              isExecutable: true,
+              name: ''
+            }
+          : {
+              type: 'name',
+              isReadOnly: true,
+              isExecutable: true,
+              name: first
+            }
+    };
   }
   let endPos = pos + 1;
   const second = source[endPos];
   assert(second !== undefined);
   if (first === second && '<>'.includes(first)) {
-    yield addDebugSource(
-      {
+    return {
+      endPos: endPos + 1,
+      value: {
         type: 'name',
         isReadOnly: true,
         isExecutable: true,
         name: first === '<' ? '<<' : '>>'
-      },
-      { ...options, length: 2 }
-    );
-    return endPos + 1;
+      }
+    };
   }
   while (endPos < length) {
     const char = source[endPos];
@@ -145,26 +115,23 @@ function* parseName(options: ParseOptionsWithSource) {
     }
     ++endPos;
   }
-  yield first === '/'
-    ? addDebugSource(
-        {
-          type: 'name',
-          isReadOnly: true,
-          isExecutable: false,
-          name: source.slice(pos + 1, endPos)
-        },
-        { ...options, length: endPos - pos }
-      )
-    : addDebugSource(
-        {
-          type: 'name',
-          isReadOnly: true,
-          isExecutable: true,
-          name: source.slice(pos, endPos)
-        },
-        { ...options, length: endPos - pos }
-      );
-  return endPos;
+  return {
+    endPos,
+    value:
+      first === '/'
+        ? {
+            type: 'name',
+            isReadOnly: true,
+            isExecutable: false,
+            name: source.slice(pos + 1, endPos)
+          }
+        : {
+            type: 'name',
+            isReadOnly: true,
+            isExecutable: true,
+            name: source.slice(pos, endPos)
+          }
+  };
 }
 
 /** Returns nullValue if a syntax error is detected */
@@ -188,12 +155,26 @@ export function* parse(source: string, options?: ParseOptions): Generator<Value>
       ++pos;
       continue;
     }
+    let parsed: Parsed;
     if (char === '"') {
-      pos = yield* parseString({ source, filename, pos });
+      parsed = parseString(source, pos);
     } else if ('-+0123456789'.includes(char)) {
-      pos = yield* parseNumber({ source, filename, pos });
+      parsed = parseNumber(source, pos);
     } else {
-      pos = yield* parseName({ source, filename, pos });
+      parsed = parseName(source, pos);
     }
+    const length = parsed.endPos - pos;
+    yield filename === undefined
+      ? parsed.value
+      : Object.assign({
+          debugSource: {
+            source,
+            filename,
+            pos,
+            length
+          },
+          ...parsed.value
+        });
+    pos = parsed.endPos;
   }
 }
