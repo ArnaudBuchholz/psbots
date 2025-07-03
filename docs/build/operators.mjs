@@ -46,3 +46,27 @@ for (const [name, label] of Object.entries(ref2)) {
     'utf8'
   );
 }
+
+// extensions (operators defined in registry but not in ref2.json)
+const extensions = Object.keys(registry).filter(([name]) => name.match(/\w+/) && !ref2.hasOwnProperty(name));
+for (const name of extensions) {
+  const markdown = [
+    '---',
+    'tags:',
+    '  - operator',
+    '  - extension',
+    '---' ,
+  ]
+  const definition = registry[name];
+  if (definition) {
+    markdown.push(
+      `🏷️ [[extension]] ${ definition.labels.map(label => '[[' + label + ']]').join(' ') }`,
+      definition.description
+    );
+  }
+  await writeFile(
+    new URL(`../operators/${name}.md`, import.meta.url),
+    markdown.join('\n'),
+    'utf8'
+  );
+}
