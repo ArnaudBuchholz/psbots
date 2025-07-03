@@ -7,7 +7,7 @@
 > 🚧 Work in progress
 
 * [List of operators](OPERATORS.md)
-* [Samples](SAMPLES.md)
+* [Samples](factorial.md)
 
 ## 🧪 Online testing
 

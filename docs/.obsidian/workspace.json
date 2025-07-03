@@ -4,21 +4,17 @@
     "type": "split",
     "children": [
       {
-        "id": "9c253bb21cc51681",
+        "id": "b6819bace94b5334",
         "type": "tabs",
         "children": [
           {
-            "id": "09ecf81215c20318",
+            "id": "60e7604c6821b42a",
             "type": "leaf",
             "state": {
-              "type": "markdown",
-              "state": {
-                "file": "OPERATORS.md",
-                "mode": "preview",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "OPERATORS"
+              "type": "graph",
+              "state": {},
+              "icon": "lucide-git-fork",
+              "title": "Graph view"
             }
           }
         ]
@@ -168,12 +164,43 @@
       "command-palette:Open command palette": false
     }
   },
-  "active": "09ecf81215c20318",
+  "active": "60e7604c6821b42a",
   "lastOpenFiles": [
-    "instructions/How to declare an operator.md",
-    "chronicles/The 5 Ws.md",
-    "chronicles/README.md",
+    "samples/factorial.md",
+    "guidelines/Operators and cycles.md",
+    "guidelines/Memory management.md",
+    "guidelines/Error mangement.md",
     "README.md",
-    "SAMPLES.md"
+    "guidelines/Garbage collection.md",
+    "Untitled.canvas",
+    "guidelines/CODING_GUIDELINES.md",
+    "samples",
+    "operators/and.md",
+    "operand.md",
+    "operators/aload.md",
+    "operators/abs.md",
+    "operators/count.md",
+    "operators/inufill.md",
+    "operators/inueofill.md",
+    "operators/currentcmykcolor.md",
+    "operators/cos.md",
+    "operators/copy.md",
+    "operators/condition.md",
+    "operators/concatmatrix.md",
+    "operators/colorimage.md",
+    "operators/closepath.md",
+    "operators/clippath.md",
+    "operators/cleartomark.md",
+    "operators/cleardictstack.md",
+    "operators/clear.md",
+    "operators/ref2.json",
+    "operators/yshow.json",
+    "operators/yield.json",
+    "operators/xyshow.json",
+    "operators/xshow.json",
+    "operators/xor.json",
+    "operators/xcheck.json",
+    "operators/wtranslation.json",
+    "operators/writestring.json"
   ]
 }
