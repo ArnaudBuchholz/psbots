@@ -4,6 +4,8 @@ import { parse } from '@babel/parser';
 import _traverse from '@babel/traverse';
 const traverse = _traverse.default;
 
+const sources = {};
+
 const red = '\u001B[31m';
 const yellow = '\u001B[33m';
 const white = '\u001B[37m';
@@ -30,27 +32,32 @@ const source = async (path) => {
   const content = await readFile(path, 'utf8');
   const ast = parse(content, { sourceType: 'module', plugins: ['typescript'] });
   await writeFile(new URL(path.toString().replace('.ts', '.ast')), JSON.stringify(ast, null, 2), { encoding: 'utf8' });
-  console.log(`${yellow}${name}${white}`);
+  // console.log(`${yellow}${name}${white}`);
+  const definition = {
+    name,
+    imports: [],
+    functions: []
+  };
   traverse(ast, {
     enter(path) {
       const { node, parent, scope } = path;
       if (node.type === 'ImportDeclaration' && node.importKind === 'value') {
-        for (const specifier of node.specifiers) {
-          console.log(`\t← ${specifier.imported.name} (${node.source.value})`);
-        }
+        // for (const specifier of node.specifiers) {
+        //   console.log(`\t← ${specifier.imported.name} (${node.source.value})`);
+        // }
       }
       if (node.type === 'ClassDeclaration') {
         const className = node.id.name;
         const exported = parent.type === 'ExportNamedDeclaration';
-        console.log(`\t${exported ? red + 'export' + white + ' ' : ''}class ${className}`);
+        // console.log(`\t${exported ? red + 'export' + white + ' ' : ''}class ${className}`);
         scope.traverse(node, {
           enter({ scope, node }) {
             if (node.type === 'ClassMethod') {
-              console.log(`\t${className}::${node.key.name}`);
+              // console.log(`\t${className}::${node.key.name}`);
               const calls = searchForCalls(scope, node);
               if (calls.size > 0) {
                 for (const [name, { count }] of calls.entries()) {
-                  console.log(`\t  → ${name}${count > 1 ? ' (' + count + ')' : ''}`);
+                  // console.log(`\t  → ${name}${count > 1 ? ' (' + count + ')' : ''}`);
                 }
               }
             }
@@ -60,16 +67,17 @@ const source = async (path) => {
       if (node.type === 'FunctionDeclaration') {
         const name = node.id.name;
         const exported = parent.type === 'ExportNamedDeclaration';
-        console.log(`\t${exported ? red + 'export' + white + ' ' : ''}function ${name}`);
+        // console.log(`\t${exported ? red + 'export' + white + ' ' : ''}function ${name}`);
         const calls = searchForCalls(scope, node);
         if (calls.size > 0) {
           for (const [name, { count }] of calls.entries()) {
-            console.log(`\t  → ${name}${count > 1 ? ' (' + count + ')' : ''}`);
+            // console.log(`\t  → ${name}${count > 1 ? ' (' + count + ')' : ''}`);
           }
         }
       }
     }
   });
+  sources[name] = definition;
 };
 
 const lookup = async (path) => {
@@ -86,4 +94,8 @@ const lookup = async (path) => {
   }
 };
 
-void lookup(new URL('../../engine/src/', import.meta.url), 'utf8');
+await lookup(new URL('../../engine/src/', import.meta.url), 'utf8');
+
+for(const [name, definition] of Object.entries(sources)) {
+  console.log(`${yellow}${name}${white}`);
+}
