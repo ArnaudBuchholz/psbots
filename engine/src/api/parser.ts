@@ -139,7 +139,7 @@ function parseName(source: string, pos: number): Parsed {
   };
 }
 
-const FORMATTING_CHARS = new Set(' \t\r\n')
+const FORMATTING_CHARS = new Set(' \t\r\n');
 
 /** Returns nullValue if a syntax error is detected */
 export function* parse(source: string, options?: ParseOptions): Generator<Value> {
