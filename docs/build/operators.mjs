@@ -48,7 +48,7 @@ for (const [name, label] of Object.entries(ref2)) {
 }
 
 // extensions (operators defined in registry but not in ref2.json)
-const extensions = Object.keys(registry).filter(([name]) => name.match(/\w+/) && !ref2.hasOwnProperty(name));
+const extensions = Object.keys(registry).filter((name) => name.match(/\w+/) && !ref2.hasOwnProperty(name));
 for (const name of extensions) {
   const markdown = [
     '---',
