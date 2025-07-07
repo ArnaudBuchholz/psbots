@@ -5,6 +5,7 @@ import _traverse from '@babel/traverse';
 const traverse = _traverse.default;
 
 const sources = {};
+const exportedFunctions = {};
 
 const red = '\u001B[31m';
 const yellow = '\u001B[33m';
@@ -72,14 +73,24 @@ const source = async (path) => {
             }
           }
         });
+        definition.classes.push(classDefinition);
         path.skip();
       }
       if (node.type === 'FunctionDeclaration') {
-        definition.functions.push({
-          name: node.id.name,
-          exported: parent.type === 'ExportNamedDeclaration',
+        const name = node.id.name;
+        const exported = parent.type === 'ExportNamedDeclaration';
+        const functionDefinition = {
+          name,
+          exported,
           calls: searchForCalls(scope, node)
-        })
+        };
+        definition.functions.push(functionDefinition);
+        if (exported) {
+          if (exportedFunctions[name]) {
+            throw new Error(`❌ duplicate exported function name: ${name}`);
+          }
+          exportedFunctions[name] = functionDefinition;
+        }
         path.skip();
       }
       if (node.type === 'ArrowFunctionExpression') {
@@ -112,6 +123,7 @@ const lookup = async (path) => {
 await lookup(new URL('../../engine/src/', import.meta.url), 'utf8');
 
 const names = Object.keys(sources).sort((a, b) => a.localeCompare(b));
+
 for(const name of names) {
   const definition = sources[name];
   console.log(`${yellow}${name}${white}`);
