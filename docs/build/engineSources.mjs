@@ -163,7 +163,9 @@ for(const name of names) {
 
 const markdown = [
   '# Sources',
+  '',
   '## Dependencies',
+  '',
 ];
 
 for(const name of names) {
@@ -172,22 +174,22 @@ for(const name of names) {
   markdown.push(`### ${name}`);
   for (const { name, from } of definition.imports) {
     console.log(`\t← ${name} (${from})`);
-    markdown.push(`\n* ← ${name} (${from})`);
+    // markdown.push(`\n* ← ${name} (${from})`);
   }
   for (const [name, { count }] of definition.calls.entries()) {
     console.log(`\t→ ${name}${count > 1 ? ' (' + count + ')' : ''}`);
-    markdown.push(`\n* → ${name}${count > 1 ? ' (' + count + ')' : ''}`);
+    markdown.push(`\n→ \`${name}\`${count > 1 ? ' (' + count + ')' : ''}`);
   }
   for (const { name: className, exported, methods } of definition.classes) {
     console.log(`\t${exported ? red + 'export' + white + ' ' : ''}class ${className}`);
-    markdown.push(`\n${exported ? '<span style="color: red;">export</span> ' : ''}class ${className}`);
+    markdown.push(`\n${exported ? '<span style="color: red;"><code>export</code></span> ' : ''}\`class ${className}\``);
     for (const { name: methodName, calls } of methods) {
       if (calls.size) {
         console.log(`\t${className}::${methodName}`);
-        markdown.push(`  ${className}::${methodName}`);
+        markdown.push(`\n\`${className}::${methodName}\``);
         for (const [name, { count }] of calls.entries()) {
           console.log(`\t  → ${name}${count > 1 ? ' (' + count + ')' : ''}`);
-          markdown.push(`\n*  → ${name}${count > 1 ? ' (' + count + ')' : ''}`);
+          markdown.push(`\n  → \`${name}\`${count > 1 ? ' (' + count + ')' : ''}`);
         }
       }
     }
@@ -195,10 +197,10 @@ for(const name of names) {
   for (const { name: functionName, exported, calls, externalCalls } of definition.functions) {
     if (exported || calls.size) {
       console.log(`\t${exported ? red + 'export' + white + ' ' : ''}function ${functionName} ${ externalCalls ? '(' + externalCalls + ')' : '' }`);
-      markdown.push(`\n${exported ? '<span style="color: red;">export</span> ' : ''}function ${functionName} ${ externalCalls ? '(' + externalCalls + ')' : '' }`);
+      markdown.push(`\n${exported ? '<span style="color: red;"><code>export</code></span> ' : ''}\`function ${functionName} ${ externalCalls ? '(' + externalCalls + ')' : '' }\``);
       for (const [name, { count }] of calls.entries()) {
           console.log(`\t  → ${name}${count > 1 ? ' (' + count + ')' : ''}`);
-          markdown.push(`\n*  → ${name}${count > 1 ? ' (' + count + ')' : ''}`);
+          markdown.push(`\n  → \`${name}\`${count > 1 ? ' (' + count + ')' : ''}`);
       }
     }
   }
@@ -209,13 +211,34 @@ markdown.push(
   '```mermaid',
   'graph LR'
 );
+let index = 0;
+console.log('names: ', names.length);
 for(const name of names) {
   const definition = sources[name];
+  if (definition.calls.size === 0 && definition.functions.length === 0 && definition.classes.length === 0) {
+    continue;
+  }
   markdown.push(`  subgraph ${name}`);
   for (const [name, { count }] of definition.calls.entries()) {
     markdown.push(`    main_${definition.id}("main") --> ${name};`);
+  }
+  if (++index < 100) // TODO: seems to be limited to 100 subgraphs
+  // if (['core/MemoryTracker.ts', 'core/operators/openClose.ts', 'core/state/operator.ts', 'core/operators/operators.ts'].includes(name))
+  for (const { name: functionName, exported, calls, externalCalls } of definition.functions) {
+    if (exported) {
+      if (functionName === '(anonymous arrow)') {
+        markdown.push(     `anon_${definition.id}("(anonymous arrow)");`);
+      } else {
+        markdown.push(`    ${functionName};`);
+      }
+      // for (const [name, { count }] of calls.entries()) {
+      //     console.log(`\t  → ${name}${count > 1 ? ' (' + count + ')' : ''}`);
+      //     markdown.push(`\n  → \`${name}\`${count > 1 ? ' (' + count + ')' : ''}`);
+      // }
+    }
   }
   markdown.push(`  end`);
 }
 markdown.push('```');
 await writeFile(new URL('../engine/sources.md', import.meta.url), markdown.join('\n'), 'utf8')
+console.log('final index: ', index);
