@@ -1,5 +1,7 @@
 # Sources
+
 ## Dependencies
+
 ### api/Exception.ts
 ### api/interfaces/IAbstractOperator.ts
 ### api/interfaces/IAbstractValue.ts
@@ -9,50 +11,44 @@
 ### api/interfaces/IMemoryTracker.ts
 ### api/interfaces/IReadOnlyArray.ts
 
-<span style="color: red;">export</span> function enumIArrayValues 
+<span style="color: red;"><code>export</code></span> `function enumIArrayValues `
 ### api/interfaces/IReadOnlyCallStack.ts
 ### api/interfaces/IReadOnlyDictionary.ts
 
-<span style="color: red;">export</span> function enumIDictionaryValues (1)
+<span style="color: red;"><code>export</code></span> `function enumIDictionaryValues (1)`
 
-<span style="color: red;">export</span> function convertIDictionaryToObject 
+<span style="color: red;"><code>export</code></span> `function convertIDictionaryToObject `
 
-*  → enumIDictionaryValues
+  → `enumIDictionaryValues`
 ### api/interfaces/IState.ts
 ### api/interfaces/IValueTracker.ts
 ### api/parser.ts
 
-* ← nullValue (./values/NullValue.js)
+`function parseNumber `
 
-* ← assert (@sdk/assert.js)
+  → `assert`
 
-function parseNumber 
+`function parseName `
 
-*  → assert
+  → `assert` (3)
 
-function parseName 
+<span style="color: red;"><code>export</code></span> `function parse (3)`
 
-*  → assert (3)
+  → `assert`
 
-<span style="color: red;">export</span> function parse (3)
+  → `parseString`
 
-*  → assert
+  → `parseNumber`
 
-*  → parseString
-
-*  → parseNumber
-
-*  → parseName
+  → `parseName`
 ### api/Result.ts
 ### api/run.ts
 
-* ← toStringValue (@sdk/toValue.js)
+<span style="color: red;"><code>export</code></span> `class RunError`
 
-<span style="color: red;">export</span> class RunError
+<span style="color: red;"><code>export</code></span> `function run `
 
-<span style="color: red;">export</span> function run 
-
-*  → toStringValue
+  → `toStringValue`
 ### api/values/ArrayValue.ts
 ### api/values/BooleanValue.ts
 ### api/values/DictionaryValue.ts
@@ -66,1230 +62,760 @@ function parseName
 ### api/values/ValueType.ts
 ### core/MemoryTracker.ts
 
-* ← SYSTEM_MEMORY_TYPE (@api/index.js)
+<span style="color: red;"><code>export</code></span> `class MemoryTracker`
 
-* ← assert (@sdk/index.js)
+`MemoryTracker::isAvailable`
 
-* ← valuesOf (@sdk/index.js)
+  → `assert` (2)
 
-* → Symbol
+  → `memorySizeToBytes`
 
-<span style="color: red;">export</span> class MemoryTracker
-  MemoryTracker::isAvailable
+`MemoryTracker::allocate`
 
-*  → assert (2)
+  → `assert`
 
-*  → memorySizeToBytes
-  MemoryTracker::allocate
+`MemoryTracker::register`
 
-*  → assert
-  MemoryTracker::register
+  → `assert` (3)
 
-*  → assert (3)
-  MemoryTracker::addStringRef
+`MemoryTracker::addStringRef`
 
-*  → stringSizer
+  → `stringSizer`
 
-*  → memorySizeToBytes
-  MemoryTracker::releaseString
+  → `memorySizeToBytes`
 
-*  → assert
+`MemoryTracker::releaseString`
 
-*  → stringSizer
+  → `assert`
 
-*  → memorySizeToBytes
-  MemoryTracker::snapshot
+  → `stringSizer`
 
-*  → stringSizer
-  MemoryTracker::addValueRef
+  → `memorySizeToBytes`
 
-*  → valuesOf
+`MemoryTracker::snapshot`
 
-*  → assert (3)
-  MemoryTracker::releaseValue
+  → `stringSizer`
 
-*  → valuesOf
+`MemoryTracker::addValueRef`
 
-*  → assert
+  → `valuesOf`
 
-<span style="color: red;">export</span> function addMemorySize (4)
+  → `assert` (3)
 
-<span style="color: red;">export</span> function memorySizeToBytes (3)
+`MemoryTracker::releaseValue`
+
+  → `valuesOf`
+
+  → `assert`
+
+<span style="color: red;"><code>export</code></span> `function addMemorySize (4)`
+
+<span style="color: red;"><code>export</code></span> `function memorySizeToBytes (3)`
 ### core/objects/AbstractValueContainer.ts
 
-* ← nullValue (@api/index.js)
+<span style="color: red;"><code>export</code></span> `class AbstractValueContainer`
 
-* ← assert (@sdk/index.js)
+`AbstractValueContainer::toValue`
 
-* ← addMemorySize (@core/MemoryTracker.js)
+  → `assert`
 
-* ← ShareableObject (@core/objects/ShareableObject.js)
+`AbstractValueContainer::constructor`
 
-<span style="color: red;">export</span> class AbstractValueContainer
-  AbstractValueContainer::toValue
+  → `assert` (3)
 
-*  → assert
-  AbstractValueContainer::constructor
+`AbstractValueContainer::createInstance`
 
-*  → assert (3)
-  AbstractValueContainer::createInstance
+  → `assert` (2)
 
-*  → assert (2)
-  AbstractValueContainer::getSize
+`AbstractValueContainer::getSize`
 
-*  → addMemorySize
-  AbstractValueContainer::reserve
+  → `addMemorySize`
 
-*  → assert
-  AbstractValueContainer::swap
+`AbstractValueContainer::reserve`
 
-*  → assert
+  → `assert`
+
+`AbstractValueContainer::swap`
+
+  → `assert`
 ### core/objects/dictionaries/Dictionary.ts
 
-* ← nullValue (@api/index.js)
+<span style="color: red;"><code>export</code></span> `class Dictionary`
 
-* ← addMemorySize (@core/MemoryTracker.js)
+`Dictionary::toValue`
 
-* ← ShareableObject (@core/objects/ShareableObject.js)
+  → `assert`
 
-* ← assert (@sdk/index.js)
+`Dictionary::constructor`
 
-<span style="color: red;">export</span> class Dictionary
-  Dictionary::toValue
+  → `assert`
 
-*  → assert
-  Dictionary::constructor
+`Dictionary::getSize`
 
-*  → assert
-  Dictionary::getSize
+  → `addMemorySize`
 
-*  → addMemorySize
-  Dictionary::def
+`Dictionary::def`
 
-*  → assert
+  → `assert`
 ### core/objects/dictionaries/Empty.ts
 
-* ← nullValue (@api/index.js)
+<span style="color: red;"><code>export</code></span> `class EmptyDictionary`
 
-* ← assert (@sdk/index.js)
+`EmptyDictionary::def`
 
-<span style="color: red;">export</span> class EmptyDictionary
-  EmptyDictionary::def
-
-*  → assert (2)
+  → `assert` (2)
 ### core/objects/dictionaries/System.ts
 
-* ← nullValue (@api/index.js)
-
-* ← registry (@core/operators/index.js)
-
-<span style="color: red;">export</span> class SystemDictionary
+<span style="color: red;"><code>export</code></span> `class SystemDictionary`
 ### core/objects/ShareableObject.ts
 
-* ← assert (@sdk/index.js)
+<span style="color: red;"><code>export</code></span> `class ShareableObject`
 
-<span style="color: red;">export</span> class ShareableObject
-  ShareableObject::release
+`ShareableObject::release`
 
-*  → assert
+  → `assert`
 
-function getShareableObject 
+`function getShareableObject `
 
-*  → assert
+  → `assert`
 ### core/objects/stacks/CallStack.ts
 
-* ← nullValue (@api/index.js)
+<span style="color: red;"><code>export</code></span> `class CallStack`
 
-* ← SYSTEM_MEMORY_TYPE (@api/index.js)
+`CallStack::create`
 
-* ← OPERATOR_STATE_UNKNOWN (@sdk/index.js)
+  → `assert`
 
-* ← OPERATOR_STATE_FIRST_CALL (@sdk/index.js)
+`CallStack::getSize`
 
-* ← OPERATOR_STATE_POP (@sdk/index.js)
+  → `addMemorySize`
 
-* ← OPERATOR_STATE_CALL_BEFORE_POP (@sdk/index.js)
+`CallStack::getIncrementSize`
 
-* ← assert (@sdk/index.js)
+  → `addMemorySize`
 
-* ← addMemorySize (@core/MemoryTracker.js)
+`CallStack::topOperatorState`
 
-* ← ValueStack (@core/objects/stacks/ValueStack.js)
+  → `assert`
 
-* ← Dictionary (@core/objects/dictionaries/Dictionary.js)
+`CallStack::topOperatorState`
 
-<span style="color: red;">export</span> class CallStack
-  CallStack::create
-
-*  → assert
-  CallStack::getSize
-
-*  → addMemorySize
-  CallStack::getIncrementSize
-
-*  → addMemorySize
-  CallStack::topOperatorState
-
-*  → assert
-  CallStack::topOperatorState
-
-*  → assert
+  → `assert`
 ### core/objects/stacks/DictionaryStack.ts
 
-* ← SYSTEM_MEMORY_TYPE (@api/index.js)
+<span style="color: red;"><code>export</code></span> `class DictionaryStack`
 
-* ← assert (@sdk/index.js)
+`DictionaryStack::create`
 
-* ← ValueStack (@core/objects/stacks/ValueStack.js)
+  → `assert` (2)
 
-* ← SystemDictionary (@core/objects/dictionaries/System.js)
+`DictionaryStack::getDictionaryValue`
 
-* ← EmptyDictionary (@core/objects/dictionaries/Empty.js)
+  → `assert`
 
-<span style="color: red;">export</span> class DictionaryStack
-  DictionaryStack::create
+`DictionaryStack::setGlobal`
 
-*  → assert (2)
-  DictionaryStack::getDictionaryValue
+  → `assert`
 
-*  → assert
-  DictionaryStack::setGlobal
+`DictionaryStack::setUser`
 
-*  → assert
-  DictionaryStack::setUser
-
-*  → assert
+  → `assert`
 ### core/objects/stacks/ValueStack.ts
 
-* ← nullValue (@api/index.js)
-
-* ← AbstractValueContainer (@core/objects/AbstractValueContainer.js)
-
-<span style="color: red;">export</span> class ValueStack
+<span style="color: red;"><code>export</code></span> `class ValueStack`
 ### core/objects/ValueArray.ts
 
-* ← nullValue (@api/index.js)
+<span style="color: red;"><code>export</code></span> `class ValueArray`
 
-* ← assert (@sdk/index.js)
+`ValueArray::toValue`
 
-* ← AbstractValueContainer (@core/objects/AbstractValueContainer.js)
-
-<span style="color: red;">export</span> class ValueArray
-  ValueArray::toValue
-
-*  → assert
+  → `assert`
 ### core/operators/array/aload.ts
 
-* ← OPERATOR_STATE_FIRST_CALL (@sdk/index.js)
+→ `buildFunctionOperator`
 
-* ← OPERATOR_STATE_POP (@sdk/index.js)
+`function (anonymous arrow) `
 
-* ← buildFunctionOperator (@core/operators/operators.js)
-
-* ← assert (@sdk/assert.js)
-
-* → buildFunctionOperator
-
-function (anonymous arrow) 
-
-*  → assert
+  → `assert`
 ### core/operators/array/closeArray.ts
 
-* ← buildFunctionOperator (@core/operators/operators.js)
+→ `buildFunctionOperator`
 
-* ← closeToMark (@core/operators/openClose.js)
+`function (anonymous arrow) `
 
-* → buildFunctionOperator
-
-function (anonymous arrow) 
-
-*  → closeToMark
+  → `closeToMark`
 ### core/operators/array/openArray.ts
 
-* ← buildFunctionOperator (@core/operators/operators.js)
-
-* ← openWithMark (@core/operators/openClose.js)
-
-* → buildFunctionOperator
+→ `buildFunctionOperator`
 ### core/operators/boolean/and.ts
 
-* ← falseValue (@api/index.js)
-
-* ← trueValue (@api/index.js)
-
-* ← buildFunctionOperator (@core/operators/operators.js)
-
-* → buildFunctionOperator
+→ `buildFunctionOperator`
 ### core/operators/boolean/or.ts
 
-* ← falseValue (@api/index.js)
-
-* ← trueValue (@api/index.js)
-
-* ← buildFunctionOperator (@core/operators/operators.js)
-
-* → buildFunctionOperator
+→ `buildFunctionOperator`
 ### core/operators/boolean/xor.ts
 
-* ← falseValue (@api/index.js)
-
-* ← trueValue (@api/index.js)
-
-* ← buildFunctionOperator (@core/operators/operators.js)
-
-* → buildFunctionOperator
+→ `buildFunctionOperator`
 ### core/operators/dictionary/closeDictionary.ts
 
-* ← USER_MEMORY_TYPE (@api/index.js)
+→ `buildFunctionOperator`
 
-* ← findMarkPos (@sdk/index.js)
+`function (anonymous arrow) `
 
-* ← valuesOf (@sdk/index.js)
+  → `findMarkPos`
 
-* ← buildFunctionOperator (@core/operators/operators.js)
+  → `valuesOf`
 
-* ← pushOpenClosedValueWithDebugInfo (@core/operators/openClose.js)
-
-* ← Dictionary (@core/objects/dictionaries/Dictionary.js)
-
-* → buildFunctionOperator
-
-function (anonymous arrow) 
-
-*  → findMarkPos
-
-*  → valuesOf
-
-*  → pushOpenClosedValueWithDebugInfo
+  → `pushOpenClosedValueWithDebugInfo`
 ### core/operators/dictionary/openDictionary.ts
 
-* ← buildFunctionOperator (@core/operators/operators.js)
+→ `buildFunctionOperator`
 
-* ← openWithMark (@core/operators/openClose.js)
+`function (anonymous arrow) `
 
-* → buildFunctionOperator
-
-function (anonymous arrow) 
-
-*  → openWithMark
+  → `openWithMark`
 ### core/operators/exceptions/dictStackUnderflow.ts
 
-* ← buildFunctionOperator (@core/operators/operators.js)
-
-* → buildFunctionOperator
+→ `buildFunctionOperator`
 ### core/operators/exceptions/invalidAccess.ts
 
-* ← buildFunctionOperator (@core/operators/operators.js)
-
-* → buildFunctionOperator
+→ `buildFunctionOperator`
 ### core/operators/exceptions/limitcheck.ts
 
-* ← buildFunctionOperator (@core/operators/operators.js)
-
-* → buildFunctionOperator
+→ `buildFunctionOperator`
 ### core/operators/exceptions/rangeCheck.ts
 
-* ← buildFunctionOperator (@core/operators/operators.js)
-
-* → buildFunctionOperator
+→ `buildFunctionOperator`
 ### core/operators/exceptions/stackUnderflow.ts
 
-* ← buildFunctionOperator (@core/operators/operators.js)
-
-* → buildFunctionOperator
+→ `buildFunctionOperator`
 ### core/operators/exceptions/stop.ts
 
-* ← buildFunctionOperator (@core/operators/operators.js)
-
-* → buildFunctionOperator
+→ `buildFunctionOperator`
 ### core/operators/exceptions/typeCheck.ts
 
-* ← buildFunctionOperator (@core/operators/operators.js)
-
-* → buildFunctionOperator
+→ `buildFunctionOperator`
 ### core/operators/exceptions/undefined.ts
 
-* ← buildFunctionOperator (@core/operators/operators.js)
-
-* → buildFunctionOperator
+→ `buildFunctionOperator`
 ### core/operators/exceptions/undefinedResult.ts
 
-* ← buildFunctionOperator (@core/operators/operators.js)
-
-* → buildFunctionOperator
+→ `buildFunctionOperator`
 ### core/operators/exceptions/unmatchedMark.ts
 
-* ← buildFunctionOperator (@core/operators/operators.js)
-
-* → buildFunctionOperator
+→ `buildFunctionOperator`
 ### core/operators/exceptions/vmOverflow.ts
 
-* ← buildFunctionOperator (@core/operators/operators.js)
-
-* → buildFunctionOperator
+→ `buildFunctionOperator`
 ### core/operators/flow/closeBlock.ts
 
-* ← OPERATOR_STATE_FIRST_CALL (@sdk/index.js)
+→ `buildFunctionOperator`
 
-* ← buildFunctionOperator (@core/operators/operators.js)
+`function (anonymous arrow) `
 
-* ← closeToMark (@core/operators/openClose.js)
-
-* → buildFunctionOperator
-
-function (anonymous arrow) 
-
-*  → closeToMark
+  → `closeToMark`
 ### core/operators/flow/finally.ts
 
-* ← nullValue (@api/index.js)
+→ `buildFunctionOperator`
 
-* ← OPERATOR_STATE_POP (@sdk/index.js)
+`function firstCall `
 
-* ← OPERATOR_STATE_FIRST_CALL (@sdk/index.js)
+  → `assert`
 
-* ← OPERATOR_STATE_CALL_BEFORE_POP (@sdk/index.js)
+`function callBeforePop `
 
-* ← toStringValue (@sdk/index.js)
+  → `toStringValue`
 
-* ← assert (@sdk/index.js)
+  → `assert` (2)
 
-* ← buildFunctionOperator (@core/operators/operators.js)
+`function popping `
 
-* ← CallStack (@core/objects/stacks/CallStack.js)
+  → `assert` (2)
 
-* → buildFunctionOperator
+`function (anonymous arrow) `
 
-function firstCall 
+  → `firstCall`
 
-*  → assert
+  → `callBeforePop`
 
-function callBeforePop 
+  → `assert`
 
-*  → toStringValue
-
-*  → assert (2)
-
-function popping 
-
-*  → assert (2)
-
-function (anonymous arrow) 
-
-*  → firstCall
-
-*  → callBeforePop
-
-*  → assert
-
-*  → popping
+  → `popping`
 ### core/operators/flow/gc.ts
 
-* ← assert (@sdk/index.js)
+→ `buildFunctionOperator`
 
-* ← OPERATOR_STATE_FIRST_CALL (@sdk/index.js)
+`function (anonymous arrow) `
 
-* ← OPERATOR_STATE_POP (@sdk/index.js)
-
-* ← buildFunctionOperator (@core/operators/operators.js)
-
-* ← MemoryTracker (@core/MemoryTracker.js)
-
-* → buildFunctionOperator
-
-function (anonymous arrow) 
-
-*  → assert
+  → `assert`
 ### core/operators/flow/if.ts
 
-* ← buildFunctionOperator (@core/operators/operators.js)
-
-* → buildFunctionOperator
+→ `buildFunctionOperator`
 ### core/operators/flow/ifelse.ts
 
-* ← buildFunctionOperator (@core/operators/operators.js)
-
-* → buildFunctionOperator
+→ `buildFunctionOperator`
 ### core/operators/flow/loop.ts
 
-* ← OPERATOR_STATE_POP (@sdk/index.js)
+→ `buildFunctionOperator`
 
-* ← OPERATOR_STATE_FIRST_CALL (@sdk/index.js)
+`function (anonymous arrow) `
 
-* ← OPERATOR_STATE_CALL_BEFORE_POP (@sdk/index.js)
-
-* ← assert (@sdk/index.js)
-
-* ← buildFunctionOperator (@core/operators/operators.js)
-
-* → buildFunctionOperator
-
-function (anonymous arrow) 
-
-*  → assert
+  → `assert`
 ### core/operators/flow/openBlock.ts
 
-* ← buildFunctionOperator (@core/operators/operators.js)
+→ `buildFunctionOperator`
 
-* ← openWithMark (@core/operators/openClose.js)
+`function (anonymous arrow) `
 
-* → buildFunctionOperator
-
-function (anonymous arrow) 
-
-*  → openWithMark
+  → `openWithMark`
 ### core/operators/flow/repeat.ts
 
-* ← OPERATOR_STATE_POP (@sdk/index.js)
+→ `buildFunctionOperator`
 
-* ← OPERATOR_STATE_FIRST_CALL (@sdk/index.js)
+`function (anonymous arrow) `
 
-* ← buildFunctionOperator (@core/operators/operators.js)
+  → `firstCall`
 
-* → buildFunctionOperator
-
-function (anonymous arrow) 
-
-*  → firstCall
-
-*  → repeat
+  → `repeat`
 ### core/operators/flow/stopped.ts
 
-* ← falseValue (@api/index.js)
+→ `buildFunctionOperator`
 
-* ← trueValue (@api/index.js)
+`function (anonymous arrow) `
 
-* ← OPERATOR_STATE_POP (@sdk/index.js)
-
-* ← OPERATOR_STATE_FIRST_CALL (@sdk/index.js)
-
-* ← OPERATOR_STATE_CALL_BEFORE_POP (@sdk/index.js)
-
-* ← assert (@sdk/index.js)
-
-* ← buildFunctionOperator (@core/operators/operators.js)
-
-* → buildFunctionOperator
-
-function (anonymous arrow) 
-
-*  → assert
+  → `assert`
 ### core/operators/integer/abs.ts
 
-* ← toIntegerValue (@sdk/index.js)
+→ `buildFunctionOperator`
 
-* ← buildFunctionOperator (@core/operators/operators.js)
+`function (anonymous arrow) `
 
-* → buildFunctionOperator
-
-function (anonymous arrow) 
-
-*  → toIntegerValue
+  → `toIntegerValue`
 ### core/operators/integer/add.ts
 
-* ← toIntegerValue (@sdk/index.js)
+→ `buildFunctionOperator`
 
-* ← buildFunctionOperator (@core/operators/operators.js)
+`function (anonymous arrow) `
 
-* → buildFunctionOperator
-
-function (anonymous arrow) 
-
-*  → toIntegerValue
+  → `toIntegerValue`
 ### core/operators/integer/div.ts
 
-* ← toIntegerValue (@sdk/index.js)
+→ `buildFunctionOperator`
 
-* ← buildFunctionOperator (@core/operators/operators.js)
+`function (anonymous arrow) `
 
-* → buildFunctionOperator
-
-function (anonymous arrow) 
-
-*  → toIntegerValue (2)
+  → `toIntegerValue` (2)
 ### core/operators/integer/gt.ts
 
-* ← falseValue (@api/index.js)
-
-* ← trueValue (@api/index.js)
-
-* ← buildFunctionOperator (@core/operators/operators.js)
-
-* → buildFunctionOperator
+→ `buildFunctionOperator`
 ### core/operators/integer/gte.ts
 
-* ← falseValue (@api/index.js)
-
-* ← trueValue (@api/index.js)
-
-* ← buildFunctionOperator (@core/operators/operators.js)
-
-* → buildFunctionOperator
+→ `buildFunctionOperator`
 ### core/operators/integer/lt.ts
 
-* ← trueValue (@api/index.js)
-
-* ← falseValue (@api/index.js)
-
-* ← buildFunctionOperator (@core/operators/operators.js)
-
-* → buildFunctionOperator
+→ `buildFunctionOperator`
 ### core/operators/integer/lte.ts
 
-* ← trueValue (@api/index.js)
-
-* ← falseValue (@api/index.js)
-
-* ← buildFunctionOperator (@core/operators/operators.js)
-
-* → buildFunctionOperator
+→ `buildFunctionOperator`
 ### core/operators/integer/mul.ts
 
-* ← toIntegerValue (@sdk/index.js)
+→ `buildFunctionOperator`
 
-* ← buildFunctionOperator (@core/operators/operators.js)
+`function (anonymous arrow) `
 
-* → buildFunctionOperator
-
-function (anonymous arrow) 
-
-*  → toIntegerValue
+  → `toIntegerValue`
 ### core/operators/integer/sub.ts
 
-* ← toIntegerValue (@sdk/index.js)
+→ `buildFunctionOperator`
 
-* ← buildFunctionOperator (@core/operators/operators.js)
+`function (anonymous arrow) `
 
-* → buildFunctionOperator
-
-function (anonymous arrow) 
-
-*  → toIntegerValue
+  → `toIntegerValue`
 ### core/operators/openClose.ts
 
-* ← USER_MEMORY_TYPE (@api/index.js)
+<span style="color: red;"><code>export</code></span> `function openWithMark (2)`
 
-* ← markValue (@api/index.js)
+<span style="color: red;"><code>export</code></span> `function pushOpenClosedValueWithDebugInfo (2)`
 
-* ← assert (@sdk/index.js)
+<span style="color: red;"><code>export</code></span> `function closeToMark (2)`
 
-* ← findMarkPos (@sdk/index.js)
+  → `findMarkPos`
 
-* ← OPERATOR_STATE_FIRST_CALL (@sdk/index.js)
+  → `toIntegerValue`
 
-* ← OPERATOR_STATE_POP (@sdk/index.js)
+  → `assert` (4)
 
-* ← toIntegerValue (@sdk/index.js)
-
-* ← ValueArray (@core/objects/ValueArray.js)
-
-<span style="color: red;">export</span> function openWithMark (2)
-
-<span style="color: red;">export</span> function pushOpenClosedValueWithDebugInfo (2)
-
-<span style="color: red;">export</span> function closeToMark (2)
-
-*  → findMarkPos
-
-*  → toIntegerValue
-
-*  → assert (4)
-
-*  → pushOpenClosedValueWithDebugInfo
+  → `pushOpenClosedValueWithDebugInfo`
 ### core/operators/operators.ts
 
-* ← assert (@sdk/index.js)
+<span style="color: red;"><code>export</code></span> `function buildFunctionOperator (68)`
 
-* ← OperatorType (@sdk/index.js)
+  → `assert`
 
-<span style="color: red;">export</span> function buildFunctionOperator (68)
-
-*  → assert
-
-<span style="color: red;">export</span> function buildConstantOperator (4)
+<span style="color: red;"><code>export</code></span> `function buildConstantOperator (4)`
 ### core/operators/stacks/call/countexecstack.ts
 
-* ← assert (@sdk/index.js)
+→ `buildFunctionOperator`
 
-* ← toIntegerValue (@sdk/index.js)
+`function (anonymous arrow) `
 
-* ← buildFunctionOperator (@core/operators/operators.js)
+  → `toIntegerValue`
 
-* → buildFunctionOperator
-
-function (anonymous arrow) 
-
-*  → toIntegerValue
-
-*  → assert
+  → `assert`
 ### core/operators/stacks/dictionary/begin.ts
 
-* ← buildFunctionOperator (@core/operators/operators.js)
-
-* → buildFunctionOperator
+→ `buildFunctionOperator`
 ### core/operators/stacks/dictionary/bind.ts
 
-* ← assert (@sdk/index.js)
+→ `buildFunctionOperator`
 
-* ← isArrayValue (@sdk/index.js)
+`function bindValue `
 
-* ← OPERATOR_STATE_POP (@sdk/index.js)
+  → `bindName`
 
-* ← ValueArray (@core/objects/ValueArray.js)
+  → `assert`
 
-* ← buildFunctionOperator (@core/operators/operators.js)
+  → `bindArray`
 
-* ← pop (@core/operators/stacks/operand/pop.js)
+`function (anonymous arrow) `
 
-* → buildFunctionOperator
+  → `assert` (2)
 
-function bindValue 
+  → `isArrayValue`
 
-*  → bindName
-
-*  → assert
-
-*  → bindArray
-
-function (anonymous arrow) 
-
-*  → assert (2)
-
-*  → isArrayValue
-
-*  → bindValue
+  → `bindValue`
 ### core/operators/stacks/dictionary/countdictstack.ts
 
-* ← assert (@sdk/index.js)
+→ `buildFunctionOperator`
 
-* ← toIntegerValue (@sdk/index.js)
+`function (anonymous arrow) `
 
-* ← buildFunctionOperator (@core/operators/operators.js)
+  → `toIntegerValue`
 
-* → buildFunctionOperator
-
-function (anonymous arrow) 
-
-*  → toIntegerValue
-
-*  → assert
+  → `assert`
 ### core/operators/stacks/dictionary/currentdict.ts
 
-* ← buildFunctionOperator (@core/operators/operators.js)
-
-* → buildFunctionOperator
+→ `buildFunctionOperator`
 ### core/operators/stacks/dictionary/def.ts
 
-* ← buildFunctionOperator (@core/operators/operators.js)
-
-* → buildFunctionOperator
+→ `buildFunctionOperator`
 ### core/operators/stacks/dictionary/end.ts
 
-* ← buildFunctionOperator (@core/operators/operators.js)
-
-* → buildFunctionOperator
+→ `buildFunctionOperator`
 ### core/operators/stacks/dictionary/globaldict.ts
 
-* ← buildFunctionOperator (@core/operators/operators.js)
-
-* → buildFunctionOperator
+→ `buildFunctionOperator`
 ### core/operators/stacks/dictionary/hostdict.ts
 
-* ← buildFunctionOperator (@core/operators/operators.js)
-
-* → buildFunctionOperator
+→ `buildFunctionOperator`
 ### core/operators/stacks/dictionary/systemdict.ts
 
-* ← buildFunctionOperator (@core/operators/operators.js)
-
-* → buildFunctionOperator
+→ `buildFunctionOperator`
 ### core/operators/stacks/dictionary/userdict.ts
 
-* ← buildFunctionOperator (@core/operators/operators.js)
-
-* → buildFunctionOperator
+→ `buildFunctionOperator`
 ### core/operators/stacks/operand/clear.ts
 
-* ← buildFunctionOperator (@core/operators/operators.js)
-
-* → buildFunctionOperator
+→ `buildFunctionOperator`
 ### core/operators/stacks/operand/cleartomark.ts
 
-* ← findMarkPos (@sdk/index.js)
+→ `buildFunctionOperator`
 
-* ← buildFunctionOperator (@core/operators/operators.js)
+`function (anonymous arrow) `
 
-* → buildFunctionOperator
-
-function (anonymous arrow) 
-
-*  → findMarkPos
+  → `findMarkPos`
 ### core/operators/stacks/operand/count.ts
 
-* ← assert (@sdk/index.js)
+→ `buildFunctionOperator`
 
-* ← toIntegerValue (@sdk/index.js)
+`function (anonymous arrow) `
 
-* ← buildFunctionOperator (@core/operators/operators.js)
+  → `toIntegerValue`
 
-* → buildFunctionOperator
-
-function (anonymous arrow) 
-
-*  → toIntegerValue
-
-*  → assert
+  → `assert`
 ### core/operators/stacks/operand/counttomark.ts
 
-* ← assert (@sdk/index.js)
+→ `buildFunctionOperator`
 
-* ← findMarkPos (@sdk/index.js)
+`function (anonymous arrow) `
 
-* ← toIntegerValue (@sdk/index.js)
+  → `findMarkPos`
 
-* ← buildFunctionOperator (@core/operators/operators.js)
+  → `toIntegerValue`
 
-* → buildFunctionOperator
-
-function (anonymous arrow) 
-
-*  → findMarkPos
-
-*  → toIntegerValue
-
-*  → assert
+  → `assert`
 ### core/operators/stacks/operand/dup.ts
 
-* ← buildFunctionOperator (@core/operators/operators.js)
-
-* → buildFunctionOperator
+→ `buildFunctionOperator`
 ### core/operators/stacks/operand/exch.ts
 
-* ← buildFunctionOperator (@core/operators/operators.js)
-
-* → buildFunctionOperator
+→ `buildFunctionOperator`
 ### core/operators/stacks/operand/indexOp.ts
 
-* ← buildFunctionOperator (@core/operators/operators.js)
-
-* → buildFunctionOperator
+→ `buildFunctionOperator`
 ### core/operators/stacks/operand/pop.ts
 
-* ← buildFunctionOperator (@core/operators/operators.js)
-
-* → buildFunctionOperator
+→ `buildFunctionOperator`
 ### core/operators/stacks/operand/roll.ts
 
-* ← buildFunctionOperator (@core/operators/operators.js)
+→ `buildFunctionOperator`
 
-* ← assert (@sdk/index.js)
+`function initialize `
 
-* ← toIntegerValue (@sdk/index.js)
+  → `toIntegerValue` (2)
 
-* ← OPERATOR_STATE_FIRST_CALL (@sdk/index.js)
+  → `assert` (2)
 
-* ← OPERATOR_STATE_POP (@sdk/index.js)
+`function roll `
 
-* → buildFunctionOperator
+  → `assert` (5)
 
-function initialize 
+  → `toIntegerValue`
 
-*  → toIntegerValue (2)
+`function (anonymous arrow) `
 
-*  → assert (2)
+  → `initialize`
 
-function roll 
-
-*  → assert (5)
-
-*  → toIntegerValue
-
-function (anonymous arrow) 
-
-*  → initialize
-
-*  → roll
+  → `roll`
 ### core/operators/value/convert/cvi.ts
 
-* ← toIntegerValue (@sdk/index.js)
+→ `buildFunctionOperator`
 
-* ← buildFunctionOperator (@core/operators/operators.js)
+`function (anonymous arrow) `
 
-* → buildFunctionOperator
-
-function (anonymous arrow) 
-
-*  → toIntegerValue
+  → `toIntegerValue`
 ### core/operators/value/convert/cvlit.ts
 
-* ← buildFunctionOperator (@core/operators/operators.js)
-
-* → buildFunctionOperator
+→ `buildFunctionOperator`
 ### core/operators/value/convert/cvn.ts
 
-* ← assert (@sdk/index.js)
+→ `buildFunctionOperator`
 
-* ← toNameValue (@sdk/index.js)
+`function (anonymous arrow) `
 
-* ← buildFunctionOperator (@core/operators/operators.js)
+  → `assert`
 
-* ← MemoryTracker (@core/MemoryTracker.js)
-
-* → buildFunctionOperator
-
-function (anonymous arrow) 
-
-*  → assert
-
-*  → toNameValue
+  → `toNameValue`
 ### core/operators/value/eq.ts
 
-* ← trueValue (@api/index.js)
+→ `buildFunctionOperator`
 
-* ← falseValue (@api/index.js)
+`function (anonymous arrow) `
 
-* ← valuesOf (@sdk/index.js)
-
-* ← buildFunctionOperator (@core/operators/operators.js)
-
-* → buildFunctionOperator
-
-function (anonymous arrow) 
-
-*  → valuesOf
+  → `valuesOf`
 ### core/operators/value/false.ts
 
-* ← falseValue (@api/index.js)
-
-* ← buildConstantOperator (@core/operators/operators.js)
-
-* → buildConstantOperator
+→ `buildConstantOperator`
 ### core/operators/value/get.ts
 
-* ← assert (@sdk/index.js)
+→ `buildFunctionOperator`
 
-* ← checkPos (@sdk/index.js)
+`function (anonymous arrow) `
 
-* ← toStringValue (@sdk/index.js)
+  → `assert`
 
-* ← buildFunctionOperator (@core/operators/operators.js)
+  → `checkPos`
 
-* ← MemoryTracker (@core/MemoryTracker.js)
+  → `toStringValue`
 
-* → buildFunctionOperator
+`function (anonymous arrow) `
 
-function (anonymous arrow) 
+  → `checkPos`
 
-*  → assert
+`function (anonymous arrow) `
 
-*  → checkPos
-
-*  → toStringValue
-
-function (anonymous arrow) 
-
-*  → checkPos
-
-function (anonymous arrow) 
-
-*  → implementation
+  → `implementation`
 ### core/operators/value/length.ts
 
-* ← assert (@sdk/index.js)
+→ `buildFunctionOperator`
 
-* ← toIntegerValue (@sdk/index.js)
+`function (anonymous arrow) `
 
-* ← buildFunctionOperator (@core/operators/operators.js)
+  → `toIntegerValue`
 
-* → buildFunctionOperator
+  → `implementation`
 
-function (anonymous arrow) 
-
-*  → toIntegerValue
-
-*  → implementation
-
-*  → assert
+  → `assert`
 ### core/operators/value/mark.ts
 
-* ← markValue (@api/index.js)
-
-* ← buildConstantOperator (../operators.js)
-
-* → buildConstantOperator
+→ `buildConstantOperator`
 ### core/operators/value/neq.ts
 
-* ← trueValue (@api/index.js)
+→ `buildFunctionOperator`
 
-* ← falseValue (@api/index.js)
+`function (anonymous arrow) `
 
-* ← valuesOf (@sdk/index.js)
-
-* ← buildFunctionOperator (@core/operators/operators.js)
-
-* → buildFunctionOperator
-
-function (anonymous arrow) 
-
-*  → valuesOf
+  → `valuesOf`
 ### core/operators/value/put.ts
 
-* ← assert (@sdk/index.js)
+→ `buildFunctionOperator`
 
-* ← checkPos (@sdk/index.js)
+`function (anonymous arrow) `
 
-* ← toStringValue (@sdk/index.js)
+  → `assert`
 
-* ← buildFunctionOperator (@core/operators/operators.js)
+  → `checkPos`
 
-* ← MemoryTracker (@core/MemoryTracker.js)
+  → `toStringValue`
 
-* → buildFunctionOperator
+`function (anonymous arrow) `
 
-function (anonymous arrow) 
+  → `checkPos`
 
-*  → assert
+`function (anonymous arrow) `
 
-*  → checkPos
-
-*  → toStringValue
-
-function (anonymous arrow) 
-
-*  → checkPos
-
-function (anonymous arrow) 
-
-*  → implementation
+  → `implementation`
 ### core/operators/value/true.ts
 
-* ← trueValue (@api/index.js)
-
-* ← buildConstantOperator (@core/operators/operators.js)
-
-* → buildConstantOperator
+→ `buildConstantOperator`
 ### core/operators/value/type.ts
 
-* ← toNameValue (@sdk/index.js)
+→ `buildFunctionOperator`
 
-* ← buildFunctionOperator (@core/operators/operators.js)
+`function (anonymous arrow) `
 
-* → buildFunctionOperator
-
-function (anonymous arrow) 
-
-*  → toNameValue
+  → `toNameValue`
 ### core/operators/value/version.ts
 
-* ← toStringValue (@sdk/index.js)
+→ `buildConstantOperator`
 
-* ← buildConstantOperator (../operators.js)
-
-* → buildConstantOperator
-
-* → toStringValue
+→ `toStringValue`
 ### core/operators/value/wcheck.ts
 
-* ← trueValue (@api/index.js)
-
-* ← falseValue (@api/index.js)
-
-* ← buildFunctionOperator (@core/operators/operators.js)
-
-* → buildFunctionOperator
+→ `buildFunctionOperator`
 ### core/operators/value/xcheck.ts
 
-* ← trueValue (@api/index.js)
-
-* ← falseValue (@api/index.js)
-
-* ← buildFunctionOperator (@core/operators/operators.js)
-
-* → buildFunctionOperator
+→ `buildFunctionOperator`
 ### core/state/block.ts
 
-* ← OPERATOR_STATE_FIRST_CALL (@sdk/index.js)
-
-* ← OPERATOR_STATE_UNKNOWN (@sdk/index.js)
-
-<span style="color: red;">export</span> function blockCycle (1)
+<span style="color: red;"><code>export</code></span> `function blockCycle (1)`
 ### core/state/call.ts
 
-* ← OPERATOR_STATE_FIRST_CALL (@sdk/index.js)
-
-<span style="color: red;">export</span> function callCycle (1)
+<span style="color: red;"><code>export</code></span> `function callCycle (1)`
 ### core/state/operator.ts
 
-* ← SYSTEM_MEMORY_TYPE (@api/index.js)
+<span style="color: red;"><code>export</code></span> `function operatorPop (2)`
 
-* ← OPERATOR_STATE_UNKNOWN (@sdk/index.js)
+`function handleFunctionOperatorTypeCheck `
 
-* ← OPERATOR_STATE_FIRST_CALL (@sdk/index.js)
+  → `assert` (2)
 
-* ← OPERATOR_STATE_POP (@sdk/index.js)
+`function handleFunctionOperator `
 
-* ← OperatorType (@sdk/index.js)
+  → `assert`
 
-* ← assert (@sdk/index.js)
+  → `handleFunctionOperatorTypeCheck`
 
-* ← MemoryTracker (@core/MemoryTracker.js)
+<span style="color: red;"><code>export</code></span> `function operatorCycle (1)`
 
-<span style="color: red;">export</span> function operatorPop (2)
+  → `operatorPop`
 
-function handleFunctionOperatorTypeCheck 
-
-*  → assert (2)
-
-function handleFunctionOperator 
-
-*  → assert
-
-*  → handleFunctionOperatorTypeCheck
-
-<span style="color: red;">export</span> function operatorCycle (1)
-
-*  → operatorPop
-
-*  → handleFunctionOperator
+  → `handleFunctionOperator`
 ### core/state/parse.ts
 
-* ← parse (@api/index.js)
+`function getToken `
 
-* ← VALUE_TYPE (@api/index.js)
+  → `parse` (2)
 
-* ← OPERATOR_STATE_FIRST_CALL (@sdk/index.js)
+`function enqueueToken `
 
-* ← OPERATOR_STATE_UNKNOWN (@sdk/index.js)
+  → `valuesOf`
 
-* ← valuesOf (@sdk/index.js)
+<span style="color: red;"><code>export</code></span> `function parseCycle (1)`
 
-function getToken 
+  → `getToken`
 
-*  → parse (2)
-
-function enqueueToken 
-
-*  → valuesOf
-
-<span style="color: red;">export</span> function parseCycle (1)
-
-*  → getToken
-
-*  → enqueueToken
+  → `enqueueToken`
 ### core/state/State.ts
 
-* ← SYSTEM_MEMORY_TYPE (@api/index.js)
+<span style="color: red;"><code>export</code></span> `class State`
 
-* ← assert (@sdk/index.js)
+`State::_checkIfDestroyed`
 
-* ← MemoryTracker (@core/MemoryTracker.js)
+  → `assert`
 
-* ← DictionaryStack (@core/objects/stacks/DictionaryStack.js)
+`State::destroy`
 
-* ← Dictionary (@core/objects/dictionaries/Dictionary.js)
+  → `assert`
 
-* ← ValueStack (@core/objects/stacks/ValueStack.js)
+`State::raiseException`
 
-* ← CallStack (@core/objects/stacks/CallStack.js)
+  → `assert` (4)
 
-* ← operatorPop (./operator.js)
+`State::cycle`
 
-* ← operatorCycle (./operator.js)
+  → `operatorPop`
 
-* ← callCycle (./call.js)
+  → `operatorCycle`
 
-* ← blockCycle (./block.js)
+  → `callCycle`
 
-* ← parseCycle (./parse.js)
+  → `blockCycle`
 
-* ← SystemDictionary (@core/objects/dictionaries/System.js)
+  → `parseCycle`
 
-<span style="color: red;">export</span> class State
-  State::_checkIfDestroyed
-
-*  → assert
-  State::destroy
-
-*  → assert
-  State::raiseException
-
-*  → assert (4)
-  State::cycle
-
-*  → operatorPop
-
-*  → operatorCycle
-
-*  → callCycle
-
-*  → blockCycle
-
-*  → parseCycle
-
-*  → assert
+  → `assert`
 ### sdk/assert.ts
 
-class AssertionFailed
+`class AssertionFailed`
 
-<span style="color: red;">export</span> function assert (83)
+<span style="color: red;"><code>export</code></span> `function assert (83)`
 ### sdk/checkPos.ts
 
-<span style="color: red;">export</span> function checkPos (4)
+<span style="color: red;"><code>export</code></span> `function checkPos (4)`
 ### sdk/checks/isObject.ts
 
-<span style="color: red;">export</span> function isObject (1)
+<span style="color: red;"><code>export</code></span> `function isObject (1)`
 ### sdk/checks/isValue.ts
 
-* ← isObject (@sdk/checks/isObject.js)
+`function is `
 
-function is 
+  → `isObject`
 
-*  → isObject
+  → `hasInvalidFlag`
 
-*  → hasInvalidFlag
+  → `checkFlags`
 
-*  → checkFlags
+  → `check`
 
-*  → check
+<span style="color: red;"><code>export</code></span> `function isIntegerValue `
 
-<span style="color: red;">export</span> function isIntegerValue 
+  → `is`
 
-*  → is
+  → `isInteger`
 
-*  → isInteger
+<span style="color: red;"><code>export</code></span> `function isStringValue `
 
-<span style="color: red;">export</span> function isStringValue 
+  → `is`
 
-*  → is
+<span style="color: red;"><code>export</code></span> `function isNameValue `
 
-<span style="color: red;">export</span> function isNameValue 
+  → `is`
 
-*  → is
+<span style="color: red;"><code>export</code></span> `function isOperatorValue `
 
-<span style="color: red;">export</span> function isOperatorValue 
+  → `is`
 
-*  → is
+`function isPositiveInteger `
 
-function isPositiveInteger 
+  → `isInteger`
 
-*  → isInteger
+<span style="color: red;"><code>export</code></span> `function isArrayValue (1)`
 
-<span style="color: red;">export</span> function isArrayValue (1)
+  → `is`
 
-*  → is
+  → `isPositiveInteger`
 
-*  → isPositiveInteger
+  → `isFunction` (2)
 
-*  → isFunction (2)
+<span style="color: red;"><code>export</code></span> `function isDictionaryValue `
 
-<span style="color: red;">export</span> function isDictionaryValue 
+  → `is`
 
-*  → is
-
-*  → isFunction (2)
+  → `isFunction` (2)
 ### sdk/findMarkPos.ts
 
-<span style="color: red;">export</span> function findMarkPos (4)
+<span style="color: red;"><code>export</code></span> `function findMarkPos (4)`
 ### sdk/interfaces/ICallStack.ts
 ### sdk/interfaces/IDictionaryStack.ts
 ### sdk/interfaces/IInternalState.ts
@@ -1298,140 +824,107 @@ function isPositiveInteger
 ### sdk/interfaces/IStack.ts
 ### sdk/toString.ts
 
-* ← parse (@api/index.js)
+`function fitToMaxWidth `
 
-* ← OPERATOR_STATE_CALL_BEFORE_POP (@sdk/interfaces/ICallStack.js)
+  → `minimizeAt`
 
-* ← OPERATOR_STATE_FIRST_CALL (@sdk/interfaces/ICallStack.js)
+  → `centerValue`
 
-* ← OPERATOR_STATE_POP (@sdk/interfaces/ICallStack.js)
+`function decorate `
 
-* ← OPERATOR_STATE_UNKNOWN (@sdk/interfaces/ICallStack.js)
+  → `convertPosToLineAndCol`
 
-function fitToMaxWidth 
+  → `fitToMaxWidth`
 
-*  → minimizeAt
+`function (anonymous arrow) `
 
-*  → centerValue
+  → `decorate`
 
-function decorate 
+`function (anonymous arrow) `
 
-*  → convertPosToLineAndCol
+  → `decorate`
 
-*  → fitToMaxWidth
+`function (anonymous arrow) `
 
-function (anonymous arrow) 
+  → `decorate`
 
-*  → decorate
+`function (anonymous arrow) `
 
-function (anonymous arrow) 
+  → `parse`
 
-*  → decorate
+  → `decorate`
 
-function (anonymous arrow) 
+`function (anonymous arrow) `
 
-*  → decorate
+  → `decorate`
 
-function (anonymous arrow) 
+`function (anonymous arrow) `
 
-*  → parse
+  → `decorate`
 
-*  → decorate
+`function (anonymous arrow) `
 
-function (anonymous arrow) 
+  → `decorate`
 
-*  → decorate
+`function (anonymous arrow) `
 
-function (anonymous arrow) 
+  → `decorate`
 
-*  → decorate
+`function (anonymous arrow) `
 
-function (anonymous arrow) 
+  → `decorate`
 
-*  → decorate
+<span style="color: red;"><code>export</code></span> `function toString (1)`
 
-function (anonymous arrow) 
+<span style="color: red;"><code>export</code></span> `function callStackToString `
 
-*  → decorate
-
-function (anonymous arrow) 
-
-*  → decorate
-
-<span style="color: red;">export</span> function toString (1)
-
-<span style="color: red;">export</span> function callStackToString 
-
-*  → toString
+  → `toString`
 ### sdk/toValue.ts
 
-<span style="color: red;">export</span> function toIntegerValue (16)
+<span style="color: red;"><code>export</code></span> `function toIntegerValue (16)`
 
-<span style="color: red;">export</span> function toStringValue (5)
+<span style="color: red;"><code>export</code></span> `function toStringValue (5)`
 
-<span style="color: red;">export</span> function toNameValue (2)
+<span style="color: red;"><code>export</code></span> `function toNameValue (2)`
 ### sdk/valuesOf.ts
 
-<span style="color: red;">export</span> function valuesOf (6)
+<span style="color: red;"><code>export</code></span> `function valuesOf (6)`
 
-*  → getValueOf
+  → `getValueOf`
 ## Grap
 ```mermaid
 graph LR
   subgraph api/Exception.ts
-  end
-  subgraph api/interfaces/IAbstractOperator.ts
-  end
-  subgraph api/interfaces/IAbstractValue.ts
-  end
-  subgraph api/interfaces/IArray.ts
-  end
-  subgraph api/interfaces/IDebugSource.ts
-  end
-  subgraph api/interfaces/IDictionary.ts
-  end
-  subgraph api/interfaces/IMemoryTracker.ts
+    func_2("getExceptionMessage");
   end
   subgraph api/interfaces/IReadOnlyArray.ts
-  end
-  subgraph api/interfaces/IReadOnlyCallStack.ts
+    export_11("enumIArrayValues");
   end
   subgraph api/interfaces/IReadOnlyDictionary.ts
-  end
-  subgraph api/interfaces/IState.ts
-  end
-  subgraph api/interfaces/IValueTracker.ts
+    export_14("enumIDictionaryValues");
+    export_15("convertIDictionaryToObject");
+    export_15 --> export_14("enumIDictionaryValues");
   end
   subgraph api/parser.ts
-  end
-  subgraph api/Result.ts
+    func_19("parseString");
+    func_20("parseNumber");
+    func_20 --> export_230("assert");
+    func_21("parseName");
+    func_21 --> export_230("assert");
+    export_22("parse");
+    export_22 --> export_230("assert");
+    export_22 --> parseString;
+    export_22 --> parseNumber;
+    export_22 --> parseName;
   end
   subgraph api/run.ts
-  end
-  subgraph api/values/ArrayValue.ts
-  end
-  subgraph api/values/BooleanValue.ts
-  end
-  subgraph api/values/DictionaryValue.ts
-  end
-  subgraph api/values/IntegerValue.ts
-  end
-  subgraph api/values/MarkValue.ts
-  end
-  subgraph api/values/NameValue.ts
-  end
-  subgraph api/values/NullValue.ts
-  end
-  subgraph api/values/OperatorValue.ts
-  end
-  subgraph api/values/StringValue.ts
-  end
-  subgraph api/values/Value.ts
-  end
-  subgraph api/values/ValueType.ts
+    export_24("run");
+    export_24 --> export_275("toStringValue");
   end
   subgraph core/MemoryTracker.ts
-    main_36("main") --> Symbol;
+    func_37("stringSizer");
+    export_38("addMemorySize");
+    export_39("memorySizeToBytes");
   end
   subgraph core/objects/AbstractValueContainer.ts
   end
@@ -1442,6 +935,8 @@ graph LR
   subgraph core/objects/dictionaries/System.ts
   end
   subgraph core/objects/ShareableObject.ts
+    func_42("getShareableObject");
+    func_42 --> export_230("assert");
   end
   subgraph core/objects/stacks/CallStack.ts
   end
@@ -1452,262 +947,508 @@ graph LR
   subgraph core/objects/ValueArray.ts
   end
   subgraph core/operators/array/aload.ts
-    main_50("main") --> buildFunctionOperator;
+    main_50("main") --> export_133("buildFunctionOperator");
+    func_51("(anonymous arrow)");
+    func_51 --> export_230("assert");
   end
   subgraph core/operators/array/closeArray.ts
-    main_52("main") --> buildFunctionOperator;
+    main_52("main") --> export_133("buildFunctionOperator");
+    func_53("(anonymous arrow)");
+    func_53 --> export_131("closeToMark");
   end
   subgraph core/operators/array/openArray.ts
-    main_54("main") --> buildFunctionOperator;
+    main_54("main") --> export_133("buildFunctionOperator");
   end
   subgraph core/operators/boolean/and.ts
-    main_55("main") --> buildFunctionOperator;
+    main_55("main") --> export_133("buildFunctionOperator");
+    func_56("(anonymous arrow)");
   end
   subgraph core/operators/boolean/or.ts
-    main_57("main") --> buildFunctionOperator;
+    main_57("main") --> export_133("buildFunctionOperator");
+    func_58("(anonymous arrow)");
   end
   subgraph core/operators/boolean/xor.ts
-    main_59("main") --> buildFunctionOperator;
+    main_59("main") --> export_133("buildFunctionOperator");
+    func_60("(anonymous arrow)");
   end
   subgraph core/operators/dictionary/closeDictionary.ts
-    main_61("main") --> buildFunctionOperator;
+    main_61("main") --> export_133("buildFunctionOperator");
+    func_62("(anonymous arrow)");
+    func_62 --> export_249("findMarkPos");
+    func_62 --> export_288("valuesOf");
+    func_62 --> export_130("pushOpenClosedValueWithDebugInfo");
   end
   subgraph core/operators/dictionary/openDictionary.ts
-    main_63("main") --> buildFunctionOperator;
+    main_63("main") --> export_133("buildFunctionOperator");
+    func_64("(anonymous arrow)");
+    func_64 --> export_129("openWithMark");
   end
   subgraph core/operators/exceptions/dictStackUnderflow.ts
-    main_65("main") --> buildFunctionOperator;
+    main_65("main") --> export_133("buildFunctionOperator");
+    func_66("(anonymous arrow)");
   end
   subgraph core/operators/exceptions/invalidAccess.ts
-    main_67("main") --> buildFunctionOperator;
+    main_67("main") --> export_133("buildFunctionOperator");
+    func_68("(anonymous arrow)");
   end
   subgraph core/operators/exceptions/limitcheck.ts
-    main_69("main") --> buildFunctionOperator;
+    main_69("main") --> export_133("buildFunctionOperator");
+    func_70("(anonymous arrow)");
   end
   subgraph core/operators/exceptions/rangeCheck.ts
-    main_71("main") --> buildFunctionOperator;
+    main_71("main") --> export_133("buildFunctionOperator");
+    func_72("(anonymous arrow)");
   end
   subgraph core/operators/exceptions/stackUnderflow.ts
-    main_73("main") --> buildFunctionOperator;
+    main_73("main") --> export_133("buildFunctionOperator");
+    func_74("(anonymous arrow)");
   end
   subgraph core/operators/exceptions/stop.ts
-    main_75("main") --> buildFunctionOperator;
+    main_75("main") --> export_133("buildFunctionOperator");
+    func_76("(anonymous arrow)");
   end
   subgraph core/operators/exceptions/typeCheck.ts
-    main_77("main") --> buildFunctionOperator;
+    main_77("main") --> export_133("buildFunctionOperator");
+    func_78("(anonymous arrow)");
   end
   subgraph core/operators/exceptions/undefined.ts
-    main_79("main") --> buildFunctionOperator;
+    main_79("main") --> export_133("buildFunctionOperator");
+    func_80("(anonymous arrow)");
   end
   subgraph core/operators/exceptions/undefinedResult.ts
-    main_81("main") --> buildFunctionOperator;
+    main_81("main") --> export_133("buildFunctionOperator");
+    func_82("(anonymous arrow)");
   end
   subgraph core/operators/exceptions/unmatchedMark.ts
-    main_83("main") --> buildFunctionOperator;
+    main_83("main") --> export_133("buildFunctionOperator");
+    func_84("(anonymous arrow)");
   end
   subgraph core/operators/exceptions/vmOverflow.ts
-    main_85("main") --> buildFunctionOperator;
+    main_85("main") --> export_133("buildFunctionOperator");
+    func_86("(anonymous arrow)");
   end
   subgraph core/operators/flow/closeBlock.ts
-    main_87("main") --> buildFunctionOperator;
+    main_87("main") --> export_133("buildFunctionOperator");
+    func_88("(anonymous arrow)");
+    func_88 --> export_131("closeToMark");
   end
   subgraph core/operators/flow/finally.ts
-    main_89("main") --> buildFunctionOperator;
+    main_89("main") --> export_133("buildFunctionOperator");
+    func_90("firstCall");
+    func_90 --> export_230("assert");
+    func_91("callBeforePop");
+    func_91 --> export_275("toStringValue");
+    func_91 --> export_230("assert");
+    func_92("popping");
+    func_92 --> export_230("assert");
+    func_93("(anonymous arrow)");
+    func_93 --> firstCall;
+    func_93 --> callBeforePop;
+    func_93 --> export_230("assert");
+    func_93 --> popping;
   end
   subgraph core/operators/flow/gc.ts
-    main_94("main") --> buildFunctionOperator;
+    main_94("main") --> export_133("buildFunctionOperator");
+    func_95("(anonymous arrow)");
+    func_95 --> export_230("assert");
   end
   subgraph core/operators/flow/if.ts
-    main_96("main") --> buildFunctionOperator;
+    main_96("main") --> export_133("buildFunctionOperator");
+    func_97("(anonymous arrow)");
   end
   subgraph core/operators/flow/ifelse.ts
-    main_98("main") --> buildFunctionOperator;
+    main_98("main") --> export_133("buildFunctionOperator");
+    func_99("(anonymous arrow)");
   end
   subgraph core/operators/flow/loop.ts
-    main_100("main") --> buildFunctionOperator;
+    main_100("main") --> export_133("buildFunctionOperator");
+    func_101("(anonymous arrow)");
+    func_101 --> export_230("assert");
   end
   subgraph core/operators/flow/openBlock.ts
-    main_102("main") --> buildFunctionOperator;
+    main_102("main") --> export_133("buildFunctionOperator");
+    func_103("(anonymous arrow)");
+    func_103 --> export_129("openWithMark");
   end
   subgraph core/operators/flow/repeat.ts
-    main_104("main") --> buildFunctionOperator;
+    main_104("main") --> export_133("buildFunctionOperator");
+    func_105("firstCall");
+    func_106("repeat");
+    func_107("(anonymous arrow)");
+    func_107 --> firstCall;
+    func_107 --> repeat;
   end
   subgraph core/operators/flow/stopped.ts
-    main_108("main") --> buildFunctionOperator;
+    main_108("main") --> export_133("buildFunctionOperator");
+    func_109("(anonymous arrow)");
+    func_109 --> export_230("assert");
   end
   subgraph core/operators/integer/abs.ts
-    main_110("main") --> buildFunctionOperator;
+    main_110("main") --> export_133("buildFunctionOperator");
+    func_111("(anonymous arrow)");
+    func_111 --> export_274("toIntegerValue");
   end
   subgraph core/operators/integer/add.ts
-    main_112("main") --> buildFunctionOperator;
+    main_112("main") --> export_133("buildFunctionOperator");
+    func_113("(anonymous arrow)");
+    func_113 --> export_274("toIntegerValue");
   end
   subgraph core/operators/integer/div.ts
-    main_114("main") --> buildFunctionOperator;
+    main_114("main") --> export_133("buildFunctionOperator");
+    func_115("(anonymous arrow)");
+    func_115 --> export_274("toIntegerValue");
   end
   subgraph core/operators/integer/gt.ts
-    main_116("main") --> buildFunctionOperator;
+    main_116("main") --> export_133("buildFunctionOperator");
+    func_117("(anonymous arrow)");
   end
   subgraph core/operators/integer/gte.ts
-    main_118("main") --> buildFunctionOperator;
+    main_118("main") --> export_133("buildFunctionOperator");
+    func_119("(anonymous arrow)");
   end
   subgraph core/operators/integer/lt.ts
-    main_120("main") --> buildFunctionOperator;
+    main_120("main") --> export_133("buildFunctionOperator");
+    func_121("(anonymous arrow)");
   end
   subgraph core/operators/integer/lte.ts
-    main_122("main") --> buildFunctionOperator;
+    main_122("main") --> export_133("buildFunctionOperator");
+    func_123("(anonymous arrow)");
   end
   subgraph core/operators/integer/mul.ts
-    main_124("main") --> buildFunctionOperator;
+    main_124("main") --> export_133("buildFunctionOperator");
+    func_125("(anonymous arrow)");
+    func_125 --> export_274("toIntegerValue");
   end
   subgraph core/operators/integer/sub.ts
-    main_126("main") --> buildFunctionOperator;
+    main_126("main") --> export_133("buildFunctionOperator");
+    func_127("(anonymous arrow)");
+    func_127 --> export_274("toIntegerValue");
   end
   subgraph core/operators/openClose.ts
+    export_129("openWithMark");
+    export_130("pushOpenClosedValueWithDebugInfo");
+    export_131("closeToMark");
+    export_131 --> export_249("findMarkPos");
+    export_131 --> export_274("toIntegerValue");
+    export_131 --> export_230("assert");
+    export_131 --> export_130("pushOpenClosedValueWithDebugInfo");
   end
   subgraph core/operators/operators.ts
+    export_133("buildFunctionOperator");
+    export_133 --> export_230("assert");
+    export_134("buildConstantOperator");
   end
   subgraph core/operators/stacks/call/countexecstack.ts
-    main_135("main") --> buildFunctionOperator;
+    main_135("main") --> export_133("buildFunctionOperator");
+    func_136("(anonymous arrow)");
+    func_136 --> export_274("toIntegerValue");
+    func_136 --> export_230("assert");
   end
   subgraph core/operators/stacks/dictionary/begin.ts
-    main_137("main") --> buildFunctionOperator;
+    main_137("main") --> export_133("buildFunctionOperator");
+    func_138("(anonymous arrow)");
   end
   subgraph core/operators/stacks/dictionary/bind.ts
-    main_139("main") --> buildFunctionOperator;
+    main_139("main") --> export_133("buildFunctionOperator");
+    func_140("bindName");
+    func_141("bindArray");
+    func_142("bindValue");
+    func_142 --> bindName;
+    func_142 --> export_230("assert");
+    func_142 --> bindArray;
+    func_143("(anonymous arrow)");
+    func_143 --> export_230("assert");
+    func_143 --> export_246("isArrayValue");
+    func_143 --> bindValue;
   end
   subgraph core/operators/stacks/dictionary/countdictstack.ts
-    main_144("main") --> buildFunctionOperator;
+    main_144("main") --> export_133("buildFunctionOperator");
+    func_145("(anonymous arrow)");
+    func_145 --> export_274("toIntegerValue");
+    func_145 --> export_230("assert");
   end
   subgraph core/operators/stacks/dictionary/currentdict.ts
-    main_146("main") --> buildFunctionOperator;
+    main_146("main") --> export_133("buildFunctionOperator");
+    func_147("(anonymous arrow)");
   end
   subgraph core/operators/stacks/dictionary/def.ts
-    main_148("main") --> buildFunctionOperator;
+    main_148("main") --> export_133("buildFunctionOperator");
+    func_149("(anonymous arrow)");
   end
   subgraph core/operators/stacks/dictionary/end.ts
-    main_150("main") --> buildFunctionOperator;
+    main_150("main") --> export_133("buildFunctionOperator");
+    func_151("(anonymous arrow)");
   end
   subgraph core/operators/stacks/dictionary/globaldict.ts
-    main_152("main") --> buildFunctionOperator;
+    main_152("main") --> export_133("buildFunctionOperator");
+    func_153("(anonymous arrow)");
   end
   subgraph core/operators/stacks/dictionary/hostdict.ts
-    main_154("main") --> buildFunctionOperator;
+    main_154("main") --> export_133("buildFunctionOperator");
+    func_155("(anonymous arrow)");
   end
   subgraph core/operators/stacks/dictionary/systemdict.ts
-    main_156("main") --> buildFunctionOperator;
+    main_156("main") --> export_133("buildFunctionOperator");
+    func_157("(anonymous arrow)");
   end
   subgraph core/operators/stacks/dictionary/userdict.ts
-    main_158("main") --> buildFunctionOperator;
+    main_158("main") --> export_133("buildFunctionOperator");
+    func_159("(anonymous arrow)");
   end
   subgraph core/operators/stacks/operand/clear.ts
-    main_160("main") --> buildFunctionOperator;
+    main_160("main") --> export_133("buildFunctionOperator");
+    func_161("(anonymous arrow)");
   end
   subgraph core/operators/stacks/operand/cleartomark.ts
-    main_162("main") --> buildFunctionOperator;
+    main_162("main") --> export_133("buildFunctionOperator");
+    func_163("(anonymous arrow)");
+    func_163 --> export_249("findMarkPos");
   end
   subgraph core/operators/stacks/operand/count.ts
-    main_164("main") --> buildFunctionOperator;
+    main_164("main") --> export_133("buildFunctionOperator");
+    func_165("(anonymous arrow)");
+    func_165 --> export_274("toIntegerValue");
+    func_165 --> export_230("assert");
   end
   subgraph core/operators/stacks/operand/counttomark.ts
-    main_166("main") --> buildFunctionOperator;
+    main_166("main") --> export_133("buildFunctionOperator");
+    func_167("(anonymous arrow)");
+    func_167 --> export_249("findMarkPos");
+    func_167 --> export_274("toIntegerValue");
+    func_167 --> export_230("assert");
   end
   subgraph core/operators/stacks/operand/dup.ts
-    main_168("main") --> buildFunctionOperator;
+    main_168("main") --> export_133("buildFunctionOperator");
+    func_169("(anonymous arrow)");
   end
   subgraph core/operators/stacks/operand/exch.ts
-    main_170("main") --> buildFunctionOperator;
+    main_170("main") --> export_133("buildFunctionOperator");
+    func_171("(anonymous arrow)");
   end
   subgraph core/operators/stacks/operand/indexOp.ts
-    main_172("main") --> buildFunctionOperator;
+    main_172("main") --> export_133("buildFunctionOperator");
+    func_173("(anonymous arrow)");
   end
   subgraph core/operators/stacks/operand/pop.ts
-    main_174("main") --> buildFunctionOperator;
+    main_174("main") --> export_133("buildFunctionOperator");
+    func_175("(anonymous arrow)");
   end
   subgraph core/operators/stacks/operand/roll.ts
-    main_176("main") --> buildFunctionOperator;
+    main_176("main") --> export_133("buildFunctionOperator");
+    func_177("initialize");
+    func_177 --> export_274("toIntegerValue");
+    func_177 --> export_230("assert");
+    func_178("roll");
+    func_178 --> export_230("assert");
+    func_178 --> export_274("toIntegerValue");
+    func_179("(anonymous arrow)");
+    func_179 --> initialize;
+    func_179 --> roll;
   end
   subgraph core/operators/value/convert/cvi.ts
-    main_180("main") --> buildFunctionOperator;
+    main_180("main") --> export_133("buildFunctionOperator");
+    func_181("(anonymous arrow)");
+    func_181 --> export_274("toIntegerValue");
   end
   subgraph core/operators/value/convert/cvlit.ts
-    main_182("main") --> buildFunctionOperator;
+    main_182("main") --> export_133("buildFunctionOperator");
+    func_183("(anonymous arrow)");
   end
   subgraph core/operators/value/convert/cvn.ts
-    main_184("main") --> buildFunctionOperator;
+    main_184("main") --> export_133("buildFunctionOperator");
+    func_185("(anonymous arrow)");
+    func_185 --> export_230("assert");
+    func_185 --> export_276("toNameValue");
   end
   subgraph core/operators/value/eq.ts
-    main_186("main") --> buildFunctionOperator;
+    main_186("main") --> export_133("buildFunctionOperator");
+    func_187("(anonymous arrow)");
+    func_187 --> export_288("valuesOf");
   end
   subgraph core/operators/value/false.ts
-    main_188("main") --> buildConstantOperator;
+    main_188("main") --> export_134("buildConstantOperator");
   end
   subgraph core/operators/value/get.ts
-    main_189("main") --> buildFunctionOperator;
+    main_189("main") --> export_133("buildFunctionOperator");
+    func_190("(anonymous arrow)");
+    func_190 --> export_230("assert");
+    func_190 --> export_232("checkPos");
+    func_190 --> export_275("toStringValue");
+    func_191("(anonymous arrow)");
+    func_191 --> export_232("checkPos");
+    func_192("(anonymous arrow)");
+    func_193("(anonymous arrow)");
+    func_193 --> implementation;
   end
   subgraph core/operators/value/length.ts
-    main_194("main") --> buildFunctionOperator;
+    main_194("main") --> export_133("buildFunctionOperator");
+    func_195("(anonymous arrow)");
+    func_196("(anonymous arrow)");
+    func_197("(anonymous arrow)");
+    func_198("(anonymous arrow)");
+    func_198 --> export_274("toIntegerValue");
+    func_198 --> implementation;
+    func_198 --> export_230("assert");
   end
   subgraph core/operators/value/mark.ts
-    main_199("main") --> buildConstantOperator;
+    main_199("main") --> export_134("buildConstantOperator");
   end
   subgraph core/operators/value/neq.ts
-    main_200("main") --> buildFunctionOperator;
+    main_200("main") --> export_133("buildFunctionOperator");
+    func_201("(anonymous arrow)");
+    func_201 --> export_288("valuesOf");
   end
   subgraph core/operators/value/put.ts
-    main_202("main") --> buildFunctionOperator;
+    main_202("main") --> export_133("buildFunctionOperator");
+    func_203("(anonymous arrow)");
+    func_203 --> export_230("assert");
+    func_203 --> export_232("checkPos");
+    func_203 --> export_275("toStringValue");
+    func_204("(anonymous arrow)");
+    func_204 --> export_232("checkPos");
+    func_205("(anonymous arrow)");
+    func_206("(anonymous arrow)");
+    func_206 --> implementation;
   end
   subgraph core/operators/value/true.ts
-    main_207("main") --> buildConstantOperator;
+    main_207("main") --> export_134("buildConstantOperator");
   end
   subgraph core/operators/value/type.ts
-    main_208("main") --> buildFunctionOperator;
+    main_208("main") --> export_133("buildFunctionOperator");
+    func_209("(anonymous arrow)");
+    func_209 --> export_276("toNameValue");
   end
   subgraph core/operators/value/version.ts
-    main_210("main") --> buildConstantOperator;
-    main_210("main") --> toStringValue;
+    main_210("main") --> export_134("buildConstantOperator");
+    main_210("main") --> export_275("toStringValue");
   end
   subgraph core/operators/value/wcheck.ts
-    main_211("main") --> buildFunctionOperator;
+    main_211("main") --> export_133("buildFunctionOperator");
+    func_212("(anonymous arrow)");
   end
   subgraph core/operators/value/xcheck.ts
-    main_213("main") --> buildFunctionOperator;
+    main_213("main") --> export_133("buildFunctionOperator");
+    func_214("(anonymous arrow)");
   end
   subgraph core/state/block.ts
+    export_217("blockCycle");
   end
   subgraph core/state/call.ts
+    export_219("callCycle");
   end
   subgraph core/state/operator.ts
+    export_221("operatorPop");
+    func_222("handleFunctionOperatorTypeCheck");
+    func_222 --> export_230("assert");
+    func_223("handleFunctionOperator");
+    func_223 --> export_230("assert");
+    func_223 --> handleFunctionOperatorTypeCheck;
+    export_224("operatorCycle");
+    export_224 --> export_221("operatorPop");
+    export_224 --> handleFunctionOperator;
   end
   subgraph core/state/parse.ts
+    func_226("getToken");
+    func_226 --> export_22("parse");
+    func_227("enqueueToken");
+    func_227 --> export_288("valuesOf");
+    export_228("parseCycle");
+    export_228 --> getToken;
+    export_228 --> enqueueToken;
   end
   subgraph core/state/State.ts
   end
   subgraph sdk/assert.ts
+    export_230("assert");
   end
   subgraph sdk/checkPos.ts
+    export_232("checkPos");
   end
   subgraph sdk/checks/isObject.ts
+    export_234("isObject");
   end
   subgraph sdk/checks/isValue.ts
+    func_236("hasInvalidFlag");
+    func_237("checkFlags");
+    func_238("is");
+    func_238 --> export_234("isObject");
+    func_238 --> hasInvalidFlag;
+    func_238 --> checkFlags;
+    func_238 --> check;
+    func_239("isInteger");
+    export_240("isIntegerValue");
+    export_240 --> is;
+    export_240 --> isInteger;
+    export_241("isStringValue");
+    export_241 --> is;
+    export_242("isNameValue");
+    export_242 --> is;
+    export_243("isOperatorValue");
+    export_243 --> is;
+    func_244("isFunction");
+    func_245("isPositiveInteger");
+    func_245 --> isInteger;
+    export_246("isArrayValue");
+    export_246 --> is;
+    export_246 --> isPositiveInteger;
+    export_246 --> isFunction;
+    export_247("isDictionaryValue");
+    export_247 --> is;
+    export_247 --> isFunction;
   end
   subgraph sdk/findMarkPos.ts
-  end
-  subgraph sdk/interfaces/ICallStack.ts
-  end
-  subgraph sdk/interfaces/IDictionaryStack.ts
-  end
-  subgraph sdk/interfaces/IInternalState.ts
-  end
-  subgraph sdk/interfaces/IOperandStack.ts
-  end
-  subgraph sdk/interfaces/IOperator.ts
-  end
-  subgraph sdk/interfaces/IStack.ts
+    export_249("findMarkPos");
   end
   subgraph sdk/toString.ts
+    func_257("convertPosToLineAndCol");
+    func_258("minimizeAt");
+    func_259("centerValue");
+    func_260("fitToMaxWidth");
+    func_260 --> minimizeAt;
+    func_260 --> centerValue;
+    func_261("decorate");
+    func_261 --> convertPosToLineAndCol;
+    func_261 --> fitToMaxWidth;
+    func_262("(anonymous arrow)");
+    func_262 --> decorate;
+    func_263("(anonymous arrow)");
+    func_263 --> decorate;
+    func_264("(anonymous arrow)");
+    func_264 --> decorate;
+    func_265("(anonymous arrow)");
+    func_265 --> export_22("parse");
+    func_265 --> decorate;
+    func_266("(anonymous arrow)");
+    func_266 --> decorate;
+    func_267("(anonymous arrow)");
+    func_267 --> decorate;
+    func_268("(anonymous arrow)");
+    func_268 --> decorate;
+    func_269("(anonymous arrow)");
+    func_269 --> decorate;
+    func_270("(anonymous arrow)");
+    func_270 --> decorate;
+    export_271("toString");
+    export_272("callStackToString");
+    export_272 --> export_271("toString");
   end
   subgraph sdk/toValue.ts
+    export_274("toIntegerValue");
+    export_275("toStringValue");
+    export_276("toNameValue");
   end
   subgraph sdk/valuesOf.ts
+    func_278("(anonymous arrow)");
+    func_279("(anonymous arrow)");
+    func_280("(anonymous arrow)");
+    func_281("(anonymous arrow)");
+    func_282("(anonymous arrow)");
+    func_283("(anonymous arrow)");
+    func_284("(anonymous arrow)");
+    func_285("(anonymous arrow)");
+    func_286("(anonymous arrow)");
+    func_287("getValueOf");
+    export_288("valuesOf");
+    export_288 --> getValueOf;
   end
 ```
