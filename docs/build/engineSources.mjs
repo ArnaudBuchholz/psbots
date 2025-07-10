@@ -15,6 +15,9 @@ const white = '\u001B[37m';
 const checkForCall = (node, calls) => {
   if (node.type === 'CallExpression' && node.callee?.name) {
     const { name } = node.callee;
+    if (name === 'Symbol') {
+      return; // ignore
+    }
     if (calls.has(name)) {
       ++calls.get(name).count;
     } else {
@@ -206,6 +209,14 @@ for(const name of names) {
   }
 }
 
+const funcId = (name) => {
+  const exportedFunction = exportedFunctions[name];
+  if (exportedFunction) {
+    return `export_${exportedFunction.id}("${name}")`;
+  }
+  return name;
+}
+
 markdown.push(
   '## Grap',
   '```mermaid',
@@ -216,25 +227,19 @@ console.log('names: ', names.length);
 for(const name of names) {
   const definition = sources[name];
   if (definition.calls.size === 0 && definition.functions.length === 0 && definition.classes.length === 0) {
+    // No dependency to show, ignore
     continue;
   }
+
   markdown.push(`  subgraph ${name}`);
   for (const [name, { count }] of definition.calls.entries()) {
-    markdown.push(`    main_${definition.id}("main") --> ${name};`);
+    markdown.push(`    main_${definition.id}("main") --> ${funcId(name)};`);
   }
-  if (++index < 100) // TODO: seems to be limited to 100 subgraphs
-  // if (['core/MemoryTracker.ts', 'core/operators/openClose.ts', 'core/state/operator.ts', 'core/operators/operators.ts'].includes(name))
   for (const { name: functionName, exported, calls, externalCalls } of definition.functions) {
-    if (exported) {
-      if (functionName === '(anonymous arrow)') {
-        markdown.push(     `anon_${definition.id}("(anonymous arrow)");`);
-      } else {
-        markdown.push(`    ${functionName};`);
-      }
-      // for (const [name, { count }] of calls.entries()) {
-      //     console.log(`\t  → ${name}${count > 1 ? ' (' + count + ')' : ''}`);
-      //     markdown.push(`\n  → \`${name}\`${count > 1 ? ' (' + count + ')' : ''}`);
-      // }
+    const name = exported ? `export_${definition.id}` : `func_${definition.id}`;
+    markdown.push(`    ${name}("${functionName}");`);
+    for (const [calledName, { count }] of calls.entries()) {
+      markdown.push(`    ${name} --> ${funcId(calledName)};`);
     }
   }
   markdown.push(`  end`);
