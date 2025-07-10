@@ -235,8 +235,8 @@ for(const name of names) {
   for (const [name, { count }] of definition.calls.entries()) {
     markdown.push(`    main_${definition.id}("main") --> ${funcId(name)};`);
   }
-  for (const { name: functionName, exported, calls, externalCalls } of definition.functions) {
-    const name = exported ? `export_${definition.id}` : `func_${definition.id}`;
+  for (const { name: functionName, exported, calls, externalCalls, id } of definition.functions) {
+    const name = exported ? `export_${id}` : `func_${id}`;
     markdown.push(`    ${name}("${functionName}");`);
     for (const [calledName, { count }] of calls.entries()) {
       markdown.push(`    ${name} --> ${funcId(calledName)};`);
