@@ -1,0 +1,3709 @@
+{
+  "api/Exception.ts": {
+    "id": 1,
+    "name": "api/Exception.ts",
+    "functions": [
+      {
+        "id": 2,
+        "name": "getExceptionMessage",
+        "exported": true
+      }
+    ]
+  },
+  "api/Result.ts": {
+    "id": 3,
+    "name": "api/Result.ts"
+  },
+  "api/interfaces/IAbstractOperator.ts": {
+    "id": 4,
+    "name": "api/interfaces/IAbstractOperator.ts"
+  },
+  "api/interfaces/IAbstractValue.ts": {
+    "id": 5,
+    "name": "api/interfaces/IAbstractValue.ts"
+  },
+  "api/interfaces/IArray.ts": {
+    "id": 6,
+    "name": "api/interfaces/IArray.ts"
+  },
+  "api/interfaces/IDebugSource.ts": {
+    "id": 7,
+    "name": "api/interfaces/IDebugSource.ts"
+  },
+  "api/interfaces/IDictionary.ts": {
+    "id": 8,
+    "name": "api/interfaces/IDictionary.ts"
+  },
+  "api/interfaces/IMemoryTracker.ts": {
+    "id": 9,
+    "name": "api/interfaces/IMemoryTracker.ts"
+  },
+  "api/interfaces/IReadOnlyArray.ts": {
+    "id": 10,
+    "name": "api/interfaces/IReadOnlyArray.ts",
+    "functions": [
+      {
+        "id": 11,
+        "name": "enumIArrayValues",
+        "exported": true
+      }
+    ]
+  },
+  "api/interfaces/IReadOnlyCallStack.ts": {
+    "id": 12,
+    "name": "api/interfaces/IReadOnlyCallStack.ts"
+  },
+  "api/interfaces/IReadOnlyDictionary.ts": {
+    "id": 13,
+    "name": "api/interfaces/IReadOnlyDictionary.ts",
+    "functions": [
+      {
+        "id": 14,
+        "name": "enumIDictionaryValues",
+        "exported": true
+      },
+      {
+        "id": 15,
+        "name": "convertIDictionaryToObject",
+        "exported": true,
+        "calls": {
+          "enumIDictionaryValues": 1
+        }
+      }
+    ]
+  },
+  "api/interfaces/IState.ts": {
+    "id": 16,
+    "name": "api/interfaces/IState.ts"
+  },
+  "api/interfaces/IValueTracker.ts": {
+    "id": 17,
+    "name": "api/interfaces/IValueTracker.ts"
+  },
+  "api/parser.ts": {
+    "id": 18,
+    "name": "api/parser.ts",
+    "imports": [
+      {
+        "name": "nullValue",
+        "from": "./values/NullValue.js"
+      },
+      {
+        "name": "assert",
+        "from": "@sdk/assert.js"
+      }
+    ],
+    "functions": [
+      {
+        "id": 19,
+        "name": "parseString",
+        "exported": false
+      },
+      {
+        "id": 20,
+        "name": "parseNumber",
+        "exported": false,
+        "calls": {
+          "assert": 1
+        }
+      },
+      {
+        "id": 21,
+        "name": "parseName",
+        "exported": false,
+        "calls": {
+          "assert": 3
+        }
+      },
+      {
+        "id": 22,
+        "name": "parse",
+        "exported": true,
+        "calls": {
+          "assert": 1,
+          "parseString": 1,
+          "parseNumber": 1,
+          "parseName": 1
+        }
+      }
+    ]
+  },
+  "api/run.ts": {
+    "id": 23,
+    "name": "api/run.ts",
+    "imports": [
+      {
+        "name": "toStringValue",
+        "from": "@sdk/toValue.js"
+      }
+    ],
+    "classes": [
+      {
+        "name": "RunError",
+        "exported": true,
+        "methods": [
+          {
+            "id": 24,
+            "name": "constructor"
+          },
+          {
+            "id": 25,
+            "name": "exception"
+          }
+        ]
+      }
+    ],
+    "functions": [
+      {
+        "id": 26,
+        "name": "run",
+        "exported": true,
+        "calls": {
+          "toStringValue": 1
+        }
+      }
+    ]
+  },
+  "api/values/ArrayValue.ts": {
+    "id": 27,
+    "name": "api/values/ArrayValue.ts"
+  },
+  "api/values/BooleanValue.ts": {
+    "id": 28,
+    "name": "api/values/BooleanValue.ts"
+  },
+  "api/values/DictionaryValue.ts": {
+    "id": 29,
+    "name": "api/values/DictionaryValue.ts"
+  },
+  "api/values/IntegerValue.ts": {
+    "id": 30,
+    "name": "api/values/IntegerValue.ts"
+  },
+  "api/values/MarkValue.ts": {
+    "id": 31,
+    "name": "api/values/MarkValue.ts"
+  },
+  "api/values/NameValue.ts": {
+    "id": 32,
+    "name": "api/values/NameValue.ts"
+  },
+  "api/values/NullValue.ts": {
+    "id": 33,
+    "name": "api/values/NullValue.ts"
+  },
+  "api/values/OperatorValue.ts": {
+    "id": 34,
+    "name": "api/values/OperatorValue.ts"
+  },
+  "api/values/StringValue.ts": {
+    "id": 35,
+    "name": "api/values/StringValue.ts"
+  },
+  "api/values/Value.ts": {
+    "id": 36,
+    "name": "api/values/Value.ts"
+  },
+  "api/values/ValueType.ts": {
+    "id": 37,
+    "name": "api/values/ValueType.ts"
+  },
+  "core/MemoryTracker.ts": {
+    "id": 38,
+    "name": "core/MemoryTracker.ts",
+    "imports": [
+      {
+        "name": "SYSTEM_MEMORY_TYPE",
+        "from": "@api/index.js"
+      },
+      {
+        "name": "assert",
+        "from": "@sdk/index.js"
+      },
+      {
+        "name": "valuesOf",
+        "from": "@sdk/index.js"
+      }
+    ],
+    "classes": [
+      {
+        "name": "MemoryTracker",
+        "exported": true,
+        "methods": [
+          {
+            "id": 42,
+            "name": "experimentalGarbageCollector"
+          },
+          {
+            "id": 43,
+            "name": "constructor"
+          },
+          {
+            "id": 44,
+            "name": "isAvailable",
+            "calls": {
+              "assert": 2,
+              "memorySizeToBytes": 1
+            }
+          },
+          {
+            "id": 45,
+            "name": "allocate",
+            "calls": {
+              "assert": 1
+            }
+          },
+          {
+            "id": 46,
+            "name": "release"
+          },
+          {
+            "id": 47,
+            "name": "register",
+            "calls": {
+              "assert": 3
+            }
+          },
+          {
+            "id": 48,
+            "name": "enumContainersAllocations"
+          },
+          {
+            "id": 49,
+            "name": "addStringRef",
+            "calls": {
+              "stringSizer": 1,
+              "memorySizeToBytes": 1
+            }
+          },
+          {
+            "id": 50,
+            "name": "releaseString",
+            "calls": {
+              "assert": 1,
+              "stringSizer": 1,
+              "memorySizeToBytes": 1
+            }
+          },
+          {
+            "id": 51,
+            "name": "used"
+          },
+          {
+            "id": 52,
+            "name": "peak"
+          },
+          {
+            "id": 53,
+            "name": "total"
+          },
+          {
+            "id": 54,
+            "name": "byType"
+          },
+          {
+            "id": 55,
+            "name": "snapshot",
+            "calls": {
+              "stringSizer": 1
+            }
+          },
+          {
+            "id": 56,
+            "name": "addValueRef",
+            "calls": {
+              "valuesOf": 1,
+              "assert": 3
+            }
+          },
+          {
+            "id": 57,
+            "name": "releaseValue",
+            "calls": {
+              "valuesOf": 1,
+              "assert": 1
+            }
+          },
+          {
+            "id": 58,
+            "name": "collectGarbage"
+          },
+          {
+            "id": 59,
+            "name": "addToGarbageCollectorQueue"
+          },
+          {
+            "id": 60,
+            "name": "hasGarbageToCollect"
+          }
+        ]
+      }
+    ],
+    "functions": [
+      {
+        "id": 39,
+        "name": "stringSizer",
+        "exported": false
+      },
+      {
+        "id": 40,
+        "name": "addMemorySize",
+        "exported": true
+      },
+      {
+        "id": 41,
+        "name": "memorySizeToBytes",
+        "exported": true
+      }
+    ]
+  },
+  "core/objects/AbstractValueContainer.ts": {
+    "id": 61,
+    "name": "core/objects/AbstractValueContainer.ts",
+    "imports": [
+      {
+        "name": "nullValue",
+        "from": "@api/index.js"
+      },
+      {
+        "name": "assert",
+        "from": "@sdk/index.js"
+      },
+      {
+        "name": "addMemorySize",
+        "from": "@core/MemoryTracker.js"
+      },
+      {
+        "name": "ShareableObject",
+        "from": "@core/objects/ShareableObject.js"
+      }
+    ],
+    "classes": [
+      {
+        "name": "AbstractValueContainer",
+        "exported": true,
+        "methods": [
+          {
+            "id": 62,
+            "name": "_toValue"
+          },
+          {
+            "id": 63,
+            "name": "toValue",
+            "calls": {
+              "assert": 1
+            }
+          },
+          {
+            "id": 64,
+            "name": "constructor",
+            "calls": {
+              "assert": 3
+            }
+          },
+          {
+            "id": 65,
+            "name": "createInstance",
+            "calls": {
+              "assert": 2
+            }
+          },
+          {
+            "id": 66,
+            "name": "getSize",
+            "calls": {
+              "addMemorySize": 1
+            }
+          },
+          {
+            "id": 67,
+            "name": "getIncrementSize"
+          },
+          {
+            "id": 68,
+            "name": "memoryTracker"
+          },
+          {
+            "id": 69,
+            "name": "memoryType"
+          },
+          {
+            "id": 70,
+            "name": "length"
+          },
+          {
+            "id": 71,
+            "name": "at"
+          },
+          {
+            "id": 72,
+            "name": "capacity"
+          },
+          {
+            "id": 73,
+            "name": "reserve",
+            "calls": {
+              "assert": 1
+            }
+          },
+          {
+            "id": 74,
+            "name": "increaseCapacityIfNeeded"
+          },
+          {
+            "id": 75,
+            "name": "_push"
+          },
+          {
+            "id": 76,
+            "name": "push"
+          },
+          {
+            "id": 77,
+            "name": "collectGarbage"
+          },
+          {
+            "id": 78,
+            "name": "reduceCapacityIfNeeded"
+          },
+          {
+            "id": 79,
+            "name": "_pop"
+          },
+          {
+            "id": 80,
+            "name": "pop"
+          },
+          {
+            "id": 81,
+            "name": "swap",
+            "calls": {
+              "assert": 1
+            }
+          },
+          {
+            "id": 82,
+            "name": "popush"
+          },
+          {
+            "id": 83,
+            "name": "clear"
+          },
+          {
+            "id": 84,
+            "name": "_dispose"
+          }
+        ]
+      }
+    ]
+  },
+  "core/objects/ShareableObject.ts": {
+    "id": 85,
+    "name": "core/objects/ShareableObject.ts",
+    "imports": [
+      {
+        "name": "assert",
+        "from": "@sdk/index.js"
+      }
+    ],
+    "classes": [
+      {
+        "name": "ShareableObject",
+        "exported": true,
+        "methods": [
+          {
+            "id": 87,
+            "name": "constructor"
+          },
+          {
+            "id": 88,
+            "name": "refCount"
+          },
+          {
+            "id": 89,
+            "name": "addRef"
+          },
+          {
+            "id": 90,
+            "name": "release",
+            "calls": {
+              "assert": 1
+            }
+          }
+        ]
+      }
+    ],
+    "functions": [
+      {
+        "id": 86,
+        "name": "getShareableObject",
+        "exported": false,
+        "calls": {
+          "assert": 1
+        }
+      }
+    ]
+  },
+  "core/objects/ValueArray.ts": {
+    "id": 91,
+    "name": "core/objects/ValueArray.ts",
+    "imports": [
+      {
+        "name": "nullValue",
+        "from": "@api/index.js"
+      },
+      {
+        "name": "assert",
+        "from": "@sdk/index.js"
+      },
+      {
+        "name": "AbstractValueContainer",
+        "from": "@core/objects/AbstractValueContainer.js"
+      }
+    ],
+    "classes": [
+      {
+        "name": "ValueArray",
+        "exported": true,
+        "methods": [
+          {
+            "id": 92,
+            "name": "create"
+          },
+          {
+            "id": 93,
+            "name": "toValue",
+            "calls": {
+              "assert": 1
+            }
+          },
+          {
+            "id": 94,
+            "name": "pushImpl"
+          },
+          {
+            "id": 95,
+            "name": "popImpl"
+          },
+          {
+            "id": 96,
+            "name": "set"
+          }
+        ]
+      }
+    ]
+  },
+  "core/objects/dictionaries/Dictionary.ts": {
+    "id": 97,
+    "name": "core/objects/dictionaries/Dictionary.ts",
+    "imports": [
+      {
+        "name": "nullValue",
+        "from": "@api/index.js"
+      },
+      {
+        "name": "addMemorySize",
+        "from": "@core/MemoryTracker.js"
+      },
+      {
+        "name": "ShareableObject",
+        "from": "@core/objects/ShareableObject.js"
+      },
+      {
+        "name": "assert",
+        "from": "@sdk/index.js"
+      }
+    ],
+    "classes": [
+      {
+        "name": "Dictionary",
+        "exported": true,
+        "methods": [
+          {
+            "id": 98,
+            "name": "toValue",
+            "calls": {
+              "assert": 1
+            }
+          },
+          {
+            "id": 99,
+            "name": "constructor",
+            "calls": {
+              "assert": 1
+            }
+          },
+          {
+            "id": 100,
+            "name": "getSize",
+            "calls": {
+              "addMemorySize": 1
+            }
+          },
+          {
+            "id": 101,
+            "name": "create"
+          },
+          {
+            "id": 102,
+            "name": "names"
+          },
+          {
+            "id": 103,
+            "name": "lookup"
+          },
+          {
+            "id": 104,
+            "name": "_checkInitialCapacityUsage"
+          },
+          {
+            "id": 105,
+            "name": "_getNewValueSlot"
+          },
+          {
+            "id": 106,
+            "name": "def",
+            "calls": {
+              "assert": 1
+            }
+          },
+          {
+            "id": 107,
+            "name": "collectGarbage"
+          },
+          {
+            "id": 108,
+            "name": "_dispose"
+          }
+        ]
+      }
+    ]
+  },
+  "core/objects/dictionaries/Empty.ts": {
+    "id": 109,
+    "name": "core/objects/dictionaries/Empty.ts",
+    "imports": [
+      {
+        "name": "nullValue",
+        "from": "@api/index.js"
+      },
+      {
+        "name": "assert",
+        "from": "@sdk/index.js"
+      }
+    ],
+    "classes": [
+      {
+        "name": "EmptyDictionary",
+        "exported": true,
+        "methods": [
+          {
+            "id": 110,
+            "name": "constructor"
+          },
+          {
+            "id": 111,
+            "name": "instance"
+          },
+          {
+            "id": 112,
+            "name": "names"
+          },
+          {
+            "id": 113,
+            "name": "lookup"
+          },
+          {
+            "id": 114,
+            "name": "def",
+            "calls": {
+              "assert": 2
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "core/objects/dictionaries/System.ts": {
+    "id": 115,
+    "name": "core/objects/dictionaries/System.ts",
+    "imports": [
+      {
+        "name": "nullValue",
+        "from": "@api/index.js"
+      },
+      {
+        "name": "registry",
+        "from": "@core/operators/index.js"
+      }
+    ],
+    "classes": [
+      {
+        "name": "SystemDictionary",
+        "exported": true,
+        "methods": [
+          {
+            "id": 116,
+            "name": "constructor"
+          },
+          {
+            "id": 117,
+            "name": "instance"
+          },
+          {
+            "id": 118,
+            "name": "names"
+          },
+          {
+            "id": 119,
+            "name": "lookup"
+          }
+        ]
+      }
+    ]
+  },
+  "core/objects/stacks/CallStack.ts": {
+    "id": 120,
+    "name": "core/objects/stacks/CallStack.ts",
+    "imports": [
+      {
+        "name": "nullValue",
+        "from": "@api/index.js"
+      },
+      {
+        "name": "SYSTEM_MEMORY_TYPE",
+        "from": "@api/index.js"
+      },
+      {
+        "name": "OPERATOR_STATE_UNKNOWN",
+        "from": "@sdk/index.js"
+      },
+      {
+        "name": "OPERATOR_STATE_FIRST_CALL",
+        "from": "@sdk/index.js"
+      },
+      {
+        "name": "OPERATOR_STATE_POP",
+        "from": "@sdk/index.js"
+      },
+      {
+        "name": "OPERATOR_STATE_CALL_BEFORE_POP",
+        "from": "@sdk/index.js"
+      },
+      {
+        "name": "assert",
+        "from": "@sdk/index.js"
+      },
+      {
+        "name": "addMemorySize",
+        "from": "@core/MemoryTracker.js"
+      },
+      {
+        "name": "ValueStack",
+        "from": "@core/objects/stacks/ValueStack.js"
+      },
+      {
+        "name": "Dictionary",
+        "from": "@core/objects/dictionaries/Dictionary.js"
+      }
+    ],
+    "classes": [
+      {
+        "name": "CallStack",
+        "exported": true,
+        "methods": [
+          {
+            "id": 121,
+            "name": "create",
+            "calls": {
+              "assert": 1
+            }
+          },
+          {
+            "id": 122,
+            "name": "getSize",
+            "calls": {
+              "addMemorySize": 1
+            }
+          },
+          {
+            "id": 123,
+            "name": "getIncrementSize",
+            "calls": {
+              "addMemorySize": 1
+            }
+          },
+          {
+            "id": 124,
+            "name": "pushImpl"
+          },
+          {
+            "id": 125,
+            "name": "popImpl"
+          },
+          {
+            "id": 126,
+            "name": "snapshot"
+          },
+          {
+            "id": 127,
+            "name": "operatorStateAt"
+          },
+          {
+            "id": 128,
+            "name": "names"
+          },
+          {
+            "id": 129,
+            "name": "lookup"
+          },
+          {
+            "id": 130,
+            "name": "def"
+          },
+          {
+            "id": 131,
+            "name": "topOperatorState",
+            "calls": {
+              "assert": 1
+            }
+          },
+          {
+            "id": 132,
+            "name": "topOperatorState",
+            "calls": {
+              "assert": 1
+            }
+          },
+          {
+            "id": 133,
+            "name": "resetTopOperatorState"
+          }
+        ]
+      }
+    ]
+  },
+  "core/objects/stacks/DictionaryStack.ts": {
+    "id": 134,
+    "name": "core/objects/stacks/DictionaryStack.ts",
+    "imports": [
+      {
+        "name": "SYSTEM_MEMORY_TYPE",
+        "from": "@api/index.js"
+      },
+      {
+        "name": "assert",
+        "from": "@sdk/index.js"
+      },
+      {
+        "name": "ValueStack",
+        "from": "@core/objects/stacks/ValueStack.js"
+      },
+      {
+        "name": "SystemDictionary",
+        "from": "@core/objects/dictionaries/System.js"
+      },
+      {
+        "name": "EmptyDictionary",
+        "from": "@core/objects/dictionaries/Empty.js"
+      }
+    ],
+    "classes": [
+      {
+        "name": "DictionaryStack",
+        "exported": true,
+        "methods": [
+          {
+            "id": 135,
+            "name": "create",
+            "calls": {
+              "assert": 2
+            }
+          },
+          {
+            "id": 136,
+            "name": "constructor"
+          },
+          {
+            "id": 137,
+            "name": "getDictionaryValue",
+            "calls": {
+              "assert": 1
+            }
+          },
+          {
+            "id": 138,
+            "name": "setHost"
+          },
+          {
+            "id": 139,
+            "name": "setGlobal",
+            "calls": {
+              "assert": 1
+            }
+          },
+          {
+            "id": 140,
+            "name": "setUser",
+            "calls": {
+              "assert": 1
+            }
+          },
+          {
+            "id": 141,
+            "name": "top"
+          },
+          {
+            "id": 142,
+            "name": "host"
+          },
+          {
+            "id": 143,
+            "name": "system"
+          },
+          {
+            "id": 144,
+            "name": "global"
+          },
+          {
+            "id": 145,
+            "name": "user"
+          },
+          {
+            "id": 146,
+            "name": "begin"
+          },
+          {
+            "id": 147,
+            "name": "end"
+          },
+          {
+            "id": 148,
+            "name": "where"
+          },
+          {
+            "id": 149,
+            "name": "lookup"
+          }
+        ]
+      }
+    ]
+  },
+  "core/objects/stacks/ValueStack.ts": {
+    "id": 150,
+    "name": "core/objects/stacks/ValueStack.ts",
+    "imports": [
+      {
+        "name": "nullValue",
+        "from": "@api/index.js"
+      },
+      {
+        "name": "AbstractValueContainer",
+        "from": "@core/objects/AbstractValueContainer.js"
+      }
+    ],
+    "classes": [
+      {
+        "name": "ValueStack",
+        "exported": true,
+        "methods": [
+          {
+            "id": 151,
+            "name": "create"
+          },
+          {
+            "id": 152,
+            "name": "top"
+          },
+          {
+            "id": 153,
+            "name": "pushImpl"
+          },
+          {
+            "id": 154,
+            "name": "popImpl"
+          }
+        ]
+      }
+    ]
+  },
+  "core/operators/array/aload.ts": {
+    "id": 155,
+    "name": "core/operators/array/aload.ts",
+    "imports": [
+      {
+        "name": "OPERATOR_STATE_FIRST_CALL",
+        "from": "@sdk/index.js"
+      },
+      {
+        "name": "OPERATOR_STATE_POP",
+        "from": "@sdk/index.js"
+      },
+      {
+        "name": "buildFunctionOperator",
+        "from": "@core/operators/operators.js"
+      },
+      {
+        "name": "assert",
+        "from": "@sdk/assert.js"
+      }
+    ],
+    "functions": [
+      {
+        "id": 156,
+        "name": "(anonymous arrow)",
+        "exported": false,
+        "calls": {
+          "assert": 1
+        }
+      }
+    ]
+  },
+  "core/operators/array/closeArray.ts": {
+    "id": 157,
+    "name": "core/operators/array/closeArray.ts",
+    "imports": [
+      {
+        "name": "buildFunctionOperator",
+        "from": "@core/operators/operators.js"
+      },
+      {
+        "name": "closeToMark",
+        "from": "@core/operators/openClose.js"
+      }
+    ],
+    "functions": [
+      {
+        "id": 158,
+        "name": "(anonymous arrow)",
+        "exported": false,
+        "calls": {
+          "closeToMark": 1
+        }
+      }
+    ]
+  },
+  "core/operators/array/openArray.ts": {
+    "id": 159,
+    "name": "core/operators/array/openArray.ts",
+    "imports": [
+      {
+        "name": "buildFunctionOperator",
+        "from": "@core/operators/operators.js"
+      },
+      {
+        "name": "openWithMark",
+        "from": "@core/operators/openClose.js"
+      }
+    ]
+  },
+  "core/operators/boolean/and.ts": {
+    "id": 160,
+    "name": "core/operators/boolean/and.ts",
+    "imports": [
+      {
+        "name": "falseValue",
+        "from": "@api/index.js"
+      },
+      {
+        "name": "trueValue",
+        "from": "@api/index.js"
+      },
+      {
+        "name": "buildFunctionOperator",
+        "from": "@core/operators/operators.js"
+      }
+    ],
+    "functions": [
+      {
+        "id": 161,
+        "name": "(anonymous arrow)",
+        "exported": false
+      }
+    ]
+  },
+  "core/operators/boolean/or.ts": {
+    "id": 162,
+    "name": "core/operators/boolean/or.ts",
+    "imports": [
+      {
+        "name": "falseValue",
+        "from": "@api/index.js"
+      },
+      {
+        "name": "trueValue",
+        "from": "@api/index.js"
+      },
+      {
+        "name": "buildFunctionOperator",
+        "from": "@core/operators/operators.js"
+      }
+    ],
+    "functions": [
+      {
+        "id": 163,
+        "name": "(anonymous arrow)",
+        "exported": false
+      }
+    ]
+  },
+  "core/operators/boolean/xor.ts": {
+    "id": 164,
+    "name": "core/operators/boolean/xor.ts",
+    "imports": [
+      {
+        "name": "falseValue",
+        "from": "@api/index.js"
+      },
+      {
+        "name": "trueValue",
+        "from": "@api/index.js"
+      },
+      {
+        "name": "buildFunctionOperator",
+        "from": "@core/operators/operators.js"
+      }
+    ],
+    "functions": [
+      {
+        "id": 165,
+        "name": "(anonymous arrow)",
+        "exported": false
+      }
+    ]
+  },
+  "core/operators/dictionary/closeDictionary.ts": {
+    "id": 166,
+    "name": "core/operators/dictionary/closeDictionary.ts",
+    "imports": [
+      {
+        "name": "USER_MEMORY_TYPE",
+        "from": "@api/index.js"
+      },
+      {
+        "name": "findMarkPos",
+        "from": "@sdk/index.js"
+      },
+      {
+        "name": "valuesOf",
+        "from": "@sdk/index.js"
+      },
+      {
+        "name": "buildFunctionOperator",
+        "from": "@core/operators/operators.js"
+      },
+      {
+        "name": "pushOpenClosedValueWithDebugInfo",
+        "from": "@core/operators/openClose.js"
+      },
+      {
+        "name": "Dictionary",
+        "from": "@core/objects/dictionaries/Dictionary.js"
+      }
+    ],
+    "functions": [
+      {
+        "id": 167,
+        "name": "(anonymous arrow)",
+        "exported": false,
+        "calls": {
+          "findMarkPos": 1,
+          "valuesOf": 1,
+          "pushOpenClosedValueWithDebugInfo": 1
+        }
+      }
+    ]
+  },
+  "core/operators/dictionary/openDictionary.ts": {
+    "id": 168,
+    "name": "core/operators/dictionary/openDictionary.ts",
+    "imports": [
+      {
+        "name": "buildFunctionOperator",
+        "from": "@core/operators/operators.js"
+      },
+      {
+        "name": "openWithMark",
+        "from": "@core/operators/openClose.js"
+      }
+    ],
+    "functions": [
+      {
+        "id": 169,
+        "name": "(anonymous arrow)",
+        "exported": false,
+        "calls": {
+          "openWithMark": 1
+        }
+      }
+    ]
+  },
+  "core/operators/exceptions/dictStackUnderflow.ts": {
+    "id": 170,
+    "name": "core/operators/exceptions/dictStackUnderflow.ts",
+    "imports": [
+      {
+        "name": "buildFunctionOperator",
+        "from": "@core/operators/operators.js"
+      }
+    ],
+    "functions": [
+      {
+        "id": 171,
+        "name": "(anonymous arrow)",
+        "exported": false
+      }
+    ]
+  },
+  "core/operators/exceptions/invalidAccess.ts": {
+    "id": 172,
+    "name": "core/operators/exceptions/invalidAccess.ts",
+    "imports": [
+      {
+        "name": "buildFunctionOperator",
+        "from": "@core/operators/operators.js"
+      }
+    ],
+    "functions": [
+      {
+        "id": 173,
+        "name": "(anonymous arrow)",
+        "exported": false
+      }
+    ]
+  },
+  "core/operators/exceptions/limitcheck.ts": {
+    "id": 174,
+    "name": "core/operators/exceptions/limitcheck.ts",
+    "imports": [
+      {
+        "name": "buildFunctionOperator",
+        "from": "@core/operators/operators.js"
+      }
+    ],
+    "functions": [
+      {
+        "id": 175,
+        "name": "(anonymous arrow)",
+        "exported": false
+      }
+    ]
+  },
+  "core/operators/exceptions/rangeCheck.ts": {
+    "id": 176,
+    "name": "core/operators/exceptions/rangeCheck.ts",
+    "imports": [
+      {
+        "name": "buildFunctionOperator",
+        "from": "@core/operators/operators.js"
+      }
+    ],
+    "functions": [
+      {
+        "id": 177,
+        "name": "(anonymous arrow)",
+        "exported": false
+      }
+    ]
+  },
+  "core/operators/exceptions/stackUnderflow.ts": {
+    "id": 178,
+    "name": "core/operators/exceptions/stackUnderflow.ts",
+    "imports": [
+      {
+        "name": "buildFunctionOperator",
+        "from": "@core/operators/operators.js"
+      }
+    ],
+    "functions": [
+      {
+        "id": 179,
+        "name": "(anonymous arrow)",
+        "exported": false
+      }
+    ]
+  },
+  "core/operators/exceptions/stop.ts": {
+    "id": 180,
+    "name": "core/operators/exceptions/stop.ts",
+    "imports": [
+      {
+        "name": "buildFunctionOperator",
+        "from": "@core/operators/operators.js"
+      }
+    ],
+    "functions": [
+      {
+        "id": 181,
+        "name": "(anonymous arrow)",
+        "exported": false
+      }
+    ]
+  },
+  "core/operators/exceptions/typeCheck.ts": {
+    "id": 182,
+    "name": "core/operators/exceptions/typeCheck.ts",
+    "imports": [
+      {
+        "name": "buildFunctionOperator",
+        "from": "@core/operators/operators.js"
+      }
+    ],
+    "functions": [
+      {
+        "id": 183,
+        "name": "(anonymous arrow)",
+        "exported": false
+      }
+    ]
+  },
+  "core/operators/exceptions/undefined.ts": {
+    "id": 184,
+    "name": "core/operators/exceptions/undefined.ts",
+    "imports": [
+      {
+        "name": "buildFunctionOperator",
+        "from": "@core/operators/operators.js"
+      }
+    ],
+    "functions": [
+      {
+        "id": 185,
+        "name": "(anonymous arrow)",
+        "exported": false
+      }
+    ]
+  },
+  "core/operators/exceptions/undefinedResult.ts": {
+    "id": 186,
+    "name": "core/operators/exceptions/undefinedResult.ts",
+    "imports": [
+      {
+        "name": "buildFunctionOperator",
+        "from": "@core/operators/operators.js"
+      }
+    ],
+    "functions": [
+      {
+        "id": 187,
+        "name": "(anonymous arrow)",
+        "exported": false
+      }
+    ]
+  },
+  "core/operators/exceptions/unmatchedMark.ts": {
+    "id": 188,
+    "name": "core/operators/exceptions/unmatchedMark.ts",
+    "imports": [
+      {
+        "name": "buildFunctionOperator",
+        "from": "@core/operators/operators.js"
+      }
+    ],
+    "functions": [
+      {
+        "id": 189,
+        "name": "(anonymous arrow)",
+        "exported": false
+      }
+    ]
+  },
+  "core/operators/exceptions/vmOverflow.ts": {
+    "id": 190,
+    "name": "core/operators/exceptions/vmOverflow.ts",
+    "imports": [
+      {
+        "name": "buildFunctionOperator",
+        "from": "@core/operators/operators.js"
+      }
+    ],
+    "functions": [
+      {
+        "id": 191,
+        "name": "(anonymous arrow)",
+        "exported": false
+      }
+    ]
+  },
+  "core/operators/flow/closeBlock.ts": {
+    "id": 192,
+    "name": "core/operators/flow/closeBlock.ts",
+    "imports": [
+      {
+        "name": "OPERATOR_STATE_FIRST_CALL",
+        "from": "@sdk/index.js"
+      },
+      {
+        "name": "buildFunctionOperator",
+        "from": "@core/operators/operators.js"
+      },
+      {
+        "name": "closeToMark",
+        "from": "@core/operators/openClose.js"
+      }
+    ],
+    "functions": [
+      {
+        "id": 193,
+        "name": "(anonymous arrow)",
+        "exported": false,
+        "calls": {
+          "closeToMark": 1
+        }
+      }
+    ]
+  },
+  "core/operators/flow/finally.ts": {
+    "id": 194,
+    "name": "core/operators/flow/finally.ts",
+    "imports": [
+      {
+        "name": "nullValue",
+        "from": "@api/index.js"
+      },
+      {
+        "name": "OPERATOR_STATE_POP",
+        "from": "@sdk/index.js"
+      },
+      {
+        "name": "OPERATOR_STATE_FIRST_CALL",
+        "from": "@sdk/index.js"
+      },
+      {
+        "name": "OPERATOR_STATE_CALL_BEFORE_POP",
+        "from": "@sdk/index.js"
+      },
+      {
+        "name": "toStringValue",
+        "from": "@sdk/index.js"
+      },
+      {
+        "name": "assert",
+        "from": "@sdk/index.js"
+      },
+      {
+        "name": "buildFunctionOperator",
+        "from": "@core/operators/operators.js"
+      },
+      {
+        "name": "CallStack",
+        "from": "@core/objects/stacks/CallStack.js"
+      }
+    ],
+    "functions": [
+      {
+        "id": 195,
+        "name": "firstCall",
+        "exported": false,
+        "calls": {
+          "assert": 1
+        }
+      },
+      {
+        "id": 196,
+        "name": "callBeforePop",
+        "exported": false,
+        "calls": {
+          "toStringValue": 1,
+          "assert": 2
+        }
+      },
+      {
+        "id": 197,
+        "name": "popping",
+        "exported": false,
+        "calls": {
+          "assert": 2
+        }
+      },
+      {
+        "id": 198,
+        "name": "(anonymous arrow)",
+        "exported": false,
+        "calls": {
+          "firstCall": 1,
+          "callBeforePop": 1,
+          "assert": 1,
+          "popping": 1
+        }
+      }
+    ]
+  },
+  "core/operators/flow/gc.ts": {
+    "id": 199,
+    "name": "core/operators/flow/gc.ts",
+    "imports": [
+      {
+        "name": "assert",
+        "from": "@sdk/index.js"
+      },
+      {
+        "name": "OPERATOR_STATE_FIRST_CALL",
+        "from": "@sdk/index.js"
+      },
+      {
+        "name": "OPERATOR_STATE_POP",
+        "from": "@sdk/index.js"
+      },
+      {
+        "name": "buildFunctionOperator",
+        "from": "@core/operators/operators.js"
+      },
+      {
+        "name": "MemoryTracker",
+        "from": "@core/MemoryTracker.js"
+      }
+    ],
+    "functions": [
+      {
+        "id": 200,
+        "name": "(anonymous arrow)",
+        "exported": false,
+        "calls": {
+          "assert": 1
+        }
+      }
+    ]
+  },
+  "core/operators/flow/if.ts": {
+    "id": 201,
+    "name": "core/operators/flow/if.ts",
+    "imports": [
+      {
+        "name": "buildFunctionOperator",
+        "from": "@core/operators/operators.js"
+      }
+    ],
+    "functions": [
+      {
+        "id": 202,
+        "name": "(anonymous arrow)",
+        "exported": false
+      }
+    ]
+  },
+  "core/operators/flow/ifelse.ts": {
+    "id": 203,
+    "name": "core/operators/flow/ifelse.ts",
+    "imports": [
+      {
+        "name": "buildFunctionOperator",
+        "from": "@core/operators/operators.js"
+      }
+    ],
+    "functions": [
+      {
+        "id": 204,
+        "name": "(anonymous arrow)",
+        "exported": false
+      }
+    ]
+  },
+  "core/operators/flow/loop.ts": {
+    "id": 205,
+    "name": "core/operators/flow/loop.ts",
+    "imports": [
+      {
+        "name": "OPERATOR_STATE_POP",
+        "from": "@sdk/index.js"
+      },
+      {
+        "name": "OPERATOR_STATE_FIRST_CALL",
+        "from": "@sdk/index.js"
+      },
+      {
+        "name": "OPERATOR_STATE_CALL_BEFORE_POP",
+        "from": "@sdk/index.js"
+      },
+      {
+        "name": "assert",
+        "from": "@sdk/index.js"
+      },
+      {
+        "name": "buildFunctionOperator",
+        "from": "@core/operators/operators.js"
+      }
+    ],
+    "functions": [
+      {
+        "id": 206,
+        "name": "(anonymous arrow)",
+        "exported": false,
+        "calls": {
+          "assert": 1
+        }
+      }
+    ]
+  },
+  "core/operators/flow/openBlock.ts": {
+    "id": 207,
+    "name": "core/operators/flow/openBlock.ts",
+    "imports": [
+      {
+        "name": "buildFunctionOperator",
+        "from": "@core/operators/operators.js"
+      },
+      {
+        "name": "openWithMark",
+        "from": "@core/operators/openClose.js"
+      }
+    ],
+    "functions": [
+      {
+        "id": 208,
+        "name": "(anonymous arrow)",
+        "exported": false,
+        "calls": {
+          "openWithMark": 1
+        }
+      }
+    ]
+  },
+  "core/operators/flow/repeat.ts": {
+    "id": 209,
+    "name": "core/operators/flow/repeat.ts",
+    "imports": [
+      {
+        "name": "OPERATOR_STATE_POP",
+        "from": "@sdk/index.js"
+      },
+      {
+        "name": "OPERATOR_STATE_FIRST_CALL",
+        "from": "@sdk/index.js"
+      },
+      {
+        "name": "buildFunctionOperator",
+        "from": "@core/operators/operators.js"
+      }
+    ],
+    "functions": [
+      {
+        "id": 210,
+        "name": "firstCall",
+        "exported": false
+      },
+      {
+        "id": 211,
+        "name": "repeat",
+        "exported": false
+      },
+      {
+        "id": 212,
+        "name": "(anonymous arrow)",
+        "exported": false,
+        "calls": {
+          "firstCall": 1,
+          "repeat": 1
+        }
+      }
+    ]
+  },
+  "core/operators/flow/stopped.ts": {
+    "id": 213,
+    "name": "core/operators/flow/stopped.ts",
+    "imports": [
+      {
+        "name": "falseValue",
+        "from": "@api/index.js"
+      },
+      {
+        "name": "trueValue",
+        "from": "@api/index.js"
+      },
+      {
+        "name": "OPERATOR_STATE_POP",
+        "from": "@sdk/index.js"
+      },
+      {
+        "name": "OPERATOR_STATE_FIRST_CALL",
+        "from": "@sdk/index.js"
+      },
+      {
+        "name": "OPERATOR_STATE_CALL_BEFORE_POP",
+        "from": "@sdk/index.js"
+      },
+      {
+        "name": "assert",
+        "from": "@sdk/index.js"
+      },
+      {
+        "name": "buildFunctionOperator",
+        "from": "@core/operators/operators.js"
+      }
+    ],
+    "functions": [
+      {
+        "id": 214,
+        "name": "(anonymous arrow)",
+        "exported": false,
+        "calls": {
+          "assert": 1
+        }
+      }
+    ]
+  },
+  "core/operators/integer/abs.ts": {
+    "id": 215,
+    "name": "core/operators/integer/abs.ts",
+    "imports": [
+      {
+        "name": "toIntegerValue",
+        "from": "@sdk/index.js"
+      },
+      {
+        "name": "buildFunctionOperator",
+        "from": "@core/operators/operators.js"
+      }
+    ],
+    "functions": [
+      {
+        "id": 216,
+        "name": "(anonymous arrow)",
+        "exported": false,
+        "calls": {
+          "toIntegerValue": 1
+        }
+      }
+    ]
+  },
+  "core/operators/integer/add.ts": {
+    "id": 217,
+    "name": "core/operators/integer/add.ts",
+    "imports": [
+      {
+        "name": "toIntegerValue",
+        "from": "@sdk/index.js"
+      },
+      {
+        "name": "buildFunctionOperator",
+        "from": "@core/operators/operators.js"
+      }
+    ],
+    "functions": [
+      {
+        "id": 218,
+        "name": "(anonymous arrow)",
+        "exported": false,
+        "calls": {
+          "toIntegerValue": 1
+        }
+      }
+    ]
+  },
+  "core/operators/integer/div.ts": {
+    "id": 219,
+    "name": "core/operators/integer/div.ts",
+    "imports": [
+      {
+        "name": "toIntegerValue",
+        "from": "@sdk/index.js"
+      },
+      {
+        "name": "buildFunctionOperator",
+        "from": "@core/operators/operators.js"
+      }
+    ],
+    "functions": [
+      {
+        "id": 220,
+        "name": "(anonymous arrow)",
+        "exported": false,
+        "calls": {
+          "toIntegerValue": 2
+        }
+      }
+    ]
+  },
+  "core/operators/integer/gt.ts": {
+    "id": 221,
+    "name": "core/operators/integer/gt.ts",
+    "imports": [
+      {
+        "name": "falseValue",
+        "from": "@api/index.js"
+      },
+      {
+        "name": "trueValue",
+        "from": "@api/index.js"
+      },
+      {
+        "name": "buildFunctionOperator",
+        "from": "@core/operators/operators.js"
+      }
+    ],
+    "functions": [
+      {
+        "id": 222,
+        "name": "(anonymous arrow)",
+        "exported": false
+      }
+    ]
+  },
+  "core/operators/integer/gte.ts": {
+    "id": 223,
+    "name": "core/operators/integer/gte.ts",
+    "imports": [
+      {
+        "name": "falseValue",
+        "from": "@api/index.js"
+      },
+      {
+        "name": "trueValue",
+        "from": "@api/index.js"
+      },
+      {
+        "name": "buildFunctionOperator",
+        "from": "@core/operators/operators.js"
+      }
+    ],
+    "functions": [
+      {
+        "id": 224,
+        "name": "(anonymous arrow)",
+        "exported": false
+      }
+    ]
+  },
+  "core/operators/integer/lt.ts": {
+    "id": 225,
+    "name": "core/operators/integer/lt.ts",
+    "imports": [
+      {
+        "name": "trueValue",
+        "from": "@api/index.js"
+      },
+      {
+        "name": "falseValue",
+        "from": "@api/index.js"
+      },
+      {
+        "name": "buildFunctionOperator",
+        "from": "@core/operators/operators.js"
+      }
+    ],
+    "functions": [
+      {
+        "id": 226,
+        "name": "(anonymous arrow)",
+        "exported": false
+      }
+    ]
+  },
+  "core/operators/integer/lte.ts": {
+    "id": 227,
+    "name": "core/operators/integer/lte.ts",
+    "imports": [
+      {
+        "name": "trueValue",
+        "from": "@api/index.js"
+      },
+      {
+        "name": "falseValue",
+        "from": "@api/index.js"
+      },
+      {
+        "name": "buildFunctionOperator",
+        "from": "@core/operators/operators.js"
+      }
+    ],
+    "functions": [
+      {
+        "id": 228,
+        "name": "(anonymous arrow)",
+        "exported": false
+      }
+    ]
+  },
+  "core/operators/integer/mul.ts": {
+    "id": 229,
+    "name": "core/operators/integer/mul.ts",
+    "imports": [
+      {
+        "name": "toIntegerValue",
+        "from": "@sdk/index.js"
+      },
+      {
+        "name": "buildFunctionOperator",
+        "from": "@core/operators/operators.js"
+      }
+    ],
+    "functions": [
+      {
+        "id": 230,
+        "name": "(anonymous arrow)",
+        "exported": false,
+        "calls": {
+          "toIntegerValue": 1
+        }
+      }
+    ]
+  },
+  "core/operators/integer/sub.ts": {
+    "id": 231,
+    "name": "core/operators/integer/sub.ts",
+    "imports": [
+      {
+        "name": "toIntegerValue",
+        "from": "@sdk/index.js"
+      },
+      {
+        "name": "buildFunctionOperator",
+        "from": "@core/operators/operators.js"
+      }
+    ],
+    "functions": [
+      {
+        "id": 232,
+        "name": "(anonymous arrow)",
+        "exported": false,
+        "calls": {
+          "toIntegerValue": 1
+        }
+      }
+    ]
+  },
+  "core/operators/openClose.ts": {
+    "id": 233,
+    "name": "core/operators/openClose.ts",
+    "imports": [
+      {
+        "name": "USER_MEMORY_TYPE",
+        "from": "@api/index.js"
+      },
+      {
+        "name": "markValue",
+        "from": "@api/index.js"
+      },
+      {
+        "name": "assert",
+        "from": "@sdk/index.js"
+      },
+      {
+        "name": "findMarkPos",
+        "from": "@sdk/index.js"
+      },
+      {
+        "name": "OPERATOR_STATE_FIRST_CALL",
+        "from": "@sdk/index.js"
+      },
+      {
+        "name": "OPERATOR_STATE_POP",
+        "from": "@sdk/index.js"
+      },
+      {
+        "name": "toIntegerValue",
+        "from": "@sdk/index.js"
+      },
+      {
+        "name": "ValueArray",
+        "from": "@core/objects/ValueArray.js"
+      }
+    ],
+    "functions": [
+      {
+        "id": 234,
+        "name": "openWithMark",
+        "exported": true
+      },
+      {
+        "id": 235,
+        "name": "pushOpenClosedValueWithDebugInfo",
+        "exported": true
+      },
+      {
+        "id": 236,
+        "name": "closeToMark",
+        "exported": true,
+        "calls": {
+          "findMarkPos": 1,
+          "toIntegerValue": 1,
+          "assert": 4,
+          "pushOpenClosedValueWithDebugInfo": 1
+        }
+      }
+    ]
+  },
+  "core/operators/operators.ts": {
+    "id": 237,
+    "name": "core/operators/operators.ts",
+    "imports": [
+      {
+        "name": "assert",
+        "from": "@sdk/index.js"
+      },
+      {
+        "name": "OperatorType",
+        "from": "@sdk/index.js"
+      }
+    ],
+    "functions": [
+      {
+        "id": 238,
+        "name": "buildFunctionOperator",
+        "exported": true,
+        "calls": {
+          "assert": 1
+        }
+      },
+      {
+        "id": 239,
+        "name": "buildConstantOperator",
+        "exported": true
+      }
+    ]
+  },
+  "core/operators/stacks/call/countexecstack.ts": {
+    "id": 240,
+    "name": "core/operators/stacks/call/countexecstack.ts",
+    "imports": [
+      {
+        "name": "assert",
+        "from": "@sdk/index.js"
+      },
+      {
+        "name": "toIntegerValue",
+        "from": "@sdk/index.js"
+      },
+      {
+        "name": "buildFunctionOperator",
+        "from": "@core/operators/operators.js"
+      }
+    ],
+    "functions": [
+      {
+        "id": 241,
+        "name": "(anonymous arrow)",
+        "exported": false,
+        "calls": {
+          "toIntegerValue": 1,
+          "assert": 1
+        }
+      }
+    ]
+  },
+  "core/operators/stacks/dictionary/begin.ts": {
+    "id": 242,
+    "name": "core/operators/stacks/dictionary/begin.ts",
+    "imports": [
+      {
+        "name": "buildFunctionOperator",
+        "from": "@core/operators/operators.js"
+      }
+    ],
+    "functions": [
+      {
+        "id": 243,
+        "name": "(anonymous arrow)",
+        "exported": false
+      }
+    ]
+  },
+  "core/operators/stacks/dictionary/bind.ts": {
+    "id": 244,
+    "name": "core/operators/stacks/dictionary/bind.ts",
+    "imports": [
+      {
+        "name": "assert",
+        "from": "@sdk/index.js"
+      },
+      {
+        "name": "isArrayValue",
+        "from": "@sdk/index.js"
+      },
+      {
+        "name": "OPERATOR_STATE_POP",
+        "from": "@sdk/index.js"
+      },
+      {
+        "name": "ValueArray",
+        "from": "@core/objects/ValueArray.js"
+      },
+      {
+        "name": "buildFunctionOperator",
+        "from": "@core/operators/operators.js"
+      },
+      {
+        "name": "pop",
+        "from": "@core/operators/stacks/operand/pop.js"
+      }
+    ],
+    "functions": [
+      {
+        "id": 245,
+        "name": "bindName",
+        "exported": false
+      },
+      {
+        "id": 246,
+        "name": "bindArray",
+        "exported": false
+      },
+      {
+        "id": 247,
+        "name": "bindValue",
+        "exported": false,
+        "calls": {
+          "bindName": 1,
+          "assert": 1,
+          "bindArray": 1
+        }
+      },
+      {
+        "id": 248,
+        "name": "(anonymous arrow)",
+        "exported": false,
+        "calls": {
+          "assert": 2,
+          "isArrayValue": 1,
+          "bindValue": 1
+        }
+      }
+    ]
+  },
+  "core/operators/stacks/dictionary/countdictstack.ts": {
+    "id": 249,
+    "name": "core/operators/stacks/dictionary/countdictstack.ts",
+    "imports": [
+      {
+        "name": "assert",
+        "from": "@sdk/index.js"
+      },
+      {
+        "name": "toIntegerValue",
+        "from": "@sdk/index.js"
+      },
+      {
+        "name": "buildFunctionOperator",
+        "from": "@core/operators/operators.js"
+      }
+    ],
+    "functions": [
+      {
+        "id": 250,
+        "name": "(anonymous arrow)",
+        "exported": false,
+        "calls": {
+          "toIntegerValue": 1,
+          "assert": 1
+        }
+      }
+    ]
+  },
+  "core/operators/stacks/dictionary/currentdict.ts": {
+    "id": 251,
+    "name": "core/operators/stacks/dictionary/currentdict.ts",
+    "imports": [
+      {
+        "name": "buildFunctionOperator",
+        "from": "@core/operators/operators.js"
+      }
+    ],
+    "functions": [
+      {
+        "id": 252,
+        "name": "(anonymous arrow)",
+        "exported": false
+      }
+    ]
+  },
+  "core/operators/stacks/dictionary/def.ts": {
+    "id": 253,
+    "name": "core/operators/stacks/dictionary/def.ts",
+    "imports": [
+      {
+        "name": "buildFunctionOperator",
+        "from": "@core/operators/operators.js"
+      }
+    ],
+    "functions": [
+      {
+        "id": 254,
+        "name": "(anonymous arrow)",
+        "exported": false
+      }
+    ]
+  },
+  "core/operators/stacks/dictionary/end.ts": {
+    "id": 255,
+    "name": "core/operators/stacks/dictionary/end.ts",
+    "imports": [
+      {
+        "name": "buildFunctionOperator",
+        "from": "@core/operators/operators.js"
+      }
+    ],
+    "functions": [
+      {
+        "id": 256,
+        "name": "(anonymous arrow)",
+        "exported": false
+      }
+    ]
+  },
+  "core/operators/stacks/dictionary/globaldict.ts": {
+    "id": 257,
+    "name": "core/operators/stacks/dictionary/globaldict.ts",
+    "imports": [
+      {
+        "name": "buildFunctionOperator",
+        "from": "@core/operators/operators.js"
+      }
+    ],
+    "functions": [
+      {
+        "id": 258,
+        "name": "(anonymous arrow)",
+        "exported": false
+      }
+    ]
+  },
+  "core/operators/stacks/dictionary/hostdict.ts": {
+    "id": 259,
+    "name": "core/operators/stacks/dictionary/hostdict.ts",
+    "imports": [
+      {
+        "name": "buildFunctionOperator",
+        "from": "@core/operators/operators.js"
+      }
+    ],
+    "functions": [
+      {
+        "id": 260,
+        "name": "(anonymous arrow)",
+        "exported": false
+      }
+    ]
+  },
+  "core/operators/stacks/dictionary/systemdict.ts": {
+    "id": 261,
+    "name": "core/operators/stacks/dictionary/systemdict.ts",
+    "imports": [
+      {
+        "name": "buildFunctionOperator",
+        "from": "@core/operators/operators.js"
+      }
+    ],
+    "functions": [
+      {
+        "id": 262,
+        "name": "(anonymous arrow)",
+        "exported": false
+      }
+    ]
+  },
+  "core/operators/stacks/dictionary/userdict.ts": {
+    "id": 263,
+    "name": "core/operators/stacks/dictionary/userdict.ts",
+    "imports": [
+      {
+        "name": "buildFunctionOperator",
+        "from": "@core/operators/operators.js"
+      }
+    ],
+    "functions": [
+      {
+        "id": 264,
+        "name": "(anonymous arrow)",
+        "exported": false
+      }
+    ]
+  },
+  "core/operators/stacks/operand/clear.ts": {
+    "id": 265,
+    "name": "core/operators/stacks/operand/clear.ts",
+    "imports": [
+      {
+        "name": "buildFunctionOperator",
+        "from": "@core/operators/operators.js"
+      }
+    ],
+    "functions": [
+      {
+        "id": 266,
+        "name": "(anonymous arrow)",
+        "exported": false
+      }
+    ]
+  },
+  "core/operators/stacks/operand/cleartomark.ts": {
+    "id": 267,
+    "name": "core/operators/stacks/operand/cleartomark.ts",
+    "imports": [
+      {
+        "name": "findMarkPos",
+        "from": "@sdk/index.js"
+      },
+      {
+        "name": "buildFunctionOperator",
+        "from": "@core/operators/operators.js"
+      }
+    ],
+    "functions": [
+      {
+        "id": 268,
+        "name": "(anonymous arrow)",
+        "exported": false,
+        "calls": {
+          "findMarkPos": 1
+        }
+      }
+    ]
+  },
+  "core/operators/stacks/operand/count.ts": {
+    "id": 269,
+    "name": "core/operators/stacks/operand/count.ts",
+    "imports": [
+      {
+        "name": "assert",
+        "from": "@sdk/index.js"
+      },
+      {
+        "name": "toIntegerValue",
+        "from": "@sdk/index.js"
+      },
+      {
+        "name": "buildFunctionOperator",
+        "from": "@core/operators/operators.js"
+      }
+    ],
+    "functions": [
+      {
+        "id": 270,
+        "name": "(anonymous arrow)",
+        "exported": false,
+        "calls": {
+          "toIntegerValue": 1,
+          "assert": 1
+        }
+      }
+    ]
+  },
+  "core/operators/stacks/operand/counttomark.ts": {
+    "id": 271,
+    "name": "core/operators/stacks/operand/counttomark.ts",
+    "imports": [
+      {
+        "name": "assert",
+        "from": "@sdk/index.js"
+      },
+      {
+        "name": "findMarkPos",
+        "from": "@sdk/index.js"
+      },
+      {
+        "name": "toIntegerValue",
+        "from": "@sdk/index.js"
+      },
+      {
+        "name": "buildFunctionOperator",
+        "from": "@core/operators/operators.js"
+      }
+    ],
+    "functions": [
+      {
+        "id": 272,
+        "name": "(anonymous arrow)",
+        "exported": false,
+        "calls": {
+          "findMarkPos": 1,
+          "toIntegerValue": 1,
+          "assert": 1
+        }
+      }
+    ]
+  },
+  "core/operators/stacks/operand/dup.ts": {
+    "id": 273,
+    "name": "core/operators/stacks/operand/dup.ts",
+    "imports": [
+      {
+        "name": "buildFunctionOperator",
+        "from": "@core/operators/operators.js"
+      }
+    ],
+    "functions": [
+      {
+        "id": 274,
+        "name": "(anonymous arrow)",
+        "exported": false
+      }
+    ]
+  },
+  "core/operators/stacks/operand/exch.ts": {
+    "id": 275,
+    "name": "core/operators/stacks/operand/exch.ts",
+    "imports": [
+      {
+        "name": "buildFunctionOperator",
+        "from": "@core/operators/operators.js"
+      }
+    ],
+    "functions": [
+      {
+        "id": 276,
+        "name": "(anonymous arrow)",
+        "exported": false
+      }
+    ]
+  },
+  "core/operators/stacks/operand/indexOp.ts": {
+    "id": 277,
+    "name": "core/operators/stacks/operand/indexOp.ts",
+    "imports": [
+      {
+        "name": "buildFunctionOperator",
+        "from": "@core/operators/operators.js"
+      }
+    ],
+    "functions": [
+      {
+        "id": 278,
+        "name": "(anonymous arrow)",
+        "exported": false
+      }
+    ]
+  },
+  "core/operators/stacks/operand/pop.ts": {
+    "id": 279,
+    "name": "core/operators/stacks/operand/pop.ts",
+    "imports": [
+      {
+        "name": "buildFunctionOperator",
+        "from": "@core/operators/operators.js"
+      }
+    ],
+    "functions": [
+      {
+        "id": 280,
+        "name": "(anonymous arrow)",
+        "exported": false
+      }
+    ]
+  },
+  "core/operators/stacks/operand/roll.ts": {
+    "id": 281,
+    "name": "core/operators/stacks/operand/roll.ts",
+    "imports": [
+      {
+        "name": "buildFunctionOperator",
+        "from": "@core/operators/operators.js"
+      },
+      {
+        "name": "assert",
+        "from": "@sdk/index.js"
+      },
+      {
+        "name": "toIntegerValue",
+        "from": "@sdk/index.js"
+      },
+      {
+        "name": "OPERATOR_STATE_FIRST_CALL",
+        "from": "@sdk/index.js"
+      },
+      {
+        "name": "OPERATOR_STATE_POP",
+        "from": "@sdk/index.js"
+      }
+    ],
+    "functions": [
+      {
+        "id": 282,
+        "name": "initialize",
+        "exported": false,
+        "calls": {
+          "toIntegerValue": 2,
+          "assert": 2
+        }
+      },
+      {
+        "id": 283,
+        "name": "roll",
+        "exported": false,
+        "calls": {
+          "assert": 5,
+          "toIntegerValue": 1
+        }
+      },
+      {
+        "id": 284,
+        "name": "(anonymous arrow)",
+        "exported": false,
+        "calls": {
+          "initialize": 1,
+          "roll": 1
+        }
+      }
+    ]
+  },
+  "core/operators/value/convert/cvi.ts": {
+    "id": 285,
+    "name": "core/operators/value/convert/cvi.ts",
+    "imports": [
+      {
+        "name": "toIntegerValue",
+        "from": "@sdk/index.js"
+      },
+      {
+        "name": "buildFunctionOperator",
+        "from": "@core/operators/operators.js"
+      }
+    ],
+    "functions": [
+      {
+        "id": 286,
+        "name": "(anonymous arrow)",
+        "exported": false,
+        "calls": {
+          "toIntegerValue": 1
+        }
+      }
+    ]
+  },
+  "core/operators/value/convert/cvlit.ts": {
+    "id": 287,
+    "name": "core/operators/value/convert/cvlit.ts",
+    "imports": [
+      {
+        "name": "buildFunctionOperator",
+        "from": "@core/operators/operators.js"
+      }
+    ],
+    "functions": [
+      {
+        "id": 288,
+        "name": "(anonymous arrow)",
+        "exported": false
+      }
+    ]
+  },
+  "core/operators/value/convert/cvn.ts": {
+    "id": 289,
+    "name": "core/operators/value/convert/cvn.ts",
+    "imports": [
+      {
+        "name": "assert",
+        "from": "@sdk/index.js"
+      },
+      {
+        "name": "toNameValue",
+        "from": "@sdk/index.js"
+      },
+      {
+        "name": "buildFunctionOperator",
+        "from": "@core/operators/operators.js"
+      },
+      {
+        "name": "MemoryTracker",
+        "from": "@core/MemoryTracker.js"
+      }
+    ],
+    "functions": [
+      {
+        "id": 290,
+        "name": "(anonymous arrow)",
+        "exported": false,
+        "calls": {
+          "assert": 1,
+          "toNameValue": 1
+        }
+      }
+    ]
+  },
+  "core/operators/value/eq.ts": {
+    "id": 291,
+    "name": "core/operators/value/eq.ts",
+    "imports": [
+      {
+        "name": "trueValue",
+        "from": "@api/index.js"
+      },
+      {
+        "name": "falseValue",
+        "from": "@api/index.js"
+      },
+      {
+        "name": "valuesOf",
+        "from": "@sdk/index.js"
+      },
+      {
+        "name": "buildFunctionOperator",
+        "from": "@core/operators/operators.js"
+      }
+    ],
+    "functions": [
+      {
+        "id": 292,
+        "name": "(anonymous arrow)",
+        "exported": false,
+        "calls": {
+          "valuesOf": 1
+        }
+      }
+    ]
+  },
+  "core/operators/value/false.ts": {
+    "id": 293,
+    "name": "core/operators/value/false.ts",
+    "imports": [
+      {
+        "name": "falseValue",
+        "from": "@api/index.js"
+      },
+      {
+        "name": "buildConstantOperator",
+        "from": "@core/operators/operators.js"
+      }
+    ]
+  },
+  "core/operators/value/get.ts": {
+    "id": 294,
+    "name": "core/operators/value/get.ts",
+    "imports": [
+      {
+        "name": "assert",
+        "from": "@sdk/index.js"
+      },
+      {
+        "name": "checkPos",
+        "from": "@sdk/index.js"
+      },
+      {
+        "name": "toStringValue",
+        "from": "@sdk/index.js"
+      },
+      {
+        "name": "buildFunctionOperator",
+        "from": "@core/operators/operators.js"
+      },
+      {
+        "name": "MemoryTracker",
+        "from": "@core/MemoryTracker.js"
+      }
+    ],
+    "functions": [
+      {
+        "id": 295,
+        "name": "(anonymous arrow)",
+        "exported": false,
+        "calls": {
+          "assert": 1,
+          "checkPos": 1,
+          "toStringValue": 1
+        }
+      },
+      {
+        "id": 296,
+        "name": "(anonymous arrow)",
+        "exported": false,
+        "calls": {
+          "checkPos": 1
+        }
+      },
+      {
+        "id": 297,
+        "name": "(anonymous arrow)",
+        "exported": false
+      },
+      {
+        "id": 298,
+        "name": "(anonymous arrow)",
+        "exported": false,
+        "calls": {
+          "implementation": 1
+        }
+      }
+    ]
+  },
+  "core/operators/value/length.ts": {
+    "id": 299,
+    "name": "core/operators/value/length.ts",
+    "imports": [
+      {
+        "name": "assert",
+        "from": "@sdk/index.js"
+      },
+      {
+        "name": "toIntegerValue",
+        "from": "@sdk/index.js"
+      },
+      {
+        "name": "buildFunctionOperator",
+        "from": "@core/operators/operators.js"
+      }
+    ],
+    "functions": [
+      {
+        "id": 300,
+        "name": "(anonymous arrow)",
+        "exported": false
+      },
+      {
+        "id": 301,
+        "name": "(anonymous arrow)",
+        "exported": false
+      },
+      {
+        "id": 302,
+        "name": "(anonymous arrow)",
+        "exported": false
+      },
+      {
+        "id": 303,
+        "name": "(anonymous arrow)",
+        "exported": false,
+        "calls": {
+          "toIntegerValue": 1,
+          "implementation": 1,
+          "assert": 1
+        }
+      }
+    ]
+  },
+  "core/operators/value/mark.ts": {
+    "id": 304,
+    "name": "core/operators/value/mark.ts",
+    "imports": [
+      {
+        "name": "markValue",
+        "from": "@api/index.js"
+      },
+      {
+        "name": "buildConstantOperator",
+        "from": "../operators.js"
+      }
+    ]
+  },
+  "core/operators/value/neq.ts": {
+    "id": 305,
+    "name": "core/operators/value/neq.ts",
+    "imports": [
+      {
+        "name": "trueValue",
+        "from": "@api/index.js"
+      },
+      {
+        "name": "falseValue",
+        "from": "@api/index.js"
+      },
+      {
+        "name": "valuesOf",
+        "from": "@sdk/index.js"
+      },
+      {
+        "name": "buildFunctionOperator",
+        "from": "@core/operators/operators.js"
+      }
+    ],
+    "functions": [
+      {
+        "id": 306,
+        "name": "(anonymous arrow)",
+        "exported": false,
+        "calls": {
+          "valuesOf": 1
+        }
+      }
+    ]
+  },
+  "core/operators/value/put.ts": {
+    "id": 307,
+    "name": "core/operators/value/put.ts",
+    "imports": [
+      {
+        "name": "assert",
+        "from": "@sdk/index.js"
+      },
+      {
+        "name": "checkPos",
+        "from": "@sdk/index.js"
+      },
+      {
+        "name": "toStringValue",
+        "from": "@sdk/index.js"
+      },
+      {
+        "name": "buildFunctionOperator",
+        "from": "@core/operators/operators.js"
+      },
+      {
+        "name": "MemoryTracker",
+        "from": "@core/MemoryTracker.js"
+      }
+    ],
+    "functions": [
+      {
+        "id": 308,
+        "name": "(anonymous arrow)",
+        "exported": false,
+        "calls": {
+          "assert": 1,
+          "checkPos": 1,
+          "toStringValue": 1
+        }
+      },
+      {
+        "id": 309,
+        "name": "(anonymous arrow)",
+        "exported": false,
+        "calls": {
+          "checkPos": 1
+        }
+      },
+      {
+        "id": 310,
+        "name": "(anonymous arrow)",
+        "exported": false
+      },
+      {
+        "id": 311,
+        "name": "(anonymous arrow)",
+        "exported": false,
+        "calls": {
+          "implementation": 1
+        }
+      }
+    ]
+  },
+  "core/operators/value/true.ts": {
+    "id": 312,
+    "name": "core/operators/value/true.ts",
+    "imports": [
+      {
+        "name": "trueValue",
+        "from": "@api/index.js"
+      },
+      {
+        "name": "buildConstantOperator",
+        "from": "@core/operators/operators.js"
+      }
+    ]
+  },
+  "core/operators/value/type.ts": {
+    "id": 313,
+    "name": "core/operators/value/type.ts",
+    "imports": [
+      {
+        "name": "toNameValue",
+        "from": "@sdk/index.js"
+      },
+      {
+        "name": "buildFunctionOperator",
+        "from": "@core/operators/operators.js"
+      }
+    ],
+    "functions": [
+      {
+        "id": 314,
+        "name": "(anonymous arrow)",
+        "exported": false,
+        "calls": {
+          "toNameValue": 1
+        }
+      }
+    ]
+  },
+  "core/operators/value/version.ts": {
+    "id": 315,
+    "name": "core/operators/value/version.ts",
+    "imports": [
+      {
+        "name": "toStringValue",
+        "from": "@sdk/index.js"
+      },
+      {
+        "name": "buildConstantOperator",
+        "from": "../operators.js"
+      }
+    ]
+  },
+  "core/operators/value/wcheck.ts": {
+    "id": 316,
+    "name": "core/operators/value/wcheck.ts",
+    "imports": [
+      {
+        "name": "trueValue",
+        "from": "@api/index.js"
+      },
+      {
+        "name": "falseValue",
+        "from": "@api/index.js"
+      },
+      {
+        "name": "buildFunctionOperator",
+        "from": "@core/operators/operators.js"
+      }
+    ],
+    "functions": [
+      {
+        "id": 317,
+        "name": "(anonymous arrow)",
+        "exported": false
+      }
+    ]
+  },
+  "core/operators/value/xcheck.ts": {
+    "id": 318,
+    "name": "core/operators/value/xcheck.ts",
+    "imports": [
+      {
+        "name": "trueValue",
+        "from": "@api/index.js"
+      },
+      {
+        "name": "falseValue",
+        "from": "@api/index.js"
+      },
+      {
+        "name": "buildFunctionOperator",
+        "from": "@core/operators/operators.js"
+      }
+    ],
+    "functions": [
+      {
+        "id": 319,
+        "name": "(anonymous arrow)",
+        "exported": false
+      }
+    ]
+  },
+  "core/state/State.ts": {
+    "id": 320,
+    "name": "core/state/State.ts",
+    "imports": [
+      {
+        "name": "SYSTEM_MEMORY_TYPE",
+        "from": "@api/index.js"
+      },
+      {
+        "name": "assert",
+        "from": "@sdk/index.js"
+      },
+      {
+        "name": "MemoryTracker",
+        "from": "@core/MemoryTracker.js"
+      },
+      {
+        "name": "DictionaryStack",
+        "from": "@core/objects/stacks/DictionaryStack.js"
+      },
+      {
+        "name": "Dictionary",
+        "from": "@core/objects/dictionaries/Dictionary.js"
+      },
+      {
+        "name": "ValueStack",
+        "from": "@core/objects/stacks/ValueStack.js"
+      },
+      {
+        "name": "CallStack",
+        "from": "@core/objects/stacks/CallStack.js"
+      },
+      {
+        "name": "operatorPop",
+        "from": "./operator.js"
+      },
+      {
+        "name": "operatorCycle",
+        "from": "./operator.js"
+      },
+      {
+        "name": "callCycle",
+        "from": "./call.js"
+      },
+      {
+        "name": "blockCycle",
+        "from": "./block.js"
+      },
+      {
+        "name": "parseCycle",
+        "from": "./parse.js"
+      },
+      {
+        "name": "SystemDictionary",
+        "from": "@core/objects/dictionaries/System.js"
+      }
+    ],
+    "classes": [
+      {
+        "name": "State",
+        "exported": true,
+        "methods": [
+          {
+            "id": 321,
+            "name": "constructor"
+          },
+          {
+            "id": 322,
+            "name": "create"
+          },
+          {
+            "id": 323,
+            "name": "destroyed"
+          },
+          {
+            "id": 324,
+            "name": "_checkIfDestroyed",
+            "calls": {
+              "assert": 1
+            }
+          },
+          {
+            "id": 325,
+            "name": "_resetException"
+          },
+          {
+            "id": 326,
+            "name": "idle"
+          },
+          {
+            "id": 327,
+            "name": "memoryTracker"
+          },
+          {
+            "id": 328,
+            "name": "operands"
+          },
+          {
+            "id": 329,
+            "name": "dictionaries"
+          },
+          {
+            "id": 330,
+            "name": "callEnabled"
+          },
+          {
+            "id": 331,
+            "name": "exception"
+          },
+          {
+            "id": 332,
+            "name": "exceptionStack"
+          },
+          {
+            "id": 333,
+            "name": "exec"
+          },
+          {
+            "id": 334,
+            "name": "destroy",
+            "calls": {
+              "assert": 1
+            }
+          },
+          {
+            "id": 335,
+            "name": "raiseException",
+            "calls": {
+              "assert": 4
+            }
+          },
+          {
+            "id": 336,
+            "name": "clearException"
+          },
+          {
+            "id": 337,
+            "name": "calls"
+          },
+          {
+            "id": 338,
+            "name": "allowCall"
+          },
+          {
+            "id": 339,
+            "name": "preventCall"
+          },
+          {
+            "id": 340,
+            "name": "run"
+          },
+          {
+            "id": 341,
+            "name": "cycle",
+            "calls": {
+              "operatorPop": 1,
+              "operatorCycle": 1,
+              "callCycle": 1,
+              "blockCycle": 1,
+              "parseCycle": 1,
+              "assert": 1
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "core/state/block.ts": {
+    "id": 342,
+    "name": "core/state/block.ts",
+    "imports": [
+      {
+        "name": "OPERATOR_STATE_FIRST_CALL",
+        "from": "@sdk/index.js"
+      },
+      {
+        "name": "OPERATOR_STATE_UNKNOWN",
+        "from": "@sdk/index.js"
+      }
+    ],
+    "functions": [
+      {
+        "id": 343,
+        "name": "blockCycle",
+        "exported": true
+      }
+    ]
+  },
+  "core/state/call.ts": {
+    "id": 344,
+    "name": "core/state/call.ts",
+    "imports": [
+      {
+        "name": "OPERATOR_STATE_FIRST_CALL",
+        "from": "@sdk/index.js"
+      }
+    ],
+    "functions": [
+      {
+        "id": 345,
+        "name": "callCycle",
+        "exported": true
+      }
+    ]
+  },
+  "core/state/operator.ts": {
+    "id": 346,
+    "name": "core/state/operator.ts",
+    "imports": [
+      {
+        "name": "SYSTEM_MEMORY_TYPE",
+        "from": "@api/index.js"
+      },
+      {
+        "name": "OPERATOR_STATE_UNKNOWN",
+        "from": "@sdk/index.js"
+      },
+      {
+        "name": "OPERATOR_STATE_FIRST_CALL",
+        "from": "@sdk/index.js"
+      },
+      {
+        "name": "OPERATOR_STATE_POP",
+        "from": "@sdk/index.js"
+      },
+      {
+        "name": "OperatorType",
+        "from": "@sdk/index.js"
+      },
+      {
+        "name": "assert",
+        "from": "@sdk/index.js"
+      },
+      {
+        "name": "MemoryTracker",
+        "from": "@core/MemoryTracker.js"
+      }
+    ],
+    "functions": [
+      {
+        "id": 347,
+        "name": "operatorPop",
+        "exported": true
+      },
+      {
+        "id": 348,
+        "name": "handleFunctionOperatorTypeCheck",
+        "exported": false,
+        "calls": {
+          "assert": 2
+        }
+      },
+      {
+        "id": 349,
+        "name": "handleFunctionOperator",
+        "exported": false,
+        "calls": {
+          "assert": 1,
+          "handleFunctionOperatorTypeCheck": 1
+        }
+      },
+      {
+        "id": 350,
+        "name": "operatorCycle",
+        "exported": true,
+        "calls": {
+          "operatorPop": 1,
+          "handleFunctionOperator": 1
+        }
+      }
+    ]
+  },
+  "core/state/parse.ts": {
+    "id": 351,
+    "name": "core/state/parse.ts",
+    "imports": [
+      {
+        "name": "parse",
+        "from": "@api/index.js"
+      },
+      {
+        "name": "VALUE_TYPE",
+        "from": "@api/index.js"
+      },
+      {
+        "name": "OPERATOR_STATE_FIRST_CALL",
+        "from": "@sdk/index.js"
+      },
+      {
+        "name": "OPERATOR_STATE_UNKNOWN",
+        "from": "@sdk/index.js"
+      },
+      {
+        "name": "valuesOf",
+        "from": "@sdk/index.js"
+      }
+    ],
+    "functions": [
+      {
+        "id": 352,
+        "name": "getToken",
+        "exported": false,
+        "calls": {
+          "parse": 2
+        }
+      },
+      {
+        "id": 353,
+        "name": "enqueueToken",
+        "exported": false,
+        "calls": {
+          "valuesOf": 1
+        }
+      },
+      {
+        "id": 354,
+        "name": "parseCycle",
+        "exported": true,
+        "calls": {
+          "getToken": 1,
+          "enqueueToken": 1
+        }
+      }
+    ]
+  },
+  "sdk/assert.ts": {
+    "id": 355,
+    "name": "sdk/assert.ts",
+    "classes": [
+      {
+        "name": "AssertionFailed",
+        "exported": false,
+        "methods": [
+          {
+            "id": 356,
+            "name": "constructor"
+          }
+        ]
+      }
+    ],
+    "functions": [
+      {
+        "id": 357,
+        "name": "assert",
+        "exported": true
+      }
+    ]
+  },
+  "sdk/checkPos.ts": {
+    "id": 358,
+    "name": "sdk/checkPos.ts",
+    "functions": [
+      {
+        "id": 359,
+        "name": "checkPos",
+        "exported": true
+      }
+    ]
+  },
+  "sdk/checks/isObject.ts": {
+    "id": 360,
+    "name": "sdk/checks/isObject.ts",
+    "functions": [
+      {
+        "id": 361,
+        "name": "isObject",
+        "exported": true
+      }
+    ]
+  },
+  "sdk/checks/isValue.ts": {
+    "id": 362,
+    "name": "sdk/checks/isValue.ts",
+    "imports": [
+      {
+        "name": "isObject",
+        "from": "@sdk/checks/isObject.js"
+      }
+    ],
+    "functions": [
+      {
+        "id": 363,
+        "name": "hasInvalidFlag",
+        "exported": false
+      },
+      {
+        "id": 364,
+        "name": "checkFlags",
+        "exported": false
+      },
+      {
+        "id": 365,
+        "name": "is",
+        "exported": false,
+        "calls": {
+          "isObject": 1,
+          "hasInvalidFlag": 1,
+          "checkFlags": 1,
+          "check": 1
+        }
+      },
+      {
+        "id": 366,
+        "name": "isInteger",
+        "exported": false
+      },
+      {
+        "id": 367,
+        "name": "isIntegerValue",
+        "exported": true,
+        "calls": {
+          "is": 1,
+          "isInteger": 1
+        }
+      },
+      {
+        "id": 368,
+        "name": "isStringValue",
+        "exported": true,
+        "calls": {
+          "is": 1
+        }
+      },
+      {
+        "id": 369,
+        "name": "isNameValue",
+        "exported": true,
+        "calls": {
+          "is": 1
+        }
+      },
+      {
+        "id": 370,
+        "name": "isOperatorValue",
+        "exported": true,
+        "calls": {
+          "is": 1
+        }
+      },
+      {
+        "id": 371,
+        "name": "isFunction",
+        "exported": false
+      },
+      {
+        "id": 372,
+        "name": "isPositiveInteger",
+        "exported": false,
+        "calls": {
+          "isInteger": 1
+        }
+      },
+      {
+        "id": 373,
+        "name": "isArrayValue",
+        "exported": true,
+        "calls": {
+          "is": 1,
+          "isPositiveInteger": 1,
+          "isFunction": 2
+        }
+      },
+      {
+        "id": 374,
+        "name": "isDictionaryValue",
+        "exported": true,
+        "calls": {
+          "is": 1,
+          "isFunction": 2
+        }
+      }
+    ]
+  },
+  "sdk/findMarkPos.ts": {
+    "id": 375,
+    "name": "sdk/findMarkPos.ts",
+    "functions": [
+      {
+        "id": 376,
+        "name": "findMarkPos",
+        "exported": true
+      }
+    ]
+  },
+  "sdk/interfaces/ICallStack.ts": {
+    "id": 377,
+    "name": "sdk/interfaces/ICallStack.ts"
+  },
+  "sdk/interfaces/IDictionaryStack.ts": {
+    "id": 378,
+    "name": "sdk/interfaces/IDictionaryStack.ts"
+  },
+  "sdk/interfaces/IInternalState.ts": {
+    "id": 379,
+    "name": "sdk/interfaces/IInternalState.ts"
+  },
+  "sdk/interfaces/IOperandStack.ts": {
+    "id": 380,
+    "name": "sdk/interfaces/IOperandStack.ts"
+  },
+  "sdk/interfaces/IOperator.ts": {
+    "id": 381,
+    "name": "sdk/interfaces/IOperator.ts"
+  },
+  "sdk/interfaces/IStack.ts": {
+    "id": 382,
+    "name": "sdk/interfaces/IStack.ts"
+  },
+  "sdk/toString.ts": {
+    "id": 383,
+    "name": "sdk/toString.ts",
+    "imports": [
+      {
+        "name": "parse",
+        "from": "@api/index.js"
+      },
+      {
+        "name": "OPERATOR_STATE_CALL_BEFORE_POP",
+        "from": "@sdk/interfaces/ICallStack.js"
+      },
+      {
+        "name": "OPERATOR_STATE_FIRST_CALL",
+        "from": "@sdk/interfaces/ICallStack.js"
+      },
+      {
+        "name": "OPERATOR_STATE_POP",
+        "from": "@sdk/interfaces/ICallStack.js"
+      },
+      {
+        "name": "OPERATOR_STATE_UNKNOWN",
+        "from": "@sdk/interfaces/ICallStack.js"
+      }
+    ],
+    "functions": [
+      {
+        "id": 384,
+        "name": "convertPosToLineAndCol",
+        "exported": false
+      },
+      {
+        "id": 385,
+        "name": "minimizeAt",
+        "exported": false
+      },
+      {
+        "id": 386,
+        "name": "centerValue",
+        "exported": false
+      },
+      {
+        "id": 387,
+        "name": "fitToMaxWidth",
+        "exported": false,
+        "calls": {
+          "minimizeAt": 1,
+          "centerValue": 1
+        }
+      },
+      {
+        "id": 388,
+        "name": "decorate",
+        "exported": false,
+        "calls": {
+          "convertPosToLineAndCol": 1,
+          "fitToMaxWidth": 1
+        }
+      },
+      {
+        "id": 389,
+        "name": "(anonymous arrow)",
+        "exported": false,
+        "calls": {
+          "decorate": 1
+        }
+      },
+      {
+        "id": 390,
+        "name": "(anonymous arrow)",
+        "exported": false,
+        "calls": {
+          "decorate": 1
+        }
+      },
+      {
+        "id": 391,
+        "name": "(anonymous arrow)",
+        "exported": false,
+        "calls": {
+          "decorate": 1
+        }
+      },
+      {
+        "id": 392,
+        "name": "(anonymous arrow)",
+        "exported": false,
+        "calls": {
+          "parse": 1,
+          "decorate": 1
+        }
+      },
+      {
+        "id": 393,
+        "name": "(anonymous arrow)",
+        "exported": false,
+        "calls": {
+          "decorate": 1
+        }
+      },
+      {
+        "id": 394,
+        "name": "(anonymous arrow)",
+        "exported": false,
+        "calls": {
+          "decorate": 1
+        }
+      },
+      {
+        "id": 395,
+        "name": "(anonymous arrow)",
+        "exported": false,
+        "calls": {
+          "decorate": 1
+        }
+      },
+      {
+        "id": 396,
+        "name": "(anonymous arrow)",
+        "exported": false,
+        "calls": {
+          "decorate": 1
+        }
+      },
+      {
+        "id": 397,
+        "name": "(anonymous arrow)",
+        "exported": false,
+        "calls": {
+          "decorate": 1
+        }
+      },
+      {
+        "id": 398,
+        "name": "toString",
+        "exported": true
+      },
+      {
+        "id": 399,
+        "name": "callStackToString",
+        "exported": true,
+        "calls": {
+          "toString": null
+        }
+      }
+    ]
+  },
+  "sdk/toValue.ts": {
+    "id": 400,
+    "name": "sdk/toValue.ts",
+    "functions": [
+      {
+        "id": 401,
+        "name": "toIntegerValue",
+        "exported": true
+      },
+      {
+        "id": 402,
+        "name": "toStringValue",
+        "exported": true
+      },
+      {
+        "id": 403,
+        "name": "toNameValue",
+        "exported": true
+      }
+    ]
+  },
+  "sdk/valuesOf.ts": {
+    "id": 404,
+    "name": "sdk/valuesOf.ts",
+    "functions": [
+      {
+        "id": 405,
+        "name": "(anonymous arrow)",
+        "exported": false
+      },
+      {
+        "id": 406,
+        "name": "(anonymous arrow)",
+        "exported": false
+      },
+      {
+        "id": 407,
+        "name": "(anonymous arrow)",
+        "exported": false
+      },
+      {
+        "id": 408,
+        "name": "(anonymous arrow)",
+        "exported": false
+      },
+      {
+        "id": 409,
+        "name": "(anonymous arrow)",
+        "exported": false
+      },
+      {
+        "id": 410,
+        "name": "(anonymous arrow)",
+        "exported": false
+      },
+      {
+        "id": 411,
+        "name": "(anonymous arrow)",
+        "exported": false
+      },
+      {
+        "id": 412,
+        "name": "(anonymous arrow)",
+        "exported": false
+      },
+      {
+        "id": 413,
+        "name": "(anonymous arrow)",
+        "exported": false
+      },
+      {
+        "id": 414,
+        "name": "getValueOf",
+        "exported": false
+      },
+      {
+        "id": 415,
+        "name": "valuesOf",
+        "exported": true,
+        "calls": {
+          "getValueOf": 1
+        }
+      }
+    ]
+  }
+}
