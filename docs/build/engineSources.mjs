@@ -12,22 +12,36 @@ const red = '\u001B[31m';
 const yellow = '\u001B[33m';
 const white = '\u001B[37m';
 
+const addExportedFunction = (functionDefinition) => {
+  const { name, exported } = functionDefinition;
+  if (!exported) {
+    return;
+  }
+  const existingFunction = exportedFunctions[name];
+  if (existingFunction) {
+    throw new Error(`❌ duplicate exported function name:
+${name} from ${functionDefinition.module}
+${existingFunction.name} from ${existingFunction.module}`);
+  }
+  exportedFunctions[name] = functionDefinition;
+}
+
 const checkForCall = (node, calls) => {
   if (node.type === 'CallExpression' && node.callee?.name) {
     const { name } = node.callee;
     if (name === 'Symbol') {
       return; // ignore
     }
-    if (calls.has(name)) {
-      ++calls.get(name).count;
+    if (name in calls) {
+      ++calls[name];
     } else {
-      calls.set(name, { count: 1 });
+      calls[name] = 1;
     }
   }
 };
 
 const searchForCalls = (scope, node) => {
-  const calls = new Map();
+  const calls = Object.create(null);
   scope.traverse(node, {
     enter({ node }) {
       checkForCall(node, calls);
@@ -45,14 +59,13 @@ const source = async (path) => {
     id: ++lastId,
     name: moduleName,
     imports: [],
-    calls: new Map(),
+    calls: Object.create(null),
     classes: [],
     functions: []
   };
   traverse(ast, {
     enter(path) {
       const { node, parent, scope } = path;
-      checkForCall(node, definition.calls);
       if (node.type === 'ImportDeclaration' && node.importKind === 'value') {
         for (const specifier of node.specifiers) {
           definition.imports.push({
@@ -70,10 +83,11 @@ const source = async (path) => {
         scope.traverse(node, {
           enter({ scope, node }) {
             if (node.type === 'ClassMethod') {
-              const calls = searchForCalls(scope, node);
               classDefinition.methods.push({
+                id: ++lastId,
+                module: moduleName,
                 name: node.key.name,
-                calls
+                calls: searchForCalls(scope, node)
               });
             }
           }
@@ -89,29 +103,26 @@ const source = async (path) => {
           module: moduleName,
           name,
           exported,
-          calls: searchForCalls(scope, node),
-          externalCalls: 0
+          calls: searchForCalls(scope, node)
         };
         definition.functions.push(functionDefinition);
-        if (exported) {
-          const existingFunction = exportedFunctions[name];
-          if (existingFunction) {
-            throw new Error(`❌ duplicate exported function name:
-${name} from ${moduleName}
-${existingFunction.name} from ${existingFunction.module}`);
-          }
-          exportedFunctions[name] = functionDefinition;
-        }
+        addExportedFunction(functionDefinition);
         path.skip();
       }
       if (node.type === 'ArrowFunctionExpression') {
-        definition.functions.push({
+        const functionDefinition = {
           id: ++lastId,
+          module: moduleName,
           name: parent.id?.name ?? '(anonymous arrow)',
-          exported: false, // TODO ?
+          exported: path.parentPath?.parentPath?.parentPath?.node?.type === 'ExportNamedDeclaration',
           calls: searchForCalls(scope, node)
-        });
+        };
+        addExportedFunction(functionDefinition);
+        definition.functions.push(functionDefinition);
         path.skip();
+      }
+      if (node.type === 'ExpressionStatement') {
+        checkForCall(node, definition.calls);
       }
     }
   });
@@ -138,31 +149,45 @@ const names = Object.keys(sources).sort((a, b) => a.localeCompare(b));
 
 for(const name of names) {
   const definition = sources[name];
-  for (const [name, { count }] of definition.calls.entries()) {
-    const functionDefinition = exportedFunctions[name];
-    if (functionDefinition) {
-      functionDefinition.externalCalls += count;
-    }
-  }
-  for (const { methods } of definition.classes) {
-    for (const { calls } of methods) {
-      for (const [name, { count }] of calls.entries()) {
-        const functionDefinition = exportedFunctions[name];
-        if (functionDefinition) {
-          functionDefinition.externalCalls += count;
+  const increaseExternalCalls = (calls) => {
+    for (const [name, count] of Object.entries(calls)) {
+      const exportedFunction = exportedFunctions[name];
+      if (exportedFunction) {
+        if (exportedFunction.externalCalls) {
+          exportedFunction.externalCalls += count;
+        } else {
+          exportedFunction.externalCalls = count;
         }
       }
     }
   }
-  for (const { calls } of definition.functions) {
-    for (const [name, { count }] of calls.entries()) {
-      const functionDefinition = exportedFunctions[name];
-      if (functionDefinition) {
-        functionDefinition.externalCalls += count;
-      }
+  increaseExternalCalls(definition.calls);
+  for (const { methods } of definition.classes) {
+    for (const { calls } of methods) {
+      increaseExternalCalls(calls);
     }
   }
+  for (const { calls } of definition.functions) {
+    increaseExternalCalls(calls);
+  }
 }
+
+await writeFile(new URL('../engine/exported.json', import.meta.url), JSON.stringify(exportedFunctions, undefined, 2), 'utf8');
+await writeFile(new URL('../engine/sources.json', import.meta.url), JSON.stringify(sources, (key, value) => {
+  if (key === 'module') {
+    return undefined;
+  }
+  if (Array.isArray(value) && !value.length) {
+    return undefined;
+  }
+  if (value && typeof value === 'object' && !Object.keys(value).length) {
+    return undefined;
+  }
+  return value;
+}, 2), 'utf8');
+
+process.exit(0);
+
 
 const markdown = [
   '# Sources',
