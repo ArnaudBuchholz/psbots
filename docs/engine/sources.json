@@ -60,7 +60,8 @@
       {
         "id": 14,
         "name": "enumIDictionaryValues",
-        "exported": true
+        "exported": true,
+        "externalCalls": 1
       },
       {
         "id": 15,
@@ -124,7 +125,8 @@
           "parseString": 1,
           "parseNumber": 1,
           "parseName": 1
-        }
+        },
+        "externalCalls": 3
       }
     ]
   },
@@ -348,12 +350,14 @@
       {
         "id": 40,
         "name": "addMemorySize",
-        "exported": true
+        "exported": true,
+        "externalCalls": 4
       },
       {
         "id": 41,
         "name": "memorySizeToBytes",
-        "exported": true
+        "exported": true,
+        "externalCalls": 3
       }
     ]
   },
@@ -2003,12 +2007,14 @@
       {
         "id": 234,
         "name": "openWithMark",
-        "exported": true
+        "exported": true,
+        "externalCalls": 2
       },
       {
         "id": 235,
         "name": "pushOpenClosedValueWithDebugInfo",
-        "exported": true
+        "exported": true,
+        "externalCalls": 2
       },
       {
         "id": 236,
@@ -2019,7 +2025,8 @@
           "toIntegerValue": 1,
           "assert": 4,
           "pushOpenClosedValueWithDebugInfo": 1
-        }
+        },
+        "externalCalls": 2
       }
     ]
   },
@@ -3150,7 +3157,8 @@
       {
         "id": 343,
         "name": "blockCycle",
-        "exported": true
+        "exported": true,
+        "externalCalls": 1
       }
     ]
   },
@@ -3167,7 +3175,8 @@
       {
         "id": 345,
         "name": "callCycle",
-        "exported": true
+        "exported": true,
+        "externalCalls": 1
       }
     ]
   },
@@ -3208,7 +3217,8 @@
       {
         "id": 347,
         "name": "operatorPop",
-        "exported": true
+        "exported": true,
+        "externalCalls": 2
       },
       {
         "id": 348,
@@ -3234,7 +3244,8 @@
         "calls": {
           "operatorPop": 1,
           "handleFunctionOperator": 1
-        }
+        },
+        "externalCalls": 1
       }
     ]
   },
@@ -3287,7 +3298,8 @@
         "calls": {
           "getToken": 1,
           "enqueueToken": 1
-        }
+        },
+        "externalCalls": 1
       }
     ]
   },
@@ -3310,7 +3322,8 @@
       {
         "id": 357,
         "name": "assert",
-        "exported": true
+        "exported": true,
+        "externalCalls": 83
       }
     ]
   },
@@ -3321,7 +3334,8 @@
       {
         "id": 359,
         "name": "checkPos",
-        "exported": true
+        "exported": true,
+        "externalCalls": 4
       }
     ]
   },
@@ -3332,7 +3346,8 @@
       {
         "id": 361,
         "name": "isObject",
-        "exported": true
+        "exported": true,
+        "externalCalls": 1
       }
     ]
   },
@@ -3426,7 +3441,8 @@
           "is": 1,
           "isPositiveInteger": 1,
           "isFunction": 2
-        }
+        },
+        "externalCalls": 1
       },
       {
         "id": 374,
@@ -3446,7 +3462,8 @@
       {
         "id": 376,
         "name": "findMarkPos",
-        "exported": true
+        "exported": true,
+        "externalCalls": 4
       }
     ]
   },
@@ -3609,14 +3626,15 @@
       {
         "id": 398,
         "name": "toString",
-        "exported": true
+        "exported": true,
+        "externalCalls": 1
       },
       {
         "id": 399,
         "name": "callStackToString",
         "exported": true,
         "calls": {
-          "toString": null
+          "toString": 1
         }
       }
     ]
@@ -3628,17 +3646,20 @@
       {
         "id": 401,
         "name": "toIntegerValue",
-        "exported": true
+        "exported": true,
+        "externalCalls": 16
       },
       {
         "id": 402,
         "name": "toStringValue",
-        "exported": true
+        "exported": true,
+        "externalCalls": 4
       },
       {
         "id": 403,
         "name": "toNameValue",
-        "exported": true
+        "exported": true,
+        "externalCalls": 2
       }
     ]
   },
@@ -3702,7 +3723,8 @@
         "exported": true,
         "calls": {
           "getValueOf": 1
-        }
+        },
+        "externalCalls": 6
       }
     ]
   }

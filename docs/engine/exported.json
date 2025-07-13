@@ -18,7 +18,8 @@
     "module": "api/interfaces/IReadOnlyDictionary.ts",
     "name": "enumIDictionaryValues",
     "exported": true,
-    "calls": {}
+    "calls": {},
+    "externalCalls": 1
   },
   "convertIDictionaryToObject": {
     "id": 15,
@@ -39,7 +40,8 @@
       "parseString": 1,
       "parseNumber": 1,
       "parseName": 1
-    }
+    },
+    "externalCalls": 3
   },
   "run": {
     "id": 26,
@@ -55,28 +57,32 @@
     "module": "core/MemoryTracker.ts",
     "name": "addMemorySize",
     "exported": true,
-    "calls": {}
+    "calls": {},
+    "externalCalls": 4
   },
   "memorySizeToBytes": {
     "id": 41,
     "module": "core/MemoryTracker.ts",
     "name": "memorySizeToBytes",
     "exported": true,
-    "calls": {}
+    "calls": {},
+    "externalCalls": 3
   },
   "openWithMark": {
     "id": 234,
     "module": "core/operators/openClose.ts",
     "name": "openWithMark",
     "exported": true,
-    "calls": {}
+    "calls": {},
+    "externalCalls": 2
   },
   "pushOpenClosedValueWithDebugInfo": {
     "id": 235,
     "module": "core/operators/openClose.ts",
     "name": "pushOpenClosedValueWithDebugInfo",
     "exported": true,
-    "calls": {}
+    "calls": {},
+    "externalCalls": 2
   },
   "closeToMark": {
     "id": 236,
@@ -88,7 +94,8 @@
       "toIntegerValue": 1,
       "assert": 4,
       "pushOpenClosedValueWithDebugInfo": 1
-    }
+    },
+    "externalCalls": 2
   },
   "buildFunctionOperator": {
     "id": 238,
@@ -111,21 +118,24 @@
     "module": "core/state/block.ts",
     "name": "blockCycle",
     "exported": true,
-    "calls": {}
+    "calls": {},
+    "externalCalls": 1
   },
   "callCycle": {
     "id": 345,
     "module": "core/state/call.ts",
     "name": "callCycle",
     "exported": true,
-    "calls": {}
+    "calls": {},
+    "externalCalls": 1
   },
   "operatorPop": {
     "id": 347,
     "module": "core/state/operator.ts",
     "name": "operatorPop",
     "exported": true,
-    "calls": {}
+    "calls": {},
+    "externalCalls": 2
   },
   "operatorCycle": {
     "id": 350,
@@ -135,7 +145,8 @@
     "calls": {
       "operatorPop": 1,
       "handleFunctionOperator": 1
-    }
+    },
+    "externalCalls": 1
   },
   "parseCycle": {
     "id": 354,
@@ -145,28 +156,32 @@
     "calls": {
       "getToken": 1,
       "enqueueToken": 1
-    }
+    },
+    "externalCalls": 1
   },
   "assert": {
     "id": 357,
     "module": "sdk/assert.ts",
     "name": "assert",
     "exported": true,
-    "calls": {}
+    "calls": {},
+    "externalCalls": 83
   },
   "checkPos": {
     "id": 359,
     "module": "sdk/checkPos.ts",
     "name": "checkPos",
     "exported": true,
-    "calls": {}
+    "calls": {},
+    "externalCalls": 4
   },
   "isObject": {
     "id": 361,
     "module": "sdk/checks/isObject.ts",
     "name": "isObject",
     "exported": true,
-    "calls": {}
+    "calls": {},
+    "externalCalls": 1
   },
   "isIntegerValue": {
     "id": 367,
@@ -214,7 +229,8 @@
       "is": 1,
       "isPositiveInteger": 1,
       "isFunction": 2
-    }
+    },
+    "externalCalls": 1
   },
   "isDictionaryValue": {
     "id": 374,
@@ -231,14 +247,16 @@
     "module": "sdk/findMarkPos.ts",
     "name": "findMarkPos",
     "exported": true,
-    "calls": {}
+    "calls": {},
+    "externalCalls": 4
   },
   "toString": {
     "id": 398,
     "module": "sdk/toString.ts",
     "name": "toString",
     "exported": true,
-    "calls": {}
+    "calls": {},
+    "externalCalls": 1
   },
   "callStackToString": {
     "id": 399,
@@ -246,7 +264,7 @@
     "name": "callStackToString",
     "exported": true,
     "calls": {
-      "toString": null
+      "toString": 1
     }
   },
   "toIntegerValue": {
@@ -254,21 +272,24 @@
     "module": "sdk/toValue.ts",
     "name": "toIntegerValue",
     "exported": true,
-    "calls": {}
+    "calls": {},
+    "externalCalls": 16
   },
   "toStringValue": {
     "id": 402,
     "module": "sdk/toValue.ts",
     "name": "toStringValue",
     "exported": true,
-    "calls": {}
+    "calls": {},
+    "externalCalls": 4
   },
   "toNameValue": {
     "id": 403,
     "module": "sdk/toValue.ts",
     "name": "toNameValue",
     "exported": true,
-    "calls": {}
+    "calls": {},
+    "externalCalls": 2
   },
   "valuesOf": {
     "id": 415,
@@ -277,6 +298,7 @@
     "exported": true,
     "calls": {
       "getValueOf": 1
-    }
+    },
+    "externalCalls": 6
   }
 }
