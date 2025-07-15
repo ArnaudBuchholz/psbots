@@ -200,7 +200,7 @@ const implementations: { [type in ValueType]: (container: Value<type>, options: 
   }
 };
 
-export function toString(value: Value, options?: ToStringOptions): string {
+export function valueToString(value: Value, options?: ToStringOptions): string {
   return implementations[value.type](
     value as never,
     options ?? {
@@ -219,7 +219,7 @@ export function callStackToString(
   for (let index = 0; index < length; ++index) {
     const value = callStack.at(index);
     const operatorState = callStack.operatorStateAt(index);
-    result.push(toString(value, Object.assign({}, options, { operatorState })));
+    result.push(valueToString(value, Object.assign({}, options, { operatorState })));
   }
   return result;
 }

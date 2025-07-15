@@ -3,7 +3,7 @@ import type { IDebugSource, IReadOnlyCallStack, Value } from '@api/index.js';
 import { markValue, nullValue } from '@api/index.js';
 import {
   callStackToString,
-  toString,
+  valueToString,
   TOSTRING_BEGIN_MARKER,
   TOSTRING_END_MARKER,
   TOSTRING_NULL
@@ -18,49 +18,49 @@ import { toValue, values, stringify } from '@test/index.js';
 
 describe('basic conversion', () => {
   it('converts null', () => {
-    expect(toString(nullValue)).toStrictEqual(TOSTRING_NULL);
+    expect(valueToString(nullValue)).toStrictEqual(TOSTRING_NULL);
   });
 
   for (const value of [...values.booleans, ...values.negativeIntegers, ...values.positiveIntegers]) {
     it(`converts a primitive value (${stringify(value)})`, () => {
-      expect(toString(toValue(value))).toStrictEqual(value.toString());
+      expect(valueToString(toValue(value))).toStrictEqual(value.toString());
     });
   }
 
   it('converts a non executable string value', () => {
-    expect(toString(toValue('Hello World !'))).toStrictEqual('"Hello World !"');
+    expect(valueToString(toValue('Hello World !'))).toStrictEqual('"Hello World !"');
   });
 
   it('converts an executable string value', () => {
-    expect(toString(toValue('Hello World !', { isExecutable: true }))).toStrictEqual('Hello World !');
+    expect(valueToString(toValue('Hello World !', { isExecutable: true }))).toStrictEqual('Hello World !');
   });
 
   it('converts a non executable name value', () => {
-    expect(toString(toValue(Symbol.for('test')))).toStrictEqual('/test');
+    expect(valueToString(toValue(Symbol.for('test')))).toStrictEqual('/test');
   });
 
   it('converts a spaced non executable name value', () => {
-    expect(toString(toValue(Symbol.for('test 2')))).toStrictEqual('/test␣2');
+    expect(valueToString(toValue(Symbol.for('test 2')))).toStrictEqual('/test␣2');
   });
 
   it('converts an executable name value', () => {
-    expect(toString(toValue(Symbol.for('test'), { isExecutable: true }))).toStrictEqual('test');
+    expect(valueToString(toValue(Symbol.for('test'), { isExecutable: true }))).toStrictEqual('test');
   });
 
   it('converts a spaced executable name value', () => {
-    expect(toString(toValue(Symbol.for('test 2'), { isExecutable: true }))).toStrictEqual('test␣2');
+    expect(valueToString(toValue(Symbol.for('test 2'), { isExecutable: true }))).toStrictEqual('test␣2');
   });
 
   it('converts a mark', () => {
-    expect(toString(markValue)).toStrictEqual('--mark--');
+    expect(valueToString(markValue)).toStrictEqual('--mark--');
   });
 
   it('converts an operator', () => {
-    expect(toString(toValue.operator)).toStrictEqual('-operator-');
+    expect(valueToString(toValue.operator)).toStrictEqual('-operator-');
   });
 
   it('converts a non executable array', () => {
-    expect(toString(toValue([1, 2, 3]))).toStrictEqual('[ 1 2 3 ]');
+    expect(valueToString(toValue([1, 2, 3]))).toStrictEqual('[ 1 2 3 ]');
   });
 
   it('converts a non executable array with null', () => {
@@ -72,26 +72,26 @@ describe('basic conversion', () => {
       }
       return at.call(arrayValue.array, index);
     };
-    expect(toString(arrayValue)).toStrictEqual('[ 1 ␀ 3 ]');
+    expect(valueToString(arrayValue)).toStrictEqual('[ 1 ␀ 3 ]');
   });
 
   it('converts an executable array', () => {
-    expect(toString(toValue([1, 2, 3], { isExecutable: true }))).toStrictEqual('{ 1 2 3 }');
+    expect(valueToString(toValue([1, 2, 3], { isExecutable: true }))).toStrictEqual('{ 1 2 3 }');
   });
 
   it('summarizes a dictionary (ro)', () => {
-    expect(toString(toValue({ a: 1 }, { isReadOnly: true }))).toStrictEqual('--dictionary(1)--');
+    expect(valueToString(toValue({ a: 1 }, { isReadOnly: true }))).toStrictEqual('--dictionary(1)--');
   });
 
   it('summarizes a dictionary (r/w)', () => {
-    expect(toString(toValue({ a: 1 }))).toStrictEqual('--dictionary(1/∞)--');
+    expect(valueToString(toValue({ a: 1 }))).toStrictEqual('--dictionary(1/∞)--');
   });
 });
 
 describe('conversion with debug information', () => {
   it('does not append debug information if no options is given', () => {
     expect(
-      toString(
+      valueToString(
         Object.assign(toValue.operator, {
           debugSource: <IDebugSource>{
             source: 'true { operator } if',
@@ -106,7 +106,7 @@ describe('conversion with debug information', () => {
 
   it('appends debug information if requested', () => {
     expect(
-      toString(
+      valueToString(
         Object.assign(toValue.operator, {
           debugSource: <IDebugSource>{
             source: 'true { operator } if',
@@ -124,7 +124,7 @@ describe('conversion with debug information', () => {
 
   it('appends debug information if requested (multiline source)', () => {
     expect(
-      toString(
+      valueToString(
         Object.assign(toValue.operator, {
           debugSource: <IDebugSource>{
             source: `true
@@ -146,7 +146,7 @@ if`,
 
   it('puts debug information only for the array itself', () => {
     expect(
-      toString(
+      valueToString(
         Object.assign(
           toValue([
             Object.assign(toValue(1), {
@@ -178,7 +178,7 @@ if`,
 
   it('hides debug info if not enough space', () => {
     expect(
-      toString(
+      valueToString(
         Object.assign(toValue.operator, {
           debugSource: <IDebugSource>{
             source: 'true { operator } if',
@@ -212,29 +212,29 @@ if`,
     });
 
   it('does not limit the width if wide enough', () => {
-    expect(toString(operator(), { maxWidth: 50 })).toStrictEqual('-operator-');
+    expect(valueToString(operator(), { maxWidth: 50 })).toStrictEqual('-operator-');
   });
 
   it('does not limit the width if wide enough (debug information included)', () => {
-    expect(toString(operator(), { includeDebugSource: true, maxWidth: 50 })).toStrictEqual(
+    expect(valueToString(operator(), { includeDebugSource: true, maxWidth: 50 })).toStrictEqual(
       '-operator-@folder/test.ps:3:3'
     );
   });
 
   it('limits the width of the value when no debug information is needed', () => {
-    expect(toString(operator(), { maxWidth: 5 })).toStrictEqual('-ope…');
+    expect(valueToString(operator(), { maxWidth: 5 })).toStrictEqual('-ope…');
   });
 
   it('limits the width of the value and debug information', () => {
-    expect(toString(operator(), { includeDebugSource: true, maxWidth: 20 })).toStrictEqual('-oper…@…/test.ps:3:3');
+    expect(valueToString(operator(), { includeDebugSource: true, maxWidth: 20 })).toStrictEqual('-oper…@…/test.ps:3:3');
   });
 
   it('limits the width of the debug information', () => {
-    expect(toString(operator(), { includeDebugSource: true, maxWidth: 25 })).toStrictEqual('-operator-@…/test.ps:3:3');
+    expect(valueToString(operator(), { includeDebugSource: true, maxWidth: 25 })).toStrictEqual('-operator-@…/test.ps:3:3');
   });
 
   it('limits the width of the value when the debug information cannot be reduced', () => {
-    expect(toString(operator('test.ps'), { includeDebugSource: true, maxWidth: 20 })).toStrictEqual(
+    expect(valueToString(operator('test.ps'), { includeDebugSource: true, maxWidth: 20 })).toStrictEqual(
       '-operat…@test.ps:3:3'
     );
   });
@@ -262,13 +262,13 @@ describe('operatorState', () => {
 
     it('converts string and indicate current position (OPERATOR_STATE_UNKNOWN)', () => {
       expect(
-        toString(toValue(string, { isExecutable: true }), { operatorState: OPERATOR_STATE_UNKNOWN })
+        valueToString(toValue(string, { isExecutable: true }), { operatorState: OPERATOR_STATE_UNKNOWN })
       ).toStrictEqual(string);
     });
 
     it('converts string and indicate current position (OPERATOR_STATE_FIRST_CALL)', () => {
       expect(
-        toString(toValue(string, { isExecutable: true }), { operatorState: OPERATOR_STATE_FIRST_CALL })
+        valueToString(toValue(string, { isExecutable: true }), { operatorState: OPERATOR_STATE_FIRST_CALL })
       ).toStrictEqual(
         `${TOSTRING_BEGIN_MARKER}/factorial${TOSTRING_END_MARKER}
 {
@@ -291,7 +291,7 @@ describe('operatorState', () => {
     });
 
     it('converts string and indicate current position (operator state is 11)', () => {
-      expect(toString(toValue(string, { isExecutable: true }), { operatorState: 11 })).toStrictEqual(
+      expect(valueToString(toValue(string, { isExecutable: true }), { operatorState: 11 })).toStrictEqual(
         `/factorial
 ${TOSTRING_BEGIN_MARKER}{${TOSTRING_END_MARKER}
   %% check stack
@@ -313,19 +313,19 @@ ${TOSTRING_BEGIN_MARKER}{${TOSTRING_END_MARKER}
     });
 
     it('centers string on current item when width is limited', () => {
-      expect(toString(toValue(string, { isExecutable: true }), { operatorState: 142, maxWidth: 40 })).toStrictEqual(
+      expect(valueToString(toValue(string, { isExecutable: true }), { operatorState: 142, maxWidth: 40 })).toStrictEqual(
         `…sult n\n  {\n    dup ${TOSTRING_BEGIN_MARKER}2${TOSTRING_END_MARKER} lt { pop stop }…`
       );
     });
 
     it('centers string on current item when width is limited (selected is larger than maxWidth)', () => {
-      expect(toString(toValue(string, { isExecutable: true }), { operatorState: 45, maxWidth: 10 })).toStrictEqual(
+      expect(valueToString(toValue(string, { isExecutable: true }), { operatorState: 45, maxWidth: 10 })).toStrictEqual(
         `… ${TOSTRING_BEGIN_MARKER}stacku…`
       );
     });
 
     it('converts string and indicate current position (operator state is 11, maxWidth set to 40)', () => {
-      expect(toString(toValue(string, { isExecutable: true }), { operatorState: 11, maxWidth: 40 })).toStrictEqual(
+      expect(valueToString(toValue(string, { isExecutable: true }), { operatorState: 11, maxWidth: 40 })).toStrictEqual(
         `/factorial
 ${TOSTRING_BEGIN_MARKER}{${TOSTRING_END_MARKER}
   %% check stack
@@ -334,7 +334,7 @@ ${TOSTRING_BEGIN_MARKER}{${TOSTRING_END_MARKER}
     });
 
     it('converts string and indicate current position (operator state is 219, maxWidth set to 40)', () => {
-      expect(toString(toValue(string, { isExecutable: true }), { operatorState: 219, maxWidth: 40 })).toStrictEqual(
+      expect(valueToString(toValue(string, { isExecutable: true }), { operatorState: 219, maxWidth: 40 })).toStrictEqual(
         `… exch
     1 sub
   } loop
@@ -346,7 +346,7 @@ ${TOSTRING_BEGIN_MARKER}{${TOSTRING_END_MARKER}
 
     it('converts string and indicate current position (operator state is 219, maxWidth set to 40, includeDebugSource)', () => {
       expect(
-        toString(
+        valueToString(
           Object.assign(
             {
               debugSource: <IDebugSource>{
@@ -377,7 +377,7 @@ ${TOSTRING_BEGIN_MARKER}{${TOSTRING_END_MARKER}
   describe('operator', () => {
     it('converts an operator with OPERATOR_STATE_UNKNOWN', () => {
       expect(
-        toString(toValue.operator, {
+        valueToString(toValue.operator, {
           operatorState: OPERATOR_STATE_UNKNOWN
         })
       ).toStrictEqual('-operator-');
@@ -385,7 +385,7 @@ ${TOSTRING_BEGIN_MARKER}{${TOSTRING_END_MARKER}
 
     it('converts an operator with OPERATOR_STATE_FIRST_CALL', () => {
       expect(
-        toString(toValue.operator, {
+        valueToString(toValue.operator, {
           operatorState: OPERATOR_STATE_FIRST_CALL
         })
       ).toStrictEqual('-operator-');
@@ -393,7 +393,7 @@ ${TOSTRING_BEGIN_MARKER}{${TOSTRING_END_MARKER}
 
     it('converts an operator with operator state 12', () => {
       expect(
-        toString(toValue.operator, {
+        valueToString(toValue.operator, {
           operatorState: 12
         })
       ).toStrictEqual(`-operator-${TOSTRING_BEGIN_MARKER}12`);
@@ -401,7 +401,7 @@ ${TOSTRING_BEGIN_MARKER}{${TOSTRING_END_MARKER}
 
     it('converts an operator with OPERATOR_STATE_CALL_BEFORE_POP', () => {
       expect(
-        toString(toValue.operator, {
+        valueToString(toValue.operator, {
           operatorState: OPERATOR_STATE_CALL_BEFORE_POP
         })
       ).toStrictEqual(`-operator-${TOSTRING_END_MARKER}`);
@@ -409,7 +409,7 @@ ${TOSTRING_BEGIN_MARKER}{${TOSTRING_END_MARKER}
 
     it('converts an operator with operator state -12', () => {
       expect(
-        toString(toValue.operator, {
+        valueToString(toValue.operator, {
           operatorState: -12
         })
       ).toStrictEqual(`-operator-${TOSTRING_END_MARKER}-12`);
@@ -417,7 +417,7 @@ ${TOSTRING_BEGIN_MARKER}{${TOSTRING_END_MARKER}
 
     it('converts an operator with OPERATOR_STATE_POP', () => {
       expect(
-        toString(toValue.operator, {
+        valueToString(toValue.operator, {
           operatorState: OPERATOR_STATE_POP
         })
       ).toStrictEqual(`-operator-${TOSTRING_END_MARKER}${TOSTRING_END_MARKER}`);
@@ -429,7 +429,7 @@ ${TOSTRING_BEGIN_MARKER}{${TOSTRING_END_MARKER}
 
     it('converts an executable array with OPERATOR_STATE_UNKNOWN', () => {
       expect(
-        toString(array, {
+        valueToString(array, {
           operatorState: OPERATOR_STATE_UNKNOWN
         })
       ).toStrictEqual('{ -operator- 2 3 }');
@@ -437,7 +437,7 @@ ${TOSTRING_BEGIN_MARKER}{${TOSTRING_END_MARKER}
 
     it('converts an executable array with OPERATOR_STATE_FIRST_CALL', () => {
       expect(
-        toString(array, {
+        valueToString(array, {
           operatorState: OPERATOR_STATE_FIRST_CALL
         })
       ).toStrictEqual(`{ ${TOSTRING_BEGIN_MARKER}-operator-${TOSTRING_END_MARKER} 2 3 }`);
@@ -445,7 +445,7 @@ ${TOSTRING_BEGIN_MARKER}{${TOSTRING_END_MARKER}
 
     it('converts an executable array with operator state 1', () => {
       expect(
-        toString(array, {
+        valueToString(array, {
           operatorState: 1
         })
       ).toStrictEqual(`{ -operator- ${TOSTRING_BEGIN_MARKER}2${TOSTRING_END_MARKER} 3 }`);
