@@ -4,34 +4,38 @@
     "module": "api/Exception.ts",
     "name": "getExceptionMessage",
     "exported": true,
-    "calls": {}
+    "calls": {},
+    "externalCalls": 0
   },
   "enumIArrayValues": {
-    "id": 11,
+    "id": 10,
     "module": "api/interfaces/IReadOnlyArray.ts",
     "name": "enumIArrayValues",
     "exported": true,
-    "calls": {}
+    "calls": {},
+    "externalCalls": 0
   },
   "enumIDictionaryValues": {
-    "id": 14,
+    "id": 13,
     "module": "api/interfaces/IReadOnlyDictionary.ts",
     "name": "enumIDictionaryValues",
     "exported": true,
     "calls": {},
-    "externalCalls": 1
+    "externalCalls": 0,
+    "internalCalls": 1
   },
   "convertIDictionaryToObject": {
-    "id": 15,
+    "id": 14,
     "module": "api/interfaces/IReadOnlyDictionary.ts",
     "name": "convertIDictionaryToObject",
     "exported": true,
     "calls": {
       "enumIDictionaryValues": 1
-    }
+    },
+    "externalCalls": 0
   },
   "parse": {
-    "id": 22,
+    "id": 21,
     "module": "api/parser.ts",
     "name": "parse",
     "exported": true,
@@ -50,7 +54,8 @@
     "exported": true,
     "calls": {
       "toStringValue": 1
-    }
+    },
+    "externalCalls": 0
   },
   "addMemorySize": {
     "id": 40,
@@ -66,7 +71,8 @@
     "name": "memorySizeToBytes",
     "exported": true,
     "calls": {},
-    "externalCalls": 3
+    "externalCalls": 0,
+    "internalCalls": 3
   },
   "openWithMark": {
     "id": 234,
@@ -82,7 +88,8 @@
     "name": "pushOpenClosedValueWithDebugInfo",
     "exported": true,
     "calls": {},
-    "externalCalls": 2
+    "externalCalls": 1,
+    "internalCalls": 1
   },
   "closeToMark": {
     "id": 236,
@@ -104,17 +111,19 @@
     "exported": true,
     "calls": {
       "assert": 1
-    }
+    },
+    "externalCalls": 0
   },
   "buildConstantOperator": {
     "id": 239,
     "module": "core/operators/operators.ts",
     "name": "buildConstantOperator",
     "exported": true,
-    "calls": {}
+    "calls": {},
+    "externalCalls": 0
   },
   "blockCycle": {
-    "id": 343,
+    "id": 321,
     "module": "core/state/block.ts",
     "name": "blockCycle",
     "exported": true,
@@ -122,7 +131,7 @@
     "externalCalls": 1
   },
   "callCycle": {
-    "id": 345,
+    "id": 323,
     "module": "core/state/call.ts",
     "name": "callCycle",
     "exported": true,
@@ -130,15 +139,16 @@
     "externalCalls": 1
   },
   "operatorPop": {
-    "id": 347,
+    "id": 325,
     "module": "core/state/operator.ts",
     "name": "operatorPop",
     "exported": true,
     "calls": {},
-    "externalCalls": 2
+    "externalCalls": 1,
+    "internalCalls": 1
   },
   "operatorCycle": {
-    "id": 350,
+    "id": 328,
     "module": "core/state/operator.ts",
     "name": "operatorCycle",
     "exported": true,
@@ -149,7 +159,7 @@
     "externalCalls": 1
   },
   "parseCycle": {
-    "id": 354,
+    "id": 332,
     "module": "core/state/parse.ts",
     "name": "parseCycle",
     "exported": true,
@@ -191,7 +201,8 @@
     "calls": {
       "is": 1,
       "isInteger": 1
-    }
+    },
+    "externalCalls": 0
   },
   "isStringValue": {
     "id": 368,
@@ -200,7 +211,8 @@
     "exported": true,
     "calls": {
       "is": 1
-    }
+    },
+    "externalCalls": 0
   },
   "isNameValue": {
     "id": 369,
@@ -209,7 +221,8 @@
     "exported": true,
     "calls": {
       "is": 1
-    }
+    },
+    "externalCalls": 0
   },
   "isOperatorValue": {
     "id": 370,
@@ -218,7 +231,8 @@
     "exported": true,
     "calls": {
       "is": 1
-    }
+    },
+    "externalCalls": 0
   },
   "isArrayValue": {
     "id": 373,
@@ -240,7 +254,8 @@
     "calls": {
       "is": 1,
       "isFunction": 2
-    }
+    },
+    "externalCalls": 0
   },
   "findMarkPos": {
     "id": 376,
@@ -250,13 +265,14 @@
     "calls": {},
     "externalCalls": 4
   },
-  "toString": {
+  "valueToString": {
     "id": 398,
     "module": "sdk/toString.ts",
-    "name": "toString",
+    "name": "valueToString",
     "exported": true,
     "calls": {},
-    "externalCalls": 1
+    "externalCalls": 0,
+    "internalCalls": 1
   },
   "callStackToString": {
     "id": 399,
@@ -264,8 +280,9 @@
     "name": "callStackToString",
     "exported": true,
     "calls": {
-      "toString": 1
-    }
+      "valueToString": 1
+    },
+    "externalCalls": 0
   },
   "toIntegerValue": {
     "id": 401,
