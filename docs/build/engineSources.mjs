@@ -5,8 +5,8 @@ import _traverse from '@babel/traverse';
 const traverse = _traverse.default;
 
 let lastId = 0;
-const sources = Object.create(null);
-const exportedFunctions = Object.create(null);
+const sources = {};
+const exportedFunctions = {};
 
 const red = '\u001B[31m';
 const yellow = '\u001B[33m';
@@ -17,6 +17,7 @@ const addExportedFunction = (functionDefinition) => {
   if (!exported) {
     return;
   }
+  functionDefinition.externalCalls = 0;
   const existingFunction = exportedFunctions[name];
   if (existingFunction) {
     throw new Error(`❌ duplicate exported function name:
@@ -41,7 +42,7 @@ const checkForCall = (node, calls) => {
 };
 
 const searchForCalls = (scope, node) => {
-  const calls = Object.create(null);
+  const calls = {};
   scope.traverse(node, {
     enter({ node }) {
       checkForCall(node, calls);
@@ -59,7 +60,7 @@ const source = async (path) => {
     id: ++lastId,
     name: moduleName,
     imports: [],
-    calls: Object.create(null),
+    calls: {},
     classes: [],
     functions: []
   };
@@ -83,12 +84,16 @@ const source = async (path) => {
         scope.traverse(node, {
           enter({ scope, node }) {
             if (node.type === 'ClassMethod') {
-              classDefinition.methods.push({
+              const definition = {
                 id: ++lastId,
                 module: moduleName,
                 name: node.key.name,
                 calls: searchForCalls(scope, node)
-              });
+              };
+              if (['get', 'set'].includes(node.kind)) {
+                definition.kind = node.kind;
+              }
+              classDefinition.methods.push(definition);
             }
           }
         });
@@ -131,6 +136,7 @@ const source = async (path) => {
 
 const lookup = async (path) => {
   const names = await readdir(path);
+  names.sort((a, b) => a.localeCompare(b));
   for (const name of names) {
     if (name === 'index.ts' || name.endsWith('.md') || name.endsWith('.spec.ts') || name.endsWith('.ast')) {
       continue;
@@ -149,32 +155,43 @@ const names = Object.keys(sources).sort((a, b) => a.localeCompare(b));
 
 for(const name of names) {
   const definition = sources[name];
-  const increaseExternalCalls = (calls) => {
+  const increaseCallsCount = (calls) => {
     for (const [name, count] of Object.entries(calls)) {
       const exportedFunction = exportedFunctions[name];
       if (exportedFunction) {
-        if (exportedFunction.externalCalls) {
-          exportedFunction.externalCalls += count;
+        const member = exportedFunction.module === definition.name ? 'internal' : 'external';
+        if (exportedFunction[`${member}Calls`]) {
+          exportedFunction[`${member}Calls`] += count;
         } else {
-          exportedFunction.externalCalls = count;
+          exportedFunction[`${member}Calls`] = count;
         }
       }
     }
   }
-  increaseExternalCalls(definition.calls);
+  increaseCallsCount(definition.calls);
   for (const { methods } of definition.classes) {
     for (const { calls } of methods) {
-      increaseExternalCalls(calls);
+      increaseCallsCount(calls);
     }
   }
   for (const { calls } of definition.functions) {
-    increaseExternalCalls(calls);
+    increaseCallsCount(calls);
   }
 }
 
 await writeFile(new URL('../engine/exported.json', import.meta.url), JSON.stringify(exportedFunctions, undefined, 2), 'utf8');
-await writeFile(new URL('../engine/sources.json', import.meta.url), JSON.stringify(sources, (key, value) => {
-  if (key === 'module') {
+const structuredSources = {};
+for (const name of names) {
+  const names = name.split('/');
+  let placeholder = structuredSources;
+  for (const part of names) {
+    placeholder = (placeholder[part] ??= {});
+  }
+  Object.assign(placeholder, sources[name]);
+  delete placeholder.name;
+}
+await writeFile(new URL('../engine/sources.json', import.meta.url), JSON.stringify(structuredSources, (key, value) => {
+  if (['module', 'id', 'imports'].includes(key)) {
     return undefined;
   }
   if (Array.isArray(value) && !value.length) {
