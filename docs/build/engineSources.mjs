@@ -209,53 +209,66 @@ await writeFile(new URL('../engine/sources.json', import.meta.url), JSON.stringi
   return value;
 }, 2), 'utf8');
 
-process.exit(0);
-
-
 const markdown = [
-  '# Sources',
+  '# Sources analysis',
   '',
-  '## Dependencies',
+  '## Sources',
   '',
 ];
 
 for(const name of names) {
   const definition = sources[name];
-  console.log(`${yellow}${name}${white}`);
+  const { calls, classes, functions } = definition;
+  if (Object.keys(calls).length === 0 && classes.length === 0 && functions.length === 0) {
+    // Nothing to present
+    continue;
+  }
   markdown.push(`### ${name}`);
-  for (const { name, from } of definition.imports) {
-    console.log(`\t← ${name} (${from})`);
-    // markdown.push(`\n* ← ${name} (${from})`);
-  }
-  for (const [name, { count }] of definition.calls.entries()) {
-    console.log(`\t→ ${name}${count > 1 ? ' (' + count + ')' : ''}`);
-    markdown.push(`\n→ \`${name}\`${count > 1 ? ' (' + count + ')' : ''}`);
-  }
-  for (const { name: className, exported, methods } of definition.classes) {
-    console.log(`\t${exported ? red + 'export' + white + ' ' : ''}class ${className}`);
-    markdown.push(`\n${exported ? '<span style="color: red;"><code>export</code></span> ' : ''}\`class ${className}\``);
-    for (const { name: methodName, calls } of methods) {
-      if (calls.size) {
-        console.log(`\t${className}::${methodName}`);
-        markdown.push(`\n\`${className}::${methodName}\``);
-        for (const [name, { count }] of calls.entries()) {
-          console.log(`\t  → ${name}${count > 1 ? ' (' + count + ')' : ''}`);
-          markdown.push(`\n  → \`${name}\`${count > 1 ? ' (' + count + ')' : ''}`);
+  // for (const [name, { count }] of definition.calls.entries()) {
+  //   console.log(`\t→ ${name}${count > 1 ? ' (' + count + ')' : ''}`);
+  //   markdown.push(`\n→ \`${name}\`${count > 1 ? ' (' + count + ')' : ''}`);
+  // }
+  // for (const { name: className, exported, methods } of definition.classes) {
+  //   console.log(`\t${exported ? red + 'export' + white + ' ' : ''}class ${className}`);
+  //   markdown.push(`\n${exported ? '<span style="color: red;"><code>export</code></span> ' : ''}\`class ${className}\``);
+  //   for (const { name: methodName, calls } of methods) {
+  //     if (calls.size) {
+  //       console.log(`\t${className}::${methodName}`);
+  //       markdown.push(`\n\`${className}::${methodName}\``);
+  //       for (const [name, { count }] of calls.entries()) {
+  //         console.log(`\t  → ${name}${count > 1 ? ' (' + count + ')' : ''}`);
+  //         markdown.push(`\n  → \`${name}\`${count > 1 ? ' (' + count + ')' : ''}`);
+  //       }
+  //     }
+  //   }
+  // }
+  // for (const { name: functionName, exported, calls, externalCalls } of definition.functions) {
+  //   if (exported || calls.size) {
+      // console.log(`\t${exported ? red + 'export' + white + ' ' : ''}function ${functionName} ${ externalCalls ? '(' + externalCalls + ')' : '' }`);
+      // markdown.push(`\n${exported ? '<span style="color: red;"><code>export</code></span> ' : ''}\`function ${functionName} ${ externalCalls ? '(' + externalCalls + ')' : '' }\``);
+      // for (const [name, { count }] of calls.entries()) {
+      //     console.log(`\t  → ${name}${count > 1 ? ' (' + count + ')' : ''}`);
+      //     markdown.push(`\n  → \`${name}\`${count > 1 ? ' (' + count + ')' : ''}`);
+      // }
+  //   }
+  // }
+  const hasExportedFunctions = definition.functions.some(({ exported }) => exported);
+  if (hasExportedFunctions) {
+    markdown.push('**Exported functions :**')
+    for (const { name: functionName, exported, calls, externalCalls } of definition.functions) {
+      if (exported) {
+        markdown.push(`* \`function ${functionName}\``);
+        if (!externalCalls && name.startsWith('core/')) {
+          markdown.push(`⚠️ Exported but not used (and not part of API or SDK)`);
         }
       }
     }
   }
-  for (const { name: functionName, exported, calls, externalCalls } of definition.functions) {
-    if (exported || calls.size) {
-      console.log(`\t${exported ? red + 'export' + white + ' ' : ''}function ${functionName} ${ externalCalls ? '(' + externalCalls + ')' : '' }`);
-      markdown.push(`\n${exported ? '<span style="color: red;"><code>export</code></span> ' : ''}\`function ${functionName} ${ externalCalls ? '(' + externalCalls + ')' : '' }\``);
-      for (const [name, { count }] of calls.entries()) {
-          console.log(`\t  → ${name}${count > 1 ? ' (' + count + ')' : ''}`);
-          markdown.push(`\n  → \`${name}\`${count > 1 ? ' (' + count + ')' : ''}`);
-      }
-    }
-  }
 }
+
+await writeFile(new URL('../engine/sources.md', import.meta.url), markdown.join('\n'), 'utf8')
+
+process.exit(0);
 
 const funcId = (name) => {
   const exportedFunction = exportedFunctions[name];
@@ -294,4 +307,3 @@ for(const name of names) {
 }
 markdown.push('```');
 await writeFile(new URL('../engine/sources.md', import.meta.url), markdown.join('\n'), 'utf8')
-console.log('final index: ', index);
