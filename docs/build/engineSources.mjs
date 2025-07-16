@@ -27,38 +27,36 @@ ${existingFunction.name} from ${existingFunction.module}`);
   exportedFunctions[name] = functionDefinition;
 }
 
-const checkForCall = (node, calls) => {
-  if (node.type === 'CallExpression' && node.callee?.name) {
-    const { name } = node.callee;
-    if (name === 'Symbol') {
-      return; // ignore
-    }
-    if (name in calls) {
-      ++calls[name];
-    } else {
-      calls[name] = 1;
-    }
-  }
-};
-
 const searchForCalls = (scope, node) => {
   const calls = {};
   scope.traverse(node, {
-    enter({ node }) {
-      checkForCall(node, calls);
+    enter(path) {
+      const { node } = path;
+      if (node.type === 'CallExpression' && node.callee?.name) {
+        const { name } = node.callee;
+        if (name === 'Symbol') {
+          return; // ignore
+        }
+        if (name in calls) {
+          ++calls[name];
+        } else {
+          calls[name] = 1;
+        }
+        path.skip();
+      }
     }
   });
   return calls;
 };
 
 const source = async (path) => {
-  const moduleName = path.pathname.split('engine/src/')[1];
+  const sourceName = path.pathname.split('engine/src/')[1];
   const content = await readFile(path, 'utf8');
   const ast = parse(content, { sourceType: 'module', plugins: ['typescript'] });
   await writeFile(new URL(path.toString().replace('.ts', '.ast')), JSON.stringify(ast, null, 2), { encoding: 'utf8' });
-  const definition = {
+  const sourceDefinition = {
     id: ++lastId,
-    name: moduleName,
+    name: sourceName,
     imports: [],
     calls: {},
     classes: [],
@@ -69,7 +67,7 @@ const source = async (path) => {
       const { node, parent, scope } = path;
       if (node.type === 'ImportDeclaration' && node.importKind === 'value') {
         for (const specifier of node.specifiers) {
-          definition.imports.push({
+          sourceDefinition.imports.push({
             name: specifier.imported.name,
             from: node.source.value
           });
@@ -86,7 +84,7 @@ const source = async (path) => {
             if (node.type === 'ClassMethod') {
               const definition = {
                 id: ++lastId,
-                module: moduleName,
+                module: sourceName,
                 name: node.key.name,
                 calls: searchForCalls(scope, node)
               };
@@ -97,7 +95,7 @@ const source = async (path) => {
             }
           }
         });
-        definition.classes.push(classDefinition);
+        sourceDefinition.classes.push(classDefinition);
         path.skip();
       }
       if (node.type === 'FunctionDeclaration') {
@@ -105,33 +103,33 @@ const source = async (path) => {
         const exported = parent.type === 'ExportNamedDeclaration';
         const functionDefinition = {
           id: ++lastId,
-          module: moduleName,
+          module: sourceName,
           name,
           exported,
           calls: searchForCalls(scope, node)
         };
-        definition.functions.push(functionDefinition);
+        sourceDefinition.functions.push(functionDefinition);
         addExportedFunction(functionDefinition);
         path.skip();
       }
       if (node.type === 'ArrowFunctionExpression') {
         const functionDefinition = {
           id: ++lastId,
-          module: moduleName,
+          module: sourceName,
           name: parent.id?.name ?? '(anonymous arrow)',
           exported: path.parentPath?.parentPath?.parentPath?.node?.type === 'ExportNamedDeclaration',
           calls: searchForCalls(scope, node)
         };
         addExportedFunction(functionDefinition);
-        definition.functions.push(functionDefinition);
+        sourceDefinition.functions.push(functionDefinition);
         path.skip();
       }
       if (node.type === 'ExpressionStatement') {
-        checkForCall(node, definition.calls);
+        sourceDefinition.calls = searchForCalls(scope, node);
       }
     }
   });
-  sources[moduleName] = definition;
+  sources[sourceName] = sourceDefinition;
 };
 
 const lookup = async (path) => {
@@ -154,27 +152,35 @@ await lookup(new URL('../../engine/src/', import.meta.url), 'utf8');
 const names = Object.keys(sources).sort((a, b) => a.localeCompare(b));
 
 for(const name of names) {
-  const definition = sources[name];
+  const sourceDefinition = sources[name];
+  const increaseMember = (object, member, count) => {
+    if (member in object) {
+      object[member] += count;
+    } else {
+      object[member] = count;
+    }
+  }
   const increaseCallsCount = (calls) => {
     for (const [name, count] of Object.entries(calls)) {
       const exportedFunction = exportedFunctions[name];
       if (exportedFunction) {
-        const member = exportedFunction.module === definition.name ? 'internal' : 'external';
-        if (exportedFunction[`${member}Calls`]) {
-          exportedFunction[`${member}Calls`] += count;
-        } else {
-          exportedFunction[`${member}Calls`] = count;
+        const member = exportedFunction.module === sourceDefinition.name ? 'internal' : 'external';
+        increaseMember(exportedFunction, `${member}Calls`, count);
+      } else {
+        const internalFunction = sourceDefinition.functions.find(({ name: funcName }) => funcName === name);
+        if (internalFunction) {
+          increaseMember(internalFunction, 'internalCalls', count);
         }
       }
     }
   }
-  increaseCallsCount(definition.calls);
-  for (const { methods } of definition.classes) {
+  increaseCallsCount(sourceDefinition.calls);
+  for (const { methods } of sourceDefinition.classes) {
     for (const { calls } of methods) {
       increaseCallsCount(calls);
     }
   }
-  for (const { calls } of definition.functions) {
+  for (const { calls } of sourceDefinition.functions) {
     increaseCallsCount(calls);
   }
 }
