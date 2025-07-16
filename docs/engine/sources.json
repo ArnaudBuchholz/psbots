@@ -51,21 +51,24 @@
       "functions": [
         {
           "name": "parseString",
-          "exported": false
+          "exported": false,
+          "internalCalls": 1
         },
         {
           "name": "parseNumber",
           "exported": false,
           "calls": {
             "assert": 1
-          }
+          },
+          "internalCalls": 1
         },
         {
           "name": "parseName",
           "exported": false,
           "calls": {
             "assert": 3
-          }
+          },
+          "internalCalls": 1
         },
         {
           "name": "parse",
@@ -228,7 +231,8 @@
       "functions": [
         {
           "name": "stringSizer",
-          "exported": false
+          "exported": false,
+          "internalCalls": 3
         },
         {
           "name": "addMemorySize",
@@ -688,6 +692,9 @@
     "operators": {
       "array": {
         "aload.ts": {
+          "calls": {
+            "buildFunctionOperator": 1
+          },
           "functions": [
             {
               "name": "(anonymous arrow)",
@@ -699,6 +706,9 @@
           ]
         },
         "closeArray.ts": {
+          "calls": {
+            "buildFunctionOperator": 1
+          },
           "functions": [
             {
               "name": "(anonymous arrow)",
@@ -709,10 +719,17 @@
             }
           ]
         },
-        "openArray.ts": {}
+        "openArray.ts": {
+          "calls": {
+            "buildFunctionOperator": 1
+          }
+        }
       },
       "boolean": {
         "and.ts": {
+          "calls": {
+            "buildFunctionOperator": 1
+          },
           "functions": [
             {
               "name": "(anonymous arrow)",
@@ -721,6 +738,9 @@
           ]
         },
         "or.ts": {
+          "calls": {
+            "buildFunctionOperator": 1
+          },
           "functions": [
             {
               "name": "(anonymous arrow)",
@@ -729,6 +749,9 @@
           ]
         },
         "xor.ts": {
+          "calls": {
+            "buildFunctionOperator": 1
+          },
           "functions": [
             {
               "name": "(anonymous arrow)",
@@ -739,6 +762,9 @@
       },
       "dictionary": {
         "closeDictionary.ts": {
+          "calls": {
+            "buildFunctionOperator": 1
+          },
           "functions": [
             {
               "name": "(anonymous arrow)",
@@ -752,6 +778,9 @@
           ]
         },
         "openDictionary.ts": {
+          "calls": {
+            "buildFunctionOperator": 1
+          },
           "functions": [
             {
               "name": "(anonymous arrow)",
@@ -765,6 +794,9 @@
       },
       "exceptions": {
         "dictStackUnderflow.ts": {
+          "calls": {
+            "buildFunctionOperator": 1
+          },
           "functions": [
             {
               "name": "(anonymous arrow)",
@@ -773,6 +805,9 @@
           ]
         },
         "invalidAccess.ts": {
+          "calls": {
+            "buildFunctionOperator": 1
+          },
           "functions": [
             {
               "name": "(anonymous arrow)",
@@ -781,6 +816,9 @@
           ]
         },
         "limitcheck.ts": {
+          "calls": {
+            "buildFunctionOperator": 1
+          },
           "functions": [
             {
               "name": "(anonymous arrow)",
@@ -789,6 +827,9 @@
           ]
         },
         "rangeCheck.ts": {
+          "calls": {
+            "buildFunctionOperator": 1
+          },
           "functions": [
             {
               "name": "(anonymous arrow)",
@@ -797,6 +838,9 @@
           ]
         },
         "stackUnderflow.ts": {
+          "calls": {
+            "buildFunctionOperator": 1
+          },
           "functions": [
             {
               "name": "(anonymous arrow)",
@@ -805,6 +849,9 @@
           ]
         },
         "stop.ts": {
+          "calls": {
+            "buildFunctionOperator": 1
+          },
           "functions": [
             {
               "name": "(anonymous arrow)",
@@ -813,6 +860,9 @@
           ]
         },
         "typeCheck.ts": {
+          "calls": {
+            "buildFunctionOperator": 1
+          },
           "functions": [
             {
               "name": "(anonymous arrow)",
@@ -821,6 +871,9 @@
           ]
         },
         "undefined.ts": {
+          "calls": {
+            "buildFunctionOperator": 1
+          },
           "functions": [
             {
               "name": "(anonymous arrow)",
@@ -829,6 +882,9 @@
           ]
         },
         "undefinedResult.ts": {
+          "calls": {
+            "buildFunctionOperator": 1
+          },
           "functions": [
             {
               "name": "(anonymous arrow)",
@@ -837,6 +893,9 @@
           ]
         },
         "unmatchedMark.ts": {
+          "calls": {
+            "buildFunctionOperator": 1
+          },
           "functions": [
             {
               "name": "(anonymous arrow)",
@@ -845,6 +904,9 @@
           ]
         },
         "vmOverflow.ts": {
+          "calls": {
+            "buildFunctionOperator": 1
+          },
           "functions": [
             {
               "name": "(anonymous arrow)",
@@ -855,6 +917,9 @@
       },
       "flow": {
         "closeBlock.ts": {
+          "calls": {
+            "buildFunctionOperator": 1
+          },
           "functions": [
             {
               "name": "(anonymous arrow)",
@@ -866,13 +931,17 @@
           ]
         },
         "finally.ts": {
+          "calls": {
+            "buildFunctionOperator": 1
+          },
           "functions": [
             {
               "name": "firstCall",
               "exported": false,
               "calls": {
                 "assert": 1
-              }
+              },
+              "internalCalls": 1
             },
             {
               "name": "callBeforePop",
@@ -880,14 +949,16 @@
               "calls": {
                 "toStringValue": 1,
                 "assert": 2
-              }
+              },
+              "internalCalls": 1
             },
             {
               "name": "popping",
               "exported": false,
               "calls": {
                 "assert": 2
-              }
+              },
+              "internalCalls": 1
             },
             {
               "name": "(anonymous arrow)",
@@ -902,6 +973,9 @@
           ]
         },
         "gc.ts": {
+          "calls": {
+            "buildFunctionOperator": 1
+          },
           "functions": [
             {
               "name": "(anonymous arrow)",
@@ -913,6 +987,9 @@
           ]
         },
         "if.ts": {
+          "calls": {
+            "buildFunctionOperator": 1
+          },
           "functions": [
             {
               "name": "(anonymous arrow)",
@@ -921,6 +998,9 @@
           ]
         },
         "ifelse.ts": {
+          "calls": {
+            "buildFunctionOperator": 1
+          },
           "functions": [
             {
               "name": "(anonymous arrow)",
@@ -929,6 +1009,9 @@
           ]
         },
         "loop.ts": {
+          "calls": {
+            "buildFunctionOperator": 1
+          },
           "functions": [
             {
               "name": "(anonymous arrow)",
@@ -940,6 +1023,9 @@
           ]
         },
         "openBlock.ts": {
+          "calls": {
+            "buildFunctionOperator": 1
+          },
           "functions": [
             {
               "name": "(anonymous arrow)",
@@ -951,14 +1037,19 @@
           ]
         },
         "repeat.ts": {
+          "calls": {
+            "buildFunctionOperator": 1
+          },
           "functions": [
             {
               "name": "firstCall",
-              "exported": false
+              "exported": false,
+              "internalCalls": 1
             },
             {
               "name": "repeat",
-              "exported": false
+              "exported": false,
+              "internalCalls": 1
             },
             {
               "name": "(anonymous arrow)",
@@ -971,6 +1062,9 @@
           ]
         },
         "stopped.ts": {
+          "calls": {
+            "buildFunctionOperator": 1
+          },
           "functions": [
             {
               "name": "(anonymous arrow)",
@@ -984,6 +1078,9 @@
       },
       "integer": {
         "abs.ts": {
+          "calls": {
+            "buildFunctionOperator": 1
+          },
           "functions": [
             {
               "name": "(anonymous arrow)",
@@ -995,6 +1092,9 @@
           ]
         },
         "add.ts": {
+          "calls": {
+            "buildFunctionOperator": 1
+          },
           "functions": [
             {
               "name": "(anonymous arrow)",
@@ -1006,6 +1106,9 @@
           ]
         },
         "div.ts": {
+          "calls": {
+            "buildFunctionOperator": 1
+          },
           "functions": [
             {
               "name": "(anonymous arrow)",
@@ -1017,6 +1120,9 @@
           ]
         },
         "gt.ts": {
+          "calls": {
+            "buildFunctionOperator": 1
+          },
           "functions": [
             {
               "name": "(anonymous arrow)",
@@ -1025,6 +1131,9 @@
           ]
         },
         "gte.ts": {
+          "calls": {
+            "buildFunctionOperator": 1
+          },
           "functions": [
             {
               "name": "(anonymous arrow)",
@@ -1033,6 +1142,9 @@
           ]
         },
         "lt.ts": {
+          "calls": {
+            "buildFunctionOperator": 1
+          },
           "functions": [
             {
               "name": "(anonymous arrow)",
@@ -1041,6 +1153,9 @@
           ]
         },
         "lte.ts": {
+          "calls": {
+            "buildFunctionOperator": 1
+          },
           "functions": [
             {
               "name": "(anonymous arrow)",
@@ -1049,6 +1164,9 @@
           ]
         },
         "mul.ts": {
+          "calls": {
+            "buildFunctionOperator": 1
+          },
           "functions": [
             {
               "name": "(anonymous arrow)",
@@ -1060,6 +1178,9 @@
           ]
         },
         "sub.ts": {
+          "calls": {
+            "buildFunctionOperator": 1
+          },
           "functions": [
             {
               "name": "(anonymous arrow)",
@@ -1105,18 +1226,21 @@
             "calls": {
               "assert": 1
             },
-            "externalCalls": 0
+            "externalCalls": 66
           },
           {
             "name": "buildConstantOperator",
             "exported": true,
-            "externalCalls": 0
+            "externalCalls": 4
           }
         ]
       },
       "stacks": {
         "call": {
           "countexecstack.ts": {
+            "calls": {
+              "buildFunctionOperator": 1
+            },
             "functions": [
               {
                 "name": "(anonymous arrow)",
@@ -1131,6 +1255,9 @@
         },
         "dictionary": {
           "begin.ts": {
+            "calls": {
+              "buildFunctionOperator": 1
+            },
             "functions": [
               {
                 "name": "(anonymous arrow)",
@@ -1142,11 +1269,13 @@
             "functions": [
               {
                 "name": "bindName",
-                "exported": false
+                "exported": false,
+                "internalCalls": 1
               },
               {
                 "name": "bindArray",
-                "exported": false
+                "exported": false,
+                "internalCalls": 1
               },
               {
                 "name": "bindValue",
@@ -1155,20 +1284,23 @@
                   "bindName": 1,
                   "assert": 1,
                   "bindArray": 1
-                }
+                },
+                "internalCalls": 1
               },
               {
                 "name": "(anonymous arrow)",
                 "exported": false,
                 "calls": {
                   "assert": 2,
-                  "isArrayValue": 1,
                   "bindValue": 1
                 }
               }
             ]
           },
           "countdictstack.ts": {
+            "calls": {
+              "buildFunctionOperator": 1
+            },
             "functions": [
               {
                 "name": "(anonymous arrow)",
@@ -1181,6 +1313,9 @@
             ]
           },
           "currentdict.ts": {
+            "calls": {
+              "buildFunctionOperator": 1
+            },
             "functions": [
               {
                 "name": "(anonymous arrow)",
@@ -1189,6 +1324,9 @@
             ]
           },
           "def.ts": {
+            "calls": {
+              "buildFunctionOperator": 1
+            },
             "functions": [
               {
                 "name": "(anonymous arrow)",
@@ -1197,6 +1335,9 @@
             ]
           },
           "end.ts": {
+            "calls": {
+              "buildFunctionOperator": 1
+            },
             "functions": [
               {
                 "name": "(anonymous arrow)",
@@ -1205,6 +1346,9 @@
             ]
           },
           "globaldict.ts": {
+            "calls": {
+              "buildFunctionOperator": 1
+            },
             "functions": [
               {
                 "name": "(anonymous arrow)",
@@ -1213,6 +1357,9 @@
             ]
           },
           "hostdict.ts": {
+            "calls": {
+              "buildFunctionOperator": 1
+            },
             "functions": [
               {
                 "name": "(anonymous arrow)",
@@ -1221,6 +1368,9 @@
             ]
           },
           "systemdict.ts": {
+            "calls": {
+              "buildFunctionOperator": 1
+            },
             "functions": [
               {
                 "name": "(anonymous arrow)",
@@ -1229,6 +1379,9 @@
             ]
           },
           "userdict.ts": {
+            "calls": {
+              "buildFunctionOperator": 1
+            },
             "functions": [
               {
                 "name": "(anonymous arrow)",
@@ -1239,6 +1392,9 @@
         },
         "operand": {
           "clear.ts": {
+            "calls": {
+              "buildFunctionOperator": 1
+            },
             "functions": [
               {
                 "name": "(anonymous arrow)",
@@ -1247,6 +1403,9 @@
             ]
           },
           "cleartomark.ts": {
+            "calls": {
+              "buildFunctionOperator": 1
+            },
             "functions": [
               {
                 "name": "(anonymous arrow)",
@@ -1258,6 +1417,9 @@
             ]
           },
           "count.ts": {
+            "calls": {
+              "buildFunctionOperator": 1
+            },
             "functions": [
               {
                 "name": "(anonymous arrow)",
@@ -1270,6 +1432,9 @@
             ]
           },
           "counttomark.ts": {
+            "calls": {
+              "buildFunctionOperator": 1
+            },
             "functions": [
               {
                 "name": "(anonymous arrow)",
@@ -1283,6 +1448,9 @@
             ]
           },
           "dup.ts": {
+            "calls": {
+              "buildFunctionOperator": 1
+            },
             "functions": [
               {
                 "name": "(anonymous arrow)",
@@ -1291,6 +1459,9 @@
             ]
           },
           "exch.ts": {
+            "calls": {
+              "buildFunctionOperator": 1
+            },
             "functions": [
               {
                 "name": "(anonymous arrow)",
@@ -1299,6 +1470,9 @@
             ]
           },
           "indexOp.ts": {
+            "calls": {
+              "buildFunctionOperator": 1
+            },
             "functions": [
               {
                 "name": "(anonymous arrow)",
@@ -1315,6 +1489,9 @@
             ]
           },
           "roll.ts": {
+            "calls": {
+              "buildFunctionOperator": 1
+            },
             "functions": [
               {
                 "name": "initialize",
@@ -1322,7 +1499,8 @@
                 "calls": {
                   "toIntegerValue": 2,
                   "assert": 2
-                }
+                },
+                "internalCalls": 1
               },
               {
                 "name": "roll",
@@ -1330,7 +1508,8 @@
                 "calls": {
                   "assert": 5,
                   "toIntegerValue": 1
-                }
+                },
+                "internalCalls": 1
               },
               {
                 "name": "(anonymous arrow)",
@@ -1347,6 +1526,9 @@
       "value": {
         "convert": {
           "cvi.ts": {
+            "calls": {
+              "buildFunctionOperator": 1
+            },
             "functions": [
               {
                 "name": "(anonymous arrow)",
@@ -1358,6 +1540,9 @@
             ]
           },
           "cvlit.ts": {
+            "calls": {
+              "buildFunctionOperator": 1
+            },
             "functions": [
               {
                 "name": "(anonymous arrow)",
@@ -1366,6 +1551,9 @@
             ]
           },
           "cvn.ts": {
+            "calls": {
+              "buildFunctionOperator": 1
+            },
             "functions": [
               {
                 "name": "(anonymous arrow)",
@@ -1379,6 +1567,9 @@
           }
         },
         "eq.ts": {
+          "calls": {
+            "buildFunctionOperator": 1
+          },
           "functions": [
             {
               "name": "(anonymous arrow)",
@@ -1389,8 +1580,15 @@
             }
           ]
         },
-        "false.ts": {},
+        "false.ts": {
+          "calls": {
+            "buildConstantOperator": 1
+          }
+        },
         "get.ts": {
+          "calls": {
+            "buildFunctionOperator": 1
+          },
           "functions": [
             {
               "name": "(anonymous arrow)",
@@ -1422,6 +1620,9 @@
           ]
         },
         "length.ts": {
+          "calls": {
+            "buildFunctionOperator": 1
+          },
           "functions": [
             {
               "name": "(anonymous arrow)",
@@ -1440,14 +1641,20 @@
               "exported": false,
               "calls": {
                 "toIntegerValue": 1,
-                "implementation": 1,
                 "assert": 1
               }
             }
           ]
         },
-        "mark.ts": {},
+        "mark.ts": {
+          "calls": {
+            "buildConstantOperator": 1
+          }
+        },
         "neq.ts": {
+          "calls": {
+            "buildFunctionOperator": 1
+          },
           "functions": [
             {
               "name": "(anonymous arrow)",
@@ -1459,6 +1666,9 @@
           ]
         },
         "put.ts": {
+          "calls": {
+            "buildFunctionOperator": 1
+          },
           "functions": [
             {
               "name": "(anonymous arrow)",
@@ -1489,8 +1699,15 @@
             }
           ]
         },
-        "true.ts": {},
+        "true.ts": {
+          "calls": {
+            "buildConstantOperator": 1
+          }
+        },
         "type.ts": {
+          "calls": {
+            "buildFunctionOperator": 1
+          },
           "functions": [
             {
               "name": "(anonymous arrow)",
@@ -1501,8 +1718,15 @@
             }
           ]
         },
-        "version.ts": {},
+        "version.ts": {
+          "calls": {
+            "buildConstantOperator": 1
+          }
+        },
         "wcheck.ts": {
+          "calls": {
+            "buildFunctionOperator": 1
+          },
           "functions": [
             {
               "name": "(anonymous arrow)",
@@ -1511,6 +1735,9 @@
           ]
         },
         "xcheck.ts": {
+          "calls": {
+            "buildFunctionOperator": 1
+          },
           "functions": [
             {
               "name": "(anonymous arrow)",
@@ -1552,7 +1779,8 @@
             "exported": false,
             "calls": {
               "assert": 2
-            }
+            },
+            "internalCalls": 1
           },
           {
             "name": "handleFunctionOperator",
@@ -1560,7 +1788,8 @@
             "calls": {
               "assert": 1,
               "handleFunctionOperatorTypeCheck": 1
-            }
+            },
+            "internalCalls": 1
           },
           {
             "name": "operatorCycle",
@@ -1580,14 +1809,16 @@
             "exported": false,
             "calls": {
               "parse": 2
-            }
+            },
+            "internalCalls": 1
           },
           {
             "name": "enqueueToken",
             "exported": false,
             "calls": {
               "valuesOf": 1
-            }
+            },
+            "internalCalls": 1
           },
           {
             "name": "parseCycle",
@@ -1745,11 +1976,13 @@
         "functions": [
           {
             "name": "hasInvalidFlag",
-            "exported": false
+            "exported": false,
+            "internalCalls": 1
           },
           {
             "name": "checkFlags",
-            "exported": false
+            "exported": false,
+            "internalCalls": 1
           },
           {
             "name": "is",
@@ -1759,18 +1992,19 @@
               "hasInvalidFlag": 1,
               "checkFlags": 1,
               "check": 1
-            }
+            },
+            "internalCalls": 6
           },
           {
             "name": "isInteger",
-            "exported": false
+            "exported": false,
+            "internalCalls": 1
           },
           {
             "name": "isIntegerValue",
             "exported": true,
             "calls": {
-              "is": 1,
-              "isInteger": 1
+              "is": 1
             },
             "externalCalls": 0
           },
@@ -1813,18 +2047,15 @@
             "name": "isArrayValue",
             "exported": true,
             "calls": {
-              "is": 1,
-              "isPositiveInteger": 1,
-              "isFunction": 2
+              "is": 1
             },
-            "externalCalls": 1
+            "externalCalls": 0
           },
           {
             "name": "isDictionaryValue",
             "exported": true,
             "calls": {
-              "is": 1,
-              "isFunction": 2
+              "is": 1
             },
             "externalCalls": 0
           }
@@ -1852,15 +2083,18 @@
       "functions": [
         {
           "name": "convertPosToLineAndCol",
-          "exported": false
+          "exported": false,
+          "internalCalls": 1
         },
         {
           "name": "minimizeAt",
-          "exported": false
+          "exported": false,
+          "internalCalls": 1
         },
         {
           "name": "centerValue",
-          "exported": false
+          "exported": false,
+          "internalCalls": 1
         },
         {
           "name": "fitToMaxWidth",
@@ -1868,7 +2102,8 @@
           "calls": {
             "minimizeAt": 1,
             "centerValue": 1
-          }
+          },
+          "internalCalls": 1
         },
         {
           "name": "decorate",
@@ -1876,7 +2111,8 @@
           "calls": {
             "convertPosToLineAndCol": 1,
             "fitToMaxWidth": 1
-          }
+          },
+          "internalCalls": 9
         },
         {
           "name": "(anonymous arrow)",
@@ -2017,7 +2253,8 @@
         },
         {
           "name": "getValueOf",
-          "exported": false
+          "exported": false,
+          "internalCalls": 1
         },
         {
           "name": "valuesOf",

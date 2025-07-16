@@ -112,7 +112,7 @@
     "calls": {
       "assert": 1
     },
-    "externalCalls": 0
+    "externalCalls": 66
   },
   "buildConstantOperator": {
     "id": 239,
@@ -120,7 +120,7 @@
     "name": "buildConstantOperator",
     "exported": true,
     "calls": {},
-    "externalCalls": 0
+    "externalCalls": 4
   },
   "blockCycle": {
     "id": 321,
@@ -199,8 +199,7 @@
     "name": "isIntegerValue",
     "exported": true,
     "calls": {
-      "is": 1,
-      "isInteger": 1
+      "is": 1
     },
     "externalCalls": 0
   },
@@ -240,11 +239,9 @@
     "name": "isArrayValue",
     "exported": true,
     "calls": {
-      "is": 1,
-      "isPositiveInteger": 1,
-      "isFunction": 2
+      "is": 1
     },
-    "externalCalls": 1
+    "externalCalls": 0
   },
   "isDictionaryValue": {
     "id": 374,
@@ -252,8 +249,7 @@
     "name": "isDictionaryValue",
     "exported": true,
     "calls": {
-      "is": 1,
-      "isFunction": 2
+      "is": 1
     },
     "externalCalls": 0
   },
