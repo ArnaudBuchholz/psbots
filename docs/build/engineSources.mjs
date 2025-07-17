@@ -216,14 +216,65 @@ const markdown = [
   '',
 ];
 
-for(const name of names) {
-  const definition = sources[name];
+const funcId = (name) => {
+  const exportedFunction = exportedFunctions[name];
+  if (exportedFunction) {
+    return `export_${exportedFunction.id}("${name}")`;
+  }
+  return name;
+};
+
+for(const moduleName of names) {
+  const definition = sources[moduleName];
   const { calls, classes, functions } = definition;
   if (Object.keys(calls).length === 0 && classes.length === 0 && functions.length === 0) {
-    // Nothing to present
+    // Nothing to show
     continue;
   }
-  markdown.push(`### ${name}`);
+  markdown.push(`### ${moduleName}`, '');
+  if (Object.keys(calls).length !== 0 || functions.filter(({ calls }) => Object.keys(calls).length !== 0).length !== 0) {
+    markdown.push(
+      '```mermaid',
+      'graph'
+    );
+
+    const externalCalls = new Set();
+    const checkForExternalCalls = (calls) => {
+      for (const name of Object.keys(calls)) {
+        const exportedFunction = exportedFunctions[name];
+        if (exportedFunction && exportedFunction.module !== moduleName && !externalCalls.has(name)) {
+          externalCalls.add(name);
+          markdown.push(
+            `  subgraph "${exportedFunction.module}"`,
+            `    ${funcId(name)};`,
+            `  end`
+          );
+        }
+      }
+    }
+    checkForExternalCalls(definition.calls);
+    for (const { calls } of definition.functions) {
+      checkForExternalCalls(calls);
+    }
+
+    markdown.push(
+      `  subgraph "${moduleName}"`
+    );
+    for (const name of Object.keys(definition.calls)) {
+      markdown.push(`    main_${definition.id}("main") --> ${funcId(name)};`);
+    }
+    for (const { name, calls } of definition.functions) {
+      for (const calledName of Object.keys(calls)) {
+        markdown.push(`    ${name} --> ${funcId(calledName)};`);
+      }
+    }
+    markdown.push(
+      '  end',
+      '```',
+      ''
+    );
+  }
+
   // for (const [name, { count }] of definition.calls.entries()) {
   //   console.log(`\t→ ${name}${count > 1 ? ' (' + count + ')' : ''}`);
   //   markdown.push(`\n→ \`${name}\`${count > 1 ? ' (' + count + ')' : ''}`);
@@ -258,7 +309,7 @@ for(const name of names) {
     for (const { name: functionName, exported, calls, externalCalls } of definition.functions) {
       if (exported) {
         markdown.push(`* \`function ${functionName}\``);
-        if (!externalCalls && name.startsWith('core/')) {
+        if (!externalCalls && moduleName.startsWith('core/')) {
           markdown.push(`⚠️ Exported but not used (and not part of API or SDK)`);
         }
       }
@@ -269,14 +320,6 @@ for(const name of names) {
 await writeFile(new URL('../engine/sources.md', import.meta.url), markdown.join('\n'), 'utf8')
 
 process.exit(0);
-
-const funcId = (name) => {
-  const exportedFunction = exportedFunctions[name];
-  if (exportedFunction) {
-    return `export_${exportedFunction.id}("${name}")`;
-  }
-  return name;
-}
 
 markdown.push(
   '## Grap',
