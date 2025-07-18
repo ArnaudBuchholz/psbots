@@ -35,8 +35,8 @@ graph
 
 ```mermaid
 graph
-  subgraph "<a href="#sdkassertts">sdk/assert.ts</a>"
-    assert;
+  subgraph "sdk/assert.ts"
+    assert("📦&nbsp;assert");
   end
   subgraph "api/parser.ts"
     parseNumber --> assert;
@@ -53,14 +53,13 @@ graph
 
 ```mermaid
 graph
-  subgraph "<a href="#sdktoValuets">sdk/toValue.ts</a>"
-    toStringValue;
+  subgraph "sdk/toValue.ts"
+    toStringValue("📦&nbsp;toStringValue");
   end
   subgraph "api/run.ts"
     run("📦&nbsp;run");
     run --> toStringValue;
-    subgraph "📦&nbsp;RunError"
-    end
+    RunError("📦&nbsp;_class_&nbsp;RunError")
   end
 ```
 
@@ -68,31 +67,38 @@ graph
 
 ```mermaid
 graph
-  subgraph "<a href="#sdkassertts">sdk/assert.ts</a>"
-    assert;
+  subgraph "sdk/assert.ts"
+    assert("📦&nbsp;assert");
   end
-  subgraph "<a href="#sdkvaluesOfts">sdk/valuesOf.ts</a>"
-    valuesOf;
+  subgraph "sdk/valuesOf.ts"
+    valuesOf("📦&nbsp;valuesOf");
   end
   subgraph "core/MemoryTracker.ts"
     addMemorySize("📦&nbsp;addMemorySize");
     memorySizeToBytes("📦&nbsp;memorySizeToBytes");
-    subgraph "📦&nbsp;MemoryTracker"
+    MemoryTracker("📦&nbsp;_class_&nbsp;MemoryTracker")
+    MemoryTracker --- isAvailable
     isAvailable --> assert;
     isAvailable --> memorySizeToBytes;
+    MemoryTracker --- allocate
     allocate --> assert;
+    MemoryTracker --- register
     register --> assert;
+    MemoryTracker --- addStringRef
     addStringRef --> stringSizer;
     addStringRef --> memorySizeToBytes;
+    MemoryTracker --- releaseString
     releaseString --> assert;
     releaseString --> stringSizer;
     releaseString --> memorySizeToBytes;
+    MemoryTracker --- snapshot
     snapshot --> stringSizer;
+    MemoryTracker --- addValueRef
     addValueRef --> valuesOf;
     addValueRef --> assert;
+    MemoryTracker --- releaseValue
     releaseValue --> valuesOf;
     releaseValue --> assert;
-    end
   end
 ```
 
@@ -101,21 +107,26 @@ graph
 
 ```mermaid
 graph
-  subgraph "<a href="#sdkassertts">sdk/assert.ts</a>"
-    assert;
+  subgraph "sdk/assert.ts"
+    assert("📦&nbsp;assert");
   end
-  subgraph "<a href="#coreMemoryTrackerts">core/MemoryTracker.ts</a>"
-    addMemorySize;
+  subgraph "core/MemoryTracker.ts"
+    addMemorySize("📦&nbsp;addMemorySize");
   end
   subgraph "core/objects/AbstractValueContainer.ts"
-    subgraph "📦&nbsp;AbstractValueContainer"
+    AbstractValueContainer("📦&nbsp;_class_&nbsp;AbstractValueContainer")
+    AbstractValueContainer --- toValue
     toValue --> assert;
+    AbstractValueContainer --- constructor
     constructor --> assert;
+    AbstractValueContainer --- createInstance
     createInstance --> assert;
+    AbstractValueContainer --- getSize
     getSize --> addMemorySize;
+    AbstractValueContainer --- reserve
     reserve --> assert;
+    AbstractValueContainer --- swap
     swap --> assert;
-    end
   end
 ```
 
@@ -123,19 +134,22 @@ graph
 
 ```mermaid
 graph
-  subgraph "<a href="#sdkassertts">sdk/assert.ts</a>"
-    assert;
+  subgraph "sdk/assert.ts"
+    assert("📦&nbsp;assert");
   end
-  subgraph "<a href="#coreMemoryTrackerts">core/MemoryTracker.ts</a>"
-    addMemorySize;
+  subgraph "core/MemoryTracker.ts"
+    addMemorySize("📦&nbsp;addMemorySize");
   end
   subgraph "core/objects/dictionaries/Dictionary.ts"
-    subgraph "📦&nbsp;Dictionary"
+    Dictionary("📦&nbsp;_class_&nbsp;Dictionary")
+    Dictionary --- toValue
     toValue --> assert;
+    Dictionary --- constructor
     constructor --> assert;
+    Dictionary --- getSize
     getSize --> addMemorySize;
+    Dictionary --- def
     def --> assert;
-    end
   end
 ```
 
@@ -143,13 +157,13 @@ graph
 
 ```mermaid
 graph
-  subgraph "<a href="#sdkassertts">sdk/assert.ts</a>"
-    assert;
+  subgraph "sdk/assert.ts"
+    assert("📦&nbsp;assert");
   end
   subgraph "core/objects/dictionaries/Empty.ts"
-    subgraph "📦&nbsp;EmptyDictionary"
+    EmptyDictionary("📦&nbsp;_class_&nbsp;EmptyDictionary")
+    EmptyDictionary --- def
     def --> assert;
-    end
   end
 ```
 
@@ -158,8 +172,7 @@ graph
 ```mermaid
 graph
   subgraph "core/objects/dictionaries/System.ts"
-    subgraph "📦&nbsp;SystemDictionary"
-    end
+    SystemDictionary("📦&nbsp;_class_&nbsp;SystemDictionary")
   end
 ```
 
@@ -167,14 +180,14 @@ graph
 
 ```mermaid
 graph
-  subgraph "<a href="#sdkassertts">sdk/assert.ts</a>"
-    assert;
+  subgraph "sdk/assert.ts"
+    assert("📦&nbsp;assert");
   end
   subgraph "core/objects/ShareableObject.ts"
     getShareableObject --> assert;
-    subgraph "📦&nbsp;ShareableObject"
+    ShareableObject("📦&nbsp;_class_&nbsp;ShareableObject")
+    ShareableObject --- release
     release --> assert;
-    end
   end
 ```
 
@@ -182,20 +195,24 @@ graph
 
 ```mermaid
 graph
-  subgraph "<a href="#sdkassertts">sdk/assert.ts</a>"
-    assert;
+  subgraph "sdk/assert.ts"
+    assert("📦&nbsp;assert");
   end
-  subgraph "<a href="#coreMemoryTrackerts">core/MemoryTracker.ts</a>"
-    addMemorySize;
+  subgraph "core/MemoryTracker.ts"
+    addMemorySize("📦&nbsp;addMemorySize");
   end
   subgraph "core/objects/stacks/CallStack.ts"
-    subgraph "📦&nbsp;CallStack"
+    CallStack("📦&nbsp;_class_&nbsp;CallStack")
+    CallStack --- create
     create --> assert;
+    CallStack --- getSize
     getSize --> addMemorySize;
+    CallStack --- getIncrementSize
     getIncrementSize --> addMemorySize;
+    CallStack --- topOperatorState
     topOperatorState --> assert;
+    CallStack --- topOperatorState
     topOperatorState --> assert;
-    end
   end
 ```
 
@@ -203,16 +220,19 @@ graph
 
 ```mermaid
 graph
-  subgraph "<a href="#sdkassertts">sdk/assert.ts</a>"
-    assert;
+  subgraph "sdk/assert.ts"
+    assert("📦&nbsp;assert");
   end
   subgraph "core/objects/stacks/DictionaryStack.ts"
-    subgraph "📦&nbsp;DictionaryStack"
+    DictionaryStack("📦&nbsp;_class_&nbsp;DictionaryStack")
+    DictionaryStack --- create
     create --> assert;
+    DictionaryStack --- getDictionaryValue
     getDictionaryValue --> assert;
+    DictionaryStack --- setGlobal
     setGlobal --> assert;
+    DictionaryStack --- setUser
     setUser --> assert;
-    end
   end
 ```
 
@@ -221,8 +241,7 @@ graph
 ```mermaid
 graph
   subgraph "core/objects/stacks/ValueStack.ts"
-    subgraph "📦&nbsp;ValueStack"
-    end
+    ValueStack("📦&nbsp;_class_&nbsp;ValueStack")
   end
 ```
 
@@ -230,13 +249,13 @@ graph
 
 ```mermaid
 graph
-  subgraph "<a href="#sdkassertts">sdk/assert.ts</a>"
-    assert;
+  subgraph "sdk/assert.ts"
+    assert("📦&nbsp;assert");
   end
   subgraph "core/objects/ValueArray.ts"
-    subgraph "📦&nbsp;ValueArray"
+    ValueArray("📦&nbsp;_class_&nbsp;ValueArray")
+    ValueArray --- toValue
     toValue --> assert;
-    end
   end
 ```
 
@@ -244,11 +263,11 @@ graph
 
 ```mermaid
 graph
-  subgraph "<a href="#coreoperatorsoperatorsts">core/operators/operators.ts</a>"
-    buildFunctionOperator;
+  subgraph "core/operators/operators.ts"
+    buildFunctionOperator("📦&nbsp;buildFunctionOperator");
   end
-  subgraph "<a href="#sdkassertts">sdk/assert.ts</a>"
-    assert;
+  subgraph "sdk/assert.ts"
+    assert("📦&nbsp;assert");
   end
   subgraph "core/operators/array/aload.ts"
     main_155("main") --> buildFunctionOperator;
@@ -260,11 +279,11 @@ graph
 
 ```mermaid
 graph
-  subgraph "<a href="#coreoperatorsoperatorsts">core/operators/operators.ts</a>"
-    buildFunctionOperator;
+  subgraph "core/operators/operators.ts"
+    buildFunctionOperator("📦&nbsp;buildFunctionOperator");
   end
-  subgraph "<a href="#coreoperatorsopenClosets">core/operators/openClose.ts</a>"
-    closeToMark;
+  subgraph "core/operators/openClose.ts"
+    closeToMark("📦&nbsp;closeToMark");
   end
   subgraph "core/operators/array/closeArray.ts"
     main_157("main") --> buildFunctionOperator;
@@ -276,8 +295,8 @@ graph
 
 ```mermaid
 graph
-  subgraph "<a href="#coreoperatorsoperatorsts">core/operators/operators.ts</a>"
-    buildFunctionOperator;
+  subgraph "core/operators/operators.ts"
+    buildFunctionOperator("📦&nbsp;buildFunctionOperator");
   end
   subgraph "core/operators/array/openArray.ts"
     main_159("main") --> buildFunctionOperator;
@@ -288,8 +307,8 @@ graph
 
 ```mermaid
 graph
-  subgraph "<a href="#coreoperatorsoperatorsts">core/operators/operators.ts</a>"
-    buildFunctionOperator;
+  subgraph "core/operators/operators.ts"
+    buildFunctionOperator("📦&nbsp;buildFunctionOperator");
   end
   subgraph "core/operators/boolean/and.ts"
     main_160("main") --> buildFunctionOperator;
@@ -300,8 +319,8 @@ graph
 
 ```mermaid
 graph
-  subgraph "<a href="#coreoperatorsoperatorsts">core/operators/operators.ts</a>"
-    buildFunctionOperator;
+  subgraph "core/operators/operators.ts"
+    buildFunctionOperator("📦&nbsp;buildFunctionOperator");
   end
   subgraph "core/operators/boolean/or.ts"
     main_162("main") --> buildFunctionOperator;
@@ -312,8 +331,8 @@ graph
 
 ```mermaid
 graph
-  subgraph "<a href="#coreoperatorsoperatorsts">core/operators/operators.ts</a>"
-    buildFunctionOperator;
+  subgraph "core/operators/operators.ts"
+    buildFunctionOperator("📦&nbsp;buildFunctionOperator");
   end
   subgraph "core/operators/boolean/xor.ts"
     main_164("main") --> buildFunctionOperator;
@@ -324,17 +343,17 @@ graph
 
 ```mermaid
 graph
-  subgraph "<a href="#coreoperatorsoperatorsts">core/operators/operators.ts</a>"
-    buildFunctionOperator;
+  subgraph "core/operators/operators.ts"
+    buildFunctionOperator("📦&nbsp;buildFunctionOperator");
   end
-  subgraph "<a href="#sdkfindMarkPosts">sdk/findMarkPos.ts</a>"
-    findMarkPos;
+  subgraph "sdk/findMarkPos.ts"
+    findMarkPos("📦&nbsp;findMarkPos");
   end
-  subgraph "<a href="#sdkvaluesOfts">sdk/valuesOf.ts</a>"
-    valuesOf;
+  subgraph "sdk/valuesOf.ts"
+    valuesOf("📦&nbsp;valuesOf");
   end
-  subgraph "<a href="#coreoperatorsopenClosets">core/operators/openClose.ts</a>"
-    pushOpenClosedValueWithDebugInfo;
+  subgraph "core/operators/openClose.ts"
+    pushOpenClosedValueWithDebugInfo("📦&nbsp;pushOpenClosedValueWithDebugInfo");
   end
   subgraph "core/operators/dictionary/closeDictionary.ts"
     main_166("main") --> buildFunctionOperator;
@@ -348,11 +367,11 @@ graph
 
 ```mermaid
 graph
-  subgraph "<a href="#coreoperatorsoperatorsts">core/operators/operators.ts</a>"
-    buildFunctionOperator;
+  subgraph "core/operators/operators.ts"
+    buildFunctionOperator("📦&nbsp;buildFunctionOperator");
   end
-  subgraph "<a href="#coreoperatorsopenClosets">core/operators/openClose.ts</a>"
-    openWithMark;
+  subgraph "core/operators/openClose.ts"
+    openWithMark("📦&nbsp;openWithMark");
   end
   subgraph "core/operators/dictionary/openDictionary.ts"
     main_168("main") --> buildFunctionOperator;
@@ -364,8 +383,8 @@ graph
 
 ```mermaid
 graph
-  subgraph "<a href="#coreoperatorsoperatorsts">core/operators/operators.ts</a>"
-    buildFunctionOperator;
+  subgraph "core/operators/operators.ts"
+    buildFunctionOperator("📦&nbsp;buildFunctionOperator");
   end
   subgraph "core/operators/exceptions/dictStackUnderflow.ts"
     main_170("main") --> buildFunctionOperator;
@@ -376,8 +395,8 @@ graph
 
 ```mermaid
 graph
-  subgraph "<a href="#coreoperatorsoperatorsts">core/operators/operators.ts</a>"
-    buildFunctionOperator;
+  subgraph "core/operators/operators.ts"
+    buildFunctionOperator("📦&nbsp;buildFunctionOperator");
   end
   subgraph "core/operators/exceptions/invalidAccess.ts"
     main_172("main") --> buildFunctionOperator;
@@ -388,8 +407,8 @@ graph
 
 ```mermaid
 graph
-  subgraph "<a href="#coreoperatorsoperatorsts">core/operators/operators.ts</a>"
-    buildFunctionOperator;
+  subgraph "core/operators/operators.ts"
+    buildFunctionOperator("📦&nbsp;buildFunctionOperator");
   end
   subgraph "core/operators/exceptions/limitcheck.ts"
     main_174("main") --> buildFunctionOperator;
@@ -400,8 +419,8 @@ graph
 
 ```mermaid
 graph
-  subgraph "<a href="#coreoperatorsoperatorsts">core/operators/operators.ts</a>"
-    buildFunctionOperator;
+  subgraph "core/operators/operators.ts"
+    buildFunctionOperator("📦&nbsp;buildFunctionOperator");
   end
   subgraph "core/operators/exceptions/rangeCheck.ts"
     main_176("main") --> buildFunctionOperator;
@@ -412,8 +431,8 @@ graph
 
 ```mermaid
 graph
-  subgraph "<a href="#coreoperatorsoperatorsts">core/operators/operators.ts</a>"
-    buildFunctionOperator;
+  subgraph "core/operators/operators.ts"
+    buildFunctionOperator("📦&nbsp;buildFunctionOperator");
   end
   subgraph "core/operators/exceptions/stackUnderflow.ts"
     main_178("main") --> buildFunctionOperator;
@@ -424,8 +443,8 @@ graph
 
 ```mermaid
 graph
-  subgraph "<a href="#coreoperatorsoperatorsts">core/operators/operators.ts</a>"
-    buildFunctionOperator;
+  subgraph "core/operators/operators.ts"
+    buildFunctionOperator("📦&nbsp;buildFunctionOperator");
   end
   subgraph "core/operators/exceptions/stop.ts"
     main_180("main") --> buildFunctionOperator;
@@ -436,8 +455,8 @@ graph
 
 ```mermaid
 graph
-  subgraph "<a href="#coreoperatorsoperatorsts">core/operators/operators.ts</a>"
-    buildFunctionOperator;
+  subgraph "core/operators/operators.ts"
+    buildFunctionOperator("📦&nbsp;buildFunctionOperator");
   end
   subgraph "core/operators/exceptions/typeCheck.ts"
     main_182("main") --> buildFunctionOperator;
@@ -448,8 +467,8 @@ graph
 
 ```mermaid
 graph
-  subgraph "<a href="#coreoperatorsoperatorsts">core/operators/operators.ts</a>"
-    buildFunctionOperator;
+  subgraph "core/operators/operators.ts"
+    buildFunctionOperator("📦&nbsp;buildFunctionOperator");
   end
   subgraph "core/operators/exceptions/undefined.ts"
     main_184("main") --> buildFunctionOperator;
@@ -460,8 +479,8 @@ graph
 
 ```mermaid
 graph
-  subgraph "<a href="#coreoperatorsoperatorsts">core/operators/operators.ts</a>"
-    buildFunctionOperator;
+  subgraph "core/operators/operators.ts"
+    buildFunctionOperator("📦&nbsp;buildFunctionOperator");
   end
   subgraph "core/operators/exceptions/undefinedResult.ts"
     main_186("main") --> buildFunctionOperator;
@@ -472,8 +491,8 @@ graph
 
 ```mermaid
 graph
-  subgraph "<a href="#coreoperatorsoperatorsts">core/operators/operators.ts</a>"
-    buildFunctionOperator;
+  subgraph "core/operators/operators.ts"
+    buildFunctionOperator("📦&nbsp;buildFunctionOperator");
   end
   subgraph "core/operators/exceptions/unmatchedMark.ts"
     main_188("main") --> buildFunctionOperator;
@@ -484,8 +503,8 @@ graph
 
 ```mermaid
 graph
-  subgraph "<a href="#coreoperatorsoperatorsts">core/operators/operators.ts</a>"
-    buildFunctionOperator;
+  subgraph "core/operators/operators.ts"
+    buildFunctionOperator("📦&nbsp;buildFunctionOperator");
   end
   subgraph "core/operators/exceptions/vmOverflow.ts"
     main_190("main") --> buildFunctionOperator;
@@ -496,11 +515,11 @@ graph
 
 ```mermaid
 graph
-  subgraph "<a href="#coreoperatorsoperatorsts">core/operators/operators.ts</a>"
-    buildFunctionOperator;
+  subgraph "core/operators/operators.ts"
+    buildFunctionOperator("📦&nbsp;buildFunctionOperator");
   end
-  subgraph "<a href="#coreoperatorsopenClosets">core/operators/openClose.ts</a>"
-    closeToMark;
+  subgraph "core/operators/openClose.ts"
+    closeToMark("📦&nbsp;closeToMark");
   end
   subgraph "core/operators/flow/closeBlock.ts"
     main_192("main") --> buildFunctionOperator;
@@ -512,14 +531,14 @@ graph
 
 ```mermaid
 graph
-  subgraph "<a href="#coreoperatorsoperatorsts">core/operators/operators.ts</a>"
-    buildFunctionOperator;
+  subgraph "core/operators/operators.ts"
+    buildFunctionOperator("📦&nbsp;buildFunctionOperator");
   end
-  subgraph "<a href="#sdkassertts">sdk/assert.ts</a>"
-    assert;
+  subgraph "sdk/assert.ts"
+    assert("📦&nbsp;assert");
   end
-  subgraph "<a href="#sdktoValuets">sdk/toValue.ts</a>"
-    toStringValue;
+  subgraph "sdk/toValue.ts"
+    toStringValue("📦&nbsp;toStringValue");
   end
   subgraph "core/operators/flow/finally.ts"
     main_194("main") --> buildFunctionOperator;
@@ -538,11 +557,11 @@ graph
 
 ```mermaid
 graph
-  subgraph "<a href="#coreoperatorsoperatorsts">core/operators/operators.ts</a>"
-    buildFunctionOperator;
+  subgraph "core/operators/operators.ts"
+    buildFunctionOperator("📦&nbsp;buildFunctionOperator");
   end
-  subgraph "<a href="#sdkassertts">sdk/assert.ts</a>"
-    assert;
+  subgraph "sdk/assert.ts"
+    assert("📦&nbsp;assert");
   end
   subgraph "core/operators/flow/gc.ts"
     main_199("main") --> buildFunctionOperator;
@@ -554,8 +573,8 @@ graph
 
 ```mermaid
 graph
-  subgraph "<a href="#coreoperatorsoperatorsts">core/operators/operators.ts</a>"
-    buildFunctionOperator;
+  subgraph "core/operators/operators.ts"
+    buildFunctionOperator("📦&nbsp;buildFunctionOperator");
   end
   subgraph "core/operators/flow/if.ts"
     main_201("main") --> buildFunctionOperator;
@@ -566,8 +585,8 @@ graph
 
 ```mermaid
 graph
-  subgraph "<a href="#coreoperatorsoperatorsts">core/operators/operators.ts</a>"
-    buildFunctionOperator;
+  subgraph "core/operators/operators.ts"
+    buildFunctionOperator("📦&nbsp;buildFunctionOperator");
   end
   subgraph "core/operators/flow/ifelse.ts"
     main_203("main") --> buildFunctionOperator;
@@ -578,11 +597,11 @@ graph
 
 ```mermaid
 graph
-  subgraph "<a href="#coreoperatorsoperatorsts">core/operators/operators.ts</a>"
-    buildFunctionOperator;
+  subgraph "core/operators/operators.ts"
+    buildFunctionOperator("📦&nbsp;buildFunctionOperator");
   end
-  subgraph "<a href="#sdkassertts">sdk/assert.ts</a>"
-    assert;
+  subgraph "sdk/assert.ts"
+    assert("📦&nbsp;assert");
   end
   subgraph "core/operators/flow/loop.ts"
     main_205("main") --> buildFunctionOperator;
@@ -594,11 +613,11 @@ graph
 
 ```mermaid
 graph
-  subgraph "<a href="#coreoperatorsoperatorsts">core/operators/operators.ts</a>"
-    buildFunctionOperator;
+  subgraph "core/operators/operators.ts"
+    buildFunctionOperator("📦&nbsp;buildFunctionOperator");
   end
-  subgraph "<a href="#coreoperatorsopenClosets">core/operators/openClose.ts</a>"
-    openWithMark;
+  subgraph "core/operators/openClose.ts"
+    openWithMark("📦&nbsp;openWithMark");
   end
   subgraph "core/operators/flow/openBlock.ts"
     main_207("main") --> buildFunctionOperator;
@@ -610,8 +629,8 @@ graph
 
 ```mermaid
 graph
-  subgraph "<a href="#coreoperatorsoperatorsts">core/operators/operators.ts</a>"
-    buildFunctionOperator;
+  subgraph "core/operators/operators.ts"
+    buildFunctionOperator("📦&nbsp;buildFunctionOperator");
   end
   subgraph "core/operators/flow/repeat.ts"
     main_209("main") --> buildFunctionOperator;
@@ -624,11 +643,11 @@ graph
 
 ```mermaid
 graph
-  subgraph "<a href="#coreoperatorsoperatorsts">core/operators/operators.ts</a>"
-    buildFunctionOperator;
+  subgraph "core/operators/operators.ts"
+    buildFunctionOperator("📦&nbsp;buildFunctionOperator");
   end
-  subgraph "<a href="#sdkassertts">sdk/assert.ts</a>"
-    assert;
+  subgraph "sdk/assert.ts"
+    assert("📦&nbsp;assert");
   end
   subgraph "core/operators/flow/stopped.ts"
     main_213("main") --> buildFunctionOperator;
@@ -640,11 +659,11 @@ graph
 
 ```mermaid
 graph
-  subgraph "<a href="#coreoperatorsoperatorsts">core/operators/operators.ts</a>"
-    buildFunctionOperator;
+  subgraph "core/operators/operators.ts"
+    buildFunctionOperator("📦&nbsp;buildFunctionOperator");
   end
-  subgraph "<a href="#sdktoValuets">sdk/toValue.ts</a>"
-    toIntegerValue;
+  subgraph "sdk/toValue.ts"
+    toIntegerValue("📦&nbsp;toIntegerValue");
   end
   subgraph "core/operators/integer/abs.ts"
     main_215("main") --> buildFunctionOperator;
@@ -656,11 +675,11 @@ graph
 
 ```mermaid
 graph
-  subgraph "<a href="#coreoperatorsoperatorsts">core/operators/operators.ts</a>"
-    buildFunctionOperator;
+  subgraph "core/operators/operators.ts"
+    buildFunctionOperator("📦&nbsp;buildFunctionOperator");
   end
-  subgraph "<a href="#sdktoValuets">sdk/toValue.ts</a>"
-    toIntegerValue;
+  subgraph "sdk/toValue.ts"
+    toIntegerValue("📦&nbsp;toIntegerValue");
   end
   subgraph "core/operators/integer/add.ts"
     main_217("main") --> buildFunctionOperator;
@@ -672,11 +691,11 @@ graph
 
 ```mermaid
 graph
-  subgraph "<a href="#coreoperatorsoperatorsts">core/operators/operators.ts</a>"
-    buildFunctionOperator;
+  subgraph "core/operators/operators.ts"
+    buildFunctionOperator("📦&nbsp;buildFunctionOperator");
   end
-  subgraph "<a href="#sdktoValuets">sdk/toValue.ts</a>"
-    toIntegerValue;
+  subgraph "sdk/toValue.ts"
+    toIntegerValue("📦&nbsp;toIntegerValue");
   end
   subgraph "core/operators/integer/div.ts"
     main_219("main") --> buildFunctionOperator;
@@ -688,8 +707,8 @@ graph
 
 ```mermaid
 graph
-  subgraph "<a href="#coreoperatorsoperatorsts">core/operators/operators.ts</a>"
-    buildFunctionOperator;
+  subgraph "core/operators/operators.ts"
+    buildFunctionOperator("📦&nbsp;buildFunctionOperator");
   end
   subgraph "core/operators/integer/gt.ts"
     main_221("main") --> buildFunctionOperator;
@@ -700,8 +719,8 @@ graph
 
 ```mermaid
 graph
-  subgraph "<a href="#coreoperatorsoperatorsts">core/operators/operators.ts</a>"
-    buildFunctionOperator;
+  subgraph "core/operators/operators.ts"
+    buildFunctionOperator("📦&nbsp;buildFunctionOperator");
   end
   subgraph "core/operators/integer/gte.ts"
     main_223("main") --> buildFunctionOperator;
@@ -712,8 +731,8 @@ graph
 
 ```mermaid
 graph
-  subgraph "<a href="#coreoperatorsoperatorsts">core/operators/operators.ts</a>"
-    buildFunctionOperator;
+  subgraph "core/operators/operators.ts"
+    buildFunctionOperator("📦&nbsp;buildFunctionOperator");
   end
   subgraph "core/operators/integer/lt.ts"
     main_225("main") --> buildFunctionOperator;
@@ -724,8 +743,8 @@ graph
 
 ```mermaid
 graph
-  subgraph "<a href="#coreoperatorsoperatorsts">core/operators/operators.ts</a>"
-    buildFunctionOperator;
+  subgraph "core/operators/operators.ts"
+    buildFunctionOperator("📦&nbsp;buildFunctionOperator");
   end
   subgraph "core/operators/integer/lte.ts"
     main_227("main") --> buildFunctionOperator;
@@ -736,11 +755,11 @@ graph
 
 ```mermaid
 graph
-  subgraph "<a href="#coreoperatorsoperatorsts">core/operators/operators.ts</a>"
-    buildFunctionOperator;
+  subgraph "core/operators/operators.ts"
+    buildFunctionOperator("📦&nbsp;buildFunctionOperator");
   end
-  subgraph "<a href="#sdktoValuets">sdk/toValue.ts</a>"
-    toIntegerValue;
+  subgraph "sdk/toValue.ts"
+    toIntegerValue("📦&nbsp;toIntegerValue");
   end
   subgraph "core/operators/integer/mul.ts"
     main_229("main") --> buildFunctionOperator;
@@ -752,11 +771,11 @@ graph
 
 ```mermaid
 graph
-  subgraph "<a href="#coreoperatorsoperatorsts">core/operators/operators.ts</a>"
-    buildFunctionOperator;
+  subgraph "core/operators/operators.ts"
+    buildFunctionOperator("📦&nbsp;buildFunctionOperator");
   end
-  subgraph "<a href="#sdktoValuets">sdk/toValue.ts</a>"
-    toIntegerValue;
+  subgraph "sdk/toValue.ts"
+    toIntegerValue("📦&nbsp;toIntegerValue");
   end
   subgraph "core/operators/integer/sub.ts"
     main_231("main") --> buildFunctionOperator;
@@ -768,14 +787,14 @@ graph
 
 ```mermaid
 graph
-  subgraph "<a href="#sdkfindMarkPosts">sdk/findMarkPos.ts</a>"
-    findMarkPos;
+  subgraph "sdk/findMarkPos.ts"
+    findMarkPos("📦&nbsp;findMarkPos");
   end
-  subgraph "<a href="#sdktoValuets">sdk/toValue.ts</a>"
-    toIntegerValue;
+  subgraph "sdk/toValue.ts"
+    toIntegerValue("📦&nbsp;toIntegerValue");
   end
-  subgraph "<a href="#sdkassertts">sdk/assert.ts</a>"
-    assert;
+  subgraph "sdk/assert.ts"
+    assert("📦&nbsp;assert");
   end
   subgraph "core/operators/openClose.ts"
     openWithMark("📦&nbsp;openWithMark");
@@ -792,8 +811,8 @@ graph
 
 ```mermaid
 graph
-  subgraph "<a href="#sdkassertts">sdk/assert.ts</a>"
-    assert;
+  subgraph "sdk/assert.ts"
+    assert("📦&nbsp;assert");
   end
   subgraph "core/operators/operators.ts"
     buildFunctionOperator("📦&nbsp;buildFunctionOperator");
@@ -806,14 +825,14 @@ graph
 
 ```mermaid
 graph
-  subgraph "<a href="#coreoperatorsoperatorsts">core/operators/operators.ts</a>"
-    buildFunctionOperator;
+  subgraph "core/operators/operators.ts"
+    buildFunctionOperator("📦&nbsp;buildFunctionOperator");
   end
-  subgraph "<a href="#sdktoValuets">sdk/toValue.ts</a>"
-    toIntegerValue;
+  subgraph "sdk/toValue.ts"
+    toIntegerValue("📦&nbsp;toIntegerValue");
   end
-  subgraph "<a href="#sdkassertts">sdk/assert.ts</a>"
-    assert;
+  subgraph "sdk/assert.ts"
+    assert("📦&nbsp;assert");
   end
   subgraph "core/operators/stacks/call/countexecstack.ts"
     main_240("main") --> buildFunctionOperator;
@@ -826,8 +845,8 @@ graph
 
 ```mermaid
 graph
-  subgraph "<a href="#coreoperatorsoperatorsts">core/operators/operators.ts</a>"
-    buildFunctionOperator;
+  subgraph "core/operators/operators.ts"
+    buildFunctionOperator("📦&nbsp;buildFunctionOperator");
   end
   subgraph "core/operators/stacks/dictionary/begin.ts"
     main_242("main") --> buildFunctionOperator;
@@ -838,8 +857,8 @@ graph
 
 ```mermaid
 graph
-  subgraph "<a href="#sdkassertts">sdk/assert.ts</a>"
-    assert;
+  subgraph "sdk/assert.ts"
+    assert("📦&nbsp;assert");
   end
   subgraph "core/operators/stacks/dictionary/bind.ts"
     bindValue --> bindName;
@@ -854,14 +873,14 @@ graph
 
 ```mermaid
 graph
-  subgraph "<a href="#coreoperatorsoperatorsts">core/operators/operators.ts</a>"
-    buildFunctionOperator;
+  subgraph "core/operators/operators.ts"
+    buildFunctionOperator("📦&nbsp;buildFunctionOperator");
   end
-  subgraph "<a href="#sdktoValuets">sdk/toValue.ts</a>"
-    toIntegerValue;
+  subgraph "sdk/toValue.ts"
+    toIntegerValue("📦&nbsp;toIntegerValue");
   end
-  subgraph "<a href="#sdkassertts">sdk/assert.ts</a>"
-    assert;
+  subgraph "sdk/assert.ts"
+    assert("📦&nbsp;assert");
   end
   subgraph "core/operators/stacks/dictionary/countdictstack.ts"
     main_249("main") --> buildFunctionOperator;
@@ -874,8 +893,8 @@ graph
 
 ```mermaid
 graph
-  subgraph "<a href="#coreoperatorsoperatorsts">core/operators/operators.ts</a>"
-    buildFunctionOperator;
+  subgraph "core/operators/operators.ts"
+    buildFunctionOperator("📦&nbsp;buildFunctionOperator");
   end
   subgraph "core/operators/stacks/dictionary/currentdict.ts"
     main_251("main") --> buildFunctionOperator;
@@ -886,8 +905,8 @@ graph
 
 ```mermaid
 graph
-  subgraph "<a href="#coreoperatorsoperatorsts">core/operators/operators.ts</a>"
-    buildFunctionOperator;
+  subgraph "core/operators/operators.ts"
+    buildFunctionOperator("📦&nbsp;buildFunctionOperator");
   end
   subgraph "core/operators/stacks/dictionary/def.ts"
     main_253("main") --> buildFunctionOperator;
@@ -898,8 +917,8 @@ graph
 
 ```mermaid
 graph
-  subgraph "<a href="#coreoperatorsoperatorsts">core/operators/operators.ts</a>"
-    buildFunctionOperator;
+  subgraph "core/operators/operators.ts"
+    buildFunctionOperator("📦&nbsp;buildFunctionOperator");
   end
   subgraph "core/operators/stacks/dictionary/end.ts"
     main_255("main") --> buildFunctionOperator;
@@ -910,8 +929,8 @@ graph
 
 ```mermaid
 graph
-  subgraph "<a href="#coreoperatorsoperatorsts">core/operators/operators.ts</a>"
-    buildFunctionOperator;
+  subgraph "core/operators/operators.ts"
+    buildFunctionOperator("📦&nbsp;buildFunctionOperator");
   end
   subgraph "core/operators/stacks/dictionary/globaldict.ts"
     main_257("main") --> buildFunctionOperator;
@@ -922,8 +941,8 @@ graph
 
 ```mermaid
 graph
-  subgraph "<a href="#coreoperatorsoperatorsts">core/operators/operators.ts</a>"
-    buildFunctionOperator;
+  subgraph "core/operators/operators.ts"
+    buildFunctionOperator("📦&nbsp;buildFunctionOperator");
   end
   subgraph "core/operators/stacks/dictionary/hostdict.ts"
     main_259("main") --> buildFunctionOperator;
@@ -934,8 +953,8 @@ graph
 
 ```mermaid
 graph
-  subgraph "<a href="#coreoperatorsoperatorsts">core/operators/operators.ts</a>"
-    buildFunctionOperator;
+  subgraph "core/operators/operators.ts"
+    buildFunctionOperator("📦&nbsp;buildFunctionOperator");
   end
   subgraph "core/operators/stacks/dictionary/systemdict.ts"
     main_261("main") --> buildFunctionOperator;
@@ -946,8 +965,8 @@ graph
 
 ```mermaid
 graph
-  subgraph "<a href="#coreoperatorsoperatorsts">core/operators/operators.ts</a>"
-    buildFunctionOperator;
+  subgraph "core/operators/operators.ts"
+    buildFunctionOperator("📦&nbsp;buildFunctionOperator");
   end
   subgraph "core/operators/stacks/dictionary/userdict.ts"
     main_263("main") --> buildFunctionOperator;
@@ -958,8 +977,8 @@ graph
 
 ```mermaid
 graph
-  subgraph "<a href="#coreoperatorsoperatorsts">core/operators/operators.ts</a>"
-    buildFunctionOperator;
+  subgraph "core/operators/operators.ts"
+    buildFunctionOperator("📦&nbsp;buildFunctionOperator");
   end
   subgraph "core/operators/stacks/operand/clear.ts"
     main_265("main") --> buildFunctionOperator;
@@ -970,11 +989,11 @@ graph
 
 ```mermaid
 graph
-  subgraph "<a href="#coreoperatorsoperatorsts">core/operators/operators.ts</a>"
-    buildFunctionOperator;
+  subgraph "core/operators/operators.ts"
+    buildFunctionOperator("📦&nbsp;buildFunctionOperator");
   end
-  subgraph "<a href="#sdkfindMarkPosts">sdk/findMarkPos.ts</a>"
-    findMarkPos;
+  subgraph "sdk/findMarkPos.ts"
+    findMarkPos("📦&nbsp;findMarkPos");
   end
   subgraph "core/operators/stacks/operand/cleartomark.ts"
     main_267("main") --> buildFunctionOperator;
@@ -986,14 +1005,14 @@ graph
 
 ```mermaid
 graph
-  subgraph "<a href="#coreoperatorsoperatorsts">core/operators/operators.ts</a>"
-    buildFunctionOperator;
+  subgraph "core/operators/operators.ts"
+    buildFunctionOperator("📦&nbsp;buildFunctionOperator");
   end
-  subgraph "<a href="#sdktoValuets">sdk/toValue.ts</a>"
-    toIntegerValue;
+  subgraph "sdk/toValue.ts"
+    toIntegerValue("📦&nbsp;toIntegerValue");
   end
-  subgraph "<a href="#sdkassertts">sdk/assert.ts</a>"
-    assert;
+  subgraph "sdk/assert.ts"
+    assert("📦&nbsp;assert");
   end
   subgraph "core/operators/stacks/operand/count.ts"
     main_269("main") --> buildFunctionOperator;
@@ -1006,17 +1025,17 @@ graph
 
 ```mermaid
 graph
-  subgraph "<a href="#coreoperatorsoperatorsts">core/operators/operators.ts</a>"
-    buildFunctionOperator;
+  subgraph "core/operators/operators.ts"
+    buildFunctionOperator("📦&nbsp;buildFunctionOperator");
   end
-  subgraph "<a href="#sdkfindMarkPosts">sdk/findMarkPos.ts</a>"
-    findMarkPos;
+  subgraph "sdk/findMarkPos.ts"
+    findMarkPos("📦&nbsp;findMarkPos");
   end
-  subgraph "<a href="#sdktoValuets">sdk/toValue.ts</a>"
-    toIntegerValue;
+  subgraph "sdk/toValue.ts"
+    toIntegerValue("📦&nbsp;toIntegerValue");
   end
-  subgraph "<a href="#sdkassertts">sdk/assert.ts</a>"
-    assert;
+  subgraph "sdk/assert.ts"
+    assert("📦&nbsp;assert");
   end
   subgraph "core/operators/stacks/operand/counttomark.ts"
     main_271("main") --> buildFunctionOperator;
@@ -1030,8 +1049,8 @@ graph
 
 ```mermaid
 graph
-  subgraph "<a href="#coreoperatorsoperatorsts">core/operators/operators.ts</a>"
-    buildFunctionOperator;
+  subgraph "core/operators/operators.ts"
+    buildFunctionOperator("📦&nbsp;buildFunctionOperator");
   end
   subgraph "core/operators/stacks/operand/dup.ts"
     main_273("main") --> buildFunctionOperator;
@@ -1042,8 +1061,8 @@ graph
 
 ```mermaid
 graph
-  subgraph "<a href="#coreoperatorsoperatorsts">core/operators/operators.ts</a>"
-    buildFunctionOperator;
+  subgraph "core/operators/operators.ts"
+    buildFunctionOperator("📦&nbsp;buildFunctionOperator");
   end
   subgraph "core/operators/stacks/operand/exch.ts"
     main_275("main") --> buildFunctionOperator;
@@ -1054,8 +1073,8 @@ graph
 
 ```mermaid
 graph
-  subgraph "<a href="#coreoperatorsoperatorsts">core/operators/operators.ts</a>"
-    buildFunctionOperator;
+  subgraph "core/operators/operators.ts"
+    buildFunctionOperator("📦&nbsp;buildFunctionOperator");
   end
   subgraph "core/operators/stacks/operand/indexOp.ts"
     main_277("main") --> buildFunctionOperator;
@@ -1068,14 +1087,14 @@ graph
 
 ```mermaid
 graph
-  subgraph "<a href="#coreoperatorsoperatorsts">core/operators/operators.ts</a>"
-    buildFunctionOperator;
+  subgraph "core/operators/operators.ts"
+    buildFunctionOperator("📦&nbsp;buildFunctionOperator");
   end
-  subgraph "<a href="#sdktoValuets">sdk/toValue.ts</a>"
-    toIntegerValue;
+  subgraph "sdk/toValue.ts"
+    toIntegerValue("📦&nbsp;toIntegerValue");
   end
-  subgraph "<a href="#sdkassertts">sdk/assert.ts</a>"
-    assert;
+  subgraph "sdk/assert.ts"
+    assert("📦&nbsp;assert");
   end
   subgraph "core/operators/stacks/operand/roll.ts"
     main_281("main") --> buildFunctionOperator;
@@ -1092,11 +1111,11 @@ graph
 
 ```mermaid
 graph
-  subgraph "<a href="#coreoperatorsoperatorsts">core/operators/operators.ts</a>"
-    buildFunctionOperator;
+  subgraph "core/operators/operators.ts"
+    buildFunctionOperator("📦&nbsp;buildFunctionOperator");
   end
-  subgraph "<a href="#sdktoValuets">sdk/toValue.ts</a>"
-    toIntegerValue;
+  subgraph "sdk/toValue.ts"
+    toIntegerValue("📦&nbsp;toIntegerValue");
   end
   subgraph "core/operators/value/convert/cvi.ts"
     main_285("main") --> buildFunctionOperator;
@@ -1108,8 +1127,8 @@ graph
 
 ```mermaid
 graph
-  subgraph "<a href="#coreoperatorsoperatorsts">core/operators/operators.ts</a>"
-    buildFunctionOperator;
+  subgraph "core/operators/operators.ts"
+    buildFunctionOperator("📦&nbsp;buildFunctionOperator");
   end
   subgraph "core/operators/value/convert/cvlit.ts"
     main_287("main") --> buildFunctionOperator;
@@ -1120,14 +1139,14 @@ graph
 
 ```mermaid
 graph
-  subgraph "<a href="#coreoperatorsoperatorsts">core/operators/operators.ts</a>"
-    buildFunctionOperator;
+  subgraph "core/operators/operators.ts"
+    buildFunctionOperator("📦&nbsp;buildFunctionOperator");
   end
-  subgraph "<a href="#sdkassertts">sdk/assert.ts</a>"
-    assert;
+  subgraph "sdk/assert.ts"
+    assert("📦&nbsp;assert");
   end
-  subgraph "<a href="#sdktoValuets">sdk/toValue.ts</a>"
-    toNameValue;
+  subgraph "sdk/toValue.ts"
+    toNameValue("📦&nbsp;toNameValue");
   end
   subgraph "core/operators/value/convert/cvn.ts"
     main_289("main") --> buildFunctionOperator;
@@ -1140,11 +1159,11 @@ graph
 
 ```mermaid
 graph
-  subgraph "<a href="#coreoperatorsoperatorsts">core/operators/operators.ts</a>"
-    buildFunctionOperator;
+  subgraph "core/operators/operators.ts"
+    buildFunctionOperator("📦&nbsp;buildFunctionOperator");
   end
-  subgraph "<a href="#sdkvaluesOfts">sdk/valuesOf.ts</a>"
-    valuesOf;
+  subgraph "sdk/valuesOf.ts"
+    valuesOf("📦&nbsp;valuesOf");
   end
   subgraph "core/operators/value/eq.ts"
     main_291("main") --> buildFunctionOperator;
@@ -1156,8 +1175,8 @@ graph
 
 ```mermaid
 graph
-  subgraph "<a href="#coreoperatorsoperatorsts">core/operators/operators.ts</a>"
-    buildConstantOperator;
+  subgraph "core/operators/operators.ts"
+    buildConstantOperator("📦&nbsp;buildConstantOperator");
   end
   subgraph "core/operators/value/false.ts"
     main_293("main") --> buildConstantOperator;
@@ -1168,17 +1187,17 @@ graph
 
 ```mermaid
 graph
-  subgraph "<a href="#coreoperatorsoperatorsts">core/operators/operators.ts</a>"
-    buildFunctionOperator;
+  subgraph "core/operators/operators.ts"
+    buildFunctionOperator("📦&nbsp;buildFunctionOperator");
   end
-  subgraph "<a href="#sdkassertts">sdk/assert.ts</a>"
-    assert;
+  subgraph "sdk/assert.ts"
+    assert("📦&nbsp;assert");
   end
-  subgraph "<a href="#sdkcheckPosts">sdk/checkPos.ts</a>"
-    checkPos;
+  subgraph "sdk/checkPos.ts"
+    checkPos("📦&nbsp;checkPos");
   end
-  subgraph "<a href="#sdktoValuets">sdk/toValue.ts</a>"
-    toStringValue;
+  subgraph "sdk/toValue.ts"
+    toStringValue("📦&nbsp;toStringValue");
   end
   subgraph "core/operators/value/get.ts"
     main_294("main") --> buildFunctionOperator;
@@ -1194,14 +1213,14 @@ graph
 
 ```mermaid
 graph
-  subgraph "<a href="#coreoperatorsoperatorsts">core/operators/operators.ts</a>"
-    buildFunctionOperator;
+  subgraph "core/operators/operators.ts"
+    buildFunctionOperator("📦&nbsp;buildFunctionOperator");
   end
-  subgraph "<a href="#sdktoValuets">sdk/toValue.ts</a>"
-    toIntegerValue;
+  subgraph "sdk/toValue.ts"
+    toIntegerValue("📦&nbsp;toIntegerValue");
   end
-  subgraph "<a href="#sdkassertts">sdk/assert.ts</a>"
-    assert;
+  subgraph "sdk/assert.ts"
+    assert("📦&nbsp;assert");
   end
   subgraph "core/operators/value/length.ts"
     main_299("main") --> buildFunctionOperator;
@@ -1214,8 +1233,8 @@ graph
 
 ```mermaid
 graph
-  subgraph "<a href="#coreoperatorsoperatorsts">core/operators/operators.ts</a>"
-    buildConstantOperator;
+  subgraph "core/operators/operators.ts"
+    buildConstantOperator("📦&nbsp;buildConstantOperator");
   end
   subgraph "core/operators/value/mark.ts"
     main_304("main") --> buildConstantOperator;
@@ -1226,11 +1245,11 @@ graph
 
 ```mermaid
 graph
-  subgraph "<a href="#coreoperatorsoperatorsts">core/operators/operators.ts</a>"
-    buildFunctionOperator;
+  subgraph "core/operators/operators.ts"
+    buildFunctionOperator("📦&nbsp;buildFunctionOperator");
   end
-  subgraph "<a href="#sdkvaluesOfts">sdk/valuesOf.ts</a>"
-    valuesOf;
+  subgraph "sdk/valuesOf.ts"
+    valuesOf("📦&nbsp;valuesOf");
   end
   subgraph "core/operators/value/neq.ts"
     main_305("main") --> buildFunctionOperator;
@@ -1242,17 +1261,17 @@ graph
 
 ```mermaid
 graph
-  subgraph "<a href="#coreoperatorsoperatorsts">core/operators/operators.ts</a>"
-    buildFunctionOperator;
+  subgraph "core/operators/operators.ts"
+    buildFunctionOperator("📦&nbsp;buildFunctionOperator");
   end
-  subgraph "<a href="#sdkassertts">sdk/assert.ts</a>"
-    assert;
+  subgraph "sdk/assert.ts"
+    assert("📦&nbsp;assert");
   end
-  subgraph "<a href="#sdkcheckPosts">sdk/checkPos.ts</a>"
-    checkPos;
+  subgraph "sdk/checkPos.ts"
+    checkPos("📦&nbsp;checkPos");
   end
-  subgraph "<a href="#sdktoValuets">sdk/toValue.ts</a>"
-    toStringValue;
+  subgraph "sdk/toValue.ts"
+    toStringValue("📦&nbsp;toStringValue");
   end
   subgraph "core/operators/value/put.ts"
     main_307("main") --> buildFunctionOperator;
@@ -1268,8 +1287,8 @@ graph
 
 ```mermaid
 graph
-  subgraph "<a href="#coreoperatorsoperatorsts">core/operators/operators.ts</a>"
-    buildConstantOperator;
+  subgraph "core/operators/operators.ts"
+    buildConstantOperator("📦&nbsp;buildConstantOperator");
   end
   subgraph "core/operators/value/true.ts"
     main_312("main") --> buildConstantOperator;
@@ -1280,11 +1299,11 @@ graph
 
 ```mermaid
 graph
-  subgraph "<a href="#coreoperatorsoperatorsts">core/operators/operators.ts</a>"
-    buildFunctionOperator;
+  subgraph "core/operators/operators.ts"
+    buildFunctionOperator("📦&nbsp;buildFunctionOperator");
   end
-  subgraph "<a href="#sdktoValuets">sdk/toValue.ts</a>"
-    toNameValue;
+  subgraph "sdk/toValue.ts"
+    toNameValue("📦&nbsp;toNameValue");
   end
   subgraph "core/operators/value/type.ts"
     main_313("main") --> buildFunctionOperator;
@@ -1296,8 +1315,8 @@ graph
 
 ```mermaid
 graph
-  subgraph "<a href="#coreoperatorsoperatorsts">core/operators/operators.ts</a>"
-    buildConstantOperator;
+  subgraph "core/operators/operators.ts"
+    buildConstantOperator("📦&nbsp;buildConstantOperator");
   end
   subgraph "core/operators/value/version.ts"
     main_315("main") --> buildConstantOperator;
@@ -1308,8 +1327,8 @@ graph
 
 ```mermaid
 graph
-  subgraph "<a href="#coreoperatorsoperatorsts">core/operators/operators.ts</a>"
-    buildFunctionOperator;
+  subgraph "core/operators/operators.ts"
+    buildFunctionOperator("📦&nbsp;buildFunctionOperator");
   end
   subgraph "core/operators/value/wcheck.ts"
     main_316("main") --> buildFunctionOperator;
@@ -1320,8 +1339,8 @@ graph
 
 ```mermaid
 graph
-  subgraph "<a href="#coreoperatorsoperatorsts">core/operators/operators.ts</a>"
-    buildFunctionOperator;
+  subgraph "core/operators/operators.ts"
+    buildFunctionOperator("📦&nbsp;buildFunctionOperator");
   end
   subgraph "core/operators/value/xcheck.ts"
     main_318("main") --> buildFunctionOperator;
@@ -1350,8 +1369,8 @@ graph
 
 ```mermaid
 graph
-  subgraph "<a href="#sdkassertts">sdk/assert.ts</a>"
-    assert;
+  subgraph "sdk/assert.ts"
+    assert("📦&nbsp;assert");
   end
   subgraph "core/state/operator.ts"
     operatorPop("📦&nbsp;operatorPop");
@@ -1368,11 +1387,11 @@ graph
 
 ```mermaid
 graph
-  subgraph "<a href="#apiparserts">api/parser.ts</a>"
-    parse;
+  subgraph "api/parser.ts"
+    parse("📦&nbsp;parse");
   end
-  subgraph "<a href="#sdkvaluesOfts">sdk/valuesOf.ts</a>"
-    valuesOf;
+  subgraph "sdk/valuesOf.ts"
+    valuesOf("📦&nbsp;valuesOf");
   end
   subgraph "core/state/parse.ts"
     getToken --> parse;
@@ -1387,36 +1406,39 @@ graph
 
 ```mermaid
 graph
-  subgraph "<a href="#sdkassertts">sdk/assert.ts</a>"
-    assert;
+  subgraph "sdk/assert.ts"
+    assert("📦&nbsp;assert");
   end
-  subgraph "<a href="#corestateoperatorts">core/state/operator.ts</a>"
-    operatorPop;
+  subgraph "core/state/operator.ts"
+    operatorPop("📦&nbsp;operatorPop");
   end
-  subgraph "<a href="#corestateoperatorts">core/state/operator.ts</a>"
-    operatorCycle;
+  subgraph "core/state/operator.ts"
+    operatorCycle("📦&nbsp;operatorCycle");
   end
-  subgraph "<a href="#corestatecallts">core/state/call.ts</a>"
-    callCycle;
+  subgraph "core/state/call.ts"
+    callCycle("📦&nbsp;callCycle");
   end
-  subgraph "<a href="#corestateblockts">core/state/block.ts</a>"
-    blockCycle;
+  subgraph "core/state/block.ts"
+    blockCycle("📦&nbsp;blockCycle");
   end
-  subgraph "<a href="#corestateparsets">core/state/parse.ts</a>"
-    parseCycle;
+  subgraph "core/state/parse.ts"
+    parseCycle("📦&nbsp;parseCycle");
   end
   subgraph "core/state/State.ts"
-    subgraph "📦&nbsp;State"
+    State("📦&nbsp;_class_&nbsp;State")
+    State --- _checkIfDestroyed
     _checkIfDestroyed --> assert;
+    State --- destroy
     destroy --> assert;
+    State --- raiseException
     raiseException --> assert;
+    State --- cycle
     cycle --> operatorPop;
     cycle --> operatorCycle;
     cycle --> callCycle;
     cycle --> blockCycle;
     cycle --> parseCycle;
     cycle --> assert;
-    end
   end
 ```
 
@@ -1426,8 +1448,7 @@ graph
 graph
   subgraph "sdk/assert.ts"
     assert("📦&nbsp;assert");
-    subgraph "AssertionFailed"
-    end
+    AssertionFailed("_class_&nbsp;AssertionFailed")
   end
 ```
 
@@ -1453,8 +1474,8 @@ graph
 
 ```mermaid
 graph
-  subgraph "<a href="#sdkchecksisObjectts">sdk/checks/isObject.ts</a>"
-    isObject;
+  subgraph "sdk/checks/isObject.ts"
+    isObject("📦&nbsp;isObject");
   end
   subgraph "sdk/checks/isValue.ts"
     is --> isObject;
@@ -1490,8 +1511,8 @@ graph
 
 ```mermaid
 graph
-  subgraph "<a href="#apiparserts">api/parser.ts</a>"
-    parse;
+  subgraph "api/parser.ts"
+    parse("📦&nbsp;parse");
   end
   subgraph "sdk/toString.ts"
     fitToMaxWidth --> minimizeAt;

@@ -88,6 +88,7 @@
       "classes": [
         {
           "name": "RunError",
+          "extends": "Error",
           "exported": true,
           "methods": [
             {
@@ -252,6 +253,7 @@
         "classes": [
           {
             "name": "AbstractValueContainer",
+            "extends": "ShareableObject",
             "exported": true,
             "methods": [
               {
@@ -354,6 +356,7 @@
           "classes": [
             {
               "name": "Dictionary",
+              "extends": "ShareableObject",
               "exported": true,
               "methods": [
                 {
@@ -501,6 +504,7 @@
           "classes": [
             {
               "name": "CallStack",
+              "extends": "ValueStack",
               "exported": true,
               "methods": [
                 {
@@ -568,6 +572,7 @@
           "classes": [
             {
               "name": "DictionaryStack",
+              "extends": "ValueStack",
               "exported": true,
               "methods": [
                 {
@@ -640,6 +645,7 @@
           "classes": [
             {
               "name": "ValueStack",
+              "extends": "AbstractValueContainer",
               "exported": true,
               "methods": [
                 {
@@ -664,6 +670,7 @@
         "classes": [
           {
             "name": "ValueArray",
+            "extends": "AbstractValueContainer",
             "exported": true,
             "methods": [
               {
@@ -1937,6 +1944,7 @@
       "classes": [
         {
           "name": "AssertionFailed",
+          "extends": "Error",
           "exported": false,
           "methods": [
             {

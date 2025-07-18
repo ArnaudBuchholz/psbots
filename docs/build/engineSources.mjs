@@ -76,6 +76,7 @@ const source = async (path) => {
       if (node.type === 'ClassDeclaration') {
         const classDefinition = {
           name: node.id.name,
+          extends: node.superClass?.name,
           exported: parent.type === 'ExportNamedDeclaration',
           methods: []
         };
@@ -209,6 +210,7 @@ await writeFile(new URL('../engine/sources.json', import.meta.url), JSON.stringi
   return value;
 }, 2), 'utf8');
 
+const exportedPrefix = '📦&nbsp;';
 const markdown = [
   '# Sources analysis',
   '',
@@ -244,8 +246,8 @@ for(const moduleName of names) {
         if (exportedFunction && exportedFunction.module !== moduleName && !externalCalls.has(name)) {
           externalCalls.add(name);
           markdown.push(
-            `  subgraph "<a href="#${exportedFunction.module.replaceAll(/[/.]/g, '')}">${exportedFunction.module}</a>"`,
-            `    ${exportedFunction.name};`,
+            `  subgraph "${exportedFunction.module}"`,
+            `    ${exportedFunction.name}("${exportedPrefix}${exportedFunction.name}");`,
             `  end`
           );
         }
@@ -269,20 +271,22 @@ for(const moduleName of names) {
     }
     for (const { name, exported, calls } of functions) {
       if (exported) {
-        markdown.push(`    ${name}("📦&nbsp;${name}");`);
+        markdown.push(`    ${name}("${exportedPrefix}${name}");`);
       }
       for (const calledName of Object.keys(calls)) {
         markdown.push(`    ${name} --> ${calledName};`);
       }
     }
     for (const { name: className, exported, methods } of classes) {
-      markdown.push(`    subgraph "${exported ? '📦&nbsp;' : ''}${className}"`);
+      markdown.push(`    ${className}("${exported ? exportedPrefix : ''}_class_&nbsp;${className}")`);
       for (const { name: methodName, calls } of methods) {
-        for (const calledName of Object.keys(calls)) {
-          markdown.push(`    ${methodName} --> ${calledName};`);
+        if (Object.keys(calls).length) {
+          markdown.push(`    ${className} --- ${methodName}`);
+          for (const calledName of Object.keys(calls)) {
+            markdown.push(`    ${methodName} --> ${calledName};`);
+          }
         }
       }
-      markdown.push('    end');
     }
     markdown.push(
       '  end',
