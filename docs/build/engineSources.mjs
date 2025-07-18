@@ -8,10 +8,6 @@ let lastId = 0;
 const sources = {};
 const exportedFunctions = {};
 
-const red = '\u001B[31m';
-const yellow = '\u001B[33m';
-const white = '\u001B[37m';
-
 const addExportedFunction = (functionDefinition) => {
   const { name, exported } = functionDefinition;
   if (!exported) {
@@ -150,10 +146,10 @@ const lookup = async (path) => {
 
 await lookup(new URL('../../engine/src/', import.meta.url), 'utf8');
 
-const names = Object.keys(sources).sort((a, b) => a.localeCompare(b));
+const moduleNames = Object.keys(sources).sort((a, b) => a.localeCompare(b));
 
-for(const name of names) {
-  const sourceDefinition = sources[name];
+for(const moduleName of moduleNames) {
+  const sourceDefinition = sources[moduleName];
   const increaseMember = (object, member, count) => {
     if (member in object) {
       object[member] += count;
@@ -188,13 +184,13 @@ for(const name of names) {
 
 await writeFile(new URL('../engine/exported.json', import.meta.url), JSON.stringify(exportedFunctions, undefined, 2), 'utf8');
 const structuredSources = {};
-for (const name of names) {
-  const names = name.split('/');
+for (const moduleName of moduleNames) {
+  const names = moduleName.split('/');
   let placeholder = structuredSources;
   for (const part of names) {
     placeholder = (placeholder[part] ??= {});
   }
-  Object.assign(placeholder, sources[name]);
+  Object.assign(placeholder, sources[moduleName]);
   delete placeholder.name;
 }
 await writeFile(new URL('../engine/sources.json', import.meta.url), JSON.stringify(structuredSources, (key, value) => {
@@ -226,7 +222,7 @@ const funcId = (name) => {
   return name;
 };
 
-for(const moduleName of names) {
+for(const moduleName of moduleNames) {
   const definition = sources[moduleName];
   const { calls, classes, functions } = definition;
   if (Object.keys(calls).length === 0 && classes.length === 0 && functions.length === 0) {
@@ -258,6 +254,19 @@ for(const moduleName of names) {
       checkForExternalCalls(calls);
     }
     for (const classDefinition of classes) {
+      if (classDefinition.extends) {
+        const classExtends = classDefinition.extends;
+        for (const extendsModuleName of moduleNames) {
+          const extendsModule = sources[extendsModuleName];
+          if (extendsModule && extendsModule.classes.some(({ name }) => name === classExtends)) {
+            markdown.push(
+              `  subgraph "${extendsModuleName}"`,
+              `    ${classExtends}("${exportedPrefix}_class_&nbsp;${classExtends}");`,
+              `  end`
+            );
+          }
+        }
+      }
       for (const { calls } of classDefinition.methods) {
         checkForExternalCalls(calls);
       }
@@ -269,21 +278,28 @@ for(const moduleName of names) {
     for (const name of Object.keys(calls)) {
       markdown.push(`    main_${definition.id}("main") --> ${name};`);
     }
-    for (const { name, exported, calls } of functions) {
+    for (const { name, id, exported, calls } of functions) {
       if (exported) {
         markdown.push(`    ${name}("${exportedPrefix}${name}");`);
       }
       for (const calledName of Object.keys(calls)) {
-        markdown.push(`    ${name} --> ${calledName};`);
+        if (name === '(anonymous arrow)') {
+          markdown.push(`    anon${id}("(anonymous function)") --> ${calledName};`);
+        } else {
+          markdown.push(`    ${name} --> ${calledName};`);
+        }
       }
     }
-    for (const { name: className, exported, methods } of classes) {
+    for (const { name: className, extends: classExtends, exported, methods } of classes) {
       markdown.push(`    ${className}("${exported ? exportedPrefix : ''}_class_&nbsp;${className}")`);
+      if (classExtends) {
+        markdown.push(`    ${className} --> ${classExtends};`);
+      }
       for (const { name: methodName, calls } of methods) {
         if (Object.keys(calls).length) {
-          markdown.push(`    ${className} --- ${methodName}`);
+          markdown.push(`    ${className} --- ${methodName === 'constructor' ? 'ctor("constructor")' : methodName};`);
           for (const calledName of Object.keys(calls)) {
-            markdown.push(`    ${methodName} --> ${calledName};`);
+            markdown.push(`    ${methodName === 'constructor' ? 'ctor' : methodName} --> ${calledName};`);
           }
         }
       }
@@ -343,8 +359,8 @@ markdown.push(
   'graph LR'
 );
 let index = 0;
-console.log('names: ', names.length);
-for(const name of names) {
+console.log('names: ', moduleNames.length);
+for(const name of moduleNames) {
   const definition = sources[name];
   if (definition.calls.size === 0 && definition.functions.length === 0 && definition.classes.length === 0) {
     // No dependency to show, ignore
