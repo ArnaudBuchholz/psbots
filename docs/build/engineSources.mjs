@@ -232,12 +232,11 @@ for(const moduleName of names) {
     continue;
   }
   markdown.push(`### ${moduleName}`, '');
-  if (Object.keys(calls).length !== 0 || functions.filter(({ calls }) => Object.keys(calls).length !== 0).length !== 0) {
+  if (Object.keys(calls).length !== 0 || classes.length || functions.filter(({ calls, exported }) => exported || Object.keys(calls).length !== 0).length !== 0) {
     markdown.push(
       '```mermaid',
       'graph'
     );
-
     const externalCalls = new Set();
     const checkForExternalCalls = (calls) => {
       for (const name of Object.keys(calls)) {
@@ -245,28 +244,45 @@ for(const moduleName of names) {
         if (exportedFunction && exportedFunction.module !== moduleName && !externalCalls.has(name)) {
           externalCalls.add(name);
           markdown.push(
-            `  subgraph "${exportedFunction.module}"`,
-            `    ${funcId(name)};`,
+            `  subgraph "<a href="#${exportedFunction.module.replaceAll(/[/.]/g, '')}">${exportedFunction.module}</a>"`,
+            `    ${exportedFunction.name};`,
             `  end`
           );
         }
       }
     }
-    checkForExternalCalls(definition.calls);
-    for (const { calls } of definition.functions) {
+    checkForExternalCalls(calls);
+    for (const { calls } of functions) {
       checkForExternalCalls(calls);
+    }
+    for (const classDefinition of classes) {
+      for (const { calls } of classDefinition.methods) {
+        checkForExternalCalls(calls);
+      }
     }
 
     markdown.push(
       `  subgraph "${moduleName}"`
     );
-    for (const name of Object.keys(definition.calls)) {
-      markdown.push(`    main_${definition.id}("main") --> ${funcId(name)};`);
+    for (const name of Object.keys(calls)) {
+      markdown.push(`    main_${definition.id}("main") --> ${name};`);
     }
-    for (const { name, calls } of definition.functions) {
-      for (const calledName of Object.keys(calls)) {
-        markdown.push(`    ${name} --> ${funcId(calledName)};`);
+    for (const { name, exported, calls } of functions) {
+      if (exported) {
+        markdown.push(`    ${name}("📦&nbsp;${name}");`);
       }
+      for (const calledName of Object.keys(calls)) {
+        markdown.push(`    ${name} --> ${calledName};`);
+      }
+    }
+    for (const { name: className, exported, methods } of classes) {
+      markdown.push(`    subgraph "${exported ? '📦&nbsp;' : ''}${className}"`);
+      for (const { name: methodName, calls } of methods) {
+        for (const calledName of Object.keys(calls)) {
+          markdown.push(`    ${methodName} --> ${calledName};`);
+        }
+      }
+      markdown.push('    end');
     }
     markdown.push(
       '  end',
@@ -305,13 +321,9 @@ for(const moduleName of names) {
   // }
   const hasExportedFunctions = definition.functions.some(({ exported }) => exported);
   if (hasExportedFunctions) {
-    markdown.push('**Exported functions :**')
-    for (const { name: functionName, exported, calls, externalCalls } of definition.functions) {
-      if (exported) {
-        markdown.push(`* \`function ${functionName}\``);
-        if (!externalCalls && moduleName.startsWith('core/')) {
-          markdown.push(`⚠️ Exported but not used (and not part of API or SDK)`);
-        }
+    for (const { name: functionName, exported, externalCalls } of definition.functions) {
+      if (exported && !externalCalls && moduleName.startsWith('core/')) {
+        markdown.push(`* ⚠️ \`${functionName}\` is exported but not used _(and not part of API or SDK)_`);
       }
     }
   }
