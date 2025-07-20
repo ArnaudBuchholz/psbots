@@ -112,7 +112,7 @@
     "calls": {
       "assert": 1
     },
-    "externalCalls": 66
+    "externalCalls": 68
   },
   "buildConstantOperator": {
     "id": 239,
@@ -122,8 +122,24 @@
     "calls": {},
     "externalCalls": 4
   },
+  "bind": {
+    "id": 248,
+    "module": "core/operators/stacks/dictionary/bind.ts",
+    "name": "bind",
+    "exported": true,
+    "calls": {},
+    "externalCalls": 0
+  },
+  "pop": {
+    "id": 281,
+    "module": "core/operators/stacks/operand/pop.ts",
+    "name": "pop",
+    "exported": true,
+    "calls": {},
+    "externalCalls": 0
+  },
   "blockCycle": {
-    "id": 321,
+    "id": 323,
     "module": "core/state/block.ts",
     "name": "blockCycle",
     "exported": true,
@@ -131,7 +147,7 @@
     "externalCalls": 1
   },
   "callCycle": {
-    "id": 323,
+    "id": 325,
     "module": "core/state/call.ts",
     "name": "callCycle",
     "exported": true,
@@ -139,7 +155,7 @@
     "externalCalls": 1
   },
   "operatorPop": {
-    "id": 325,
+    "id": 327,
     "module": "core/state/operator.ts",
     "name": "operatorPop",
     "exported": true,
@@ -148,7 +164,7 @@
     "internalCalls": 1
   },
   "operatorCycle": {
-    "id": 328,
+    "id": 330,
     "module": "core/state/operator.ts",
     "name": "operatorCycle",
     "exported": true,
@@ -159,7 +175,7 @@
     "externalCalls": 1
   },
   "parseCycle": {
-    "id": 332,
+    "id": 334,
     "module": "core/state/parse.ts",
     "name": "parseCycle",
     "exported": true,
@@ -170,7 +186,7 @@
     "externalCalls": 1
   },
   "assert": {
-    "id": 357,
+    "id": 359,
     "module": "sdk/assert.ts",
     "name": "assert",
     "exported": true,
@@ -178,7 +194,7 @@
     "externalCalls": 83
   },
   "checkPos": {
-    "id": 359,
+    "id": 361,
     "module": "sdk/checkPos.ts",
     "name": "checkPos",
     "exported": true,
@@ -186,7 +202,7 @@
     "externalCalls": 4
   },
   "isObject": {
-    "id": 361,
+    "id": 363,
     "module": "sdk/checks/isObject.ts",
     "name": "isObject",
     "exported": true,
@@ -194,7 +210,7 @@
     "externalCalls": 1
   },
   "isIntegerValue": {
-    "id": 367,
+    "id": 369,
     "module": "sdk/checks/isValue.ts",
     "name": "isIntegerValue",
     "exported": true,
@@ -204,7 +220,7 @@
     "externalCalls": 0
   },
   "isStringValue": {
-    "id": 368,
+    "id": 370,
     "module": "sdk/checks/isValue.ts",
     "name": "isStringValue",
     "exported": true,
@@ -214,7 +230,7 @@
     "externalCalls": 0
   },
   "isNameValue": {
-    "id": 369,
+    "id": 371,
     "module": "sdk/checks/isValue.ts",
     "name": "isNameValue",
     "exported": true,
@@ -224,7 +240,7 @@
     "externalCalls": 0
   },
   "isOperatorValue": {
-    "id": 370,
+    "id": 372,
     "module": "sdk/checks/isValue.ts",
     "name": "isOperatorValue",
     "exported": true,
@@ -234,7 +250,7 @@
     "externalCalls": 0
   },
   "isArrayValue": {
-    "id": 373,
+    "id": 375,
     "module": "sdk/checks/isValue.ts",
     "name": "isArrayValue",
     "exported": true,
@@ -244,7 +260,7 @@
     "externalCalls": 0
   },
   "isDictionaryValue": {
-    "id": 374,
+    "id": 376,
     "module": "sdk/checks/isValue.ts",
     "name": "isDictionaryValue",
     "exported": true,
@@ -254,7 +270,7 @@
     "externalCalls": 0
   },
   "findMarkPos": {
-    "id": 376,
+    "id": 378,
     "module": "sdk/findMarkPos.ts",
     "name": "findMarkPos",
     "exported": true,
@@ -262,7 +278,7 @@
     "externalCalls": 4
   },
   "valueToString": {
-    "id": 398,
+    "id": 400,
     "module": "sdk/toString.ts",
     "name": "valueToString",
     "exported": true,
@@ -271,7 +287,7 @@
     "internalCalls": 1
   },
   "callStackToString": {
-    "id": 399,
+    "id": 401,
     "module": "sdk/toString.ts",
     "name": "callStackToString",
     "exported": true,
@@ -281,7 +297,7 @@
     "externalCalls": 0
   },
   "toIntegerValue": {
-    "id": 401,
+    "id": 403,
     "module": "sdk/toValue.ts",
     "name": "toIntegerValue",
     "exported": true,
@@ -289,7 +305,7 @@
     "externalCalls": 16
   },
   "toStringValue": {
-    "id": 402,
+    "id": 404,
     "module": "sdk/toValue.ts",
     "name": "toStringValue",
     "exported": true,
@@ -297,7 +313,7 @@
     "externalCalls": 4
   },
   "toNameValue": {
-    "id": 403,
+    "id": 405,
     "module": "sdk/toValue.ts",
     "name": "toNameValue",
     "exported": true,
@@ -305,7 +321,7 @@
     "externalCalls": 2
   },
   "valuesOf": {
-    "id": 415,
+    "id": 417,
     "module": "sdk/valuesOf.ts",
     "name": "valuesOf",
     "exported": true,

@@ -78,26 +78,26 @@ graph
     addMemorySize("📦&nbsp;addMemorySize");
     memorySizeToBytes("📦&nbsp;memorySizeToBytes");
     MemoryTracker("📦&nbsp;_class_&nbsp;MemoryTracker")
-    MemoryTracker --- isAvailable;
+    MemoryTracker --- isAvailable("MemoryTracker::isAvailable");
     isAvailable --> assert;
     isAvailable --> memorySizeToBytes;
-    MemoryTracker --- allocate;
+    MemoryTracker --- allocate("MemoryTracker::allocate");
     allocate --> assert;
-    MemoryTracker --- register;
+    MemoryTracker --- register("MemoryTracker::register");
     register --> assert;
-    MemoryTracker --- addStringRef;
+    MemoryTracker --- addStringRef("MemoryTracker::addStringRef");
     addStringRef --> stringSizer;
     addStringRef --> memorySizeToBytes;
-    MemoryTracker --- releaseString;
+    MemoryTracker --- releaseString("MemoryTracker::releaseString");
     releaseString --> assert;
     releaseString --> stringSizer;
     releaseString --> memorySizeToBytes;
-    MemoryTracker --- snapshot;
+    MemoryTracker --- snapshot("MemoryTracker::snapshot");
     snapshot --> stringSizer;
-    MemoryTracker --- addValueRef;
+    MemoryTracker --- addValueRef("MemoryTracker::addValueRef");
     addValueRef --> valuesOf;
     addValueRef --> assert;
-    MemoryTracker --- releaseValue;
+    MemoryTracker --- releaseValue("MemoryTracker::releaseValue");
     releaseValue --> valuesOf;
     releaseValue --> assert;
   end
@@ -120,17 +120,17 @@ graph
   subgraph "core/objects/AbstractValueContainer.ts"
     AbstractValueContainer("📦&nbsp;_class_&nbsp;AbstractValueContainer")
     AbstractValueContainer --> ShareableObject;
-    AbstractValueContainer --- toValue;
+    AbstractValueContainer --- toValue("AbstractValueContainer::toValue");
     toValue --> assert;
-    AbstractValueContainer --- ctor("constructor");
+    AbstractValueContainer --- ctor("AbstractValueContainer::constructor");
     ctor --> assert;
-    AbstractValueContainer --- createInstance;
+    AbstractValueContainer --- createInstance("AbstractValueContainer::createInstance");
     createInstance --> assert;
-    AbstractValueContainer --- getSize;
+    AbstractValueContainer --- getSize("AbstractValueContainer::getSize");
     getSize --> addMemorySize;
-    AbstractValueContainer --- reserve;
+    AbstractValueContainer --- reserve("AbstractValueContainer::reserve");
     reserve --> assert;
-    AbstractValueContainer --- swap;
+    AbstractValueContainer --- swap("AbstractValueContainer::swap");
     swap --> assert;
   end
 ```
@@ -151,13 +151,13 @@ graph
   subgraph "core/objects/dictionaries/Dictionary.ts"
     Dictionary("📦&nbsp;_class_&nbsp;Dictionary")
     Dictionary --> ShareableObject;
-    Dictionary --- toValue;
+    Dictionary --- toValue("Dictionary::toValue");
     toValue --> assert;
-    Dictionary --- ctor("constructor");
+    Dictionary --- ctor("Dictionary::constructor");
     ctor --> assert;
-    Dictionary --- getSize;
+    Dictionary --- getSize("Dictionary::getSize");
     getSize --> addMemorySize;
-    Dictionary --- def;
+    Dictionary --- def("Dictionary::def");
     def --> assert;
   end
 ```
@@ -171,7 +171,7 @@ graph
   end
   subgraph "core/objects/dictionaries/Empty.ts"
     EmptyDictionary("📦&nbsp;_class_&nbsp;EmptyDictionary")
-    EmptyDictionary --- def;
+    EmptyDictionary --- def("EmptyDictionary::def");
     def --> assert;
   end
 ```
@@ -195,7 +195,7 @@ graph
   subgraph "core/objects/ShareableObject.ts"
     getShareableObject --> assert;
     ShareableObject("📦&nbsp;_class_&nbsp;ShareableObject")
-    ShareableObject --- release;
+    ShareableObject --- release("ShareableObject::release");
     release --> assert;
   end
 ```
@@ -216,15 +216,15 @@ graph
   subgraph "core/objects/stacks/CallStack.ts"
     CallStack("📦&nbsp;_class_&nbsp;CallStack")
     CallStack --> ValueStack;
-    CallStack --- create;
+    CallStack --- create("CallStack::create");
     create --> assert;
-    CallStack --- getSize;
+    CallStack --- getSize("CallStack::getSize");
     getSize --> addMemorySize;
-    CallStack --- getIncrementSize;
+    CallStack --- getIncrementSize("CallStack::getIncrementSize");
     getIncrementSize --> addMemorySize;
-    CallStack --- topOperatorState;
+    CallStack --- topOperatorState("CallStack::topOperatorState");
     topOperatorState --> assert;
-    CallStack --- topOperatorState;
+    CallStack --- topOperatorState("CallStack::topOperatorState");
     topOperatorState --> assert;
   end
 ```
@@ -242,13 +242,13 @@ graph
   subgraph "core/objects/stacks/DictionaryStack.ts"
     DictionaryStack("📦&nbsp;_class_&nbsp;DictionaryStack")
     DictionaryStack --> ValueStack;
-    DictionaryStack --- create;
+    DictionaryStack --- create("DictionaryStack::create");
     create --> assert;
-    DictionaryStack --- getDictionaryValue;
+    DictionaryStack --- getDictionaryValue("DictionaryStack::getDictionaryValue");
     getDictionaryValue --> assert;
-    DictionaryStack --- setGlobal;
+    DictionaryStack --- setGlobal("DictionaryStack::setGlobal");
     setGlobal --> assert;
-    DictionaryStack --- setUser;
+    DictionaryStack --- setUser("DictionaryStack::setUser");
     setUser --> assert;
   end
 ```
@@ -279,7 +279,7 @@ graph
   subgraph "core/objects/ValueArray.ts"
     ValueArray("📦&nbsp;_class_&nbsp;ValueArray")
     ValueArray --> AbstractValueContainer;
-    ValueArray --- toValue;
+    ValueArray --- toValue("ValueArray::toValue");
     toValue --> assert;
   end
 ```
@@ -882,18 +882,24 @@ graph
 
 ```mermaid
 graph
+  subgraph "core/operators/operators.ts"
+    buildFunctionOperator("📦&nbsp;buildFunctionOperator");
+  end
   subgraph "sdk/assert.ts"
     assert("📦&nbsp;assert");
   end
   subgraph "core/operators/stacks/dictionary/bind.ts"
+    main_244("main") --> buildFunctionOperator;
     bindValue --> bindName;
     bindValue --> assert;
     bindValue --> bindArray;
-    anon248("(anonymous function)") --> assert;
-    anon248("(anonymous function)") --> bindValue;
+    bind("📦&nbsp;bind");
+    anon249("(anonymous function)") --> assert;
+    anon249("(anonymous function)") --> bindValue;
   end
 ```
 
+* ⚠️ `bind` is exported but not used _(and not part of API or SDK)_
 ### core/operators/stacks/dictionary/countdictstack.ts
 
 ```mermaid
@@ -908,9 +914,9 @@ graph
     assert("📦&nbsp;assert");
   end
   subgraph "core/operators/stacks/dictionary/countdictstack.ts"
-    main_249("main") --> buildFunctionOperator;
-    anon250("(anonymous function)") --> toIntegerValue;
-    anon250("(anonymous function)") --> assert;
+    main_250("main") --> buildFunctionOperator;
+    anon251("(anonymous function)") --> toIntegerValue;
+    anon251("(anonymous function)") --> assert;
   end
 ```
 
@@ -922,7 +928,7 @@ graph
     buildFunctionOperator("📦&nbsp;buildFunctionOperator");
   end
   subgraph "core/operators/stacks/dictionary/currentdict.ts"
-    main_251("main") --> buildFunctionOperator;
+    main_252("main") --> buildFunctionOperator;
   end
 ```
 
@@ -934,7 +940,7 @@ graph
     buildFunctionOperator("📦&nbsp;buildFunctionOperator");
   end
   subgraph "core/operators/stacks/dictionary/def.ts"
-    main_253("main") --> buildFunctionOperator;
+    main_254("main") --> buildFunctionOperator;
   end
 ```
 
@@ -946,7 +952,7 @@ graph
     buildFunctionOperator("📦&nbsp;buildFunctionOperator");
   end
   subgraph "core/operators/stacks/dictionary/end.ts"
-    main_255("main") --> buildFunctionOperator;
+    main_256("main") --> buildFunctionOperator;
   end
 ```
 
@@ -958,7 +964,7 @@ graph
     buildFunctionOperator("📦&nbsp;buildFunctionOperator");
   end
   subgraph "core/operators/stacks/dictionary/globaldict.ts"
-    main_257("main") --> buildFunctionOperator;
+    main_258("main") --> buildFunctionOperator;
   end
 ```
 
@@ -970,7 +976,7 @@ graph
     buildFunctionOperator("📦&nbsp;buildFunctionOperator");
   end
   subgraph "core/operators/stacks/dictionary/hostdict.ts"
-    main_259("main") --> buildFunctionOperator;
+    main_260("main") --> buildFunctionOperator;
   end
 ```
 
@@ -982,7 +988,7 @@ graph
     buildFunctionOperator("📦&nbsp;buildFunctionOperator");
   end
   subgraph "core/operators/stacks/dictionary/systemdict.ts"
-    main_261("main") --> buildFunctionOperator;
+    main_262("main") --> buildFunctionOperator;
   end
 ```
 
@@ -994,7 +1000,7 @@ graph
     buildFunctionOperator("📦&nbsp;buildFunctionOperator");
   end
   subgraph "core/operators/stacks/dictionary/userdict.ts"
-    main_263("main") --> buildFunctionOperator;
+    main_264("main") --> buildFunctionOperator;
   end
 ```
 
@@ -1006,7 +1012,7 @@ graph
     buildFunctionOperator("📦&nbsp;buildFunctionOperator");
   end
   subgraph "core/operators/stacks/operand/clear.ts"
-    main_265("main") --> buildFunctionOperator;
+    main_266("main") --> buildFunctionOperator;
   end
 ```
 
@@ -1021,8 +1027,8 @@ graph
     findMarkPos("📦&nbsp;findMarkPos");
   end
   subgraph "core/operators/stacks/operand/cleartomark.ts"
-    main_267("main") --> buildFunctionOperator;
-    anon268("(anonymous function)") --> findMarkPos;
+    main_268("main") --> buildFunctionOperator;
+    anon269("(anonymous function)") --> findMarkPos;
   end
 ```
 
@@ -1040,9 +1046,9 @@ graph
     assert("📦&nbsp;assert");
   end
   subgraph "core/operators/stacks/operand/count.ts"
-    main_269("main") --> buildFunctionOperator;
-    anon270("(anonymous function)") --> toIntegerValue;
-    anon270("(anonymous function)") --> assert;
+    main_270("main") --> buildFunctionOperator;
+    anon271("(anonymous function)") --> toIntegerValue;
+    anon271("(anonymous function)") --> assert;
   end
 ```
 
@@ -1063,10 +1069,10 @@ graph
     assert("📦&nbsp;assert");
   end
   subgraph "core/operators/stacks/operand/counttomark.ts"
-    main_271("main") --> buildFunctionOperator;
-    anon272("(anonymous function)") --> findMarkPos;
-    anon272("(anonymous function)") --> toIntegerValue;
-    anon272("(anonymous function)") --> assert;
+    main_272("main") --> buildFunctionOperator;
+    anon273("(anonymous function)") --> findMarkPos;
+    anon273("(anonymous function)") --> toIntegerValue;
+    anon273("(anonymous function)") --> assert;
   end
 ```
 
@@ -1078,7 +1084,7 @@ graph
     buildFunctionOperator("📦&nbsp;buildFunctionOperator");
   end
   subgraph "core/operators/stacks/operand/dup.ts"
-    main_273("main") --> buildFunctionOperator;
+    main_274("main") --> buildFunctionOperator;
   end
 ```
 
@@ -1090,7 +1096,7 @@ graph
     buildFunctionOperator("📦&nbsp;buildFunctionOperator");
   end
   subgraph "core/operators/stacks/operand/exch.ts"
-    main_275("main") --> buildFunctionOperator;
+    main_276("main") --> buildFunctionOperator;
   end
 ```
 
@@ -1102,12 +1108,24 @@ graph
     buildFunctionOperator("📦&nbsp;buildFunctionOperator");
   end
   subgraph "core/operators/stacks/operand/indexOp.ts"
-    main_277("main") --> buildFunctionOperator;
+    main_278("main") --> buildFunctionOperator;
   end
 ```
 
 ### core/operators/stacks/operand/pop.ts
 
+```mermaid
+graph
+  subgraph "core/operators/operators.ts"
+    buildFunctionOperator("📦&nbsp;buildFunctionOperator");
+  end
+  subgraph "core/operators/stacks/operand/pop.ts"
+    main_280("main") --> buildFunctionOperator;
+    pop("📦&nbsp;pop");
+  end
+```
+
+* ⚠️ `pop` is exported but not used _(and not part of API or SDK)_
 ### core/operators/stacks/operand/roll.ts
 
 ```mermaid
@@ -1122,13 +1140,13 @@ graph
     assert("📦&nbsp;assert");
   end
   subgraph "core/operators/stacks/operand/roll.ts"
-    main_281("main") --> buildFunctionOperator;
+    main_283("main") --> buildFunctionOperator;
     initialize --> toIntegerValue;
     initialize --> assert;
     roll --> assert;
     roll --> toIntegerValue;
-    anon284("(anonymous function)") --> initialize;
-    anon284("(anonymous function)") --> roll;
+    anon286("(anonymous function)") --> initialize;
+    anon286("(anonymous function)") --> roll;
   end
 ```
 
@@ -1143,8 +1161,8 @@ graph
     toIntegerValue("📦&nbsp;toIntegerValue");
   end
   subgraph "core/operators/value/convert/cvi.ts"
-    main_285("main") --> buildFunctionOperator;
-    anon286("(anonymous function)") --> toIntegerValue;
+    main_287("main") --> buildFunctionOperator;
+    anon288("(anonymous function)") --> toIntegerValue;
   end
 ```
 
@@ -1156,7 +1174,7 @@ graph
     buildFunctionOperator("📦&nbsp;buildFunctionOperator");
   end
   subgraph "core/operators/value/convert/cvlit.ts"
-    main_287("main") --> buildFunctionOperator;
+    main_289("main") --> buildFunctionOperator;
   end
 ```
 
@@ -1174,9 +1192,9 @@ graph
     toNameValue("📦&nbsp;toNameValue");
   end
   subgraph "core/operators/value/convert/cvn.ts"
-    main_289("main") --> buildFunctionOperator;
-    anon290("(anonymous function)") --> assert;
-    anon290("(anonymous function)") --> toNameValue;
+    main_291("main") --> buildFunctionOperator;
+    anon292("(anonymous function)") --> assert;
+    anon292("(anonymous function)") --> toNameValue;
   end
 ```
 
@@ -1191,8 +1209,8 @@ graph
     valuesOf("📦&nbsp;valuesOf");
   end
   subgraph "core/operators/value/eq.ts"
-    main_291("main") --> buildFunctionOperator;
-    anon292("(anonymous function)") --> valuesOf;
+    main_293("main") --> buildFunctionOperator;
+    anon294("(anonymous function)") --> valuesOf;
   end
 ```
 
@@ -1204,7 +1222,7 @@ graph
     buildConstantOperator("📦&nbsp;buildConstantOperator");
   end
   subgraph "core/operators/value/false.ts"
-    main_293("main") --> buildConstantOperator;
+    main_295("main") --> buildConstantOperator;
   end
 ```
 
@@ -1225,12 +1243,12 @@ graph
     toStringValue("📦&nbsp;toStringValue");
   end
   subgraph "core/operators/value/get.ts"
-    main_294("main") --> buildFunctionOperator;
-    anon295("(anonymous function)") --> assert;
-    anon295("(anonymous function)") --> checkPos;
-    anon295("(anonymous function)") --> toStringValue;
-    anon296("(anonymous function)") --> checkPos;
-    anon298("(anonymous function)") --> implementation;
+    main_296("main") --> buildFunctionOperator;
+    anon297("(anonymous function)") --> assert;
+    anon297("(anonymous function)") --> checkPos;
+    anon297("(anonymous function)") --> toStringValue;
+    anon298("(anonymous function)") --> checkPos;
+    anon300("(anonymous function)") --> implementation;
   end
 ```
 
@@ -1248,9 +1266,9 @@ graph
     assert("📦&nbsp;assert");
   end
   subgraph "core/operators/value/length.ts"
-    main_299("main") --> buildFunctionOperator;
-    anon303("(anonymous function)") --> toIntegerValue;
-    anon303("(anonymous function)") --> assert;
+    main_301("main") --> buildFunctionOperator;
+    anon305("(anonymous function)") --> toIntegerValue;
+    anon305("(anonymous function)") --> assert;
   end
 ```
 
@@ -1262,7 +1280,7 @@ graph
     buildConstantOperator("📦&nbsp;buildConstantOperator");
   end
   subgraph "core/operators/value/mark.ts"
-    main_304("main") --> buildConstantOperator;
+    main_306("main") --> buildConstantOperator;
   end
 ```
 
@@ -1277,8 +1295,8 @@ graph
     valuesOf("📦&nbsp;valuesOf");
   end
   subgraph "core/operators/value/neq.ts"
-    main_305("main") --> buildFunctionOperator;
-    anon306("(anonymous function)") --> valuesOf;
+    main_307("main") --> buildFunctionOperator;
+    anon308("(anonymous function)") --> valuesOf;
   end
 ```
 
@@ -1299,12 +1317,12 @@ graph
     toStringValue("📦&nbsp;toStringValue");
   end
   subgraph "core/operators/value/put.ts"
-    main_307("main") --> buildFunctionOperator;
-    anon308("(anonymous function)") --> assert;
-    anon308("(anonymous function)") --> checkPos;
-    anon308("(anonymous function)") --> toStringValue;
-    anon309("(anonymous function)") --> checkPos;
-    anon311("(anonymous function)") --> implementation;
+    main_309("main") --> buildFunctionOperator;
+    anon310("(anonymous function)") --> assert;
+    anon310("(anonymous function)") --> checkPos;
+    anon310("(anonymous function)") --> toStringValue;
+    anon311("(anonymous function)") --> checkPos;
+    anon313("(anonymous function)") --> implementation;
   end
 ```
 
@@ -1316,7 +1334,7 @@ graph
     buildConstantOperator("📦&nbsp;buildConstantOperator");
   end
   subgraph "core/operators/value/true.ts"
-    main_312("main") --> buildConstantOperator;
+    main_314("main") --> buildConstantOperator;
   end
 ```
 
@@ -1331,8 +1349,8 @@ graph
     toNameValue("📦&nbsp;toNameValue");
   end
   subgraph "core/operators/value/type.ts"
-    main_313("main") --> buildFunctionOperator;
-    anon314("(anonymous function)") --> toNameValue;
+    main_315("main") --> buildFunctionOperator;
+    anon316("(anonymous function)") --> toNameValue;
   end
 ```
 
@@ -1344,7 +1362,7 @@ graph
     buildConstantOperator("📦&nbsp;buildConstantOperator");
   end
   subgraph "core/operators/value/version.ts"
-    main_315("main") --> buildConstantOperator;
+    main_317("main") --> buildConstantOperator;
   end
 ```
 
@@ -1356,7 +1374,7 @@ graph
     buildFunctionOperator("📦&nbsp;buildFunctionOperator");
   end
   subgraph "core/operators/value/wcheck.ts"
-    main_316("main") --> buildFunctionOperator;
+    main_318("main") --> buildFunctionOperator;
   end
 ```
 
@@ -1368,7 +1386,7 @@ graph
     buildFunctionOperator("📦&nbsp;buildFunctionOperator");
   end
   subgraph "core/operators/value/xcheck.ts"
-    main_318("main") --> buildFunctionOperator;
+    main_320("main") --> buildFunctionOperator;
   end
 ```
 
@@ -1451,13 +1469,13 @@ graph
   end
   subgraph "core/state/State.ts"
     State("📦&nbsp;_class_&nbsp;State")
-    State --- _checkIfDestroyed;
+    State --- _checkIfDestroyed("State::_checkIfDestroyed");
     _checkIfDestroyed --> assert;
-    State --- destroy;
+    State --- destroy("State::destroy");
     destroy --> assert;
-    State --- raiseException;
+    State --- raiseException("State::raiseException");
     raiseException --> assert;
-    State --- cycle;
+    State --- cycle("State::cycle");
     cycle --> operatorPop;
     cycle --> operatorCycle;
     cycle --> callCycle;
@@ -1545,16 +1563,16 @@ graph
     fitToMaxWidth --> centerValue;
     decorate --> convertPosToLineAndCol;
     decorate --> fitToMaxWidth;
-    anon389("(anonymous function)") --> decorate;
-    anon390("(anonymous function)") --> decorate;
     anon391("(anonymous function)") --> decorate;
-    anon392("(anonymous function)") --> parse;
     anon392("(anonymous function)") --> decorate;
     anon393("(anonymous function)") --> decorate;
+    anon394("(anonymous function)") --> parse;
     anon394("(anonymous function)") --> decorate;
     anon395("(anonymous function)") --> decorate;
     anon396("(anonymous function)") --> decorate;
     anon397("(anonymous function)") --> decorate;
+    anon398("(anonymous function)") --> decorate;
+    anon399("(anonymous function)") --> decorate;
     valueToString("📦&nbsp;valueToString");
     callStackToString("📦&nbsp;callStackToString");
     callStackToString --> valueToString;

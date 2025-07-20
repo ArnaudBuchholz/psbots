@@ -23,8 +23,8 @@ ${existingFunction.name} from ${existingFunction.module}`);
   exportedFunctions[name] = functionDefinition;
 }
 
-const searchForCalls = (scope, node) => {
-  const calls = {};
+const searchForCalls = (scope, node, existingCalls = {}) => {
+  const calls = existingCalls;
   scope.traverse(node, {
     enter(path) {
       const { node } = path;
@@ -109,6 +109,23 @@ const source = async (path) => {
         addExportedFunction(functionDefinition);
         path.skip();
       }
+      if (node.type === 'VariableDeclaration') {
+        const exported = path.parentPath?.node?.type === 'ExportNamedDeclaration';
+        const declaration = node.declarations[0];
+        const name = declaration.id.name;
+        if (declaration.init.type === 'CallExpression' && declaration.init.callee.name === 'buildFunctionOperator') {
+          const functionDefinition = {
+            id: ++lastId,
+            module: sourceName,
+            name,
+            exported,
+            calls: {}
+          };
+          sourceDefinition.functions.push(functionDefinition);
+          addExportedFunction(functionDefinition);
+          sourceDefinition.calls.buildFunctionOperator = 1;
+        }
+      }
       if (node.type === 'ArrowFunctionExpression') {
         const functionDefinition = {
           id: ++lastId,
@@ -122,7 +139,7 @@ const source = async (path) => {
         path.skip();
       }
       if (node.type === 'ExpressionStatement') {
-        sourceDefinition.calls = searchForCalls(scope, node);
+        sourceDefinition.calls = searchForCalls(scope, node, sourceDefinition.calls);
       }
     }
   });
@@ -297,7 +314,7 @@ for(const moduleName of moduleNames) {
       }
       for (const { name: methodName, calls } of methods) {
         if (Object.keys(calls).length) {
-          markdown.push(`    ${className} --- ${methodName === 'constructor' ? 'ctor("constructor")' : methodName};`);
+          markdown.push(`    ${className} --- ${methodName === 'constructor' ? 'ctor("' + className + '::constructor")' : methodName + '("' + className + '::' + methodName + '")' };`);
           for (const calledName of Object.keys(calls)) {
             markdown.push(`    ${methodName === 'constructor' ? 'ctor' : methodName} --> ${calledName};`);
           }

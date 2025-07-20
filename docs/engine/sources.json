@@ -1233,7 +1233,7 @@
             "calls": {
               "assert": 1
             },
-            "externalCalls": 66
+            "externalCalls": 68
           },
           {
             "name": "buildConstantOperator",
@@ -1273,6 +1273,9 @@
             ]
           },
           "bind.ts": {
+            "calls": {
+              "buildFunctionOperator": 1
+            },
             "functions": [
               {
                 "name": "bindName",
@@ -1293,6 +1296,11 @@
                   "bindArray": 1
                 },
                 "internalCalls": 1
+              },
+              {
+                "name": "bind",
+                "exported": true,
+                "externalCalls": 0
               },
               {
                 "name": "(anonymous arrow)",
@@ -1488,7 +1496,15 @@
             ]
           },
           "pop.ts": {
+            "calls": {
+              "buildFunctionOperator": 1
+            },
             "functions": [
+              {
+                "name": "pop",
+                "exported": true,
+                "externalCalls": 0
+              },
               {
                 "name": "(anonymous arrow)",
                 "exported": false
