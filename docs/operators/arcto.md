@@ -1,6 +1,11 @@
+# arcto
+
 ---
 tags:
-  - operator
-  - unknown
+
+- operator
+- unknown
+
 ---
+
 [Postscript Level 2 documentation](https://hepunx.rl.ac.uk/~adye/psdocs/ref/PSL2a.html#arcto)

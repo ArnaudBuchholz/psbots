@@ -1,7 +1,12 @@
+# hostdict
+
 ---
 tags:
-  - operator
-  - extension
+
+- operator
+- extension
+
 ---
+
 🏷️ [[extension]] [[dictstack]]
 retrieves the host dictionary from the dictionary stack

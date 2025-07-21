@@ -1,7 +1,12 @@
+# dicttomark
+
 ---
 tags:
-  - operator
-  - extension
+
+- operator
+- extension
+
 ---
+
 🏷️ [[extension]] [[dictionary]] [[mark]]
 finalizes a dictionary
