@@ -1,6 +1,6 @@
 import type { IState } from '@psbots/engine';
 import { createState, enumIArrayValues, run } from '@psbots/engine';
-import { assert, callStackToString, toString, toStringValue } from '@psbots/engine/sdk';
+import { assert, callStackToString, valueToString, toStringValue } from '@psbots/engine/sdk';
 import { MAX_POINTS } from './constants.js';
 import { State } from './State.js';
 import { PaddleHost } from './PaddleHost.js';
@@ -136,7 +136,7 @@ export class Game {
     return [
       `Operands: ${operands.length}`,
       ...[
-        ...[...enumIArrayValues(operands)].map((value) => toString(value, { maxWidth: 40 })),
+        ...[...enumIArrayValues(operands)].map((value) => valueToString(value, { maxWidth: 40 })),
         '',
         '',
         '',
@@ -145,7 +145,7 @@ export class Game {
       ].slice(0, 5),
       `Call stack: ${calls.length}`,
       ...[...enumIArrayValues(calls)].map((value, index) =>
-        toString(value, { maxWidth: 40, operatorState: calls.operatorStateAt(index) })
+        valueToString(value, { maxWidth: 40, operatorState: calls.operatorStateAt(index) })
       )
     ].join('\n');
   }
