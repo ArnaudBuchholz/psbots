@@ -104,6 +104,7 @@ graph
 ```
 
 * ⚠️ `memorySizeToBytes` is exported but not used _(and not part of API or SDK)_
+
 ### core/objects/AbstractValueContainer.ts
 
 ```mermaid
@@ -900,6 +901,7 @@ graph
 ```
 
 * ⚠️ `bind` is exported but not used _(and not part of API or SDK)_
+
 ### core/operators/stacks/dictionary/countdictstack.ts
 
 ```mermaid
@@ -1126,6 +1128,7 @@ graph
 ```
 
 * ⚠️ `pop` is exported but not used _(and not part of API or SDK)_
+
 ### core/operators/stacks/operand/roll.ts
 
 ```mermaid
