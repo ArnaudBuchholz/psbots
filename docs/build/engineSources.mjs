@@ -360,7 +360,7 @@ for(const moduleName of moduleNames) {
   if (hasExportedFunctions) {
     for (const { name: functionName, exported, externalCalls } of definition.functions) {
       if (exported && !externalCalls && moduleName.startsWith('core/')) {
-        markdown.push(`* ⚠️ \`${functionName}\` is exported but not used _(and not part of API or SDK)_`);
+        markdown.push(`* ⚠️ \`${functionName}\` is exported but not used _(and not part of API or SDK)_`, '');
       }
     }
   }
