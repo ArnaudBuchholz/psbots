@@ -1,3 +1,5 @@
+# Memory management
+
 Even if JavaScript does not require memory handling, the engine keeps track of *allocated* memory through a `MemoryTracker` instance.
 Also, it tries to mimic the allocations (and memory access) that would be needed if developped on a different technology (such as WebAssembly).
 
@@ -15,7 +17,7 @@ type MemorySize = {
 > [!IMPORTANT]  
 > Try to limit the use of `bytes` as much as possible and prefer using one of the known types.
 
-Memory allocation *may* fail but memory release is **not** supposed to. This is why the `release` method does not return a `Result` (see [Error Management](#error-management)).
+Memory allocation *may* fail but memory release is **not** supposed to. This is why the `release` method does not return a `Result` (see [Error Management](error-management.md)).
 
 ```TypeScript
 /** Check if the requested memory size can be allocated */

@@ -1,3 +1,5 @@
+# Error management
+
 * When a method *may* fail either because of its direct content or its subsequent calls, it *must* returns a `Result`.
 
 * When an object instantiation *may* fail (because of the constructor), encapsulate the object creation in a factory returning a `Result`.

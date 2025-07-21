@@ -1,3 +1,5 @@
+# Operators and cycles
+
 * Operators *must* have a **predictable** cycle length : **no iteration** should occur within a cycle, use `operatorState` to iterate.
 
 * To enable debugging, operators *must* leave the engine in a *comprehensive* state when they **fail** :
