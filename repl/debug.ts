@@ -1,6 +1,6 @@
 import type { IMemorySnapshot, IState } from '@psbots/engine';
 import type { IReplIO } from './IReplIo.js';
-import { assert, toString, TOSTRING_BEGIN_MARKER, TOSTRING_END_MARKER } from '@psbots/engine/sdk';
+import { assert, valueToString, TOSTRING_BEGIN_MARKER, TOSTRING_END_MARKER } from '@psbots/engine/sdk';
 import { blue, cyan, /* cyan, */ green, magenta, red, white, yellow } from './colors.js';
 import { formatCountVariation, formatMemoryVariation } from './status.js';
 import { enumAndDisplay, operands } from './format.js';
@@ -150,7 +150,7 @@ function renderOperandAndCallStacks({
     replIO.output(`${border}│${white}`);
 
     const operand = state.operands.at(index);
-    const operandInfo = toString(operand, { maxWidth: operandsWidth, includeDebugSource: true });
+    const operandInfo = valueToString(operand, { maxWidth: operandsWidth, includeDebugSource: true });
     replIO.output(`${colorize(operandInfo)}${''.padStart(operandsWidth - operandInfo.length, ' ')}`);
 
     replIO.output(`${border}│${white}`);
@@ -158,7 +158,7 @@ function renderOperandAndCallStacks({
     if (index < callStack.length) {
       const value = state.calls.at(index);
       const operatorState = state.calls.operatorStateAt(index);
-      const callStackInfo = toString(value, { maxWidth: callStackWidth, operatorState, includeDebugSource: true });
+      const callStackInfo = valueToString(value, { maxWidth: callStackWidth, operatorState, includeDebugSource: true });
       const callStackInfoSize = callStackInfo.length;
       replIO.output(`${colorize(callStackInfo)}${''.padStart(callStackWidth - callStackInfoSize, ' ')}`);
     } else {
@@ -243,14 +243,14 @@ async function dumpDictionaries(replIO: IReplIO, state: IState, waitForChar: Deb
       const index = Number.parseInt(key, 10);
       if (index < state.dictionaries.length) {
         const dictionaryValue = state.dictionaries.at(index);
-        replIO.output(`${cyan}${index}${white} ${toString(dictionaryValue)}\r\n`);
+        replIO.output(`${cyan}${index}${white} ${valueToString(dictionaryValue)}\r\n`);
         assert(dictionaryValue.type === 'dictionary');
         const { dictionary } = dictionaryValue;
         const names = dictionary.names;
         for (const name of names) {
           const value = dictionary.lookup(name);
           replIO.output(
-            `${yellow}${name}${white}: ${toString(value, { maxWidth: replIO.width - name.length - 3 })}\r\n`
+            `${yellow}${name}${white}: ${valueToString(value, { maxWidth: replIO.width - name.length - 3 })}\r\n`
           );
         }
       } else {

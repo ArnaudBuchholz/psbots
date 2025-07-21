@@ -1,7 +1,7 @@
 import { enumIArrayValues } from '@psbots/engine';
 import type { IReadOnlyArray, IReadOnlyCallStack, IState } from '@psbots/engine';
 import type { ToStringOptions } from '@psbots/engine/sdk';
-import { toString } from '@psbots/engine/sdk';
+import { valueToString } from '@psbots/engine/sdk';
 import type { IReplIO } from './IReplIo.js';
 import { blue, cyan, white, /* green, red, white, */ yellow } from './colors.js';
 import { memory } from './status.js';
@@ -36,7 +36,7 @@ export function enumAndDisplay(
     if (callstack) {
       operatorState = (values as IReadOnlyCallStack).operatorStateAt(index);
     }
-    const formatted = toString(value, { includeDebugSource, maxWidth, operatorState });
+    const formatted = valueToString(value, { includeDebugSource, maxWidth, operatorState });
     const withDebugInfo = /^(.*)@([^:@]+:\d+:\d+)$/.exec(formatted);
     let instruction = formatted;
     let debugInfo = '';
