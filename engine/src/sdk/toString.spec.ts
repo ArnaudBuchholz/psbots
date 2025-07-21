@@ -230,7 +230,9 @@ if`,
   });
 
   it('limits the width of the debug information', () => {
-    expect(valueToString(operator(), { includeDebugSource: true, maxWidth: 25 })).toStrictEqual('-operator-@…/test.ps:3:3');
+    expect(valueToString(operator(), { includeDebugSource: true, maxWidth: 25 })).toStrictEqual(
+      '-operator-@…/test.ps:3:3'
+    );
   });
 
   it('limits the width of the value when the debug information cannot be reduced', () => {
@@ -313,9 +315,9 @@ ${TOSTRING_BEGIN_MARKER}{${TOSTRING_END_MARKER}
     });
 
     it('centers string on current item when width is limited', () => {
-      expect(valueToString(toValue(string, { isExecutable: true }), { operatorState: 142, maxWidth: 40 })).toStrictEqual(
-        `…sult n\n  {\n    dup ${TOSTRING_BEGIN_MARKER}2${TOSTRING_END_MARKER} lt { pop stop }…`
-      );
+      expect(
+        valueToString(toValue(string, { isExecutable: true }), { operatorState: 142, maxWidth: 40 })
+      ).toStrictEqual(`…sult n\n  {\n    dup ${TOSTRING_BEGIN_MARKER}2${TOSTRING_END_MARKER} lt { pop stop }…`);
     });
 
     it('centers string on current item when width is limited (selected is larger than maxWidth)', () => {
@@ -334,7 +336,9 @@ ${TOSTRING_BEGIN_MARKER}{${TOSTRING_END_MARKER}
     });
 
     it('converts string and indicate current position (operator state is 219, maxWidth set to 40)', () => {
-      expect(valueToString(toValue(string, { isExecutable: true }), { operatorState: 219, maxWidth: 40 })).toStrictEqual(
+      expect(
+        valueToString(toValue(string, { isExecutable: true }), { operatorState: 219, maxWidth: 40 })
+      ).toStrictEqual(
         `… exch
     1 sub
   } loop
