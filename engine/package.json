@@ -36,7 +36,7 @@
     "test:operators": "vitest run --no-coverage operators.spec",
     "prebuild": "npm run make-sources",
     "build": "tsc --project tsconfig.build.json",
-    "postbuild": "node ../tools/postBuild.mjs dist"
+    "postbuild": "node ../tools/postBuild.mjs dist && node ./tools/postBuild.mjs dist"
   },
   "keywords": [
     "postscript",
