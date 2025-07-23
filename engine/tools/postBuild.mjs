@@ -6,8 +6,6 @@ import { generate } from '@babel/generator';
 import _traverse from '@babel/traverse';
 const traverse = _traverse.default;
 
-const basePath = process.argv[2];
-
 const removeImport = (path, importedName) => {
   const { node } = path;
   if (node.type === 'ImportDeclaration') {
@@ -25,6 +23,49 @@ const removeImport = (path, importedName) => {
   }
   return false;
 };
+
+const cleanAstNode = (node) => {
+  delete node.loc;
+  delete node.start;
+  delete node.end;
+  delete node.extra;
+}
+
+let toIntegerValueAST;
+const getToIntegerValueAST = async (integerValue) => {
+  if (toIntegerValueAST) {
+    return toIntegerValueAST(integerValue);
+  }
+  const source = await readFile('dist/sdk/toValue.js', 'utf8');
+  const ast = parse(source, { sourceType: 'module' });
+  let base;
+  let placeholderForValue;
+  traverse(ast, {
+    enter(path) {
+      const { node } = path;
+      cleanAstNode(node);
+      if (node.type === 'FunctionDeclaration' && node.id.name === 'toIntegerValue') {
+        const returnStatement = node.body.body.find((node) => node.type === 'ReturnStatement');
+        base = returnStatement.argument;
+      }
+      if (node.type === 'ObjectProperty' && node.key.name === 'integer') {
+        placeholderForValue = node;
+      }
+    }
+  });
+  placeholderForValue.shorthand = false;
+  toIntegerValueAST = (integerValue) => {
+    placeholderForValue.value = integerValue;
+    return structuredClone(base);
+  }
+  return toIntegerValueAST(integerValue);
+}
+
+console.log(JSON.stringify({
+  123: await getToIntegerValueAST(123),
+  456: await getToIntegerValueAST(456)
+}, null, 2));
+process.exit(0);
 
 async function optimize(basePath, path = basePath) {
   if (/\bperf\b/.test(path)) {
@@ -99,4 +140,4 @@ async function optimize(basePath, path = basePath) {
     }
   }
 }
-await optimize(basePath);
+await optimize('dist');
