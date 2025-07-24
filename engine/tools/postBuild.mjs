@@ -32,9 +32,9 @@ const cleanAstNode = (node) => {
 }
 
 let toIntegerValueAST;
-const getToIntegerValueAST = async (integerValue) => {
+const buildToIntegerValueAST = async () => {
   if (toIntegerValueAST) {
-    return toIntegerValueAST(integerValue);
+    return;
   }
   const source = await readFile('dist/sdk/toValue.js', 'utf8');
   const ast = parse(source, { sourceType: 'module' });
@@ -58,14 +58,7 @@ const getToIntegerValueAST = async (integerValue) => {
     placeholderForValue.value = integerValue;
     return structuredClone(base);
   }
-  return toIntegerValueAST(integerValue);
 }
-
-console.log(JSON.stringify({
-  123: await getToIntegerValueAST(123),
-  456: await getToIntegerValueAST(456)
-}, null, 2));
-process.exit(0);
 
 async function optimize(basePath, path = basePath) {
   if (/\bperf\b/.test(path)) {
@@ -97,6 +90,8 @@ async function optimize(basePath, path = basePath) {
         }
       });
       if (removableCount > 0) {
+        await buildToIntegerValueAST();
+        console.log(itemPath)
         traverse(ast, {
           enter(path) {
             const { node } = path;
@@ -107,7 +102,9 @@ async function optimize(basePath, path = basePath) {
             if (node.type === 'VariableDeclaration' && path.toString().includes('toIntegerValue')) {
               const [, variableName] = path.toString().match(/\b(\w+)\s+=\s+toIntegerValue/);
               if (path.getNextSibling().toString().startsWith(`assert(${variableName}`)) {
-                // replace with inline
+                const value = node.declarations[0].init.arguments[0];
+                node.declarations[0].init = toIntegerValueAST(value);
+                path.skip();
               }
             }
           }
