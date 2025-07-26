@@ -6,58 +6,58 @@ import type { MemoryTracker } from '@core/MemoryTracker.js';
 
 const UNKNOWN_FILENAME = 'unknown';
 
-function getToken(state: IInternalState, value: Value<'string'>): Value | undefined {
-  const { calls } = state;
+function getToken(this: IInternalState, top: Value<'string'>): Value | undefined {
+  const { calls } = this;
   if (calls.topOperatorState === OPERATOR_STATE_UNKNOWN) {
     calls.topOperatorState = OPERATOR_STATE_FIRST_CALL;
-    const [first] = parse(value.string, { pos: 0, filename: value.debugSource?.filename ?? UNKNOWN_FILENAME });
+    const [first] = parse(top.string, { pos: 0, filename: top.debugSource?.filename ?? UNKNOWN_FILENAME });
     return first;
   } else {
-    const [, second] = parse(value.string, {
+    const [, second] = parse(top.string, {
       pos: calls.topOperatorState,
-      filename: value.debugSource?.filename ?? UNKNOWN_FILENAME
+      filename: top.debugSource?.filename ?? UNKNOWN_FILENAME
     });
     return second;
   }
 }
 
-function enqueueToken(state: IInternalState, token: Value) {
-  const { calls, operands } = state;
-  const memoryTracker = state.memoryTracker as MemoryTracker;
-  const { pos } = token.debugSource!; // as filename is specified
+function enqueueToken(this: IInternalState, top: Value) {
+  const { calls, operands } = this;
+  const memoryTracker = this.memoryTracker as MemoryTracker;
+  const { pos } = top.debugSource!; // as filename is specified
   if (pos > 0) {
     calls.topOperatorState = pos;
   }
-  if (token.debugSource?.filename === UNKNOWN_FILENAME) {
+  if (top.debugSource?.filename === UNKNOWN_FILENAME) {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars -- better than copy & delete
-    const { debugSource, ...tokenWithoutDebugSource } = token;
-    token = tokenWithoutDebugSource;
+    const { debugSource, ...tokenWithoutDebugSource } = top;
+    top = tokenWithoutDebugSource;
   }
   let string: string | undefined;
   // Known value types names are not tracked
-  if (token.type === 'string' || (token.type === 'name' && !Object.keys(VALUE_TYPE).includes(token.name))) {
-    string = valuesOf(token)[0];
+  if (top.type === 'string' || (top.type === 'name' && !Object.keys(VALUE_TYPE).includes(top.name))) {
+    string = valuesOf(top)[0];
     const result = memoryTracker.addStringRef(string);
     if (!result.success) {
-      state.raiseException(result.exception);
+      this.raiseException(result.exception);
       return;
     }
-    Object.assign(token, { tracker: memoryTracker });
+    Object.assign(top, { tracker: memoryTracker });
   }
-  const pushed = token.isExecutable ? calls.push(token) : operands.push(token);
+  const pushed = top.isExecutable ? calls.push(top) : operands.push(top);
   if (string !== undefined) {
     memoryTracker.releaseString(string);
   }
   if (!pushed.success) {
-    state.raiseException(pushed.exception);
+    this.raiseException(pushed.exception);
   }
 }
 
-export function parseCycle(state: IInternalState, value: Value<'string'>): void {
-  const { calls } = state;
-  const token = getToken(state, value);
+export function parseCycle(this: IInternalState, top: Value<'string'>): void {
+  const { calls } = this;
+  const token = getToken.call(this, top);
   if (token) {
-    enqueueToken(state, token);
+    enqueueToken.call(this, token);
   } else {
     calls.pop();
   }
