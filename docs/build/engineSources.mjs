@@ -28,8 +28,17 @@ const searchForCalls = (scope, node, existingCalls = {}) => {
   scope.traverse(node, {
     enter(path) {
       const { node } = path;
-      if (node.type === 'CallExpression' && node.callee?.name) {
-        const { name } = node.callee;
+      if (node.type === 'CallExpression') {
+        const { callee } = node;
+        let name;
+        if (callee.type === 'MemberExpression' && callee.property.name === 'call') {
+          name = callee.object.name;
+        } else {
+          name = node.callee.name;
+        }
+        if (!name) {
+          return;
+        }
         if (name === 'Symbol') {
           return; // ignore
         }
@@ -327,35 +336,6 @@ for(const moduleName of moduleNames) {
       ''
     );
   }
-
-  // for (const [name, { count }] of definition.calls.entries()) {
-  //   console.log(`\t→ ${name}${count > 1 ? ' (' + count + ')' : ''}`);
-  //   markdown.push(`\n→ \`${name}\`${count > 1 ? ' (' + count + ')' : ''}`);
-  // }
-  // for (const { name: className, exported, methods } of definition.classes) {
-  //   console.log(`\t${exported ? red + 'export' + white + ' ' : ''}class ${className}`);
-  //   markdown.push(`\n${exported ? '<span style="color: red;"><code>export</code></span> ' : ''}\`class ${className}\``);
-  //   for (const { name: methodName, calls } of methods) {
-  //     if (calls.size) {
-  //       console.log(`\t${className}::${methodName}`);
-  //       markdown.push(`\n\`${className}::${methodName}\``);
-  //       for (const [name, { count }] of calls.entries()) {
-  //         console.log(`\t  → ${name}${count > 1 ? ' (' + count + ')' : ''}`);
-  //         markdown.push(`\n  → \`${name}\`${count > 1 ? ' (' + count + ')' : ''}`);
-  //       }
-  //     }
-  //   }
-  // }
-  // for (const { name: functionName, exported, calls, externalCalls } of definition.functions) {
-  //   if (exported || calls.size) {
-      // console.log(`\t${exported ? red + 'export' + white + ' ' : ''}function ${functionName} ${ externalCalls ? '(' + externalCalls + ')' : '' }`);
-      // markdown.push(`\n${exported ? '<span style="color: red;"><code>export</code></span> ' : ''}\`function ${functionName} ${ externalCalls ? '(' + externalCalls + ')' : '' }\``);
-      // for (const [name, { count }] of calls.entries()) {
-      //     console.log(`\t  → ${name}${count > 1 ? ' (' + count + ')' : ''}`);
-      //     markdown.push(`\n  → \`${name}\`${count > 1 ? ' (' + count + ')' : ''}`);
-      // }
-  //   }
-  // }
   const hasExportedFunctions = definition.functions.some(({ exported }) => exported);
   if (hasExportedFunctions) {
     for (const { name: functionName, exported, externalCalls } of definition.functions) {
