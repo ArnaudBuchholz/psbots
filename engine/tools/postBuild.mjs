@@ -149,21 +149,40 @@ const extractInlinedCycleFunction = async (name) => {
   const source = await readFile(`dist/perf/core/state/${name}.js`, 'utf8');
   const ast = parse(source, { sourceType: 'module' });
   let functions = {};
-  let inlinePlaceholders = {}
+  let functionDetails;
   traverse(ast, {
     enter(path) {
       const { node } = path;
       cleanAstNode(node);
       if (node.type === 'FunctionDeclaration') {
-        functions[node.id.name] = node.body;
+        functionDetails = {
+          name: node.id.name,
+          body: node.body,
+          exported: path.parentPath.node.type === 'ExportNamedDeclaration',
+          inlinePlaceholders: {}
+        };
+        functions[node.id.name] = functionDetails;
       }
       if (node.type === 'CallExpression' && node.callee.type === 'MemberExpression' && node.callee.property.name === 'call') {
         const name = node.callee.object.name;
-        inlinePlaceholders[name] ??= [];
-        inlinePlaceholders[name].push(path);
+        functionDetails.inlinePlaceholders[name] ??= [];
+        functionDetails.inlinePlaceholders[name].push(path);
+      }
+      if (node.type === 'ReturnStatement') {
+        functionDetails.usesReturn = true;
+        if (node.argument !== null) {
+          functionDetails.returnsValue = true;
+        }
+      }
+    },
+    exit(path) {
+      const { node } = path;
+      if (node.type === 'FunctionDeclaration') {
+        functionDetails = null;
       }
     }
   });
+  console.log(functions);
   const failed = () => {
     throw new Error(`Not able to find ${name}Cycle in dist/perf/core/state/${name}.js: ${Object.keys(functions)}`);
   }
