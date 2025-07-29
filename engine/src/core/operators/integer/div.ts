@@ -1,4 +1,4 @@
-import { toIntegerValue } from '@sdk/index.js';
+import { assert, toIntegerValue } from '@sdk/index.js';
 import { buildFunctionOperator } from '@core/operators/operators.js';
 
 buildFunctionOperator(
@@ -28,13 +28,9 @@ buildFunctionOperator(
     }
     const reminder = divisor % quotient;
     const reminderResult = toIntegerValue(reminder);
-    if (!reminderResult.success) {
-      return reminderResult;
-    }
+    assert(reminderResult);
     const dividendResult = toIntegerValue((divisor - reminder) / quotient);
-    if (!dividendResult.success) {
-      return dividendResult;
-    }
+    assert(dividendResult);
     return operands.popush(2, dividendResult.value, reminderResult.value);
   }
 );
