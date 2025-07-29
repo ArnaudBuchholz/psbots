@@ -61,7 +61,7 @@ buildFunctionOperator(
       return { success: false, exception: 'typeCheck' };
     }
     const integerResult = toIntegerValue(implementation(value as never));
-    assert(integerResult.success); // cannot exceed limit
+    assert(integerResult); // cannot exceed limit
     return operands.popush(1, integerResult.value);
   }
 );

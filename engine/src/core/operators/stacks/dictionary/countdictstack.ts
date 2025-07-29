@@ -18,7 +18,7 @@ buildFunctionOperator(
   },
   ({ operands, dictionaries }) => {
     const integerResult = toIntegerValue(dictionaries.length);
-    assert(integerResult.success); // cannot exceed limit
+    assert(integerResult); // cannot exceed limit
     return operands.push(integerResult.value);
   }
 );
