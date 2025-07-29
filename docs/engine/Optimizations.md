@@ -1,10 +1,16 @@
 # Optimizations
 
-> This document summarizes optimizations that are applied on the engine codebase after it has been transpiled from TypeScript.
+> This document summarizes optimizations that are applied on the engine codebase *after* it has been transpiled from TypeScript.
 
 ## Abstract Syntax Tree
 
-> 🚧 explain how @babel tools are used to parse, traverse and regenerate the JavaScript
+All these optimizations are realized by manipulating the Abstract Syntax Tree representation (often shortened to [AST]) of the source codes. 
+
+The following packages are used :
+
+* [`@babel/parser`](https://www.npmjs.com/package/@babel/parser): to transform the source code into [AST],
+* [`@babel/traverse`](https://www.npmjs.com/package/@babel/traverse): to crawl the generated [AST],
+* [`@babel/generator`](https://www.npmjs.com/package/@babel/traverse): to transform the manipulated [AST] back into source code.
 
 ## Removing `assert` calls
 
@@ -24,12 +30,12 @@ In the engine codebase, the [`assert`] function has two usages :
 * Validating that a function call succeeded by testing the `success` member of the returned [`Result`] structure,
 * Assessing a condition.
 
-In both situations, the [`assert`] function fails by throwing an exception if the expected condition is not met.
+In both situations, the [`assert`] function throws an exception if the expected condition is not met.
 
-> [! IMPORTANT]
-> To keep the possibily to generate WebAssembly using [AssemblyScript](https://www.assemblyscript.org/), the productive engine code *does not* use JavaScript exceptions.
+> [!IMPORTANT]
+> To keep the possibily to generate WebAssembly using [AssemblyScript](https://www.assemblyscript.org/), the productive engine code *does not* use JavaScript exceptions. As a consequence, failed assertions *should* never happen in the codebase. 
 
-From a pure TypeScript point of view, the function simplifies the code by removing the need for conditions. In the following example, it is expected that the call to the function [`toIntegerValue`] always succeed as the operand stack length is a valid integer.
+From a pure TypeScript point of view, the [`assert`] function simplifies the code by removing the need for conditions. In the following example, it is expected that the call to the function [`toIntegerValue`] always succeed as the operand stack length is a valid integer.
 By assessing the `integerResult` variable, the code can access `integerResult.value` without failing the type check.
 
 ```TypeScript
@@ -40,7 +46,7 @@ By assessing the `integerResult` variable, the code can access `integerResult.va
 
 > An example where [`assert`] is used to simplify the code
 
-The function [`toIntegerValue`] returns a [`Result`] as this conversion may sometimes fail, like in the following example.
+The function [`toIntegerValue`] returns a [`Result`] as this conversion may sfail, like in the following example.
 
 ```TypeScript
     const integerResult = toIntegerValue(value1 + value2);
@@ -51,14 +57,15 @@ The function [`toIntegerValue`] returns a [`Result`] as this conversion may some
 
 > An example where [`toIntegerValue`] could fail by adding two big numbers.
 
-The calls to the [`assert`] function are removed after transpiling.
-
-> [! NOTE]
-> As of the time these lines were written, there are 83 [`assert`] calls in the codebase.
-
 ### Removing
 
-Removing the calls to the [`assert`] function is done in two steps :
+The calls to the [`assert`] function are removed after transpiling.
+
+> [!NOTE]
+> As of the time these lines were written, there are 83 [`assert`] calls in the codebase.
+
+
+This is done in two steps :
 
 * Removing the corresponding `import`,
 * Removing the `ExpressionStatements` calling the function.
@@ -77,3 +84,4 @@ Removing the calls to the [`assert`] function is done in two steps :
 [`assert`]: https://github.com/ArnaudBuchholz/psbots/blob/main/engine/src/sdk/assert.ts "Open source code"
 [`Result`]: https://github.com/ArnaudBuchholz/psbots/blob/main/engine/src/api/Result.ts "Open source code"
 [`toIntegerValue`]: https://github.com/ArnaudBuchholz/psbots/blob/main/engine/src/sdk/toValue.ts "Open source code"
+[AST]: https://en.wikipedia.org/wiki/Abstract_syntax_tree "Open documentation"
