@@ -72,11 +72,50 @@ This is done in two steps :
 * Removing the corresponding `import`,
 * Removing the `ExpressionStatements` calling the function.
 
-## Inlining toValue functions
+## Inlining `toValue` functions
 
-### Inlining some `toIntegerValue` functions
+The engine manipulates [values](https://github.com/ArnaudBuchholz/psbots/blob/main/engine/src/api/values/Value.ts) which structure *must* respect a strict definition. There are many places in the code where these values must be created.
 
-> 🚧 the ones that are followed by an `assert`
+To avoid error while using literal objects, [helper functions](https://github.com/ArnaudBuchholz/psbots/blob/main/engine/src/sdk/toValue.ts) were created to convert primitive types (numbers, strings...) into values.
+
+### Inlining *some* `toIntegerValue` functions
+
+The [`toIntegerValue`] function has a particularity : the engine must first verify that the provided number is an integer and it can be represented within the engine. Hence, instead of returning a `Value<'integer'>`, the function returns a `Result<Value<'integer'>>`, meaning the caller must verify if the function succeeded by testing the `success` member of the returned value.
+
+```TypeScript
+export function toIntegerValue(integer: number): Result<Value<'integer'>> {
+  if (integer % 1 !== 0 || integer < Number.MIN_SAFE_INTEGER || integer > Number.MAX_SAFE_INTEGER) {
+    return { success: false, exception: 'undefinedResult' };
+  }
+  return {
+    success: true,
+    value: {
+      type: 'integer',
+      isExecutable: false,
+      isReadOnly: true,
+      integer
+    }
+  };
+}
+```
+
+> Source of [`toIntegerValue`] function
+
+Indeed there are situations where the value cannot be represented as an integer. As stated previously, when adding two big numbers, the result may be greater than the `Number.MAX_SAFE_INTEGER` limit.
+
+On the other hand, there are situations where the engine knows that the value is an integer and respects the defined limits. For instance, the [`count` operator] returns the operand stack size. This number is positive and cannot go beyond the limit (unless the system has infinite memory).
+
+In that case, the code does not test directly the returned result. Instead, an [`assert`] is used.
+
+```TypeScript
+    const integerResult = toIntegerValue(operands.length);
+    assert(integerResult); // cannot exceed limit
+    return operands.push(integerResult.value);
+```
+
+> Core implementation of the [`count` operator]
+
+Whenever the [`toIntegerValue`] function is directly followed by an [`assert`], it is safe to replace it with the literal object implementation.
 
 ## Inlining patterns
 
@@ -191,7 +230,7 @@ In order to analyze *if* and *how* a function can be inlined, there are several 
 #### Block inlining
 
 A function with no parameters or `return` statement is inlined in a `BlockStatement` reproducing the content of the function.
-Within this new scope, variables (`let` or `const`) *may* shadow parent scope's symbols but this will not affect the inlined content.
+Within this new scope, variables (`let` or `const`) *may* shadow parent scope's symbols but this does not affect the inlined content.
 
 > [!IMPORTANT]
 > The optimized codebase does not use any `var` statement or nested function that could collide with the parent scope.
@@ -327,6 +366,7 @@ function main_inline() {
 [`Result`]: https://github.com/ArnaudBuchholz/psbots/blob/main/engine/src/api/Result.ts "Open source code"
 [`toIntegerValue`]: https://github.com/ArnaudBuchholz/psbots/blob/main/engine/src/sdk/toValue.ts "Open source code"
 [AST]: https://en.wikipedia.org/wiki/Abstract_syntax_tree "Open documentation"
+[`count` operator]: https://github.com/ArnaudBuchholz/psbots/blob/main/engine/src/core/operators/stacks/operand/count.ts "Open source code"
 
 [parent scope]: #block-inlining "parent scope definition"
 [inline scope]: #block-inlining "inline scope definition"
