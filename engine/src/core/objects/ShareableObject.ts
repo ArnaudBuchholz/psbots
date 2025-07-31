@@ -17,7 +17,7 @@ export abstract class ShareableObject {
     integers: 1
   } as const;
 
-  private _refCount: number;
+  private _refCount: number = 1;
 
   static readonly tracker: IValueTracker = {
     addValueRef(value) {
@@ -29,9 +29,7 @@ export abstract class ShareableObject {
     }
   };
 
-  constructor() {
-    this._refCount = 1;
-  }
+  constructor() {}
 
   get refCount(): number {
     return this._refCount;
