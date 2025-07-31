@@ -80,7 +80,7 @@ This is done in two steps :
 
 ## Inlining patterns
 
-## Overview
+### Overview
 
 This is probably the most challenging part of the optimization. Due to the usage of strict linting rules, the codebase contains small functions. In some situation, an algorithm is split into multiple functions and one way to improve performance is to inline them all.
 
@@ -169,86 +169,120 @@ graph
 
 > Dependency graph of the core `cycle` method
 
-## Function definition
+### Function definition
 
 In order to analyze *if* and *how* a function can be inlined, there are several aspects of the function implementation that must be considered :
 
+* **placement** : the function can be inlined only if represented as a `CallExpression` directly under an `ExpressionStatement`, any other configuration requires more complex handling (for instance: when called within a condition or a mathematical expression),
 * **Parameters** : when the function is inlined, it must receive values from the initial calling function,
 * **Returned value** : the function *may* return a value, the calling function might use this value either to assign a variable or directly in a statement,
 * **Early exits** : the function *may* use the `return` keyword to exit prematurely,
 * **Loops** : as early exits might generate complexity in the
 
-### Examples
+> [!IMPORTANT]
+> Ideally, other considerations should be added such as :
+> * **asynchronous** : is the function to inline an async one ...
+> * **ExpressionStatement** : 
 
-> These examples are expressed JavaScript both to simplify the writing but also because optimization is applied on JavaScript sources.
->
-#### Simple case 1
+### Fundamental patterns
+
+> These patterns are expressed in JavaScript not only to simplify the code but also because the optimization is applied on JavaScript sources.
+
+#### Block inlining
+
+A function with no parameters or `return` statement is inlined in a `BlockStatement` reproducing the content of the function.
+Within this new scope, variables (`let` or `const`) *may* shadow parent scope's symbols but this will not affect the inlined content.
+
+> [!IMPORTANT]
+> The optimized codebase does not use any `var` statement or nested function that could collide with the parent scope.
+
+|Term|Definition|
+|---|---|
+|[parent scope]|scope in which the inlined function is called|
+|[inline scope]|block created to reproduce the content of the inlined function|
 
 ```JavaScript
 function main() {
-  const result = inline();
-  return result + 1;
+  inline();
+  console.log('ok');
 }
 
+// Function with no parameters or return
 function inline() {
-  return 1;
+  const message = 'Hello World !';
+  console.log(message);
 }
 
-/* Should result in */
+/* 🗜🗜🗜 */
 function main_inline() {
-  const result = 1; // let is acceptable
-  return result + 1;
+  {
+    const message = 'Hello World !';
+    console.log(message);
+  }
+  console.log('ok');
 }
 ```
+
+> Block inlining example (same in [AST Explorer](https://astexplorer.net/#/gist/ea9de8f7be84ed27ae6cf112e61d32e5/eb9f7e6e2c52ac2c55768c695d7135ebad7ec6f1))
 
 ### Parameters
 
+Parameters are transmitted in two steps :
+
+* in the [parent scope], temporary `const` variables are created for each parameter value. The names of these variables are generated to ensure they are unique even when the function is called more than once in this scope.
+* in the [inline scope], parameters are declared as `let` variables getting the value from the [parent scope]'s `const` equivalent.
+
 ```JavaScript
 function main() {
-  const result = inline(5);
-  return result + 1;
+  const value = 5;
+  inline(value);
+  console.log('ok');
 }
 
 function inline(value) {
-  return value + 1;
+  console.log(value);
 }
 
-/* Should result in */
+/* 🗜🗜🗜 */
 function main_inline() {
-  const __inline_arg1 = 5; // Simplest way to handle use of parameter
-  const result = __inline_arg1 + 1;
-  return result + 1;
+  const value = 5;
+  const __inline_arg1 = 5;
+  {
+    let value = __inline_arg1;
+    console.log(value);
+  }
+  console.log('ok');
 }
 ```
+
+> parameters inlining example (same in [AST Explorer](https://astexplorer.net/#/gist/8999968c595a13b82e0727e8b00f6d70/38f66fb1ebfe634bcc6693a26b857a150fb01448))
 
 #### Early exit
 
 ```JavaScript
 function main() {
-  const result = inline();
-  return result + 1;
+  inline();
+  console.log('ok');
 }
 
-// Could use ternary operator but that's not the point
 function inline() {
   if (Math.random() > .5) {
-    return 1;
+    console.log('6+');
+    return;
   }
-  return 2;
+  console.log('5-');
 }
 
 /* Should result in */
 function main_inline() {
-  let result;
   do {
     if (Math.random() > .5) {
-   result = 1;
-   break;
+      console.log('6+');
+      break;
     }
- result = 2;
-  } while (false);
-  const result = 1;
-  return result + 1;
+    console.log('5-');
+  } while (0);
+  console.log('ok');
 }
 ```
 
@@ -293,3 +327,6 @@ function main_inline() {
 [`Result`]: https://github.com/ArnaudBuchholz/psbots/blob/main/engine/src/api/Result.ts "Open source code"
 [`toIntegerValue`]: https://github.com/ArnaudBuchholz/psbots/blob/main/engine/src/sdk/toValue.ts "Open source code"
 [AST]: https://en.wikipedia.org/wiki/Abstract_syntax_tree "Open documentation"
+
+[parent scope]: #block-inlining "parent scope definition"
+[inline scope]: #block-inlining "inline scope definition"
