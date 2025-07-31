@@ -4,7 +4,7 @@
 
 ## Abstract Syntax Tree
 
-All these optimizations are realized by manipulating the Abstract Syntax Tree representation (often shortened to [AST]) of the source codes. 
+All these optimizations are realized by manipulating the Abstract Syntax Tree representation (often shortened to [AST]) of the source codes.
 
 The following packages are used :
 
@@ -36,7 +36,7 @@ In the engine codebase, this function has two usages :
 In both situations, the [`assert`] function throws an exception if the expected condition is not met.
 
 > [!IMPORTANT]
-> To keep the possibily to generate WebAssembly using [AssemblyScript](https://www.assemblyscript.org/), the productive engine code *does not* use JavaScript exceptions. As a consequence, failed assertions *should* never happen in the codebase. 
+> To keep the possibily to generate WebAssembly using [AssemblyScript](https://www.assemblyscript.org/), the productive engine code *does not* use JavaScript exceptions. As a consequence, failed assertions *should* never happen in the codebase.
 
 From a pure TypeScript point of view, the [`assert`] function simplifies the code by removing the need for conditions. In the following example, it is expected that the call to the function [`toIntegerValue`] always succeed as the operand stack length is a valid integer.
 By assessing the `integerResult` variable, the code can access `integerResult.value` without failing the type check.
@@ -66,7 +66,6 @@ The calls to the [`assert`] function are removed after transpiling.
 
 > [!NOTE]
 > As of the time these lines were written, there are 83 [`assert`] calls in the codebase.
-
 
 This is done in two steps :
 
@@ -118,17 +117,15 @@ cycle() {
 
 > core cycle implementation
 
-> [!IMPORTANT]
-> To prepare for the inlining process, these functions were refactored to use the `.call` syntax. As a result, each function has a common signature and can access `this` as in the main method.
+These functions are implemented in different modules, focusing on only one aspect of the cycle :
 
-These functions are implemented in different modules :
 * `operatorCycle` inside [`operator.ts`](https://github.com/ArnaudBuchholz/psbots/blob/main/engine/src/core/state/operator.ts)
 * `callCycle` inside [`call.ts`](https://github.com/ArnaudBuchholz/psbots/blob/main/engine/src/core/state/call.ts)
 * `blockCycle` inside [`block.ts`](https://github.com/ArnaudBuchholz/psbots/blob/main/engine/src/core/state/block.ts)
 * `parseCycle` inside [`parse.ts`](https://github.com/ArnaudBuchholz/psbots/blob/main/engine/src/core/state/parse.ts)
 
-> [!NOTE]
-> The benefit is that each module focuses on only one aspect of the cycle.
+> [!IMPORTANT]
+> To prepare for the inlining process, these functions were refactored to use the `.call` syntax. As a result, each function has a common signature and can access `this` as in the main method.
 
 These dependencies are illustrated in the following graph :
 
@@ -175,15 +172,18 @@ graph
 ## Function definition
 
 In order to analyze *if* and *how* a function can be inlined, there are several aspects of the function implementation that must be considered :
+
 * **Parameters** : when the function is inlined, it must receive values from the initial calling function,
 * **Returned value** : the function *may* return a value, the calling function might use this value either to assign a variable or directly in a statement,
 * **Early exits** : the function *may* use the `return` keyword to exit prematurely,
-* **Loops** : as early exits might generate complexity in the 
+* **Loops** : as early exits might generate complexity in the
 
 ### Examples
 
 > These examples are expressed JavaScript both to simplify the writing but also because optimization is applied on JavaScript sources.
+>
 #### Simple case 1
+
 ```JavaScript
 function main() {
   const result = inline();
@@ -200,7 +200,9 @@ function main_inline() {
   return result + 1;
 }
 ```
+
 ### Parameters
+
 ```JavaScript
 function main() {
   const result = inline(5);
@@ -218,7 +220,9 @@ function main_inline() {
   return result + 1;
 }
 ```
+
 #### Early exit
+
 ```JavaScript
 function main() {
   const result = inline();
@@ -238,16 +242,18 @@ function main_inline() {
   let result;
   do {
     if (Math.random() > .5) {
-	  result = 1;
-	  break;
+   result = 1;
+   break;
     }
-	result = 2;
+ result = 2;
   } while (false);
   const result = 1;
   return result + 1;
 }
 ```
+
 #### Early exit with loops in loops
+
 ```JavaScript
 function main() {
   let value = 0;
@@ -273,15 +279,16 @@ function main_inline() {
   let result;
   do {
     if (Math.random() > .5) {
-	  result = 1;
-	  break;
+   result = 1;
+   break;
     }
-	result = 2;
+ result = 2;
   } while (false);
   const result = 1;
   return result + 1;
 }
 ```
+
 [`assert`]: https://github.com/ArnaudBuchholz/psbots/blob/main/engine/src/sdk/assert.ts "Open source code"
 [`Result`]: https://github.com/ArnaudBuchholz/psbots/blob/main/engine/src/api/Result.ts "Open source code"
 [`toIntegerValue`]: https://github.com/ArnaudBuchholz/psbots/blob/main/engine/src/sdk/toValue.ts "Open source code"
