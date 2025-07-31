@@ -1,5 +1,5 @@
 /* eslint-env node */
-import { readdir, readFile, stat, writeFile, mkdir } from 'node:fs/promises';
+import { readdir, readFile, stat, writeFile } from 'node:fs/promises';
 import { join, relative } from 'node:path';
 
 const tsconfig = JSON.parse(await readFile('tsconfig.json'));
