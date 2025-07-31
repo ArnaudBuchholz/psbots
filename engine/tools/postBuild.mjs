@@ -109,7 +109,7 @@ const removeAsserts = (ast) => {
       }
     }
   });
-}
+};
 
 const optimize = async (basePath, path = basePath) => {
   if (/\bperf\b/.test(path)) {
@@ -142,7 +142,7 @@ const optimize = async (basePath, path = basePath) => {
       }
     }
   }
-}
+};
 await optimize('dist');
 
 const extractInlinedCycleFunction = async (name) => {
@@ -163,7 +163,11 @@ const extractInlinedCycleFunction = async (name) => {
         };
         functions[node.id.name] = functionDetails;
       }
-      if (node.type === 'CallExpression' && node.callee.type === 'MemberExpression' && node.callee.property.name === 'call') {
+      if (
+        node.type === 'CallExpression' &&
+        node.callee.type === 'MemberExpression' &&
+        node.callee.property.name === 'call'
+      ) {
         const name = node.callee.object.name;
         functionDetails.inlinePlaceholders[name] ??= [];
         functionDetails.inlinePlaceholders[name].push(path);
@@ -182,14 +186,13 @@ const extractInlinedCycleFunction = async (name) => {
       }
     }
   });
-  console.log(functions);
   const failed = () => {
     throw new Error(`Not able to find ${name}Cycle in dist/perf/core/state/${name}.js: ${Object.keys(functions)}`);
-  }
+  };
   return functions[`${name}Cycle`] ?? failed();
-}
+};
 
-// const blockCycle = await extractInlinedCycleFunction('block');
-// const callCycle = await extractInlinedCycleFunction('call');
+const blockCycle = await extractInlinedCycleFunction('block');
+const callCycle = await extractInlinedCycleFunction('call');
 const operatorCycle = await extractInlinedCycleFunction('operator');
-
+console.log(blockCycle, callCycle, operatorCycle);
