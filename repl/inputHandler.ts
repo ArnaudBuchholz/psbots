@@ -104,7 +104,7 @@ export function buildInputHandler(replIO: IReplIO): IInputHandler {
         if (newInput) {
           return waitForLine();
         }
-        return linesBuffer.splice(1).reverse().join('\n');
+        return linesBuffer.splice(1).toReversed().join('\n');
       };
       return waitForLine();
     },
