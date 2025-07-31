@@ -119,7 +119,10 @@ Peak: ${state.memoryTracker.peak}`;
   };
 
   terminal.addEventListener('start', (event) => {
-    const terminalEvent = event as CustomEvent;
+    const terminalEvent = event as CustomEvent<{
+      wait: void | Promise<void>;
+      state: IState;
+    }>;
     memory.length = 0;
     cpuCyclesPerSecond.length = 0;
     terminalEvent.detail.wait = monitor(terminalEvent.detail.state);
@@ -132,7 +135,12 @@ Peak: ${state.memoryTracker.peak}`;
   }
   let sizeTimeout: ReturnType<typeof setTimeout> | null = null;
   terminal.addEventListener('resize', (event: UIEvent) => {
-    const { width, height } = event.detail as any;
+    const { width, height } = (
+      event as unknown as CustomEvent<{
+        width: number;
+        height: number;
+      }>
+    ).detail;
     sizeElement.setAttribute('style', '');
     if (sizeTimeout) {
       clearTimeout(sizeTimeout);
@@ -144,13 +152,19 @@ Peak: ${state.memoryTracker.peak}`;
   });
 
   terminal.addEventListener('ready', (event) => {
-    const terminalEvent = event as CustomEvent;
+    const terminalEvent = event as CustomEvent<{
+      wait: void | Promise<void>;
+      state: IState;
+    }>;
     terminalEvent.detail.wait = monitor(terminalEvent.detail.state, true);
     status.innerHTML = '🟢';
   });
 
   terminal.addEventListener('cycle', (event) => {
-    const terminalEvent = event as CustomEvent;
+    const terminalEvent = event as CustomEvent<{
+      wait: void | Promise<void>;
+      state: IState;
+    }>;
     terminalEvent.detail.wait = monitor(terminalEvent.detail.state);
     status.innerHTML = '🟡';
   });
@@ -160,7 +174,12 @@ Peak: ${state.memoryTracker.peak}`;
   });
 
   const getOptions = (filter: (option: string) => boolean = () => true): string[] => {
-    return terminal.getAttribute('options')?.split(',')?.filter(filter) ?? [];
+    return (
+      terminal
+        .getAttribute('options')
+        ?.split(',')
+        ?.filter((option) => filter(option)) ?? []
+    );
   };
 
   document.querySelector('#memory')?.addEventListener('change', (event) => {
