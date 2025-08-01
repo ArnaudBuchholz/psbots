@@ -271,6 +271,15 @@ Parameters are transmitted in two steps :
 * in the [parent scope], temporary `const` variables are created for each parameter value. The names of these variables are generated to ensure they are unique even when the function is called more than once in this scope.
 * in the [inline scope], parameters are declared as `let` variables getting the value from the [parent scope]'s `const` equivalent.
 
+> [!NOTE]
+> Another approach consists in inserting an intermediate scope which would contain the temporary variables and enclose the [inline scope].
+> The advantages are multiples:
+>
+> * only one [AST] node to inject in the [parent scope],
+> * no risk of naming collision.
+>
+> Yet, the drawback is that performance tests revealed an impact.
+
 ```JavaScript
 function main() {
   const value = 5;
