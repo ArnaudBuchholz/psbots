@@ -203,19 +203,26 @@ graph LR
 
 In order to analyze *if* and *how* a function can be inlined, there are several aspects of the function implementation that must be considered :
 
-* **Location** : the function can be inlined only if called as a `CallExpression` directly under an `ExpressionStatement` itself contained in a `BlockStatement`. Any other configuration requires more complex handling, for instance:
+* **Location** : the function can be inlined only if *called* as a `CallExpression` directly under an `ExpressionStatement` itself contained in a `BlockStatement`. Any other configuration requires more complex handling, for instance:
 	* when called within a condition,
 	* when part of a mathematical expression,
 	* ...
-* **Parameters** : when the function is inlined, it must receive values from the initial calling function,
+
+> [!NOTE]
+> This is based on the *current* need. This *may* be extended. In particular, if a function is called in a `ReturnStatement`, some of the following technics *could* be applied.
+
+* **Parameters** : when the function is inlined, it must receive values from the call that has been replaced,
+
 * **Returned value** : the function *may* return a value, the calling function *may* use this value to assign a variable,
-* **Early exits** : the function *may* use the `return` keyword to exit prematurely from its control flow,
-* **Loops** : as early exits might generate complexity in the
+
+* **Early exits** : the function *may* use the `return` statement to exit prematurely from its control flow,
+
+* **Loops** : because of the way early exits are implemented during the inlining process , loops must be taken into account (see fundamental patterns for an example).
 
 > [!IMPORTANT]
-> Ideally, other considerations should be added such as :
-> * **asynchronous** : is the function to inline an async one ...
-> * **ExpressionStatement** : 
+> Ideally, other considerations *could* be added such as :
+> * **Asynchronous** : when the function to inline is an `async` one, the caller is expected to use the `await` instruction (hence the caller itself is also an `async` function). This means no extra effort is expected. However, if the calling method is not asynchronous then it complexifies (a lot) the inlining. In the engine, all methods are synchronous.
+> * **Recursive** : a recursive function *could* be inlined by changing the structure of the function itself. However, this is beyond the scope of this analysis.
 
 ### Fundamental patterns
 
@@ -229,10 +236,10 @@ Within this new scope, variables (`let` or `const`) *may* shadow parent scope's 
 > [!IMPORTANT]
 > The optimized codebase does not use any `var` statement or nested function that could collide with the parent scope.
 
-|Term|Definition|
-|---|---|
-|[parent scope]|scope in which the inlined function is called|
-|[inline scope]|block created to reproduce the content of the inlined function|
+| Term           | Definition                                                     |
+| -------------- | -------------------------------------------------------------- |
+| [parent scope] | scope in which the inlined function is called                  |
+| [inline scope] | block created to reproduce the content of the inlined function |
 
 ```JavaScript
 function main() {
@@ -262,11 +269,12 @@ function main_inline() {
 
 Parameters are transmitted in two steps :
 
-* in the [parent scope], temporary `const` variables are created for each parameter value. The names of these variables are generated to ensure they are unique even when the function is called more than once in this scope.
+* in the [parent scope], `const` variables are created for each parameter value. The names of these variables are generated to ensure their uniqueness when the function is called multiple times within this scope.
 * in the [inline scope], parameters are declared as `let` variables getting the value from the [parent scope]'s `const` equivalent.
 
 > [!NOTE]
-> Another approach consists in inserting an intermediate scope which would contain the temporary variables and enclose the [inline scope].
+> Another approach consists in inserting a new intermediate scope which would contain the temporary variables and enclose the [inline scope].
+>
 > The advantages are multiples:
 >
 > * only one [AST] node to inject in the [parent scope],
@@ -301,6 +309,10 @@ function main_inline() {
 
 #### Early exit
 
+Dumping a `return` statement inside the inlined function would break the calling function flow. The statement must be replaced to guarantee that the inlined function flow is interrupted without impacting the calling one.
+
+One proposal is to wrap the [inline scope] inside a `do {} while(0);` statement and use `break` instructions to exit the loop.
+
 ```JavaScript
 function main() {
   inline();
@@ -328,6 +340,7 @@ function main_inline() {
 }
 ```
 
+🚧🚧🚧 Need to create an online example 🚧🚧🚧
 #### Early exit with loops in loops
 
 ```JavaScript
