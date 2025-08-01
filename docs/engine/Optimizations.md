@@ -36,7 +36,7 @@ In the engine codebase, this function has two usages :
 In both situations, the [`assert`] function throws an exception if the expected condition is not met.
 
 > [!IMPORTANT]
-> To keep the possibily to generate WebAssembly using [AssemblyScript](https://www.assemblyscript.org/), the productive engine code *does not* use JavaScript exceptions. As a consequence, failed assertions *should* never happen in the codebase.
+> To keep the possibily to generate WebAssembly using [AssemblyScript](https://www.assemblyscript.org/), the productive engine code *does not* use JavaScript exceptions. As a consequence, failed assertions *must* never happen in the codebase.
 
 From a pure TypeScript point of view, the [`assert`] function simplifies the code by removing the need for conditions. In the following example, it is expected that the call to the function [`toIntegerValue`] always succeed as the operand stack length is a valid integer.
 By assessing the `integerResult` variable, the code can access `integerResult.value` without failing the type check.
@@ -74,7 +74,7 @@ This is done in two steps :
 
 ## Inlining `toValue` functions
 
-The engine manipulates [values](https://github.com/ArnaudBuchholz/psbots/blob/main/engine/src/api/values/Value.ts) which structure *must* respect a strict definition. There are many places in the code where these values must be created.
+The engine manipulates [values](https://github.com/ArnaudBuchholz/psbots/blob/main/engine/src/api/values/Value.ts) which structure *must* respect a strict definition. There are many places in the code where these values are created.
 
 To avoid error while using literal objects, [helper functions](https://github.com/ArnaudBuchholz/psbots/blob/main/engine/src/sdk/toValue.ts) were created to convert primitive types (numbers, strings...) into values.
 
@@ -103,7 +103,7 @@ export function toIntegerValue(integer: number): Result<Value<'integer'>> {
 
 Indeed there are situations where the value cannot be represented as an integer. As stated previously, when adding two big numbers, the result may be greater than the `Number.MAX_SAFE_INTEGER` limit.
 
-On the other hand, there are situations where the engine knows that the value is an integer and respects the defined limits. For instance, the [`count` operator] returns the operand stack size. This number is positive and cannot go beyond the limit (unless the system has infinite memory).
+On the other hand, there are situations where the engine knows that the integer value respects the defined limits. For instance, the [`count` operator] returns the operand stack size. This number is positive and cannot go beyond the limit (or it means that the hosting system has infinite memory).
 
 In that case, the code does not test directly the returned result. Instead, an [`assert`] is used.
 
@@ -115,7 +115,7 @@ In that case, the code does not test directly the returned result. Instead, an [
 
 > Core implementation of the [`count` operator]
 
-Whenever the [`toIntegerValue`] function is directly followed by an [`assert`], it is safe to replace it with the literal object implementation.
+Whenever the [`toIntegerValue`] function is directly followed by an [`assert`], it is safe to replace it with the literal object result *(skipping the condition at the beginning of the function body)*.
 
 ## Inlining patterns
 
@@ -156,9 +156,9 @@ cycle() {
 
 > core cycle implementation
 
-These functions are implemented in different modules, focusing on only one aspect of the cycle :
+These functions are implemented in different modules, each one focusing on one aspect of the cycle :
 
-* `operatorCycle` inside [`operator.ts`](https://github.com/ArnaudBuchholz/psbots/blob/main/engine/src/core/state/operator.ts)
+* `operatorPop` and `operatorCycle` inside [`operator.ts`](https://github.com/ArnaudBuchholz/psbots/blob/main/engine/src/core/state/operator.ts)
 * `callCycle` inside [`call.ts`](https://github.com/ArnaudBuchholz/psbots/blob/main/engine/src/core/state/call.ts)
 * `blockCycle` inside [`block.ts`](https://github.com/ArnaudBuchholz/psbots/blob/main/engine/src/core/state/block.ts)
 * `parseCycle` inside [`parse.ts`](https://github.com/ArnaudBuchholz/psbots/blob/main/engine/src/core/state/parse.ts)
@@ -169,10 +169,7 @@ These functions are implemented in different modules, focusing on only one aspec
 These dependencies are illustrated in the following graph :
 
 ```mermaid
-graph
-  subgraph "sdk/assert.ts"
-    assert("📦&nbsp;assert");
-  end
+graph LR
   subgraph "core/state/operator.ts"
     operatorPop("📦&nbsp;operatorPop");
   end
@@ -190,12 +187,6 @@ graph
   end
   subgraph "core/state/State.ts"
     State("📦&nbsp;_class_&nbsp;State")
-    State --- _checkIfDestroyed("State::_checkIfDestroyed");
-    _checkIfDestroyed --> assert;
-    State --- destroy("State::destroy");
-    destroy --> assert;
-    State --- raiseException("State::raiseException");
-    raiseException --> assert;
     State --- cycle("State::cycle");
     cycle --> operatorPop;
     cycle --> operatorCycle;
@@ -212,13 +203,16 @@ graph
 
 In order to analyze *if* and *how* a function can be inlined, there are several aspects of the function implementation that must be considered :
 
-* **placement** : the function can be inlined only if represented as a `CallExpression` directly under an `ExpressionStatement`, any other configuration requires more complex handling (for instance: when called within a condition or a mathematical expression),
+* **Location** : the function can be inlined only if called as a `CallExpression` directly under an `ExpressionStatement` itself contained in a `BlockStatement`. Any other configuration requires more complex handling, for instance:
+	* when called within a condition,
+	* when part of a mathematical expression,
+	* ...
 * **Parameters** : when the function is inlined, it must receive values from the initial calling function,
-* **Returned value** : the function *may* return a value, the calling function might use this value either to assign a variable or directly in a statement,
-* **Early exits** : the function *may* use the `return` keyword to exit prematurely,
+* **Returned value** : the function *may* return a value, the calling function *may* use this value to assign a variable,
+* **Early exits** : the function *may* use the `return` keyword to exit prematurely from its control flow,
 * **Loops** : as early exits might generate complexity in the
 
-> [!IMPORTANT]
+> [!IMPORTANT]
 > Ideally, other considerations should be added such as :
 > * **asynchronous** : is the function to inline an async one ...
 > * **ExpressionStatement** : 
