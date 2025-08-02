@@ -203,13 +203,36 @@ graph LR
 
 In order to analyze *if* and *how* a function can be inlined, there are several aspects of the function implementation that must be considered :
 
-* **Location** : the function can be inlined only if *called* as a `CallExpression` directly under an `ExpressionStatement` itself contained in a `BlockStatement`. Any other configuration requires more complex handling, for instance:
-	* when called within a condition,
-	* when part of a mathematical expression,
-	* ...
+* **Location** : the function can be inlined when called in a specific context (see examples right after):
+  * It must be within a `BlockStatement`,
+  * The `CallExpression` can be either :
+    * A direct child of an `ExpressionStatement`
+    * The `init` part of a `VariableDeclarator`,
+    * The `argument` of a `ReturnStatement`.
 
 > [!NOTE]
-> This is based on the *current* need. This *may* be extended. In particular, if a function is called in a `ReturnStatement`, some of the following technics *could* be applied.
+> These are the limits of the current requirements. It has been identified that other locations require complex handling, for instance :
+>
+> * when called within a condition,
+> * when part of a mathematical expression,
+> * ...
+
+```JavaScript
+function inline() {}
+
+function main() {
+  inline(); // direct child of an ExpressionStatement
+  const a = inline(); // init part of a VariableDeclarator
+  return inline(); // argument of a ReturnStatement
+}
+
+function ignored() {
+  if (inline() || inline()) {}
+  const a = 2 * inline();
+}
+```
+
+> Examples of valid and ignored locations (same in [AST Explorer](https://astexplorer.net/#/gist/caadeaeeb3e58817b7576803a4c545d4/83b1e9093e0b1ac3fea071140324c23a4bba1e59))
 
 * **Parameters** : when the function is inlined, it must receive values from the call that has been replaced,
 
@@ -221,20 +244,21 @@ In order to analyze *if* and *how* a function can be inlined, there are several 
 
 > [!IMPORTANT]
 > Ideally, other considerations *could* be added such as :
-> * **Asynchronous** : when the function to inline is an `async` one, the caller is expected to use the `await` instruction (hence the caller itself is also an `async` function). This means no extra effort is expected. However, if the calling method is not asynchronous then it complexifies (a lot) the inlining. In the engine, all methods are synchronous.
+>
+> * **Asynchronous** : when the function to inline is an `async` one, the caller is expected to use the `await` instruction (hence the caller itself is also an `async` function). This means no extra effort is expected. However, if the calling method is not asynchronous then it complexifies (a lot) the inlining. In the engine, all the functions and methods are synchronous.
 > * **Recursive** : a recursive function *could* be inlined by changing the structure of the function itself. However, this is beyond the scope of this analysis.
 
 ### Fundamental patterns
 
 > These patterns are expressed in JavaScript not only to simplify the code but also because the optimization is applied on JavaScript sources.
 
-#### Block inlining
+#### Basic
 
 A function with no parameters or `return` statement is inlined in a `BlockStatement` reproducing the content of the function.
 Within this new scope, variables (`let` or `const`) *may* shadow parent scope's symbols but this does not affect the inlined content.
 
 > [!IMPORTANT]
-> The optimized codebase does not use any `var` statement or nested function that could collide with the parent scope.
+> The optimized codebase does not use any `var` statement or nested function that could collide with the parent scope.
 
 | Term           | Definition                                                     |
 | -------------- | -------------------------------------------------------------- |
@@ -305,11 +329,38 @@ function main_inline() {
 }
 ```
 
-> parameters inlining example (same in [AST Explorer](https://astexplorer.net/#/gist/8999968c595a13b82e0727e8b00f6d70/38f66fb1ebfe634bcc6693a26b857a150fb01448))
+> Parameters inlining example (same in [AST Explorer](https://astexplorer.net/#/gist/679b77273a505d443f17f758f7824327/56d65569c00485d1987fd083bd95c204c4f370c4))
+
+#### Return value
+
+Similar to parameters, the result value must be transfered using a new `let` variable that receives the inlined function result (the name must be unique within the [parent scope]). This variable is then assigned to the [parent scope] variable (if any).
+
+```JavaScript
+function main() {
+  const result = inline();
+  console.log(result);
+}
+
+function inline() {
+  return Math.random();
+}
+
+/* 🗜🗜🗜 */
+function main_inline() {
+  let __inline_result;
+  {
+    __inline_result = Math.random();
+  }
+  const result = __inline_result;
+  console.log(result);
+}
+```
+
+> Returned value inlining example (same in [AST Explorer](https://astexplorer.net/#/gist/318b5dd89e453338eb304a9211d2be2b/0dc48bb3428cdd5176ad045449223c5f7001fca5))
 
 #### Early exit
 
-Dumping a `return` statement inside the inlined function would break the calling function flow. The statement must be replaced to guarantee that the inlined function flow is interrupted without impacting the calling one.
+Copying a `return` statement inside the inlined function would break the calling function flow. The statement must be replaced to guarantee that the inlined function flow is interrupted *without* impacting the calling one.
 
 One proposal is to wrap the [inline scope] inside a `do {} while(0);` statement and use `break` instructions to exit the loop.
 
@@ -327,7 +378,7 @@ function inline() {
   console.log('5-');
 }
 
-/* Should result in */
+/* 🗜🗜🗜 */
 function main_inline() {
   do {
     if (Math.random() > .5) {
@@ -340,16 +391,17 @@ function main_inline() {
 }
 ```
 
-🚧🚧🚧 Need to create an online example 🚧🚧🚧
-#### Early exit with loops in loops
+> Early exit inlining example (same in [AST Explorer](https://astexplorer.net/#/gist/2ff1e7548efac6cb35049c36f067c141/57e3ff003fb243228d97b4930d8a7fecd709588c))
+
+#### Early exit within a loop
+
+If the inlined function includes a loop or any instruction affected by the `break` statement, it adds another layer of complexity.
+
+One way to solve this problem is to use [JavaScript labels](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/label). The label being in the [parent scope], it must be unique.
 
 ```JavaScript
 function main() {
-  let value = 0;
-  do {
-    const result = inline();
-  } while ()
-  return result + 1;
+  return inline();
 }
 
 function inline() {
@@ -363,20 +415,27 @@ function inline() {
   return 100;
 }
 
-/* Should result in */
+/* 🗜🗜🗜 */
 function main_inline() {
-  let result;
-  do {
-    if (Math.random() > .5) {
-   result = 1;
-   break;
+  let __inline_result;
+  __inline_exit: do {
+    let value = 0;
+    while (value < 100) {
+      if (Math.random() > .5) {
+        __inline_result = value;
+        break __inline_exit;
+      }
+      ++value;
     }
- result = 2;
-  } while (false);
+    __inline_result = 100;
+    break __inline_exit; // Can be optimized 
+  } while (0);
   const result = 1;
-  return result + 1;
+  return __inline_result;
 }
 ```
+
+> Early exit within a loop inlining example (same in [AST Explorer](https://astexplorer.net/#/gist/7b0b2d38b91e517d39b751eac4b23f46/fe6d640344ca8f4e204295b7ec23916858cc8154))
 
 [`assert`]: https://github.com/ArnaudBuchholz/psbots/blob/main/engine/src/sdk/assert.ts "Open source code"
 [`Result`]: https://github.com/ArnaudBuchholz/psbots/blob/main/engine/src/api/Result.ts "Open source code"
@@ -384,5 +443,5 @@ function main_inline() {
 [AST]: https://en.wikipedia.org/wiki/Abstract_syntax_tree "Open documentation"
 [`count` operator]: https://github.com/ArnaudBuchholz/psbots/blob/main/engine/src/core/operators/stacks/operand/count.ts "Open source code"
 
-[parent scope]: #block-inlining "parent scope definition"
-[inline scope]: #block-inlining "inline scope definition"
+[parent scope]: https://github.com/ArnaudBuchholz/psbots/blob/main/docs/engine/Optimizations.md#block-inlining "parent scope definition"
+[inline scope]: https://github.com/ArnaudBuchholz/psbots/blob/main/docs/engine/Optimizations.md#block-inlining "inline scope definition"
