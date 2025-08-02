@@ -111,6 +111,71 @@ const removeAsserts = (ast) => {
   });
 };
 
+let lastId = 0;
+const analyzed = {};
+
+const analyzeForInlining = (itemPath, ast) => {
+  let functions = {};
+  let functionDetails;
+  traverse(ast, {
+    enter(path) {
+      const { node, parent } = path;
+      if (node.type === 'FunctionDeclaration') {
+        functionDetails = {
+          id: ++lastId,
+          name: node.id.name,
+          // body: node.body,
+          exported: path.parentPath.node.type === 'ExportNamedDeclaration',
+          inlinePlaceholders: {}
+        };
+        functions[functionDetails.name] = functionDetails;
+      }
+      if (node.type === 'ArrowFunctionExpression') {
+        functionDetails = {
+          id: ++lastId,
+          name: parent.id?.name ?? '(anonymous arrow)',
+          exported: path.parentPath?.parentPath?.parentPath?.node?.type === 'ExportNamedDeclaration',
+          inlinePlaceholders: {}
+        };
+        functions[functionDetails.name] = functionDetails;
+      }
+      if (node.type === 'ClassMethod') {
+        functionDetails = {
+          id: ++lastId,
+          name: `::${node.key.name}`,
+          exported: false, // Not relevant for being inlined
+          inlinePlaceholders: {}
+        };
+        functions[functionDetails.name] = functionDetails;
+      }
+      // if (
+      //   node.type === 'CallExpression' &&
+      //   node.callee.type === 'MemberExpression' &&
+      //   node.callee.property.name === 'call'
+      // ) {
+      //   const name = node.callee.object.name;
+      //   functionDetails.inlinePlaceholders[name] ??= [];
+      //   functionDetails.inlinePlaceholders[name].push(path);
+      // }
+      if (node.type === 'ReturnStatement') {
+        functionDetails.usesReturn = true;
+        if (node.argument !== null) {
+          functionDetails.returnsValue = true;
+        }
+      }
+    },
+    exit(path) {
+      const { node } = path;
+      if (node.type === 'FunctionDeclaration') {
+        functionDetails = null;
+      }
+    }
+  });
+  if (Object.keys(functions).length > 0) {
+    analyzed[itemPath] = functions;
+  }
+};
+
 const optimize = async (basePath, path = basePath) => {
   if (/\bperf\b/.test(path)) {
     return;
@@ -130,6 +195,7 @@ const optimize = async (basePath, path = basePath) => {
 
       inlineToIntegerValue(ast);
       removeAsserts(ast);
+      analyzeForInlining(itemPath, ast);
 
       await writeFile(join(perfPath, name.replace('.js', '.optimized.ast')), JSON.stringify(ast, null, 2), {
         encoding: 'utf8'
@@ -145,54 +211,4 @@ const optimize = async (basePath, path = basePath) => {
 };
 await optimize('dist');
 
-const extractInlinedCycleFunction = async (name) => {
-  const source = await readFile(`dist/perf/core/state/${name}.js`, 'utf8');
-  const ast = parse(source, { sourceType: 'module' });
-  let functions = {};
-  let functionDetails;
-  traverse(ast, {
-    enter(path) {
-      const { node } = path;
-      cleanAstNode(node);
-      if (node.type === 'FunctionDeclaration') {
-        functionDetails = {
-          name: node.id.name,
-          body: node.body,
-          exported: path.parentPath.node.type === 'ExportNamedDeclaration',
-          inlinePlaceholders: {}
-        };
-        functions[node.id.name] = functionDetails;
-      }
-      if (
-        node.type === 'CallExpression' &&
-        node.callee.type === 'MemberExpression' &&
-        node.callee.property.name === 'call'
-      ) {
-        const name = node.callee.object.name;
-        functionDetails.inlinePlaceholders[name] ??= [];
-        functionDetails.inlinePlaceholders[name].push(path);
-      }
-      if (node.type === 'ReturnStatement') {
-        functionDetails.usesReturn = true;
-        if (node.argument !== null) {
-          functionDetails.returnsValue = true;
-        }
-      }
-    },
-    exit(path) {
-      const { node } = path;
-      if (node.type === 'FunctionDeclaration') {
-        functionDetails = null;
-      }
-    }
-  });
-  const failed = () => {
-    throw new Error(`Not able to find ${name}Cycle in dist/perf/core/state/${name}.js: ${Object.keys(functions)}`);
-  };
-  return functions[`${name}Cycle`] ?? failed();
-};
-
-const blockCycle = await extractInlinedCycleFunction('block');
-const callCycle = await extractInlinedCycleFunction('call');
-const operatorCycle = await extractInlinedCycleFunction('operator');
-console.log(blockCycle, callCycle, operatorCycle);
+await writeFile('dist/perf/analyzed.json', JSON.stringify(analyzed, null, 2), 'utf8');
