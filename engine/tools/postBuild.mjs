@@ -114,60 +114,109 @@ const removeAsserts = (ast) => {
 let lastId = 0;
 const analyzed = {};
 
+const uniquePathId = (path) => {
+  let currentPath = path;
+  const pathParts = [];
+  while (currentPath) {
+    const key = currentPath.key;
+    // path.inList is true if the container is an array
+    if (currentPath.inList) {
+      pathParts.unshift(`[${key}]`);
+    } else if (currentPath.parentPath) {
+      pathParts.unshift(`.${key}`);
+    } else {
+      pathParts.unshift(key);
+    }
+    currentPath = currentPath.parentPath;
+  }
+  return pathParts.join('');
+}
+
+const functionStatements = ['FunctionDeclaration', 'ArrowFunctionExpression', 'ClassMethod'];
+const breakableStatements = ['WhileStatement', 'DoWhileStatement', 'ForStatement', 'ForOfStatement', 'ForInStatement', 'SwitchStatement'];
+
 const analyzeForInlining = (itemPath, ast) => {
-  let functions = {};
+  const functions = {};
+  const functionsStack = []; 
   let functionDetails;
+  let inBreakableStatement = 0;
   traverse(ast, {
     enter(path) {
       const { node, parent } = path;
       if (node.type === 'FunctionDeclaration') {
         functionDetails = {
           id: ++lastId,
+          pathId: uniquePathId(path),
           name: node.id.name,
-          // body: node.body,
-          exported: path.parentPath.node.type === 'ExportNamedDeclaration',
-          inlinePlaceholders: {}
+          exported: path.parentPath.node.type === 'ExportNamedDeclaration'
         };
         functions[functionDetails.name] = functionDetails;
+        functionsStack.push(functionDetails);
       }
       if (node.type === 'ArrowFunctionExpression') {
         functionDetails = {
           id: ++lastId,
+          pathId: uniquePathId(path),
           name: parent.id?.name ?? '(anonymous arrow)',
-          exported: path.parentPath?.parentPath?.parentPath?.node?.type === 'ExportNamedDeclaration',
-          inlinePlaceholders: {}
+          exported: path.parentPath?.parentPath?.parentPath?.node?.type === 'ExportNamedDeclaration'
         };
         functions[functionDetails.name] = functionDetails;
+        functionsStack.push(functionDetails);
       }
       if (node.type === 'ClassMethod') {
         functionDetails = {
           id: ++lastId,
+          pathId: uniquePathId(path),
           name: `::${node.key.name}`,
-          exported: false, // Not relevant for being inlined
-          inlinePlaceholders: {}
+          exported: false // Not relevant for being inlined
         };
         functions[functionDetails.name] = functionDetails;
+        functionsStack.push(functionDetails);
       }
-      // if (
-      //   node.type === 'CallExpression' &&
-      //   node.callee.type === 'MemberExpression' &&
-      //   node.callee.property.name === 'call'
-      // ) {
-      //   const name = node.callee.object.name;
-      //   functionDetails.inlinePlaceholders[name] ??= [];
-      //   functionDetails.inlinePlaceholders[name].push(path);
-      // }
+      if (breakableStatements.includes(node.type)) {
+        ++inBreakableStatement;
+      }
       if (node.type === 'ReturnStatement') {
-        functionDetails.usesReturn = true;
-        if (node.argument !== null) {
-          functionDetails.returnsValue = true;
+        if (inBreakableStatement) {
+          functionDetails.needBreakLabel = true;
+        }
+        try {
+          functionDetails.useReturn = true;
+          if (node.argument !== null) {
+            functionDetails.returnValue = true;
+          }
+        } catch (e) {
+          console.error(itemPath, uniquePathId(path));
+          throw e;
+        }
+      }
+      if (functionDetails && (node.type === 'CallExpression' && node.callee.type === 'Identifier')) {
+        const { name } = node.callee;
+        let inlineIsPossible = false;
+        if (path.parentPath.node.type === 'ExpressionStatement') {
+          inlineIsPossible = true;
+        }
+        if (inlineIsPossible) {
+          if (!functionDetails.inlinePlaceholders) {
+            functionDetails.inlinePlaceholders = {};
+          }
+          functionDetails.inlinePlaceholders[name] ??= [];
+          functionDetails.inlinePlaceholders[name].push({
+            id: ++lastId,
+            pathId: uniquePathId(path),
+            name
+          });
         }
       }
     },
     exit(path) {
       const { node } = path;
-      if (node.type === 'FunctionDeclaration') {
-        functionDetails = null;
+      if (functionStatements.includes(node.type)) {
+        functionsStack.pop();
+        functionDetails = functionsStack.length ? functionsStack.at(-1) : null;
+      }
+      if (breakableStatements.includes(node.type)) {
+        --inBreakableStatement;
       }
     }
   });
