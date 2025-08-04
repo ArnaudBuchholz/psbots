@@ -221,8 +221,7 @@ const analyzeForInlining = (itemPath, ast) => {
           functionDetails.inlinePlaceholders[name] ??= [];
           functionDetails.inlinePlaceholders[name].push({
             id: ++lastId,
-            pathId: uniquePathId(path),
-            name
+            pathId: uniquePathId(path)
           });
         }
       }
@@ -239,7 +238,7 @@ const analyzeForInlining = (itemPath, ast) => {
     }
   });
   if (Object.keys(functions).length > 0) {
-    analyzed[itemPath] = functions;
+    analyzed[itemPath.replaceAll('\\', '/')] = functions;
   }
 };
 
