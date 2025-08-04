@@ -130,17 +130,25 @@ const uniquePathId = (path) => {
     currentPath = currentPath.parentPath;
   }
   return pathParts.join('');
-}
+};
 
-const functionStatements = ['FunctionDeclaration', 'ArrowFunctionExpression', 'ClassMethod'];
-const breakableStatements = ['WhileStatement', 'DoWhileStatement', 'ForStatement', 'ForOfStatement', 'ForInStatement', 'SwitchStatement'];
+const functionStatements = new Set(['FunctionDeclaration', 'ArrowFunctionExpression', 'ObjectMethod', 'ClassMethod']);
+const breakableStatements = new Set([
+  'WhileStatement',
+  'DoWhileStatement',
+  'ForStatement',
+  'ForOfStatement',
+  'ForInStatement',
+  'SwitchStatement'
+]);
 
 const analyzeForInlining = (itemPath, ast) => {
   const functions = {};
-  const functionsStack = []; 
+  const functionsStack = [];
   let functionDetails;
   let inBreakableStatement = 0;
   traverse(ast, {
+    // eslint-disable-next-line sonarjs/cognitive-complexity -- will be improved later
     enter(path) {
       const { node, parent } = path;
       if (node.type === 'FunctionDeclaration') {
@@ -149,6 +157,16 @@ const analyzeForInlining = (itemPath, ast) => {
           pathId: uniquePathId(path),
           name: node.id.name,
           exported: path.parentPath.node.type === 'ExportNamedDeclaration'
+        };
+        functions[functionDetails.name] = functionDetails;
+        functionsStack.push(functionDetails);
+      }
+      if (node.type === 'ObjectMethod') {
+        functionDetails = {
+          id: ++lastId,
+          pathId: uniquePathId(path),
+          name: node.key.name,
+          exported: false
         };
         functions[functionDetails.name] = functionDetails;
         functionsStack.push(functionDetails);
@@ -173,7 +191,7 @@ const analyzeForInlining = (itemPath, ast) => {
         functions[functionDetails.name] = functionDetails;
         functionsStack.push(functionDetails);
       }
-      if (breakableStatements.includes(node.type)) {
+      if (breakableStatements.has(node.type)) {
         ++inBreakableStatement;
       }
       if (node.type === 'ReturnStatement') {
@@ -185,12 +203,12 @@ const analyzeForInlining = (itemPath, ast) => {
           if (node.argument !== null) {
             functionDetails.returnValue = true;
           }
-        } catch (e) {
+        } catch (error) {
           console.error(itemPath, uniquePathId(path));
-          throw e;
+          throw error;
         }
       }
-      if (functionDetails && (node.type === 'CallExpression' && node.callee.type === 'Identifier')) {
+      if (functionDetails && node.type === 'CallExpression' && node.callee.type === 'Identifier') {
         const { name } = node.callee;
         let inlineIsPossible = false;
         if (path.parentPath.node.type === 'ExpressionStatement') {
@@ -211,11 +229,11 @@ const analyzeForInlining = (itemPath, ast) => {
     },
     exit(path) {
       const { node } = path;
-      if (functionStatements.includes(node.type)) {
+      if (functionStatements.has(node.type)) {
         functionsStack.pop();
-        functionDetails = functionsStack.length ? functionsStack.at(-1) : null;
+        functionDetails = functionsStack.length > 0 ? functionsStack.at(-1) : null;
       }
-      if (breakableStatements.includes(node.type)) {
+      if (breakableStatements.has(node.type)) {
         --inBreakableStatement;
       }
     }
