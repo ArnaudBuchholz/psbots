@@ -214,19 +214,19 @@ export class State implements IInternalState {
     const { top } = calls;
     if (this._exception) {
       if (top.type === 'operator') {
-        operatorPop.call(this, top);
+        operatorPop(this, top);
       } else {
         calls.pop();
       }
     } else if (top.isExecutable) {
       if (top.type === 'operator') {
-        operatorCycle.call(this, top);
+        operatorCycle(this, top);
       } else if (top.type === 'name') {
-        callCycle.call(this, top);
+        callCycle(this, top);
       } else if (top.type === 'array') {
-        blockCycle.call(this, top);
+        blockCycle(this, top);
       } else if (top.type === 'string') {
-        parseCycle.call(this, top);
+        parseCycle(this, top);
       } else {
         assert(false, 'Unsupported executable value');
       }

@@ -6,8 +6,7 @@ import type { MemoryTracker } from '@core/MemoryTracker.js';
 
 const UNKNOWN_FILENAME = 'unknown';
 
-function getToken(this: IInternalState, top: Value<'string'>): Value | undefined {
-  const { calls } = this;
+function getToken({ calls }: IInternalState, top: Value<'string'>): Value | undefined {
   if (calls.topOperatorState === OPERATOR_STATE_UNKNOWN) {
     calls.topOperatorState = OPERATOR_STATE_FIRST_CALL;
     const [first] = parse(top.string, { pos: 0, filename: top.debugSource?.filename ?? UNKNOWN_FILENAME });
@@ -21,9 +20,9 @@ function getToken(this: IInternalState, top: Value<'string'>): Value | undefined
   }
 }
 
-function enqueueToken(this: IInternalState, top: Value) {
-  const { calls, operands } = this;
-  const memoryTracker = this.memoryTracker as MemoryTracker;
+function enqueueToken(state: IInternalState, top: Value) {
+  const { calls, operands } = state;
+  const memoryTracker = state.memoryTracker as MemoryTracker;
   const { pos } = top.debugSource!; // as filename is specified
   if (pos > 0) {
     calls.topOperatorState = pos;
@@ -39,7 +38,7 @@ function enqueueToken(this: IInternalState, top: Value) {
     string = valuesOf(top)[0];
     const result = memoryTracker.addStringRef(string);
     if (!result.success) {
-      this.raiseException(result.exception);
+      state.raiseException(result.exception);
       return;
     }
     Object.assign(top, { tracker: memoryTracker });
@@ -49,15 +48,15 @@ function enqueueToken(this: IInternalState, top: Value) {
     memoryTracker.releaseString(string);
   }
   if (!pushed.success) {
-    this.raiseException(pushed.exception);
+    state.raiseException(pushed.exception);
   }
 }
 
-export function parseCycle(this: IInternalState, top: Value<'string'>): void {
-  const { calls } = this;
-  const token = getToken.call(this, top);
+export function parseCycle(state: IInternalState, top: Value<'string'>): void {
+  const { calls } = state;
+  const token = getToken(state, top);
   if (token) {
-    enqueueToken.call(this, token);
+    enqueueToken(state, token);
   } else {
     calls.pop();
   }

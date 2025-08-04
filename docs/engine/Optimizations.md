@@ -131,19 +131,19 @@ cycle() {
     const { top } = calls;
     if (this._exception) {
       if (top.type === 'operator') {
-        operatorPop.call(this, top);
+        operatorPop(this, top);
       } else {
         calls.pop();
       }
     } else if (top.isExecutable) {
       if (top.type === 'operator') {
-        operatorCycle.call(this, top);
+        operatorCycle(this, top);
       } else if (top.type === 'name') {
-        callCycle.call(this, top);
+        callCycle(this, top);
       } else if (top.type === 'array') {
-        blockCycle.call(this, top);
+        blockCycle(this, top);
       } else if (top.type === 'string') {
-        parseCycle.call(this, top);
+        parseCycle(this, top);
       } else {
         assert(false, 'Unsupported executable value');
       }
@@ -162,9 +162,6 @@ These functions are implemented in different modules, each one focusing on one a
 * `callCycle` inside [`call.ts`](https://github.com/ArnaudBuchholz/psbots/blob/main/engine/src/core/state/call.ts)
 * `blockCycle` inside [`block.ts`](https://github.com/ArnaudBuchholz/psbots/blob/main/engine/src/core/state/block.ts)
 * `parseCycle` inside [`parse.ts`](https://github.com/ArnaudBuchholz/psbots/blob/main/engine/src/core/state/parse.ts)
-
-> [!IMPORTANT]
-> To prepare for the inlining process, these functions were refactored to use the `.call` syntax. As a result, each function has a common signature and can access `this` as in the main method.
 
 These dependencies are illustrated in the following graph :
 
