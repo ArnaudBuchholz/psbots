@@ -1,6 +1,6 @@
 /* eslint-env node */
 import { readdir, readFile, stat, writeFile, mkdir } from 'node:fs/promises';
-import { join } from 'node:path';
+import { join, dirname } from 'node:path';
 import assert from 'node:assert/strict';
 import { parse } from '@babel/parser';
 import { generate } from '@babel/generator';
@@ -146,51 +146,60 @@ const breakableStatements = new Set([
 const analyzeForInlining = (itemPath, ast) => {
   const functions = {};
   const functionsStack = [];
+  const imported = {};
   let functionDetails;
   let inBreakableStatement = 0;
+
+  const buildFunctionDetails = (path, details) => {
+    functionDetails = {
+      id: ++lastId,
+      pathId: uniquePathId(path),
+      exported: false,
+      ...details
+    };
+    functions[functionDetails.name] = functionDetails;
+    functionsStack.push(functionDetails);
+  };
+
   traverse(ast, {
     // eslint-disable-next-line sonarjs/cognitive-complexity -- will be improved later
     enter(path) {
       const { node, parent } = path;
+      if (node.type === 'ImportDeclaration') {
+        const path = join(dirname(itemPath), node.source.value).replaceAll('\\', '/');
+        for (const declaration of node.specifiers) {
+          assert.strictEqual(declaration.imported.name, declaration.local.name);
+          imported[declaration.imported.name] = path;
+        }
+      }
+      if (node.type === 'Identifier') {
+        const importedFrom = imported[node.name];
+        if (importedFrom && functionDetails) {
+          functionDetails.imports ??= {};
+          functionDetails.imports[node.name] = importedFrom;
+        }
+      }
       if (node.type === 'FunctionDeclaration') {
-        functionDetails = {
-          id: ++lastId,
-          pathId: uniquePathId(path),
+        buildFunctionDetails(path, {
           name: node.id.name,
           exported: path.parentPath.node.type === 'ExportNamedDeclaration'
-        };
-        functions[functionDetails.name] = functionDetails;
-        functionsStack.push(functionDetails);
+        });
       }
       if (node.type === 'ObjectMethod') {
-        functionDetails = {
-          id: ++lastId,
-          pathId: uniquePathId(path),
-          name: node.key.name,
-          exported: false
-        };
-        functions[functionDetails.name] = functionDetails;
-        functionsStack.push(functionDetails);
+        buildFunctionDetails(path, {
+          name: node.key.name
+        });
       }
       if (node.type === 'ArrowFunctionExpression') {
-        functionDetails = {
-          id: ++lastId,
-          pathId: uniquePathId(path),
+        buildFunctionDetails(path, {
           name: parent.id?.name ?? '(anonymous arrow)',
           exported: path.parentPath?.parentPath?.parentPath?.node?.type === 'ExportNamedDeclaration'
-        };
-        functions[functionDetails.name] = functionDetails;
-        functionsStack.push(functionDetails);
+        });
       }
       if (node.type === 'ClassMethod') {
-        functionDetails = {
-          id: ++lastId,
-          pathId: uniquePathId(path),
-          name: `::${node.key.name}`,
-          exported: false // Not relevant for being inlined
-        };
-        functions[functionDetails.name] = functionDetails;
-        functionsStack.push(functionDetails);
+        buildFunctionDetails(path, {
+          name: `::${node.key.name}`
+        });
       }
       if (breakableStatements.has(node.type)) {
         ++inBreakableStatement;
@@ -239,7 +248,7 @@ const analyzeForInlining = (itemPath, ast) => {
     }
   });
   if (Object.keys(functions).length > 0) {
-    analyzed[itemPath.replaceAll('\\', '/')] = functions;
+    analyzed[itemPath] = functions;
   }
 };
 
@@ -254,7 +263,7 @@ const optimize = async (basePath, path = basePath) => {
   await buildToIntegerValueAST();
 
   for (const name of names) {
-    const itemPath = join(path, name);
+    const itemPath = join(path, name).replaceAll('\\', '/');
     if (name.endsWith('.js')) {
       const source = await readFile(itemPath, 'utf8');
       const ast = parse(source, { sourceType: 'module' });
@@ -280,9 +289,9 @@ await optimize('dist');
 
 await writeFile('dist/perf/analyzed.json', JSON.stringify(analyzed, null, 2), 'utf8');
 
-const inline = async (itemPath, targetFunctionName, functionNameToInline) => {
-  const perf = (path) => path.replace('dist/', 'dist/perf/');
+const perf = (path) => path.replace('dist/', 'dist/perf/');
 
+const inline = async (itemPath, targetFunctionName, functionNameToInline) => {
   let functionToInline;
   let sourceOfFunctionToInline;
   for (const [sourcePath, functions] of Object.entries(analyzed)) {
@@ -315,7 +324,7 @@ const inline = async (itemPath, targetFunctionName, functionNameToInline) => {
         const key = path.parentPath.key;
         assert.strictEqual(typeof key, 'number');
         let inlineAst = [];
-        for (const [index, parameter] of Object.entries(sourceFunctionAst.params)) {
+        for (const [index] of Object.entries(sourceFunctionAst.params)) {
           const ast = parse(`const __${functionNameToInline}_arg${index} = '';`).program.body[0];
           ast.declarations[0].init = path.node.arguments[index];
           inlineAst.push(ast);
