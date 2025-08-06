@@ -286,7 +286,7 @@ function main_inline() {
 
 > Block inlining example (same in [AST Explorer](https://astexplorer.net/#/gist/ea9de8f7be84ed27ae6cf112e61d32e5/eb9f7e6e2c52ac2c55768c695d7135ebad7ec6f1))
 
-### Parameters
+#### Parameters
 
 Parameters are transmitted in two steps :
 
