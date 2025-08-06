@@ -1,6 +1,7 @@
 /* eslint-env node */
 import { readdir, readFile, stat, writeFile, mkdir } from 'node:fs/promises';
 import { join } from 'node:path';
+import assert from 'node:assert/strict';
 import { parse } from '@babel/parser';
 import { generate } from '@babel/generator';
 import _traverse from '@babel/traverse';
@@ -278,3 +279,64 @@ const optimize = async (basePath, path = basePath) => {
 await optimize('dist');
 
 await writeFile('dist/perf/analyzed.json', JSON.stringify(analyzed, null, 2), 'utf8');
+
+const inline = async (itemPath, targetFunctionName, functionNameToInline) => {
+  const perf = (path) => path.replace('dist/', 'dist/perf/');
+
+  let functionToInline;
+  let sourceOfFunctionToInline;
+  for (const [sourcePath, functions] of Object.entries(analyzed)) {
+    if (functions[functionNameToInline]) {
+      functionToInline = functions[functionNameToInline];
+      sourceOfFunctionToInline = sourcePath;
+      break;
+    }
+  }
+  const sourceAst = parse(await readFile(perf(sourceOfFunctionToInline), 'utf8'), { sourceType: 'module' });
+  let sourceFunctionAst;
+  traverse(sourceAst, {
+    enter(path) {
+      if (uniquePathId(path) === functionToInline.pathId) {
+        sourceFunctionAst = path.node;
+        path.stop();
+      }
+    }
+  });
+  
+  const targetAst = parse(await readFile(perf(itemPath), 'utf8'), { sourceType: 'module' });
+  const targetFunction = analyzed[itemPath][targetFunctionName];
+  const inlinePlaceholders = targetFunction.inlinePlaceholders[functionNameToInline];
+  traverse(targetAst, {
+    enter(path) {
+      const inlinePlaceholder = inlinePlaceholders.find(({ pathId }) => uniquePathId(path) === pathId);
+      if (inlinePlaceholder) {
+        const blockStatement = path.parentPath.parentPath.node;
+        assert.strictEqual(blockStatement.type, 'BlockStatement');
+        const key = path.parentPath.key;
+        assert.strictEqual(typeof key, 'number');
+        let inlineAst = [];
+        for (const [index, param] of Object.entries(sourceFunctionAst.params)) {
+          const ast = parse(`const __${functionNameToInline}_arg${index} = '';`).program.body[0];
+          ast.declarations[0].init = path.node.arguments[index];
+          inlineAst.push(ast);
+        }
+        const inlineStatement = {
+          type: 'BlockStatement',
+          body: []
+        };
+        inlineAst.push(inlineStatement);
+        for (const [index, param] of Object.entries(sourceFunctionAst.params)) {
+          const ast = parse(`let ${param.name} = __${functionNameToInline}_arg${index};`).program.body[0];
+          inlineStatement.body.push(ast);
+        }
+        inlineStatement.body.push(...sourceFunctionAst.body.body);
+        blockStatement.body.splice(key, 1, ...inlineAst);
+      }
+    }
+  });
+
+  await writeFile(perf(itemPath), generate(targetAst).code, { encoding: 'utf8' });
+}
+
+await inline ('dist/core/state/State.js', '::cycle', 'operatorPop');
+
