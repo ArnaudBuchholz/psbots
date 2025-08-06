@@ -1,6 +1,6 @@
 /* eslint-env node */
 import { readdir, readFile, stat, writeFile, mkdir } from 'node:fs/promises';
-import { join, dirname } from 'node:path';
+import { join, dirname, relative } from 'node:path';
 import assert from 'node:assert/strict';
 import { parse } from '@babel/parser';
 import { generate } from '@babel/generator';
@@ -312,11 +312,21 @@ const inline = async (itemPath, targetFunctionName, functionNameToInline) => {
     }
   });
 
+  let imports;
+  if (functionToInline.imports) {
+    imports = { ...functionToInline.imports };
+    for (const [name, path] of Object.entries(imports)) {
+      imports[name] = relative(dirname(itemPath), path).replaceAll(/\\/g, '/');
+    }
+  }
+
   const targetAst = parse(await readFile(perf(itemPath), 'utf8'), { sourceType: 'module' });
   const targetFunction = analyzed[itemPath][targetFunctionName];
   const inlinePlaceholders = targetFunction.inlinePlaceholders[functionNameToInline];
   traverse(targetAst, {
     enter(path) {
+      // TODO: check existing ImportDeclaration to see if source matches the import paths, add and/or delete imported members
+      // TODO: when no more ImportDeclaration, checks if remaining imports to add new ImportDeclaration
       const inlinePlaceholder = inlinePlaceholders.find(({ pathId }) => uniquePathId(path) === pathId);
       if (inlinePlaceholder) {
         const blockStatement = path.parentPath.parentPath.node;
