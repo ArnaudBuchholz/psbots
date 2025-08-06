@@ -302,7 +302,7 @@ const inline = async (itemPath, targetFunctionName, functionNameToInline) => {
       }
     }
   });
-  
+
   const targetAst = parse(await readFile(perf(itemPath), 'utf8'), { sourceType: 'module' });
   const targetFunction = analyzed[itemPath][targetFunctionName];
   const inlinePlaceholders = targetFunction.inlinePlaceholders[functionNameToInline];
@@ -315,7 +315,7 @@ const inline = async (itemPath, targetFunctionName, functionNameToInline) => {
         const key = path.parentPath.key;
         assert.strictEqual(typeof key, 'number');
         let inlineAst = [];
-        for (const [index, param] of Object.entries(sourceFunctionAst.params)) {
+        for (const [index, parameter] of Object.entries(sourceFunctionAst.params)) {
           const ast = parse(`const __${functionNameToInline}_arg${index} = '';`).program.body[0];
           ast.declarations[0].init = path.node.arguments[index];
           inlineAst.push(ast);
@@ -325,8 +325,8 @@ const inline = async (itemPath, targetFunctionName, functionNameToInline) => {
           body: []
         };
         inlineAst.push(inlineStatement);
-        for (const [index, param] of Object.entries(sourceFunctionAst.params)) {
-          const ast = parse(`let ${param.name} = __${functionNameToInline}_arg${index};`).program.body[0];
+        for (const [index, parameter] of Object.entries(sourceFunctionAst.params)) {
+          const ast = parse(`let ${parameter.name} = __${functionNameToInline}_arg${index};`).program.body[0];
           inlineStatement.body.push(ast);
         }
         inlineStatement.body.push(...sourceFunctionAst.body.body);
@@ -336,7 +336,6 @@ const inline = async (itemPath, targetFunctionName, functionNameToInline) => {
   });
 
   await writeFile(perf(itemPath), generate(targetAst).code, { encoding: 'utf8' });
-}
+};
 
-await inline ('dist/core/state/State.js', '::cycle', 'operatorPop');
-
+await inline('dist/core/state/State.js', '::cycle', 'operatorPop');
