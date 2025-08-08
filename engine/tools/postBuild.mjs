@@ -314,19 +314,56 @@ const inline = async (itemPath, targetFunctionName, functionNameToInline) => {
 
   let imports;
   if (functionToInline.imports) {
-    imports = { ...functionToInline.imports };
-    for (const [name, path] of Object.entries(imports)) {
-      imports[name] = relative(dirname(itemPath), path).replaceAll(/\\/g, '/');
+    imports = {};
+    for (const [name, path] of Object.entries(functionToInline.imports)) {
+      const adjustedPath = relative(dirname(itemPath), path).replaceAll('\\', '/');
+      if (!imports[adjustedPath]) {
+        imports[adjustedPath] = [];
+      }
+      imports[adjustedPath].push(name);
     }
   }
 
   const targetAst = parse(await readFile(perf(itemPath), 'utf8'), { sourceType: 'module' });
   const targetFunction = analyzed[itemPath][targetFunctionName];
   const inlinePlaceholders = targetFunction.inlinePlaceholders[functionNameToInline];
+  let pathForRemainingImports;
   traverse(targetAst, {
+    // eslint-disable-next-line sonarjs/cognitive-complexity -- will be improved later
     enter(path) {
-      // TODO: check existing ImportDeclaration to see if source matches the import paths, add and/or delete imported members
-      // TODO: when no more ImportDeclaration, checks if remaining imports to add new ImportDeclaration
+      const { node } = path;
+
+      removeImport(path, functionNameToInline);
+      if (node.type === 'ImportDeclaration') {
+        const importPath = node.source.value;
+        if (imports[importPath]) {
+          for (const name of imports[importPath]) {
+            const alreadyImported = node.specifiers.some((declaration) => declaration.imported.name === name);
+            if (!alreadyImported) {
+              node.specifiers.push({
+                type: 'ImportSpecifier',
+                imported: {
+                  type: 'Identifier',
+                  name
+                },
+                local: {
+                  type: 'Identifier',
+                  name
+                }
+              });
+            }
+          }
+          delete imports[importPath];
+        }
+        return path.skip();
+      } else if (
+        Object.keys(imports).length > 0 &&
+        !pathForRemainingImports &&
+        !['Program', 'body'].includes(node.type)
+      ) {
+        pathForRemainingImports = path;
+      }
+
       const inlinePlaceholder = inlinePlaceholders.find(({ pathId }) => uniquePathId(path) === pathId);
       if (inlinePlaceholder) {
         const blockStatement = path.parentPath.parentPath.node;
@@ -335,7 +372,8 @@ const inline = async (itemPath, targetFunctionName, functionNameToInline) => {
         assert.strictEqual(typeof key, 'number');
         let inlineAst = [];
         for (const [index] of Object.entries(sourceFunctionAst.params)) {
-          const ast = parse(`const __${functionNameToInline}_arg${index} = '';`).program.body[0];
+          const ast = parse(`const __${functionNameToInline}_arg${index} = '';`, { sourceType: 'module' }).program
+            .body[0];
           ast.declarations[0].init = path.node.arguments[index];
           inlineAst.push(ast);
         }
@@ -345,11 +383,22 @@ const inline = async (itemPath, targetFunctionName, functionNameToInline) => {
         };
         inlineAst.push(inlineStatement);
         for (const [index, parameter] of Object.entries(sourceFunctionAst.params)) {
-          const ast = parse(`let ${parameter.name} = __${functionNameToInline}_arg${index};`).program.body[0];
+          const ast = parse(`let ${parameter.name} = __${functionNameToInline}_arg${index};`, { sourceType: 'module' })
+            .program.body[0];
           inlineStatement.body.push(ast);
         }
         inlineStatement.body.push(...sourceFunctionAst.body.body);
         blockStatement.body.splice(key, 1, ...inlineAst);
+      }
+    },
+    exit(path) {
+      const { node } = path;
+      if (node.type === 'Program' && pathForRemainingImports) {
+        for (const [importPath, names] of Object.entries(imports)) {
+          const ast = parse(`import { ${names.join(', ')} } from '${importPath}';`, { sourceType: 'module' }).program
+            .body[0];
+          pathForRemainingImports.insertBefore(ast);
+        }
       }
     }
   });
