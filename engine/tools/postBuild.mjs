@@ -147,10 +147,14 @@ const identifyFunctionWhileTraversing = (traversePath) => {
 
 const identifyInlinableFunctionCall = (traversePath) => {
   const { node } = traversePath;
-  if (node.type === 'CallExpression' && node.callee.type === 'Identifier' && traversePath.parentPath.node.type === 'ExpressionStatement') {
+  if (
+    node.type === 'CallExpression' &&
+    node.callee.type === 'Identifier' &&
+    traversePath.parentPath.node.type === 'ExpressionStatement'
+  ) {
     return node.callee.name;
   }
-}
+};
 
 const analyzeForInlining = (itemPath, ast) => {
   const functions = {};
