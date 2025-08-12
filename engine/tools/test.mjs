@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
-import * as distributionVersion from '../dist/index.js';
-import * as performanceVersion from '../dist/perf/index.js';
+import * as transpiled from '../dist/index.js';
+import * as optimized from '../dist/perf/index.js';
+import { TimeBucket } from './TimeBucket.mjs';
 
 function compareIArrays(actual, expected) {
   assert.strictEqual(actual.length, expected.length);
@@ -73,7 +74,7 @@ function warmup(impl, stateOptions = {}) {
   return { count, errors };
 }
 
-function measure(impl, metrics) {
+function measure(impl) {
   const start = performance.now();
   for (const definition of Object.values(impl.getOperatorDefinitionRegistry())) {
     for (const { in: inSource, out: outSource } of definition.samples) {
@@ -86,52 +87,64 @@ function measure(impl, metrics) {
     }
   }
   const end = performance.now();
-  const duration = Math.floor(1000 * (end - start)) / 1000;
-  metrics.min = Math.min(metrics.min ?? Number.POSITIVE_INFINITY, duration);
-  metrics.max = Math.max(metrics.max ?? 0, duration);
-  metrics.sum = (metrics.sum ?? 0) + duration;
+  return Math.floor(1000 * (end - start)) / 1000;
 }
 
 // Warming up and validating the builds
 console.log('Warming up...');
-const { count: distributionCount, errors: distributionErrors } = warmup(distributionVersion, { debugMemory: true });
-const { count: perfCount, errors: perfErrors } = warmup(performanceVersion, { debugMemory: true });
-assert.strictEqual(distributionErrors + perfErrors, 0);
-assert.strictEqual(distributionCount, perfCount);
-console.log('🧪 tests count     :', distributionCount);
+const { count: transpiledCount, errors: transpiledErrors } = warmup(transpiled, { debugMemory: true });
+const { count: optimizedCount, errors: optimizedErrors } = warmup(optimized, { debugMemory: true });
+assert.strictEqual(transpiledErrors + optimizedErrors, 0);
+assert.strictEqual(transpiledCount, optimizedCount);
+console.log('🧪 tests count     :', transpiledCount);
 
-for (let iteration = 0; iteration < 10; ++iteration) {
-  warmup(distributionVersion);
-  warmup(performanceVersion);
+for (let iteration = 0; iteration < 100; ++iteration) {
+  warmup(transpiled);
+  warmup(optimized);
 }
 
 // Performance
+const resolution = TimeBucket.getResolution();
+console.log('⏲️  Resolution (µs) :', resolution);
 
-const distributionMetrics = {};
-const perfMetrics = {};
-let count = 0;
-process.stdout.write('\u001B[s');
-while (count < 10_000) {
-  process.stdout.write('\u001B[u');
-  ++count;
-  measure(distributionVersion, distributionMetrics);
-  measure(performanceVersion, perfMetrics);
-  process.stdout.write(
-    [
-      '⏳ time spent (ms) : ',
-      distributionMetrics.min.toFixed(3),
-      ' ≤ ',
-      (distributionMetrics.sum / count).toFixed(3),
-      ' ≤ ',
-      distributionMetrics.max.toFixed(3),
-      '\n',
-      '⚡ time spent (ms) : ',
-      perfMetrics.min.toFixed(3),
-      ' ≤ ',
-      (perfMetrics.sum / count).toFixed(3),
-      ' ≤ ',
-      perfMetrics.max.toFixed(3),
-      '\n'
-    ].join('')
-  );
+const transpiledDurations = [];
+const optimizedDurations = [];
+console.log('\n\n\n');
+const REFRESH_MS = 250;
+let lastUpdate = Date.now() - REFRESH_MS;
+
+const min = (durations) => durations.reduce((min, current) => Math.min(min, current));
+const mean = (durations) => durations.reduce((sum, current) => sum + current) / durations.length;
+const max = (durations) => durations.slice(-250).reduce((max, current) => Math.max(max, current));
+
+while (transpiledDurations.length < 10_000) {
+  transpiledDurations.push(measure(transpiled));
+  optimizedDurations.push(measure(optimized));
+  if (Date.now() - lastUpdate > REFRESH_MS) {
+    lastUpdate = Date.now();
+    const transpiledMin = min(transpiledDurations);
+    const transpiledMean = mean(transpiledDurations);
+    const optimizedMin = min(optimizedDurations);
+    const optimizedMean = mean(optimizedDurations);
+    console.log(
+      '\u001B[4A🔄 iterations      :',
+      transpiledDurations.length,
+      '\n⏳ time spent (ms) :',
+      transpiledMin.toFixed(3),
+      '≤',
+      transpiledMean.toFixed(3),
+      '≤',
+      max(transpiledDurations).toFixed(3),
+      '\n⚡ time spent (ms) :',
+      optimizedMin.toFixed(3),
+      '≤',
+      optimizedMean.toFixed(3),
+      '≤',
+      max(optimizedDurations).toFixed(3),
+      '\n⏳𝝙⚡ (ms)         :',
+      (transpiledMin - optimizedMin).toFixed(3),
+      '≤',
+      (transpiledMean - optimizedMean).toFixed(3)
+    );
+  }
 }
