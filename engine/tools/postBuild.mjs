@@ -7,34 +7,27 @@ import { generate } from '@babel/generator';
 import _traverse from '@babel/traverse';
 const traverse = _traverse.default;
 
-const removeImport = (path, importedName) => {
-  const { node } = path;
+const removeImportWhileTraversing = (traversePath, importedName) => {
+  const { node } = traversePath;
   if (node.type === 'ImportDeclaration') {
     // Assuming name has not been changed and from is not relevant
     const { specifiers } = node;
     const assertIndex = specifiers.findIndex((specifier) => specifier.imported.name === importedName);
     if (assertIndex !== -1) {
       if (specifiers.length === 1) {
-        path.remove();
+        traversePath.remove();
       } else {
         specifiers.splice(assertIndex, 1);
       }
     }
+    traversePath.skip();
     return true;
   }
-  return false;
 };
 
-const cleanAstNode = (node) => {
-  delete node.loc;
-  delete node.start;
-  delete node.end;
-  delete node.extra;
-};
-
-let toIntegerValueAST;
-const buildToIntegerValueAST = async () => {
-  if (toIntegerValueAST) {
+let toIntegerValueAstTemplate;
+const buildToIntegerValueAstTemplate = async () => {
+  if (toIntegerValueAstTemplate) {
     return;
   }
   const source = await readFile('dist/sdk/toValue.js', 'utf8');
@@ -44,7 +37,10 @@ const buildToIntegerValueAST = async () => {
   traverse(ast, {
     enter(path) {
       const { node } = path;
-      cleanAstNode(node);
+      delete node.loc;
+      delete node.start;
+      delete node.end;
+      delete node.extra;
       if (node.type === 'FunctionDeclaration' && node.id.name === 'toIntegerValue') {
         const returnStatement = node.body.body.find((node) => node.type === 'ReturnStatement');
         base = returnStatement.argument;
@@ -55,7 +51,7 @@ const buildToIntegerValueAST = async () => {
     }
   });
   placeholderForValue.shorthand = false;
-  toIntegerValueAST = (integerValue) => {
+  toIntegerValueAstTemplate = (integerValue) => {
     placeholderForValue.value = integerValue;
     return structuredClone(base);
   };
@@ -80,15 +76,14 @@ const inlineToIntegerValue = (ast) => {
     traverse(ast, {
       enter(path) {
         const { node } = path;
-        if (removableCount === totalCount && removeImport(path, 'toIntegerValue')) {
-          path.skip();
-          return;
+        if (removableCount === totalCount) {
+          removeImportWhileTraversing(path, 'toIntegerValue');
         }
         if (node.type === 'VariableDeclaration' && path.toString().includes('toIntegerValue')) {
           const [, variableName] = path.toString().match(/\b(\w+)\s+=\s+toIntegerValue/);
           if (path.getNextSibling().toString().startsWith(`assert(${variableName}`)) {
             const value = node.declarations[0].init.arguments[0];
-            node.declarations[0].init = toIntegerValueAST(value);
+            node.declarations[0].init = toIntegerValueAstTemplate(value);
             path.skip();
           }
         }
@@ -100,37 +95,15 @@ const inlineToIntegerValue = (ast) => {
 const removeAsserts = (ast) => {
   traverse(ast, {
     enter(path) {
-      const { node } = path;
-      if (removeImport(path, 'assert')) {
-        path.skip();
+      if (removeImportWhileTraversing(path, 'assert')) {
         return;
       }
+      const { node } = path;
       if (node.type === 'ExpressionStatement' && node.expression?.callee?.name === 'assert') {
         path.remove();
       }
     }
   });
-};
-
-let lastId = 0;
-const analyzed = {};
-
-const uniquePathId = (path) => {
-  let currentPath = path;
-  const pathParts = [];
-  while (currentPath) {
-    const key = currentPath.key;
-    // path.inList is true if the container is an array
-    if (currentPath.inList) {
-      pathParts.unshift(`[${key}]`);
-    } else if (currentPath.parentPath) {
-      pathParts.unshift(`.${key}`);
-    } else {
-      pathParts.unshift(key);
-    }
-    currentPath = currentPath.parentPath;
-  }
-  return pathParts.join('');
 };
 
 const functionStatements = new Set(['FunctionDeclaration', 'ArrowFunctionExpression', 'ObjectMethod', 'ClassMethod']);
@@ -143,95 +116,108 @@ const breakableStatements = new Set([
   'SwitchStatement'
 ]);
 
+let uniqueId = 0;
+const analyzedForInlining = {};
+
+const identifyFunctionWhileTraversing = (traversePath) => {
+  const { node, parent } = traversePath;
+  if (node.type === 'FunctionDeclaration') {
+    return {
+      name: node.id.name,
+      exported: traversePath.parentPath.node.type === 'ExportNamedDeclaration'
+    };
+  }
+  if (node.type === 'ObjectMethod') {
+    return {
+      name: node.key.name
+    };
+  }
+  if (node.type === 'ArrowFunctionExpression') {
+    return {
+      name: parent.id?.name ?? '(anonymous arrow)',
+      exported: traversePath.parentPath?.parentPath?.parentPath?.node?.type === 'ExportNamedDeclaration'
+    };
+  }
+  if (node.type === 'ClassMethod') {
+    return {
+      name: `::${node.key.name}`
+    };
+  }
+};
+
+const identifyInlinableFunctionCall = (traversePath) => {
+  const { node } = traversePath;
+  if (node.type === 'CallExpression' && node.callee.type === 'Identifier' && traversePath.parentPath.node.type === 'ExpressionStatement') {
+    return node.callee.name;
+  }
+}
+
 const analyzeForInlining = (itemPath, ast) => {
   const functions = {};
   const functionsStack = [];
-  const imported = {};
-  let functionDetails;
+  const importedIdentifiers = {};
+  let currentFunction;
   let inBreakableStatement = 0;
-
-  const buildFunctionDetails = (path, details) => {
-    functionDetails = {
-      id: ++lastId,
-      pathId: uniquePathId(path),
-      exported: false,
-      ...details
-    };
-    functions[functionDetails.name] = functionDetails;
-    functionsStack.push(functionDetails);
-  };
 
   traverse(ast, {
     // eslint-disable-next-line sonarjs/cognitive-complexity -- will be improved later
     enter(path) {
-      const { node, parent } = path;
+      const { node } = path;
       if (node.type === 'ImportDeclaration') {
         const path = join(dirname(itemPath), node.source.value).replaceAll('\\', '/');
         for (const declaration of node.specifiers) {
           assert.strictEqual(declaration.imported.name, declaration.local.name);
-          imported[declaration.imported.name] = path;
+          importedIdentifiers[declaration.imported.name] = path;
         }
       }
       if (node.type === 'Identifier') {
-        const importedFrom = imported[node.name];
-        if (importedFrom && functionDetails) {
-          functionDetails.imports ??= {};
-          functionDetails.imports[node.name] = importedFrom;
+        const importedFrom = importedIdentifiers[node.name];
+        if (importedFrom && currentFunction) {
+          currentFunction.importedIdentifiers ??= {};
+          currentFunction.importedIdentifiers[node.name] = importedFrom;
         }
       }
-      if (node.type === 'FunctionDeclaration') {
-        buildFunctionDetails(path, {
-          name: node.id.name,
-          exported: path.parentPath.node.type === 'ExportNamedDeclaration'
-        });
+
+      const functionInfos = identifyFunctionWhileTraversing(path);
+      if (functionInfos) {
+        currentFunction = {
+          id: ++uniqueId,
+          line: node.loc.start.line,
+          exported: false,
+          ...functionInfos
+        };
+        functions[currentFunction.name] = currentFunction;
+        functionsStack.push(currentFunction);
       }
-      if (node.type === 'ObjectMethod') {
-        buildFunctionDetails(path, {
-          name: node.key.name
-        });
-      }
-      if (node.type === 'ArrowFunctionExpression') {
-        buildFunctionDetails(path, {
-          name: parent.id?.name ?? '(anonymous arrow)',
-          exported: path.parentPath?.parentPath?.parentPath?.node?.type === 'ExportNamedDeclaration'
-        });
-      }
-      if (node.type === 'ClassMethod') {
-        buildFunctionDetails(path, {
-          name: `::${node.key.name}`
-        });
-      }
+
       if (breakableStatements.has(node.type)) {
         ++inBreakableStatement;
       }
       if (node.type === 'ReturnStatement') {
         if (inBreakableStatement) {
-          functionDetails.needBreakLabel = true;
+          currentFunction.needBreakLabel = true;
         }
         try {
-          functionDetails.useReturn = true;
+          currentFunction.useReturn = true;
           if (node.argument !== null) {
-            functionDetails.returnValue = true;
+            currentFunction.returnValue = true;
           }
         } catch (error) {
           console.error(itemPath, uniquePathId(path));
           throw error;
         }
       }
-      if (functionDetails && node.type === 'CallExpression' && node.callee.type === 'Identifier') {
-        const { name } = node.callee;
-        let inlineIsPossible = false;
-        if (path.parentPath.node.type === 'ExpressionStatement') {
-          inlineIsPossible = true;
-        }
-        if (inlineIsPossible) {
-          if (!functionDetails.inlinePlaceholders) {
-            functionDetails.inlinePlaceholders = {};
+
+      if (currentFunction) {
+        const name = identifyInlinableFunctionCall(path);
+        if (name) {
+          if (!currentFunction.inlinePlaceholders) {
+            currentFunction.inlinePlaceholders = {};
           }
-          functionDetails.inlinePlaceholders[name] ??= [];
-          functionDetails.inlinePlaceholders[name].push({
-            id: ++lastId,
-            pathId: uniquePathId(path)
+          currentFunction.inlinePlaceholders[name] ??= [];
+          currentFunction.inlinePlaceholders[name].push({
+            id: ++uniqueId,
+            line: node.loc.start.line
           });
         }
       }
@@ -240,7 +226,7 @@ const analyzeForInlining = (itemPath, ast) => {
       const { node } = path;
       if (functionStatements.has(node.type)) {
         functionsStack.pop();
-        functionDetails = functionsStack.length > 0 ? functionsStack.at(-1) : null;
+        currentFunction = functionsStack.length > 0 ? functionsStack.at(-1) : null;
       }
       if (breakableStatements.has(node.type)) {
         --inBreakableStatement;
@@ -248,7 +234,7 @@ const analyzeForInlining = (itemPath, ast) => {
     }
   });
   if (Object.keys(functions).length > 0) {
-    analyzed[itemPath] = functions;
+    analyzedForInlining[itemPath] = functions;
   }
 };
 
@@ -260,7 +246,7 @@ const optimize = async (basePath, path = basePath) => {
   const perfPath = path.replace(/\bdist\b/, 'dist/perf');
   await mkdir(perfPath, { recursive: true });
 
-  await buildToIntegerValueAST();
+  await buildToIntegerValueAstTemplate();
 
   for (const name of names) {
     const itemPath = join(path, name).replaceAll('\\', '/');
@@ -287,14 +273,16 @@ const optimize = async (basePath, path = basePath) => {
 };
 await optimize('dist');
 
-await writeFile('dist/perf/analyzed.json', JSON.stringify(analyzed, null, 2), 'utf8');
+await writeFile('dist/perf/analyzed.json', JSON.stringify(analyzedForInlining, null, 2), 'utf8');
+
+process.exit(0);
 
 const perf = (path) => path.replace('dist/', 'dist/perf/');
 
 const inline = async (itemPath, targetFunctionName, functionNameToInline) => {
   let functionToInline;
   let sourceOfFunctionToInline;
-  for (const [sourcePath, functions] of Object.entries(analyzed)) {
+  for (const [sourcePath, functions] of Object.entries(analyzedForInlining)) {
     if (functions[functionNameToInline]) {
       functionToInline = functions[functionNameToInline];
       sourceOfFunctionToInline = sourcePath;
@@ -313,9 +301,9 @@ const inline = async (itemPath, targetFunctionName, functionNameToInline) => {
   });
 
   let imports;
-  if (functionToInline.imports) {
+  if (functionToInline.importedIdentifiers) {
     imports = {};
-    for (const [name, path] of Object.entries(functionToInline.imports)) {
+    for (const [name, path] of Object.entries(functionToInline.importedIdentifiers)) {
       const adjustedPath = relative(dirname(itemPath), path).replaceAll('\\', '/');
       if (!imports[adjustedPath]) {
         imports[adjustedPath] = [];
@@ -325,7 +313,7 @@ const inline = async (itemPath, targetFunctionName, functionNameToInline) => {
   }
 
   const targetAst = parse(await readFile(perf(itemPath), 'utf8'), { sourceType: 'module' });
-  const targetFunction = analyzed[itemPath][targetFunctionName];
+  const targetFunction = analyzedForInlining[itemPath][targetFunctionName];
   const inlinePlaceholders = targetFunction.inlinePlaceholders[functionNameToInline];
   let pathForRemainingImports;
   traverse(targetAst, {
@@ -333,7 +321,9 @@ const inline = async (itemPath, targetFunctionName, functionNameToInline) => {
     enter(path) {
       const { node } = path;
 
-      removeImport(path, functionNameToInline);
+      if (removeImportWhileTraversing(path, functionNameToInline)) {
+        return;
+      }
       if (node.type === 'ImportDeclaration') {
         const importPath = node.source.value;
         if (imports[importPath]) {
@@ -407,3 +397,5 @@ const inline = async (itemPath, targetFunctionName, functionNameToInline) => {
 };
 
 await inline('dist/core/state/State.js', '::cycle', 'operatorPop');
+// await inline('dist/core/state/State.js', '::cycle', 'blockCycle');
+// await inline('dist/core/state/State.js', '::cycle', 'callCycle');
