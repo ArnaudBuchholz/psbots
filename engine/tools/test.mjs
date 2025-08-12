@@ -39,7 +39,8 @@ function compareValues(actual, expected) {
   }
 }
 
-const ITERATIONS = 10;
+const ITERATIONS = 50;
+const WARMUP = 10;
 
 // eslint-disable-next-line sonarjs/cognitive-complexity -- testing purpose
 function runTests(impl) {
@@ -90,19 +91,21 @@ function runTests(impl) {
         ++count;
       }
     }
-    const end = performance.now();
+    if (iteration >= WARMUP) {
+      const end = performance.now();
 
-    const duration = Math.floor(1000 * (end - start)) / 1000;
-    min = Math.min(min, duration);
-    max = Math.max(max, duration);
-    sum += duration;
+      const duration = Math.floor(1000 * (end - start)) / 1000;
+      min = Math.min(min, duration);
+      max = Math.max(max, duration);
+      sum += duration;
+    }
   }
 
   return {
     count,
     min,
     max,
-    mean: Math.floor((1000 * sum) / ITERATIONS) / 1000,
+    mean: Math.floor((1000 * sum) / (ITERATIONS - WARMUP)) / 1000,
     errors
   };
 }
