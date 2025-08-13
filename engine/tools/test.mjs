@@ -75,7 +75,7 @@ function warmup(impl, stateOptions = {}) {
 }
 
 function measure(impl) {
-  const start = performance.now();
+  const start = TimeBucket.measure();
   for (const definition of Object.values(impl.getOperatorDefinitionRegistry())) {
     for (const { in: inSource, out: outSource } of definition.samples) {
       const { value: inState } = impl.createState();
@@ -86,8 +86,7 @@ function measure(impl) {
       outState.destroy();
     }
   }
-  const end = performance.now();
-  return Math.floor(1000 * (end - start)) / 1000;
+  return TimeBucket.measure(start);
 }
 
 // Warming up and validating the builds
@@ -107,44 +106,41 @@ for (let iteration = 0; iteration < 100; ++iteration) {
 const resolution = TimeBucket.getResolution();
 console.log('⏲️  Resolution (µs) :', resolution);
 
-const transpiledDurations = [];
-const optimizedDurations = [];
+const transpiledTimeBucket = new TimeBucket(resolution);
+const optimizedTimeBucket = new TimeBucket(resolution);
 console.log('\n\n\n');
 const REFRESH_MS = 250;
 let lastUpdate = Date.now() - REFRESH_MS;
 
-const min = (durations) => durations.reduce((min, current) => Math.min(min, current));
-const mean = (durations) => durations.reduce((sum, current) => sum + current) / durations.length;
-const max = (durations) => durations.slice(-250).reduce((max, current) => Math.max(max, current));
-
-while (transpiledDurations.length < 10_000) {
-  transpiledDurations.push(measure(transpiled));
-  optimizedDurations.push(measure(optimized));
+while (transpiledTimeBucket.count < 10_000) {
+  transpiledTimeBucket.add(measure(transpiled));
+  optimizedTimeBucket.add(measure(optimized));
   if (Date.now() - lastUpdate > REFRESH_MS) {
     lastUpdate = Date.now();
-    const transpiledMin = min(transpiledDurations);
-    const transpiledMean = mean(transpiledDurations);
-    const optimizedMin = min(optimizedDurations);
-    const optimizedMean = mean(optimizedDurations);
+    const transpiledMetrics = transpiledTimeBucket.cleanedStats();
+    const optimizedMetrics = optimizedTimeBucket.cleanedStats();
+    if (!transpiledMetrics || !optimizedMetrics) {
+      continue;
+    }
     console.log(
       '\u001B[4A🔄 iterations      :',
-      transpiledDurations.length,
+      transpiledTimeBucket.count,
       '\n⏳ time spent (ms) :',
-      transpiledMin.toFixed(3),
+      transpiledMetrics.min.toFixed(3),
       '≤',
-      transpiledMean.toFixed(3),
+      transpiledMetrics.mean.toFixed(3),
       '≤',
-      max(transpiledDurations).toFixed(3),
+      transpiledMetrics.max.toFixed(3),
       '\n⚡ time spent (ms) :',
-      optimizedMin.toFixed(3),
+      optimizedMetrics.min.toFixed(3),
       '≤',
-      optimizedMean.toFixed(3),
+      optimizedMetrics.mean.toFixed(3),
       '≤',
-      max(optimizedDurations).toFixed(3),
+      optimizedMetrics.max.toFixed(3),
       '\n⏳𝝙⚡ (ms)         :',
-      (transpiledMin - optimizedMin).toFixed(3),
+      (transpiledMetrics.min - optimizedMetrics.min).toFixed(3),
       '≤',
-      (transpiledMean - optimizedMean).toFixed(3)
+      (transpiledMetrics.mean - optimizedMetrics.mean).toFixed(3)
     );
   }
 }
