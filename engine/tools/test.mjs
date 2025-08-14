@@ -110,7 +110,7 @@ const transpiledTimeBucket = new TimeBucket(resolution);
 const optimizedTimeBucket = new TimeBucket(resolution);
 console.log('\n\n\n');
 const REFRESH_MS = 250;
-let lastUpdate = Date.now() - REFRESH_MS;
+let lastUpdate = Date.now();
 
 while (transpiledTimeBucket.count < 10_000) {
   transpiledTimeBucket.add(measure(transpiled));
@@ -131,16 +131,23 @@ while (transpiledTimeBucket.count < 10_000) {
       transpiledMetrics.mean.toFixed(3),
       '≤',
       transpiledMetrics.max.toFixed(3),
-      '\n⚡ time spent (ms) :',
+      '🗑',
+      transpiledMetrics.ignored,
+      '    \n⚡ time spent (ms) :',
       optimizedMetrics.min.toFixed(3),
       '≤',
       optimizedMetrics.mean.toFixed(3),
       '≤',
       optimizedMetrics.max.toFixed(3),
-      '\n⏳𝝙⚡ (ms)         :',
+      '🗑',
+      optimizedMetrics.ignored,
+      '    \n⏳𝝙⚡ (ms)         :',
       (transpiledMetrics.min - optimizedMetrics.min).toFixed(3),
       '≤',
-      (transpiledMetrics.mean - optimizedMetrics.mean).toFixed(3)
+      (transpiledMetrics.mean - optimizedMetrics.mean).toFixed(3),
+      ' ',
+      Math.floor(((transpiledMetrics.mean - optimizedMetrics.mean) * 100) / transpiledMetrics.mean),
+      '%      '
     );
   }
 }
