@@ -4,7 +4,9 @@ export class TimeBucket {
     return from ? now - from : now;
   }
 
-  static SCALE = 1_000_000;
+  static get SCALE() {
+    return 1_000_000;
+  }
 
   /** Returns best resolution for the current system */
   static getResolution() {
