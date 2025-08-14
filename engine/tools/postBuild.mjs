@@ -207,7 +207,7 @@ const analyzeForInlining = (itemPath, ast) => {
             currentFunction.returnValue = true;
           }
         } catch (error) {
-          console.error(itemPath, uniquePathId(path));
+          console.error(itemPath, node.loc.start.line);
           throw error;
         }
       }
@@ -279,11 +279,9 @@ await optimize('dist');
 
 await writeFile('dist/perf/analyzed.json', JSON.stringify(analyzedForInlining, null, 2), 'utf8');
 
-process.exit(0);
-
 const perf = (path) => path.replace('dist/', 'dist/perf/');
 
-const inline = async (itemPath, targetFunctionName, functionNameToInline) => {
+const inline = async (itemPath, functionNameToInline) => {
   let functionToInline;
   let sourceOfFunctionToInline;
   for (const [sourcePath, functions] of Object.entries(analyzedForInlining)) {
@@ -297,7 +295,8 @@ const inline = async (itemPath, targetFunctionName, functionNameToInline) => {
   let sourceFunctionAst;
   traverse(sourceAst, {
     enter(path) {
-      if (uniquePathId(path) === functionToInline.pathId) {
+      const functionInfos = identifyFunctionWhileTraversing(path);
+      if (functionInfos && functionInfos.name === functionToInline.name) {
         sourceFunctionAst = path.node;
         path.stop();
       }
@@ -317,8 +316,6 @@ const inline = async (itemPath, targetFunctionName, functionNameToInline) => {
   }
 
   const targetAst = parse(await readFile(perf(itemPath), 'utf8'), { sourceType: 'module' });
-  const targetFunction = analyzedForInlining[itemPath][targetFunctionName];
-  const inlinePlaceholders = targetFunction.inlinePlaceholders[functionNameToInline];
   let pathForRemainingImports;
   traverse(targetAst, {
     // eslint-disable-next-line sonarjs/cognitive-complexity -- will be improved later
@@ -358,8 +355,8 @@ const inline = async (itemPath, targetFunctionName, functionNameToInline) => {
         pathForRemainingImports = path;
       }
 
-      const inlinePlaceholder = inlinePlaceholders.find(({ pathId }) => uniquePathId(path) === pathId);
-      if (inlinePlaceholder) {
+      const name = identifyInlinableFunctionCall(path);
+      if (name === functionNameToInline) {
         const blockStatement = path.parentPath.parentPath.node;
         assert.strictEqual(blockStatement.type, 'BlockStatement');
         const key = path.parentPath.key;
@@ -400,6 +397,6 @@ const inline = async (itemPath, targetFunctionName, functionNameToInline) => {
   await writeFile(perf(itemPath), generate(targetAst).code, { encoding: 'utf8' });
 };
 
-await inline('dist/core/state/State.js', '::cycle', 'operatorPop');
-// await inline('dist/core/state/State.js', '::cycle', 'blockCycle');
-// await inline('dist/core/state/State.js', '::cycle', 'callCycle');
+await inline('dist/core/state/State.js', 'operatorPop');
+// await inline('dist/core/state/State.js', 'blockCycle');
+// await inline('dist/core/state/State.js', 'callCycle');
