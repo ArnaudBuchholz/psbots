@@ -389,12 +389,18 @@ const inline = async (itemPath, functionNameToInline) => {
           const ast = parse(`let ${returnVariableName};`, { sourceType: 'module' }).program.body[0];
           inlineAst.push(ast);
         }
-        // TODO switch to do {} while (0) if early exit
-        const inlineStatement = {
-          type: 'BlockStatement',
-          body: []
-        };
-        inlineAst.push(inlineStatement);
+        let inlineStatement;
+        if (functionToInline.useReturn) {
+          const whileStatement = parse('do {} while (0)', { sourceType: 'module' }).program.body[0];
+          inlineAst.push(whileStatement);
+          inlineStatement = whileStatement.body;
+        } else {
+          inlineStatement = {
+            type: 'BlockStatement',
+            body: []
+          };
+          inlineAst.push(inlineStatement);
+        }
         for (const [index, parameter] of Object.entries(sourceFunctionAst.params)) {
           let name;
           if (parameter.type === 'Identifier') {
