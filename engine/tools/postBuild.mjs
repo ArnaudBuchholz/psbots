@@ -150,7 +150,7 @@ const identifyInlinableFunctionCall = (traversePath) => {
   if (
     node.type === 'CallExpression' &&
     node.callee.type === 'Identifier' &&
-    traversePath.parentPath.node.type === 'ExpressionStatement'
+    ['ExpressionStatement', 'VariableDeclarator'].includes(traversePath.parentPath.node.type)
   ) {
     return node.callee.name;
   }
@@ -322,9 +322,8 @@ const inline = async (itemPath, functionNameToInline) => {
     enter(path) {
       const { node } = path;
 
-      if (removeImportWhileTraversing(path, functionNameToInline)) {
-        return;
-      }
+      removeImportWhileTraversing(path, functionNameToInline);
+      
       if (node.type === 'ImportDeclaration') {
         const importPath = node.source.value;
         if (imports[importPath]) {
@@ -357,27 +356,47 @@ const inline = async (itemPath, functionNameToInline) => {
 
       const name = identifyInlinableFunctionCall(path);
       if (name === functionNameToInline) {
-        const blockStatement = path.parentPath.parentPath.node;
+        const containerStatement = path.parentPath.parentPath.node;
+        let blockStatement;
+        let key;
+        if (containerStatement.type === 'BlockStatement') {
+          blockStatement = containerStatement;
+          key = path.parentPath.key;
+        } else {
+          assert.strictEqual(containerStatement.type, 'VariableDeclaration');
+          blockStatement = path.parentPath.parentPath.parentPath.node;
+          key = path.parentPath.parentPath.key - 1;
+          // TODO change assignment to use result variable
+        }
         assert.strictEqual(blockStatement.type, 'BlockStatement');
-        const key = path.parentPath.key;
         assert.strictEqual(typeof key, 'number');
         let inlineAst = [];
+        // TODO add result declaration
         for (const [index] of Object.entries(sourceFunctionAst.params)) {
           const ast = parse(`const __${functionNameToInline}_arg${index} = '';`, { sourceType: 'module' }).program
             .body[0];
           ast.declarations[0].init = path.node.arguments[index];
           inlineAst.push(ast);
         }
+        // TODO switch to do {} while (0) if early exit
         const inlineStatement = {
           type: 'BlockStatement',
           body: []
         };
         inlineAst.push(inlineStatement);
         for (const [index, parameter] of Object.entries(sourceFunctionAst.params)) {
-          const ast = parse(`let ${parameter.name} = __${functionNameToInline}_arg${index};`, { sourceType: 'module' })
+          let name;
+          if (parameter.type === 'Identifier') {
+            name = parameter.name;
+          } else {
+            assert(parameter.type === 'ObjectPattern');
+            name = `{ ${parameter.properties.map(({ key }) => key.name).join(', ')}}`;
+          }
+          const ast = parse(`let ${name} = __${functionNameToInline}_arg${index};`, { sourceType: 'module' })
             .program.body[0];
           inlineStatement.body.push(ast);
         }
+        // TODO replace returns
         inlineStatement.body.push(...sourceFunctionAst.body.body);
         blockStatement.body.splice(key, 1, ...inlineAst);
       }
@@ -398,5 +417,10 @@ const inline = async (itemPath, functionNameToInline) => {
 };
 
 await inline('dist/core/state/State.js', 'operatorPop');
-// await inline('dist/core/state/State.js', 'blockCycle');
-// await inline('dist/core/state/State.js', 'callCycle');
+await inline('dist/core/state/State.js', 'blockCycle');
+await inline('dist/core/state/State.js', 'callCycle');
+
+// await inline('dist/core/state/operator.js', 'operatorPop');
+await inline('dist/core/state/operator.js', 'handleFunctionOperatorTypeCheck');
+// await inline('dist/core/state/operator.js', 'handleFunctionOperator');
+
