@@ -358,24 +358,35 @@ const inline = async (itemPath, functionNameToInline) => {
       if (name === functionNameToInline) {
         const containerStatement = path.parentPath.parentPath.node;
         let blockStatement;
-        let key;
+        let slicePos;
+        let sliceCount;
+        let returnVariableName;
         if (containerStatement.type === 'BlockStatement') {
           blockStatement = containerStatement;
-          key = path.parentPath.key;
+          slicePos = path.parentPath.key;
+          sliceCount = 1;
         } else {
           assert.strictEqual(containerStatement.type, 'VariableDeclaration');
           blockStatement = path.parentPath.parentPath.parentPath.node;
-          key = path.parentPath.parentPath.key - 1;
-          // TODO change assignment to use result variable
+          slicePos = path.parentPath.parentPath.parentPath.key - 1;
+          sliceCount = 0;
+          returnVariableName = `__${functionNameToInline}_result`;
+          path.parentPath.node.init = {
+            type: 'Identifier',
+            name: returnVariableName
+          };
         }
         assert.strictEqual(blockStatement.type, 'BlockStatement');
-        assert.strictEqual(typeof key, 'number');
+        assert.strictEqual(typeof slicePos, 'number');
         let inlineAst = [];
-        // TODO add result declaration
         for (const [index] of Object.entries(sourceFunctionAst.params)) {
           const ast = parse(`const __${functionNameToInline}_arg${index} = '';`, { sourceType: 'module' }).program
             .body[0];
           ast.declarations[0].init = path.node.arguments[index];
+          inlineAst.push(ast);
+        }
+        if (returnVariableName) {
+          const ast = parse(`let ${returnVariableName};`, { sourceType: 'module' }).program.body[0];
           inlineAst.push(ast);
         }
         // TODO switch to do {} while (0) if early exit
@@ -398,7 +409,7 @@ const inline = async (itemPath, functionNameToInline) => {
         }
         // TODO replace returns
         inlineStatement.body.push(...sourceFunctionAst.body.body);
-        blockStatement.body.splice(key, 1, ...inlineAst);
+        blockStatement.body.splice(slicePos, sliceCount, ...inlineAst);
       }
     },
     exit(path) {
