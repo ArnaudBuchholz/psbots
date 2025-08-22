@@ -323,7 +323,7 @@ const inline = async (itemPath, functionNameToInline) => {
       const { node } = path;
 
       removeImportWhileTraversing(path, functionNameToInline);
-      
+
       if (node.type === 'ImportDeclaration') {
         const importPath = node.source.value;
         if (imports[importPath]) {
@@ -406,11 +406,11 @@ const inline = async (itemPath, functionNameToInline) => {
           if (parameter.type === 'Identifier') {
             name = parameter.name;
           } else {
-            assert(parameter.type === 'ObjectPattern');
+            assert.ok(parameter.type === 'ObjectPattern');
             name = `{ ${parameter.properties.map(({ key }) => key.name).join(', ')}}`;
           }
-          const ast = parse(`let ${name} = __${functionNameToInline}_arg${index};`, { sourceType: 'module' })
-            .program.body[0];
+          const ast = parse(`let ${name} = __${functionNameToInline}_arg${index};`, { sourceType: 'module' }).program
+            .body[0];
           inlineStatement.body.push(ast);
         }
         // TODO replace returns
@@ -440,4 +440,3 @@ await inline('dist/core/state/State.js', 'callCycle');
 // await inline('dist/core/state/operator.js', 'operatorPop');
 await inline('dist/core/state/operator.js', 'handleFunctionOperatorTypeCheck');
 // await inline('dist/core/state/operator.js', 'handleFunctionOperator');
-
