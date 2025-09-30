@@ -26,7 +26,7 @@ async function generateIndexes(path, generate) {
           }
           return `export * from './${name.replace('.ts', '.js')}';`;
         })
-        .sort()
+        .toSorted()
         .join('\n') + '\n'
     );
   }

@@ -213,7 +213,7 @@ async function measureAllOperators(context: ExecuteContext) {
 function report(context: ExecuteContext) {
   const { replIO, measures, resolution } = context;
   context.replIO.output(`${cyan}Resolution: ${yellow}${resolution.toString()}${cyan}ns${white}\r\n`);
-  const keys = Object.keys(measures).sort((a, b) => a.localeCompare(b));
+  const keys = Object.keys(measures).toSorted((a, b) => a.localeCompare(b));
   let maxKeyLength = 0;
   let maxMeanLength = 0;
   for (const key of keys) {

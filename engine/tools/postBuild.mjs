@@ -433,10 +433,12 @@ const inline = async (itemPath, functionNameToInline) => {
   await writeFile(perf(itemPath), generate(targetAst).code, { encoding: 'utf8' });
 };
 
-await inline('dist/core/state/State.js', 'operatorPop');
-await inline('dist/core/state/State.js', 'blockCycle');
-await inline('dist/core/state/State.js', 'callCycle');
+if (process.argv.includes('--inline')) {
+  await inline('dist/core/state/State.js', 'operatorPop');
+  await inline('dist/core/state/State.js', 'blockCycle');
+  await inline('dist/core/state/State.js', 'callCycle');
 
-// await inline('dist/core/state/operator.js', 'operatorPop');
-await inline('dist/core/state/operator.js', 'handleFunctionOperatorTypeCheck');
-// await inline('dist/core/state/operator.js', 'handleFunctionOperator');
+  await inline('dist/core/state/operator.js', 'operatorPop');
+  await inline('dist/core/state/operator.js', 'handleFunctionOperatorTypeCheck');
+  await inline('dist/core/state/operator.js', 'handleFunctionOperator');
+}

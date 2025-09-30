@@ -13,8 +13,8 @@ function compareIArrays(actual, expected) {
 
 function compareIDictionaries(actual, expected) {
   assert.deepStrictEqual(
-    actual.names.sort((a, b) => a.localCompare(b)),
-    expected.names.sort((a, b) => a.localCompare(b))
+    actual.names.toSorted((a, b) => a.localCompare(b)),
+    expected.names.toSorted((a, b) => a.localCompare(b))
   );
   for (const name of actual.names) {
     compareValues(actual.lookup(name), expected.lookup(name));
