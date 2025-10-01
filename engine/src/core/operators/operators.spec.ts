@@ -18,7 +18,7 @@ function executeOperatorsTests(settings: Partial<StateFactorySettings> = {}) {
   const label =
     settingsString === '{}' ? 'executing in & out using debug' : `executing in & out using debug ${settingsString}`;
   describe(label, () => {
-    for (const operatorName of Object.keys(registry).sort()) {
+    for (const operatorName of Object.keys(registry).toSorted()) {
       describe(`operators/${operatorName}`, () => {
         const definition: OperatorDefinition = registry[operatorName]?.definition ?? nullDefinition;
         let state: State;
