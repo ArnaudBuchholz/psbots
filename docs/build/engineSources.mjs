@@ -347,35 +347,3 @@ for(const moduleName of moduleNames) {
 }
 
 await writeFile(new URL('../engine/sources.md', import.meta.url), markdown.join('\n'), 'utf8')
-
-process.exit(0);
-
-markdown.push(
-  '## Grap',
-  '```mermaid',
-  'graph LR'
-);
-let index = 0;
-console.log('names: ', moduleNames.length);
-for(const name of moduleNames) {
-  const definition = sources[name];
-  if (definition.calls.size === 0 && definition.functions.length === 0 && definition.classes.length === 0) {
-    // No dependency to show, ignore
-    continue;
-  }
-
-  markdown.push(`  subgraph ${name}`);
-  for (const [name, { count }] of definition.calls.entries()) {
-    markdown.push(`    main_${definition.id}("main") --> ${funcId(name)};`);
-  }
-  for (const { name: functionName, exported, calls, externalCalls, id } of definition.functions) {
-    const name = exported ? `export_${id}` : `func_${id}`;
-    markdown.push(`    ${name}("${functionName}");`);
-    for (const [calledName, { count }] of calls.entries()) {
-      markdown.push(`    ${name} --> ${funcId(calledName)};`);
-    }
-  }
-  markdown.push(`  end`);
-}
-markdown.push('```');
-await writeFile(new URL('../engine/sources.md', import.meta.url), markdown.join('\n'), 'utf8')
