@@ -242,6 +242,21 @@ const analyzeForInlining = (itemPath, ast) => {
   }
 };
 
+const identifyForOfStatements = (itemPath, ast) => {
+  let count = 0;
+  traverse(ast, {
+    enter(path) {
+      const { node } = path;
+      if (node.type === 'ForOfStatement') {
+        ++count;
+      }
+    }
+  });
+  if (count) {
+    console.log(`ℹ️  ${itemPath}: ForOfStatement x${count}`)
+  }
+}
+
 const optimize = async (basePath, path = basePath) => {
   if (/\bperf\b/.test(path)) {
     return;
@@ -262,6 +277,10 @@ const optimize = async (basePath, path = basePath) => {
       inlineToIntegerValue(ast);
       removeAsserts(ast);
       analyzeForInlining(itemPath, ast);
+
+      if (process.argv.includes('--search')) {
+        identifyForOfStatements(itemPath, ast);
+      }
 
       await writeFile(join(perfPath, name.replace('.js', '.optimized.ast')), JSON.stringify(ast, null, 2), {
         encoding: 'utf8'
