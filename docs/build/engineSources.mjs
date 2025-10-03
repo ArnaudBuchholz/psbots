@@ -304,9 +304,12 @@ for(const moduleName of moduleNames) {
     for (const name of Object.keys(calls)) {
       markdown.push(`    main_${definition.id}("main") --> ${name};`);
     }
-    for (const { name, id, exported, calls } of functions) {
+    for (const { name, id, exported, externalCalls, calls } of functions) {
       if (exported) {
         markdown.push(`    ${name}("${exportedPrefix}${name}");`);
+        if (externalCalls) {
+          markdown.push(`    ext${id}(("*${externalCalls}*")) -.-> ${name};`);
+        }
       }
       for (const calledName of Object.keys(calls)) {
         if (name === '(anonymous arrow)') {

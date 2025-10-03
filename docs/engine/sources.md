@@ -42,6 +42,7 @@ graph
     parseNumber --> assert;
     parseName --> assert;
     parse("📦&nbsp;parse");
+    ext21(("*3*")) -.-> parse;
     parse --> assert;
     parse --> parseString;
     parse --> parseNumber;
@@ -76,6 +77,7 @@ graph
   end
   subgraph "core/MemoryTracker.ts"
     addMemorySize("📦&nbsp;addMemorySize");
+    ext40(("*4*")) -.-> addMemorySize;
     memorySizeToBytes("📦&nbsp;memorySizeToBytes");
     MemoryTracker("📦&nbsp;_class_&nbsp;MemoryTracker")
     MemoryTracker --- isAvailable("MemoryTracker::isAvailable");
@@ -717,6 +719,9 @@ graph
 
 ```mermaid
 graph
+  subgraph "sdk/assert.ts"
+    assert("📦&nbsp;assert");
+  end
   subgraph "core/operators/operators.ts"
     buildFunctionOperator("📦&nbsp;buildFunctionOperator");
   end
@@ -724,8 +729,10 @@ graph
     toIntegerValue("📦&nbsp;toIntegerValue");
   end
   subgraph "core/operators/integer/div.ts"
+    main_219("main") --> assert;
     main_219("main") --> buildFunctionOperator;
     anon220("(anonymous function)") --> toIntegerValue;
+    anon220("(anonymous function)") --> assert;
   end
 ```
 
@@ -824,8 +831,11 @@ graph
   end
   subgraph "core/operators/openClose.ts"
     openWithMark("📦&nbsp;openWithMark");
+    ext234(("*2*")) -.-> openWithMark;
     pushOpenClosedValueWithDebugInfo("📦&nbsp;pushOpenClosedValueWithDebugInfo");
+    ext235(("*1*")) -.-> pushOpenClosedValueWithDebugInfo;
     closeToMark("📦&nbsp;closeToMark");
+    ext236(("*2*")) -.-> closeToMark;
     closeToMark --> findMarkPos;
     closeToMark --> toIntegerValue;
     closeToMark --> assert;
@@ -842,8 +852,10 @@ graph
   end
   subgraph "core/operators/operators.ts"
     buildFunctionOperator("📦&nbsp;buildFunctionOperator");
+    ext238(("*68*")) -.-> buildFunctionOperator;
     buildFunctionOperator --> assert;
     buildConstantOperator("📦&nbsp;buildConstantOperator");
+    ext239(("*4*")) -.-> buildConstantOperator;
   end
 ```
 
@@ -1399,6 +1411,7 @@ graph
 graph
   subgraph "core/state/block.ts"
     blockCycle("📦&nbsp;blockCycle");
+    ext323(("*1*")) -.-> blockCycle;
   end
 ```
 
@@ -1408,6 +1421,7 @@ graph
 graph
   subgraph "core/state/call.ts"
     callCycle("📦&nbsp;callCycle");
+    ext325(("*1*")) -.-> callCycle;
   end
 ```
 
@@ -1420,10 +1434,12 @@ graph
   end
   subgraph "core/state/operator.ts"
     operatorPop("📦&nbsp;operatorPop");
+    ext327(("*1*")) -.-> operatorPop;
     handleFunctionOperatorTypeCheck --> assert;
     handleFunctionOperator --> assert;
     handleFunctionOperator --> handleFunctionOperatorTypeCheck;
     operatorCycle("📦&nbsp;operatorCycle");
+    ext330(("*1*")) -.-> operatorCycle;
     operatorCycle --> operatorPop;
     operatorCycle --> handleFunctionOperator;
   end
@@ -1443,6 +1459,7 @@ graph
     getToken --> parse;
     enqueueToken --> valuesOf;
     parseCycle("📦&nbsp;parseCycle");
+    ext334(("*1*")) -.-> parseCycle;
     parseCycle --> getToken;
     parseCycle --> enqueueToken;
   end
@@ -1494,6 +1511,7 @@ graph
 graph
   subgraph "sdk/assert.ts"
     assert("📦&nbsp;assert");
+    ext359(("*87*")) -.-> assert;
     AssertionFailed("_class_&nbsp;AssertionFailed")
     AssertionFailed --> Error;
   end
@@ -1505,6 +1523,7 @@ graph
 graph
   subgraph "sdk/checkPos.ts"
     checkPos("📦&nbsp;checkPos");
+    ext361(("*4*")) -.-> checkPos;
   end
 ```
 
@@ -1514,6 +1533,7 @@ graph
 graph
   subgraph "sdk/checks/isObject.ts"
     isObject("📦&nbsp;isObject");
+    ext363(("*1*")) -.-> isObject;
   end
 ```
 
@@ -1551,6 +1571,7 @@ graph
 graph
   subgraph "sdk/findMarkPos.ts"
     findMarkPos("📦&nbsp;findMarkPos");
+    ext378(("*4*")) -.-> findMarkPos;
   end
 ```
 
@@ -1588,8 +1609,11 @@ graph
 graph
   subgraph "sdk/toValue.ts"
     toIntegerValue("📦&nbsp;toIntegerValue");
+    ext403(("*16*")) -.-> toIntegerValue;
     toStringValue("📦&nbsp;toStringValue");
+    ext404(("*4*")) -.-> toStringValue;
     toNameValue("📦&nbsp;toNameValue");
+    ext405(("*2*")) -.-> toNameValue;
   end
 ```
 
@@ -1599,6 +1623,7 @@ graph
 graph
   subgraph "sdk/valuesOf.ts"
     valuesOf("📦&nbsp;valuesOf");
+    ext417(("*6*")) -.-> valuesOf;
     valuesOf --> getValueOf;
   end
 ```

@@ -191,7 +191,7 @@
     "name": "assert",
     "exported": true,
     "calls": {},
-    "externalCalls": 83
+    "externalCalls": 87
   },
   "checkPos": {
     "id": 361,

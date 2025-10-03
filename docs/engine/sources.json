@@ -1114,6 +1114,7 @@
         },
         "div.ts": {
           "calls": {
+            "assert": 2,
             "buildFunctionOperator": 1
           },
           "functions": [
@@ -1121,7 +1122,8 @@
               "name": "(anonymous arrow)",
               "exported": false,
               "calls": {
-                "toIntegerValue": 2
+                "toIntegerValue": 2,
+                "assert": 2
               }
             }
           ]
@@ -1973,7 +1975,7 @@
         {
           "name": "assert",
           "exported": true,
-          "externalCalls": 83
+          "externalCalls": 87
         }
       ]
     },
