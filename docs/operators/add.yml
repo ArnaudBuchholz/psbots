@@ -1,0 +1,25 @@
+id: add
+ref: https://hepunx.rl.ac.uk/~adye/psdocs/ref/PSL2a.html#add
+tags:
+  - integer
+  - math
+description: adds two integers
+signature:
+  input:
+    - integer
+    - integer
+  output:
+    - integer
+samples:
+  - in: 1 2 add
+    out: 3
+  - in: 2 -1 add
+    out: 1
+implementation: |
+  function body (state)
+    local operands = state.operands
+    local value1 = operands.at(0).integer
+    local value2 = operands.at(1).integer
+    local add = integer(value1 + value2)
+    operands.popush(2, add)
+  end
