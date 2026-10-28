@@ -1,0 +1,12 @@
+{
+  "name": "wasm-basic",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs"
+  },
+  "dependencies": {
+    "wabt": "^1.0.37"
+  }
+}

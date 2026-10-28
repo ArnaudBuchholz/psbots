@@ -1,0 +1,15 @@
+{
+  "name": "wasm-cycle",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "run": "node run.mjs",
+    "perf": "node perf.mjs"
+  },
+  "dependencies": {
+    "@psbots/engine": "file:../../../engine",
+    "wabt": "^1.0.37"
+  }
+}
