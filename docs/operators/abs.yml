@@ -14,12 +14,3 @@ samples:
     out: 1
   - in: -1 abs
     out: 1
-implementation: |
-  function body (state)
-    local operands = state.operands
-    local value = operands.at(0).integer
-    if value < 0 then
-      local abs = integer(-value)
-      operands.popush(1, abs)
-    end
-  end

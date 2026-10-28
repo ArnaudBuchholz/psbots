@@ -9,25 +9,3 @@ signature:
 samples:
   - in: "[ 1 2 3 ] aload pop"
     out: 1 2 3
-implementation: |
-  function body (state)
-    local operands = state.operands
-    local calls = state.calls
-    local arrayValue = operands.at(0)
-    local array = arrayValue.array
-    if calls.topOperatorState == OPERATOR_STATE_FIRST_CALL then
-      operands.reserve(1 + array.length)
-      calls.topOperatorState = 1
-    else
-      local index = calls.topOperatorState - 1
-      if index >= array.length then
-        calls.topOperatorState = OPERATOR_STATE_POP
-      else
-        local value = array.at(index)
-        addValueRef(arrayValue)
-        operands.popush(1, value, arrayValue)
-        releaseValue(arrayValue)
-        calls.topOperatorState = index + 2
-      end
-    end
-  end
