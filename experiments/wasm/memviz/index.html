@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>PSBots Memory Visualizer</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Courier New', monospace;
+      background: #1a1a2e;
+      color: #e0e0e0;
+      padding: 16px;
+      min-height: 100vh;
+    }
+
+    h1 { font-size: 14px; color: #888; margin-bottom: 12px; letter-spacing: 2px; text-transform: uppercase; }
+
+    /* ── top row ── */
+    .top { display: flex; gap: 16px; margin-bottom: 16px; align-items: flex-start; }
+
+    /* program input */
+    .program-box { flex: 0 0 280px; }
+    .program-box label { font-size: 11px; color: #888; display: block; margin-bottom: 4px; }
+    .program-box input {
+      width: 100%;
+      background: #0d0d1a;
+      border: 1px solid #333;
+      color: #e0e0e0;
+      font-family: inherit;
+      font-size: 13px;
+      padding: 6px 8px;
+      outline: none;
+    }
+    .program-box input:focus { border-color: #556; }
+
+    /* controls */
+    .controls { display: flex; flex-direction: column; gap: 6px; }
+    button {
+      background: #16213e;
+      border: 1px solid #334;
+      color: #aac;
+      font-family: inherit;
+      font-size: 12px;
+      padding: 5px 14px;
+      cursor: pointer;
+      letter-spacing: 1px;
+    }
+    button:hover { background: #1e2d50; border-color: #557; color: #ccf; }
+    button:disabled { opacity: 0.3; cursor: default; }
+
+    /* cycle log */
+    .log-box { flex: 1; }
+    .log-box label { font-size: 11px; color: #888; display: block; margin-bottom: 4px; }
+    #log {
+      background: #0d0d1a;
+      border: 1px solid #333;
+      padding: 6px 8px;
+      font-size: 11px;
+      color: #7a9;
+      height: 80px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column-reverse;
+    }
+    #log .entry { padding: 1px 0; }
+    #log .entry.error { color: #e66; }
+
+    /* ── stacks row ── */
+    .stacks-row { display: flex; gap: 16px; margin-bottom: 16px; }
+
+    .stack-panel {
+      flex: 1;
+      background: #0d0d1a;
+      border: 1px solid #333;
+      padding: 8px;
+    }
+    .stack-panel h2 { font-size: 10px; color: #666; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px; }
+
+    .stack-slots {
+      display: flex;
+      flex-direction: column-reverse; /* bottom of stack at bottom */
+      gap: 2px;
+      min-height: 120px;
+    }
+    .slot {
+      display: flex;
+      align-items: stretch;
+      height: 22px;
+      font-size: 11px;
+      transition: opacity 0.15s;
+    }
+    .slot .addr {
+      width: 52px;
+      flex-shrink: 0;
+      color: #444;
+      font-size: 10px;
+      display: flex;
+      align-items: center;
+      padding-right: 6px;
+      justify-content: flex-end;
+    }
+    .slot .cell {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      padding: 0 6px;
+      border-left: 2px solid transparent;
+    }
+    .slot.top .cell { border-left-color: #88f; }
+    .slot .tag { margin-right: 6px; font-size: 10px; padding: 1px 4px; border-radius: 2px; }
+    .slot .val { color: #ccc; }
+    .slot .exec-mark { margin-left: 4px; font-size: 9px; color: #88f; }
+    .slot .state-mark { margin-left: 6px; font-size: 9px; color: #888; }
+
+    /* type colors */
+    .t-integer  { background: #1a3a2a; color: #4c9; }
+    .t-boolean  { background: #2a2a1a; color: #cc4; }
+    .t-null     { background: #222; color: #555; }
+    .t-name     { background: #1a2a3a; color: #48c; }
+    .t-operator { background: #2a1a3a; color: #a4c; }
+    .t-string   { background: #3a2a1a; color: #c84; }
+    .t-array    { background: #1a3a3a; color: #4cc; }
+    .t-mark     { background: #2a1a1a; color: #c44; }
+
+    /* empty slot */
+    .slot.empty .cell { background: #111; border-left-color: transparent; }
+    .slot.empty .val { color: #333; }
+
+    /* ── memory map ── */
+    .mem-panel {
+      background: #0d0d1a;
+      border: 1px solid #333;
+      padding: 8px;
+      margin-bottom: 16px;
+    }
+    .mem-panel h2 { font-size: 10px; color: #666; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; }
+
+    .mem-header {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+    .mem-reg {
+      background: #111;
+      border: 1px solid #222;
+      padding: 5px 8px;
+      font-size: 10px;
+    }
+    .mem-reg .reg-label { color: #666; margin-bottom: 2px; }
+    .mem-reg .reg-val { color: #aac; }
+
+    /* byte grid */
+    .byte-grid-wrap { overflow-x: auto; }
+    .byte-grid {
+      display: grid;
+      grid-template-columns: 52px repeat(16, 18px);
+      gap: 1px;
+      font-size: 10px;
+      width: max-content;
+    }
+    .byte-grid .row-addr { color: #444; display: flex; align-items: center; justify-content: flex-end; padding-right: 4px; height: 16px; }
+    .byte-cell {
+      height: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s, color 0.2s;
+    }
+    .byte-cell.zero { color: #333; background: #111; }
+    .byte-cell.nonzero { color: #aac; background: #1a1a30; }
+    /* region highlights */
+    .byte-cell.region-header   { background: #1a2020; }
+    .byte-cell.region-operand  { background: #0f2016; }
+    .byte-cell.region-call     { background: #1a0f20; }
+    .byte-cell.region-dict     { background: #201a0f; }
+    .byte-cell.region-strings  { background: #20100f; }
+    .byte-cell.region-arrays   { background: #0f1820; }
+    .byte-cell.region-dicts    { background: #10200f; }
+    /* written-recently flash */
+    .byte-cell.just-written { background: #3a3a10 !important; color: #ff8 !important; }
+
+    /* legend */
+    .legend { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 6px; }
+    .legend-item { display: flex; align-items: center; gap: 4px; font-size: 10px; color: #666; }
+    .legend-swatch { width: 12px; height: 12px; border: 1px solid #333; }
+    .ls-header  { background: #1a2020; }
+    .ls-operand { background: #0f2016; }
+    .ls-call    { background: #1a0f20; }
+    .ls-dict    { background: #201a0f; }
+    .ls-strings { background: #20100f; }
+    .ls-arrays  { background: #0f1820; }
+    .ls-written { background: #3a3a10; }
+  </style>
+</head>
+<body>
+  <h1>PSBots · Memory Layout Visualizer</h1>
+
+  <div class="top">
+    <div class="program-box">
+      <label>Program</label>
+      <input id="program" value="3 4 add" spellcheck="false">
+    </div>
+    <div class="controls">
+      <button id="btn-load">Load ↺</button>
+      <button id="btn-step" disabled>Step →</button>
+      <button id="btn-run"  disabled>Run ▶</button>
+    </div>
+    <div class="log-box">
+      <label>Cycle log</label>
+      <div id="log"></div>
+    </div>
+  </div>
+
+  <div class="stacks-row">
+    <div class="stack-panel" id="panel-operand">
+      <h2>Operand Stack</h2>
+      <div class="stack-slots" id="operand-slots"></div>
+    </div>
+    <div class="stack-panel" id="panel-call">
+      <h2>Call Stack</h2>
+      <div class="stack-slots" id="call-slots"></div>
+    </div>
+    <div class="stack-panel" id="panel-dict">
+      <h2>Dictionary Stack</h2>
+      <div class="stack-slots" id="dict-slots"></div>
+    </div>
+  </div>
+
+  <div class="mem-panel">
+    <h2>Memory Buffer</h2>
+    <div class="mem-header" id="mem-header"></div>
+    <div class="byte-grid-wrap">
+      <div class="byte-grid" id="byte-grid"></div>
+    </div>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch ls-header"></div>header</div>
+      <div class="legend-item"><div class="legend-swatch ls-operand"></div>operand stack</div>
+      <div class="legend-item"><div class="legend-swatch ls-call"></div>call stack</div>
+      <div class="legend-item"><div class="legend-swatch ls-dict"></div>dict stack</div>
+      <div class="legend-item"><div class="legend-swatch ls-strings"></div>string heap</div>
+      <div class="legend-item"><div class="legend-swatch ls-arrays"></div>array heap</div>
+      <div class="legend-item"><div class="legend-swatch ls-written"></div>just written</div>
+    </div>
+  </div>
+
+<script type="module">
+// ── Constants ────────────────────────────────────────────────────────────────
+
+const HEADER_SIZE     = 64
+const VALUE_SIZE      = 8    // i32 type+flags | i32 payload
+const FRAME_SIZE      = 12   // i32 type+flags | i32 payload | i32 operator_state
+const DICT_ENTRY_SIZE = 4    // i32 offset into dict-heap
+const PAGE_SIZE       = 256  // bytes to show in the visualizer (not 64KB, scaled down)
+
+// Header field offsets
+const H_MAGIC         = 0
+const H_VERSION       = 4
+const H_HEAP_TOP      = 8
+const H_OPERAND_BASE  = 16
+const H_OPERAND_CAP   = 20
+const H_OPERAND_DEPTH = 24
+const H_CALL_BASE     = 28
+const H_CALL_CAP      = 32
+const H_CALL_DEPTH    = 36
+const H_DICT_BASE     = 40
+const H_DICT_CAP      = 44
+const H_DICT_DEPTH    = 48
+const H_STRING_BASE   = 52
+const H_STRING_TOP    = 56
+
+// Value types
+const TYPE = { null:0, boolean:1, integer:2, string:3, name:4, mark:5, operator:6, array:7, dictionary:8 }
+const TYPE_NAME = Object.fromEntries(Object.entries(TYPE).map(([k,v]) => [v,k]))
+const FLAG_EXEC     = 0x01
+const FLAG_READONLY = 0x02
+
+// Operator state sentinels (i32)
+const STATE_UNKNOWN    = 0x7fffffff
+const STATE_FIRST_CALL = 0x00000000
+const STATE_POP        = 0x80000000
+
+// ── Memory ───────────────────────────────────────────────────────────────────
+
+const buf  = new ArrayBuffer(PAGE_SIZE)
+const view = new DataView(buf)
+const u8   = new Uint8Array(buf)
+
+function r32(off)        { return view.getInt32(off, true) }
+function w32(off, val)   { view.setInt32(off, val, true); markWritten(off, 4) }
+function w8 (off, val)   { view.setUint8(off, val); markWritten(off, 1) }
+
+// Track which bytes were just written for the flash animation
+const justWritten = new Set()
+function markWritten(off, len) { for (let i=0; i<len; ++i) justWritten.add(off+i) }
+
+// ── Region layout (dynamic, set at init) ─────────────────────────────────────
+
+function init(operandCap=8, callCap=8, dictCap=4) {
+  justWritten.clear()
+  u8.fill(0)
+
+  // header
+  w32(H_MAGIC,   0x50534257) // "PSBW"
+  w32(H_VERSION, 1)
+
+  // place regions after header
+  let ptr = HEADER_SIZE
+
+  w32(H_OPERAND_BASE,  ptr)
+  w32(H_OPERAND_CAP,   operandCap)
+  w32(H_OPERAND_DEPTH, 0)
+  ptr += operandCap * VALUE_SIZE
+
+  w32(H_CALL_BASE,  ptr)
+  w32(H_CALL_CAP,   callCap)
+  w32(H_CALL_DEPTH, 0)
+  ptr += callCap * FRAME_SIZE
+
+  w32(H_DICT_BASE,  ptr)
+  w32(H_DICT_CAP,   dictCap)
+  w32(H_DICT_DEPTH, 0)
+  ptr += dictCap * DICT_ENTRY_SIZE
+
+  // string heap starts after stacks
+  w32(H_STRING_BASE, ptr)
+  w32(H_STRING_TOP,  ptr)
+
+  w32(H_HEAP_TOP, ptr)
+}
+
+// ── Stack operations ──────────────────────────────────────────────────────────
+
+function operandPush(type, flags, payload) {
+  const depth = r32(H_OPERAND_DEPTH)
+  const base  = r32(H_OPERAND_BASE)
+  const addr  = base + depth * VALUE_SIZE
+  w32(addr,     (type & 0xff) | ((flags & 0xff) << 8))
+  w32(addr + 4, payload)
+  w32(H_OPERAND_DEPTH, depth + 1)
+}
+
+function operandPop() {
+  const depth = r32(H_OPERAND_DEPTH)
+  if (depth === 0) throw new Error('operand stack underflow')
+  w32(H_OPERAND_DEPTH, depth - 1)
+  const base = r32(H_OPERAND_BASE)
+  const addr = base + (depth - 1) * VALUE_SIZE
+  return { type: r32(addr) & 0xff, flags: (r32(addr) >> 8) & 0xff, payload: r32(addr + 4) }
+}
+
+function operandAt(index) { // 0 = top
+  const depth = r32(H_OPERAND_DEPTH)
+  const base  = r32(H_OPERAND_BASE)
+  const addr  = base + (depth - 1 - index) * VALUE_SIZE
+  return { type: r32(addr) & 0xff, flags: (r32(addr) >> 8) & 0xff, payload: r32(addr + 4) }
+}
+
+function callPush(type, flags, payload) {
+  const depth = r32(H_CALL_DEPTH)
+  const base  = r32(H_CALL_BASE)
+  const addr  = base + depth * FRAME_SIZE
+  w32(addr,     (type & 0xff) | ((flags & 0xff) << 8))
+  w32(addr + 4, payload)
+  w32(addr + 8, STATE_UNKNOWN)
+  w32(H_CALL_DEPTH, depth + 1)
+}
+
+function callPop() {
+  const depth = r32(H_CALL_DEPTH)
+  w32(H_CALL_DEPTH, depth - 1)
+}
+
+function callTop() {
+  const depth = r32(H_CALL_DEPTH)
+  const base  = r32(H_CALL_BASE)
+  const addr  = base + (depth - 1) * FRAME_SIZE
+  return { type: r32(addr) & 0xff, flags: (r32(addr) >> 8) & 0xff, payload: r32(addr + 4), state: r32(addr + 8), addr }
+}
+
+function callSetState(state) {
+  const depth = r32(H_CALL_DEPTH)
+  const base  = r32(H_CALL_BASE)
+  const addr  = base + (depth - 1) * FRAME_SIZE + 8
+  w32(addr, state)
+}
+
+// ── String heap ───────────────────────────────────────────────────────────────
+
+const encoder = new TextEncoder()
+const decoder = new TextDecoder()
+const stringCache = new Map() // string → heap offset (interning)
+
+function internString(str) {
+  if (stringCache.has(str)) return stringCache.get(str)
+  const bytes  = encoder.encode(str)
+  const top    = r32(H_STRING_TOP)
+  const entry  = top
+  // layout: i32 length | i32 refcount | bytes... | padding
+  w32(entry,     bytes.length)
+  w32(entry + 4, 1)
+  for (let i = 0; i < bytes.length; ++i) w8(entry + 8 + i, bytes[i])
+  const next = entry + 8 + bytes.length
+  const aligned = (next + 3) & ~3
+  w32(H_STRING_TOP, aligned)
+  w32(H_HEAP_TOP,   aligned)
+  stringCache.set(str, entry)
+  return entry
+}
+
+function readString(offset) {
+  const len   = r32(offset)
+  const bytes = new Uint8Array(buf, offset + 8, len)
+  return decoder.decode(bytes)
+}
+
+// ── Operator table (system dict — stays in JS) ────────────────────────────────
+
+const OPERATORS = {
+  add: { id: 0, impl: () => { const b = operandPop(), a = operandPop(); operandPush(TYPE.integer, FLAG_READONLY, a.payload + b.payload) } },
+  sub: { id: 1, impl: () => { const b = operandPop(), a = operandPop(); operandPush(TYPE.integer, FLAG_READONLY, a.payload - b.payload) } },
+  mul: { id: 2, impl: () => { const b = operandPop(), a = operandPop(); operandPush(TYPE.integer, FLAG_READONLY, a.payload * b.payload) } },
+  dup: { id: 3, impl: () => { const a = operandAt(0); operandPush(a.type, a.flags, a.payload) } },
+  pop: { id: 4, impl: () => { operandPop() } },
+  exch: { id: 5, impl: () => {
+    const b = operandPop(), a = operandPop()
+    operandPush(b.type, b.flags, b.payload)
+    operandPush(a.type, a.flags, a.payload)
+  }},
+}
+const OP_BY_ID = Object.fromEntries(Object.values(OPERATORS).map(o => [o.id, o]))
+
+// ── Tokenizer (JS, not Wasm) ──────────────────────────────────────────────────
+
+function tokenize(src) {
+  const tokens = []
+  for (const tok of src.trim().split(/\s+/)) {
+    if (!tok) continue
+    const n = Number(tok)
+    if (!isNaN(n) && tok !== '') {
+      tokens.push({ kind: 'integer', value: n })
+    } else if (tok === 'true' || tok === 'false') {
+      tokens.push({ kind: 'boolean', value: tok === 'true' })
+    } else {
+      tokens.push({ kind: 'name', value: tok })
+    }
+  }
+  return tokens
+}
+
+// ── Cycle engine ─────────────────────────────────────────────────────────────
+
+function cycle() {
+  const callDepth = r32(H_CALL_DEPTH)
+  if (callDepth === 0) return 'idle'
+
+  const top = callTop()
+
+  if (!(top.flags & FLAG_EXEC)) {
+    // non-executable: move to operand stack
+    operandPush(top.type, top.flags, top.payload)
+    callPop()
+    return describeValue(top)
+  }
+
+  if (top.type === TYPE.name) {
+    if (top.state === STATE_FIRST_CALL) {
+      callPop()
+      return `name cleanup`
+    }
+    callSetState(STATE_FIRST_CALL)
+    const name = readString(top.payload)
+    const op   = OPERATORS[name]
+    if (!op) { log(`undefined: ${name}`, true); return 'error' }
+    callPush(TYPE.operator, FLAG_EXEC | FLAG_READONLY, op.id)
+    return `lookup "${name}" → operator`
+  }
+
+  if (top.type === TYPE.operator) {
+    if (top.state === STATE_FIRST_CALL || top.state === STATE_POP) {
+      callPop()
+      return `operator done`
+    }
+    callSetState(STATE_FIRST_CALL)
+    const op = OP_BY_ID[top.payload]
+    op.impl()
+    return `execute ${Object.keys(OPERATORS).find(k => OPERATORS[k].id === top.payload)}`
+  }
+
+  return 'unhandled'
+}
+
+function describeValue(v) {
+  const tn = TYPE_NAME[v.type] ?? '?'
+  if (v.type === TYPE.integer)  return `push integer(${v.payload})`
+  if (v.type === TYPE.boolean)  return `push boolean(${v.payload ? 'true' : 'false'})`
+  if (v.type === TYPE.name)     return `push name("${readString(v.payload)}")`
+  if (v.type === TYPE.string)   return `push string("${readString(v.payload)}")`
+  return `push ${tn}`
+}
+
+// ── Inject program ────────────────────────────────────────────────────────────
+
+let tokens = []
+let tokenIndex = 0
+
+function loadProgram() {
+  stringCache.clear()
+  init(8, 8, 4)
+  tokens = tokenize(document.getElementById('program').value)
+  tokenIndex = 0
+  // push tokens onto call stack in reverse order (so first token is on top)
+  for (let i = tokens.length - 1; i >= 0; --i) {
+    const tok = tokens[i]
+    if (tok.kind === 'integer') {
+      // integers are non-executable: they will be moved to operand stack by cycle()
+      callPush(TYPE.integer, FLAG_READONLY, tok.value)
+    } else if (tok.kind === 'boolean') {
+      callPush(TYPE.boolean, FLAG_READONLY, tok.value ? 1 : 0)
+    } else if (tok.kind === 'name') {
+      const offset = internString(tok.value)
+      callPush(TYPE.name, FLAG_EXEC | FLAG_READONLY, offset)
+    }
+  }
+  log(`loaded: ${document.getElementById('program').value}`)
+  document.getElementById('btn-step').disabled = false
+  document.getElementById('btn-run').disabled  = false
+  render()
+}
+
+// ── Render ────────────────────────────────────────────────────────────────────
+
+function typeClass(type) { return `t-${TYPE_NAME[type] ?? 'null'}` }
+
+function stateLabel(s) {
+  if (s === STATE_UNKNOWN)    return 'UNKNOWN'
+  if (s === STATE_FIRST_CALL) return 'FIRST_CALL'
+  if (s === STATE_POP)        return 'POP'
+  return String(s)
+}
+
+function payloadLabel(type, payload) {
+  if (type === TYPE.integer)  return String(payload)
+  if (type === TYPE.boolean)  return payload ? 'true' : 'false'
+  if (type === TYPE.null)     return 'null'
+  if (type === TYPE.mark)     return '—'
+  if (type === TYPE.operator) return Object.keys(OPERATORS).find(k => OPERATORS[k].id === payload) ?? `op#${payload}`
+  if (type === TYPE.name || type === TYPE.string) {
+    try { return `"${readString(payload)}"` } catch { return `@${payload}` }
+  }
+  return `@${payload}`
+}
+
+function renderStack(containerId, depth, base, entrySize, isCall) {
+  const el = document.getElementById(containerId)
+  el.innerHTML = ''
+  const cap = r32(isCall ? H_CALL_CAP : H_OPERAND_CAP)
+
+  for (let i = 0; i < Math.max(depth, 3); ++i) {
+    const slot = document.createElement('div')
+    slot.className = 'slot' + (i === depth - 1 ? ' top' : '') + (i >= depth ? ' empty' : '')
+
+    const addr = document.createElement('div')
+    addr.className = 'addr'
+    addr.textContent = i < depth ? `+${(base + i * entrySize).toString(16).padStart(3,'0')}` : ''
+    slot.appendChild(addr)
+
+    const cell = document.createElement('div')
+    cell.className = 'cell'
+
+    if (i < depth) {
+      const slotAddr = base + i * entrySize
+      const tf      = r32(slotAddr)
+      const type    = tf & 0xff
+      const flags   = (tf >> 8) & 0xff
+      const payload = r32(slotAddr + 4)
+
+      const tag = document.createElement('span')
+      tag.className = `tag ${typeClass(type)}`
+      tag.textContent = TYPE_NAME[type] ?? '?'
+      cell.appendChild(tag)
+
+      const val = document.createElement('span')
+      val.className = 'val'
+      val.textContent = payloadLabel(type, payload)
+      cell.appendChild(val)
+
+      if (flags & FLAG_EXEC) {
+        const em = document.createElement('span')
+        em.className = 'exec-mark'
+        em.textContent = '⚡'
+        cell.appendChild(em)
+      }
+
+      if (isCall) {
+        const state = r32(slotAddr + 8)
+        const sm = document.createElement('span')
+        sm.className = 'state-mark'
+        sm.textContent = stateLabel(state)
+        cell.appendChild(sm)
+      }
+    } else {
+      const val = document.createElement('span')
+      val.className = 'val'
+      val.textContent = '·'
+      cell.appendChild(val)
+    }
+
+    slot.appendChild(cell)
+    el.appendChild(slot)
+  }
+}
+
+function regionOf(offset) {
+  const ob = r32(H_OPERAND_BASE), oc = r32(H_OPERAND_CAP)
+  const cb = r32(H_CALL_BASE),    cc = r32(H_CALL_CAP)
+  const db = r32(H_DICT_BASE),    dc = r32(H_DICT_CAP)
+  const sb = r32(H_STRING_BASE),  st = r32(H_STRING_TOP)
+  if (offset < HEADER_SIZE)                                           return 'header'
+  if (offset >= ob && offset < ob + oc * VALUE_SIZE)                  return 'operand'
+  if (offset >= cb && offset < cb + cc * FRAME_SIZE)                  return 'call'
+  if (offset >= db && offset < db + dc * DICT_ENTRY_SIZE)             return 'dict'
+  if (offset >= sb && offset < st)                                     return 'strings'
+  return ''
+}
+
+function renderByteGrid() {
+  const grid = document.getElementById('byte-grid')
+  grid.innerHTML = ''
+  const rows = Math.ceil(PAGE_SIZE / 16)
+
+  for (let row = 0; row < rows; ++row) {
+    const rowAddr = document.createElement('div')
+    rowAddr.className = 'row-addr'
+    rowAddr.textContent = (row * 16).toString(16).padStart(3, '0')
+    grid.appendChild(rowAddr)
+
+    for (let col = 0; col < 16; ++col) {
+      const offset = row * 16 + col
+      const byte   = u8[offset]
+      const cell   = document.createElement('div')
+      const region = regionOf(offset)
+      cell.className = `byte-cell${region ? ` region-${region}` : ''}${byte ? ' nonzero' : ' zero'}${justWritten.has(offset) ? ' just-written' : ''}`
+      cell.textContent = byte.toString(16).padStart(2, '0')
+      cell.title = `+${offset.toString(16).padStart(3,'0')} = ${byte} (${region || 'free'})`
+      grid.appendChild(cell)
+    }
+  }
+}
+
+function renderHeader() {
+  const fields = [
+    ['heap_top',      r32(H_HEAP_TOP)],
+    ['operand_base',  r32(H_OPERAND_BASE)],
+    ['operand_depth', r32(H_OPERAND_DEPTH)],
+    ['call_base',     r32(H_CALL_BASE)],
+    ['call_depth',    r32(H_CALL_DEPTH)],
+    ['string_base',   r32(H_STRING_BASE)],
+    ['string_top',    r32(H_STRING_TOP)],
+  ]
+  const el = document.getElementById('mem-header')
+  el.innerHTML = ''
+  for (const [label, val] of fields) {
+    const div = document.createElement('div')
+    div.className = 'mem-reg'
+    div.innerHTML = `<div class="reg-label">${label}</div><div class="reg-val">${val} (0x${val.toString(16)})</div>`
+    el.appendChild(div)
+  }
+}
+
+function render() {
+  const od = r32(H_OPERAND_DEPTH), ob = r32(H_OPERAND_BASE)
+  const cd = r32(H_CALL_DEPTH),    cb = r32(H_CALL_BASE)
+  const dd = r32(H_DICT_DEPTH),    db = r32(H_DICT_BASE)
+
+  renderStack('operand-slots', od, ob, VALUE_SIZE,  false)
+  renderStack('call-slots',    cd, cb, FRAME_SIZE,  true)
+  renderStack('dict-slots',    dd, db, DICT_ENTRY_SIZE, false)
+  renderHeader()
+  renderByteGrid()
+}
+
+// ── Log ───────────────────────────────────────────────────────────────────────
+
+let cycleCount = 0
+function log(msg, isError=false) {
+  const el = document.getElementById('log')
+  const entry = document.createElement('div')
+  entry.className = 'entry' + (isError ? ' error' : '')
+  entry.textContent = isError ? `✗ ${msg}` : `cycle ${cycleCount}: ${msg}`
+  el.prepend(entry)
+}
+
+// ── Controls ──────────────────────────────────────────────────────────────────
+
+document.getElementById('btn-load').addEventListener('click', () => {
+  cycleCount = 0
+  loadProgram()
+})
+
+document.getElementById('btn-step').addEventListener('click', () => {
+  justWritten.clear()
+  if (r32(H_CALL_DEPTH) === 0) {
+    document.getElementById('btn-step').disabled = true
+    document.getElementById('btn-run').disabled  = true
+    return
+  }
+  ++cycleCount
+  const result = cycle()
+  log(result)
+  if (r32(H_CALL_DEPTH) === 0) {
+    document.getElementById('btn-step').disabled = true
+    document.getElementById('btn-run').disabled  = true
+    log('done ✓')
+  }
+  render()
+})
+
+document.getElementById('btn-run').addEventListener('click', () => {
+  justWritten.clear()
+  while (r32(H_CALL_DEPTH) > 0) {
+    ++cycleCount
+    const result = cycle()
+    log(result)
+  }
+  document.getElementById('btn-step').disabled = true
+  document.getElementById('btn-run').disabled  = true
+  log('done ✓')
+  render()
+})
+
+document.getElementById('program').addEventListener('keydown', e => {
+  if (e.key === 'Enter') loadProgram()
+})
+
+// ── Boot ──────────────────────────────────────────────────────────────────────
+
+loadProgram()
+</script>
+</body>
+</html>

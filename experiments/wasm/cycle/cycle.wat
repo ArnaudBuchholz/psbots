@@ -252,6 +252,16 @@
   (func $stack_depth (export "stack_depth") (result i32)
     (call $operand_depth))
 
+  ;; Read call stack depth
+  (func $call_stack_depth (export "call_stack_depth") (result i32)
+    (call $call_depth))
+
+  ;; Execute one cycle; returns exception code (0 = ok)
+  (func $step (export "step") (result i32)
+    (if (i32.eqz (call $call_depth))
+      (then (return (global.get $EX_NONE))))
+    (call $cycle))
+
   ;; Reset both stacks (for benchmarking)
   (func $reset (export "reset")
     (i32.store (i32.const 1024) (i32.const 0))
