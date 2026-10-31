@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>PSBots Memory Playground</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Courier New', monospace; background: #1a1a2e; color: #e0e0e0; padding: 16px; }
+    h1 { font-size: 14px; color: #888; margin-bottom: 12px; letter-spacing: 2px; text-transform: uppercase; }
+    h2 { font-size: 10px; color: #666; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; }
+
+    .cols { display: flex; gap: 16px; align-items: flex-start; }
+    .left { flex: 0 0 340px; display: flex; flex-direction: column; gap: 12px; }
+    .right { flex: 1; display: flex; flex-direction: column; gap: 12px; }
+    .panel { background: #0d0d1a; border: 1px solid #333; padding: 10px; }
+
+    label { font-size: 11px; color: #888; display: block; margin-bottom: 3px; }
+    input, select {
+      width: 100%; background: #0d0d1a; border: 1px solid #333; color: #e0e0e0;
+      font-family: inherit; font-size: 12px; padding: 4px 6px; outline: none;
+    }
+    input:focus, select:focus { border-color: #556; }
+    .row { display: flex; gap: 6px; align-items: flex-end; margin-bottom: 6px; }
+    .row > div { flex: 1; }
+    .row > div.narrow { flex: 0 0 70px; }
+
+    button {
+      background: #16213e; border: 1px solid #334; color: #aac;
+      font-family: inherit; font-size: 12px; padding: 5px 12px; cursor: pointer; letter-spacing: 1px;
+    }
+    button:hover { background: #1e2d50; border-color: #557; color: #ccf; }
+    button:disabled { opacity: 0.3; cursor: default; }
+    button.wide { width: 100%; }
+    button.danger { border-color: #633; color: #c88; }
+    button.danger:hover { background: #3a1616; }
+    button.primary { border-color: #363; color: #8c8; }
+    button.primary:hover { background: #163a16; }
+
+    /* metrics */
+    .metrics { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; }
+    .metric { background: #111; border: 1px solid #222; padding: 6px 8px; }
+    .metric .m-label { color: #666; font-size: 10px; margin-bottom: 2px; }
+    .metric .m-val { color: #aac; font-size: 15px; }
+    .metric .m-val.warn { color: #cc6; }
+    .metric .m-val.bad { color: #e66; }
+    .frag-bar { height: 8px; background: #111; border: 1px solid #222; margin-top: 4px; position: relative; overflow: hidden; }
+    .frag-bar .fill { height: 100%; background: #c84; transition: width 0.3s, background 0.3s; }
+
+    /* handle table */
+    #handles { max-height: 260px; overflow-y: auto; font-size: 11px; }
+    table { width: 100%; border-collapse: collapse; }
+    th { color: #555; font-size: 9px; text-align: left; padding: 2px 4px; text-transform: uppercase; letter-spacing: 1px; }
+    td { padding: 2px 4px; color: #aac; border-top: 1px solid #1a1a2a; }
+    tr.free td { color: #444; }
+    tr.sel td { background: #1a2a3a; }
+    tr:hover td { background: #16213e; cursor: pointer; }
+    .htype { padding: 0 4px; border-radius: 2px; font-size: 10px; }
+    .ht-array { background: #1a3a3a; color: #4cc; }
+    .ht-dict  { background: #10200f; color: #6c6; }
+    .ht-string{ background: #3a2a1a; color: #c84; }
+
+    /* memory map */
+    .map-wrap { overflow-x: auto; }
+    .map {
+      display: grid; gap: 1px; font-size: 9px; width: max-content;
+      grid-template-columns: 54px repeat(var(--cols, 32), 15px);
+    }
+    .map .row-addr { color: #444; display: flex; align-items: center; justify-content: flex-end; padding-right: 4px; height: 15px; }
+    .cell { height: 15px; display: flex; align-items: center; justify-content: center; font-size: 8px; color: #556; }
+    .cell.flags   { background: #1a2020; }
+    .cell.handle  { background: #15152a; color: #88a; }
+    .cell.handle.hfree { background: #1a1016; color: #633; }
+    .cell.shard   { background: #0f1820; color: #4cc; }
+    .cell.shard.hole { background: #2a1010; color: #a44; }
+    .cell.string  { background: #20100f; color: #c84; }
+    .cell.gap     { background: #0c0c12; color: #223; }
+    .cell.sel     { outline: 1px solid #ff8; outline-offset: -1px; }
+
+    .legend { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px; }
+    .legend-item { display: flex; align-items: center; gap: 4px; font-size: 10px; color: #777; }
+    .sw { width: 12px; height: 12px; border: 1px solid #333; }
+    .sw.flags{background:#1a2020}.sw.handle{background:#15152a}.sw.hfree{background:#1a1016}
+    .sw.shard{background:#0f1820}.sw.hole{background:#2a1010}.sw.string{background:#20100f}.sw.gap{background:#0c0c12}
+
+    #log { background: #0d0d1a; border: 1px solid #333; padding: 6px 8px; font-size: 11px; height: 120px; overflow-y: auto; display: flex; flex-direction: column-reverse; }
+    #log .entry { padding: 1px 0; color: #7a9; }
+    #log .entry.err { color: #e66; }
+    #log .entry.sys { color: #a8c; }
+    .hint { font-size: 10px; color: #556; margin-top: 4px; line-height: 1.5; }
+  </style>
+</head>
+<body>
+  <h1>PSBots · Memory Playground</h1>
+  <div class="cols">
+    <!-- ───────────── LEFT: controls ───────────── -->
+    <div class="left">
+      <div class="panel">
+        <h2>Init State</h2>
+        <div class="row">
+          <div><label>Total bytes</label><input id="cfg-total" type="number" value="1024"></div>
+          <div class="narrow"><label>Shard slots</label><input id="cfg-shard" type="number" value="4"></div>
+        </div>
+        <div class="row">
+          <div class="narrow"><label>Handle chunk</label><input id="cfg-hchunk" type="number" value="4"></div>
+          <div><label>Flags bytes</label><input id="cfg-flags" type="number" value="16"></div>
+        </div>
+        <button id="btn-init" class="wide primary">Initialize ↺</button>
+        <div class="hint">Shard = fixed-size linked block (slots × 8 bytes). Dict cell = 2 slots. Handle table grows in chunks of N entries.</div>
+      </div>
+
+      <div class="panel">
+        <h2>Allocate</h2>
+        <div class="row">
+          <div><label>Array (initial slots)</label><input id="a-size" type="number" value="3"></div>
+          <div class="narrow"><button id="btn-array" class="wide">+ Array</button></div>
+        </div>
+        <div class="row">
+          <div><label>Dict (initial pairs)</label><input id="d-size" type="number" value="2"></div>
+          <div class="narrow"><button id="btn-dict" class="wide">+ Dict</button></div>
+        </div>
+        <div class="row">
+          <div><label>String (text)</label><input id="s-text" value="hello"></div>
+          <div class="narrow"><button id="btn-string" class="wide">+ Str</button></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Mutate selected handle <span id="sel-label" style="color:#88f"></span></h2>
+        <div class="row">
+          <div class="narrow"><label>Count</label><input id="m-count" type="number" value="1"></div>
+          <div><button id="btn-grow" class="wide">Grow (push)</button></div>
+          <div><button id="btn-shrink" class="wide">Shrink (pop)</button></div>
+        </div>
+        <button id="btn-release" class="wide danger">Release (refcount → 0)</button>
+        <div class="hint">Select a row in the handle table. Grow pushes values (arrays) or name/value pairs (dicts), allocating shards as needed. Release frees shards to the free-shard list.</div>
+      </div>
+
+      <div class="panel">
+        <h2>Maintenance</h2>
+        <button id="btn-compact" class="wide primary">Compact shards</button>
+        <div class="hint">Slides live shards down to close holes, updates moved handles by scanning the table, rebuilds the free-shard list.</div>
+      </div>
+    </div>
+
+    <!-- ───────────── RIGHT: visualization ───────────── -->
+    <div class="right">
+      <div class="panel">
+        <h2>Fragmentation & Space</h2>
+        <div class="metrics">
+          <div class="metric"><div class="m-label">Shard-region fragmentation</div><div class="m-val" id="met-frag">0%</div><div class="frag-bar"><div class="fill" id="frag-fill" style="width:0%"></div></div></div>
+          <div class="metric"><div class="m-label">Free gap (bytes)</div><div class="m-val" id="met-gap">0</div></div>
+          <div class="metric"><div class="m-label">Dead space (holes · str)</div><div class="m-val" id="met-holes">0</div></div>
+          <div class="metric"><div class="m-label">Live / total handles</div><div class="m-val" id="met-handles">0 / 0</div></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Handle Table</h2>
+        <div id="handles"></div>
+      </div>
+
+      <div class="panel">
+        <h2>Memory Map</h2>
+        <div class="map-wrap"><div class="map" id="map"></div></div>
+        <div class="legend">
+          <div class="legend-item"><div class="sw flags"></div>flags</div>
+          <div class="legend-item"><div class="sw handle"></div>handle (live)</div>
+          <div class="legend-item"><div class="sw hfree"></div>handle (free)</div>
+          <div class="legend-item"><div class="sw shard"></div>shard (live)</div>
+          <div class="legend-item"><div class="sw hole"></div>shard (hole)</div>
+          <div class="legend-item"><div class="sw gap"></div>free gap</div>
+          <div class="legend-item"><div class="sw string"></div>string</div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Log</h2>
+        <div id="log"></div>
+      </div>
+    </div>
+  </div>
+
+<script type="module">
+// ════════════════════════════════════════════════════════════════════════════
+//  Model — faithful to docs/guidelines/Memory and State.md
+//  Layout:  [ flags ][ handles → ][ shards ][ ...gap... ][ strings ← ]
+//           0         A            B                       C = total
+//  - shard offsets are B-relative  (B = end of handles)
+//  - string offsets are C-relative (C = end of memory, negative)
+// ════════════════════════════════════════════════════════════════════════════
+
+const SLOT = 8            // one tagged value = 8 bytes (we only track structure, not value bits here)
+const HANDLE_SIZE = 8     // bytes per handle entry (structural model, not packed)
+
+// Object types
+const T = { array: 7, dict: 8, string: 3 }
+const T_NAME = { 7: 'array', 8: 'dict', 3: 'string' }
+
+// ── Config (from flags) ──
+let cfg = { total: 1024, shardSlots: 4, handleChunk: 4, flagsBytes: 16 }
+
+// ── State ──
+// We model memory as structured JS objects rather than raw bytes, because the
+// doc is about STRUCTURE (handles, shards, offsets). A byte grid is derived for display.
+let state = null
+
+function shardBytes() { return cfg.shardSlots * SLOT }
+
+function initState() {
+  cfg.total       = clampInt('cfg-total', 128, 1 << 20, 1024)
+  cfg.shardSlots  = clampInt('cfg-shard', 1, 64, 4)
+  cfg.handleChunk = clampInt('cfg-hchunk', 1, 64, 4)
+  cfg.flagsBytes  = clampInt('cfg-flags', 0, 256, 16)
+
+  state = {
+    A: cfg.flagsBytes,          // start of handle table (fixed)
+    handleCap: 0,               // number of handle slots physically present
+    handles: [],                // entry = { used, type, length, capacity, rootShard, shards:[absAddr...] } | null
+    // B = A + handleCap*HANDLE_SIZE  (derived)
+    shardTop: 0,                // bytes of shard region used, measured from B (B-relative high-water)
+    freeShards: [],             // free-shard list: B-relative offsets of holes (each shardBytes() long)
+    liveShards: new Map(),      // B-relative offset -> handleIndex (owner), for live shards only
+    stringBottom: cfg.total,    // absolute addr of the lowest string byte (strings grow down from C)
+    strings: [],                // { handleIndex, size, addr } addr is absolute
+    nextSeq: 0,
+  }
+  log(`init: total=${cfg.total}B, shard=${cfg.shardSlots} slots (${shardBytes()}B), handleChunk=${cfg.handleChunk}, flags=${cfg.flagsBytes}B`, 'sys')
+  selected = -1
+  render()
+}
+
+function B() { return state.A + state.handleCap * HANDLE_SIZE }
+function gapStart() { return B() + state.shardTop }        // absolute: first free byte after shards
+function gapEnd()   { return state.stringBottom }          // absolute: first string byte (exclusive low end)
+function gapSize()  { return gapEnd() - gapStart() }
+
+// ── Handle allocation ────────────────────────────────────────────────────────
+function allocHandle(entry) {
+  // reuse a free slot (refcount 0) first
+  let idx = state.handles.findIndex(h => h === null || !h.used)
+  if (idx === -1) {
+    // grow the handle table by a chunk — this shifts B rightward.
+    // Shards are B-relative, so NO shard offset changes; but absolute gap shrinks.
+    const need = HANDLE_SIZE * cfg.handleChunk
+    if (gapSize() < need + /*ensure shards still fit*/ 0) {
+      // growing handles eats into the gap (B moves right, shards move right with it)
+      if (gapSize() < need) { log(`vmOverflow: cannot grow handle table (need ${need}B, gap ${gapSize()}B)`, 'err'); return -1 }
+    }
+    idx = state.handleCap
+    for (let i = 0; i < cfg.handleChunk; ++i) state.handles.push(null)
+    state.handleCap += cfg.handleChunk
+    log(`handle table grew +${cfg.handleChunk} (cap ${state.handleCap}); B=${B()} shards shifted, offsets unchanged`, 'sys')
+  }
+  state.handles[idx] = entry
+  return idx
+}
+
+// ── Shard allocation (B-relative offsets) ────────────────────────────────────
+function allocShard(ownerIdx) {
+  // reuse a hole first
+  let off
+  if (state.freeShards.length > 0) {
+    off = state.freeShards.shift()
+  } else {
+    // carve from the gap
+    if (gapSize() < shardBytes()) return null
+    off = state.shardTop
+    state.shardTop += shardBytes()
+  }
+  state.liveShards.set(off, ownerIdx)
+  return off
+}
+
+function freeShard(off) {
+  state.liveShards.delete(off)
+  state.freeShards.push(off)
+}
+
+// ── String allocation (contiguous, grows down from C) ────────────────────────
+function allocString(text, handleIndex) {
+  const size = text.length   // 1 byte/char (ASCII), + we ignore header bytes for simplicity
+  if (gapSize() < size) return null
+  state.stringBottom -= size
+  const addr = state.stringBottom
+  const s = { handleIndex, size, addr, text }
+  state.strings.push(s)
+  return s
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+//  Operations
+// ════════════════════════════════════════════════════════════════════════════
+
+function createArray(initialSlots) {
+  const entry = { used: true, type: T.array, length: 0, capacity: 0, shards: [], seq: state.nextSeq++ }
+  const idx = allocHandle(entry)
+  if (idx === -1) return
+  entry.rootShard = null
+  // pre-allocate shards to hold initialSlots
+  if (!ensureCapacity(idx, initialSlots)) { rollbackHandle(idx); log(`vmOverflow: array(${initialSlots})`, 'err'); return }
+  log(`array #${idx}: ${entry.shards.length} shard(s), cap ${entry.capacity} slots`)
+  selectHandle(idx); render()
+}
+
+function createDict(initialPairs) {
+  const slots = initialPairs * 2   // each pair = name-handle + value = 2 slots
+  const entry = { used: true, type: T.dict, length: 0, capacity: 0, shards: [], seq: state.nextSeq++ }
+  const idx = allocHandle(entry)
+  if (idx === -1) return
+  if (!ensureCapacity(idx, slots)) { rollbackHandle(idx); log(`vmOverflow: dict(${initialPairs})`, 'err'); return }
+  log(`dict #${idx}: ${entry.shards.length} shard(s), cap ${entry.capacity/2} pairs`)
+  selectHandle(idx); render()
+}
+
+function createString(text) {
+  const entry = { used: true, type: T.string, length: text.length, capacity: text.length, shards: [], seq: state.nextSeq++ }
+  const idx = allocHandle(entry)
+  if (idx === -1) return
+  const s = allocString(text, idx)
+  if (!s) { rollbackHandle(idx); log(`vmOverflow: string("${text}")`, 'err'); return }
+  entry.stringAddr = s.addr
+  log(`string #${idx}: "${text}" (${text.length}B) @abs ${s.addr} (C-relative ${s.addr - cfg.total})`)
+  selectHandle(idx); render()
+}
+
+function rollbackHandle(idx) { state.handles[idx] = null }
+
+// capacity in slots; allocates/links shards as needed
+function ensureCapacity(idx, slots) {
+  const e = state.handles[idx]
+  while (e.capacity < slots) {
+    const off = allocShard(idx)
+    if (off === null) {
+      // undo shards we added in this call? keep simple: fail, caller rolls back whole object
+      return false
+    }
+    e.shards.push(off)
+    if (e.rootShard == null) e.rootShard = off
+    e.capacity += cfg.shardSlots
+  }
+  return true
+}
+
+function growObject(idx, count) {
+  const e = state.handles[idx]
+  if (!e || !e.used) return
+  if (e.type === T.string) { log(`strings are immutable — cannot grow #${idx}`, 'err'); return }
+  const step = e.type === T.dict ? 2 : 1   // dict grows by pairs (2 slots)
+  const label = e.type === T.dict ? 'pair' : 'value'
+  let added = 0
+  for (let i = 0; i < count; ++i) {
+    if (e.length + step > e.capacity) {
+      if (!ensureCapacity(idx, e.length + step)) { log(`vmOverflow growing #${idx} after +${added}`, 'err'); break }
+    }
+    e.length += step
+    ++added
+  }
+  if (added) log(`#${idx} grew +${added} ${label}(s) → length ${e.length/ (e.type===T.dict?2:1)} ${e.type===T.dict?'pairs':'slots'}, cap ${e.capacity} slots, ${e.shards.length} shard(s)`)
+  render()
+}
+
+function shrinkObject(idx, count) {
+  const e = state.handles[idx]
+  if (!e || !e.used) return
+  if (e.type === T.string) { log(`strings are immutable — cannot shrink #${idx}`, 'err'); return }
+  const step = e.type === T.dict ? 2 : 1
+  let removed = 0
+  for (let i = 0; i < count && e.length >= step; ++i) { e.length -= step; ++removed }
+  // Free trailing shards that are now fully unused, but keep at least the root
+  // shard so the object retains its allocation (an empty-but-live array still
+  // owns one shard, matching how it was created).
+  const neededShards = Math.max(1, Math.ceil(e.length / cfg.shardSlots))
+  let freed = 0
+  while (e.shards.length > neededShards) {
+    const off = e.shards.pop()
+    e.capacity -= cfg.shardSlots
+    freeShard(off)
+    ++freed
+  }
+  if (removed) log(`#${idx} shrank -${removed} → length ${e.type===T.dict?e.length/2+' pair(s)':e.length+' slot(s)'}, ${e.shards.length} shard(s)${freed?`, freed ${freed} to hole list`:''}`)
+  render()
+}
+
+function releaseObject(idx) {
+  const e = state.handles[idx]
+  if (!e || !e.used) return
+  if (e.type === T.string) {
+    // Drop the string. Its space stays dead (a hole below C) until compaction
+    // slides the survivors up. No hole list is needed: the live string handles
+    // are the source of truth — holes are implicitly the gaps between them.
+    state.strings = state.strings.filter(s => s.handleIndex !== idx)
+    log(`released string #${idx} → dead space (reclaimed on next compact)`)
+  } else {
+    for (const off of e.shards) freeShard(off)
+    log(`released #${T_NAME[e.type]} #${idx}: ${e.shards.length} shard(s) → hole list`)
+  }
+  state.handles[idx] = null   // refcount → 0, slot reusable
+  if (selected === idx) selected = -1
+  render()
+}
+
+// ── Compaction: pack shards toward B and strings toward C (widening the gap) ──
+function compact() {
+  if (!state) return
+  const holesBefore = state.freeShards.length
+  const stringSpanBefore = cfg.total - state.stringBottom
+  const liveStringBytes = state.strings.reduce((n, s) => n + s.size, 0)
+  const deadStringBytes = stringSpanBefore - liveStringBytes
+
+  if (holesBefore === 0 && deadStringBytes === 0) { log('compact: no holes or dead strings, nothing to do', 'sys'); return }
+
+  // ── Phase 1: pack shards toward B ──
+  const liveOffsets = [...state.liveShards.keys()].sort((a, b) => a - b)
+  let shardMoves = 0
+  let write = 0  // next B-relative offset to place a live shard
+  const remap = new Map()  // oldOff -> newOff
+  for (const oldOff of liveOffsets) {
+    const newOff = write
+    if (newOff !== oldOff) ++shardMoves
+    remap.set(oldOff, newOff)
+    write += shardBytes()
+  }
+  // Update handle entries by scanning the whole table (the doc's chosen approach).
+  for (let i = 0; i < state.handles.length; ++i) {
+    const e = state.handles[i]
+    if (!e || !e.used || e.type === T.string) continue
+    e.shards = e.shards.map(off => remap.get(off))
+    if (e.rootShard != null) e.rootShard = remap.get(e.rootShard)
+  }
+  const newLive = new Map()
+  for (const [oldOff, owner] of state.liveShards) newLive.set(remap.get(oldOff), owner)
+  state.liveShards = newLive
+  state.shardTop = write
+  state.freeShards = []
+
+  // ── Phase 2: pack live strings toward C ──
+  // Slide survivors up so they abut C with no dead gaps. C-relative offsets
+  // change, so each moved string's handle entry is rewritten (owner found by
+  // the same scan via s.handleIndex).
+  let stringMoves = 0
+  const byAddrDesc = [...state.strings].sort((a, b) => b.addr - a.addr) // nearest C first
+  let top = cfg.total   // next free byte abutting C, exclusive
+  for (const s of byAddrDesc) {
+    const newAddr = top - s.size
+    if (newAddr !== s.addr) {
+      s.addr = newAddr
+      state.handles[s.handleIndex].stringAddr = newAddr  // rewrite handle (C-relative)
+      ++stringMoves
+    }
+    top = newAddr
+  }
+  state.stringBottom = top
+
+  log(`compact: shards closed ${holesBefore} hole(s)/moved ${shardMoves}; strings reclaimed ${deadStringBytes}B/moved ${stringMoves}. shardTop=${state.shardTop}, stringBottom=${state.stringBottom}, gap=${gapSize()}B`, 'sys')
+  render()
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+//  Metrics
+// ════════════════════════════════════════════════════════════════════════════
+function fragmentation() {
+  // fraction of the shard-region span that is holes
+  const span = state.shardTop                    // bytes from B to shard high-water
+  if (span === 0) return 0
+  const holeBytes = state.freeShards.length * shardBytes()
+  return holeBytes / span
+}
+
+function deadStringBytes() {
+  const span = cfg.total - state.stringBottom     // whole string region span
+  const live = state.strings.reduce((n, s) => n + s.size, 0)
+  return span - live                              // dead space from released strings
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+//  Rendering
+// ════════════════════════════════════════════════════════════════════════════
+let selected = -1
+
+function selectHandle(idx) { selected = idx; const e = state?.handles[idx]; document.getElementById('sel-label').textContent = (idx>=0&&e)?`#${idx} (${T_NAME[e.type]})`:'' }
+
+function render() {
+  if (!state) return
+  renderMetrics()
+  renderHandles()
+  renderMap()
+}
+
+function renderMetrics() {
+  const frag = fragmentation()
+  const fEl = document.getElementById('met-frag')
+  fEl.textContent = (frag * 100).toFixed(0) + '%'
+  fEl.className = 'm-val' + (frag > 0.5 ? ' bad' : frag > 0.2 ? ' warn' : '')
+  document.getElementById('frag-fill').style.width = (frag * 100).toFixed(0) + '%'
+  document.getElementById('frag-fill').style.background = frag > 0.5 ? '#e66' : frag > 0.2 ? '#cc6' : '#4c9'
+
+  const gap = gapSize()
+  const gEl = document.getElementById('met-gap')
+  gEl.textContent = gap
+  gEl.className = 'm-val' + (gap < shardBytes() ? ' bad' : gap < shardBytes() * 3 ? ' warn' : '')
+
+  document.getElementById('met-holes').textContent = `${state.freeShards.length} · ${deadStringBytes()}B str`
+  const live = state.handles.filter(h => h && h.used).length
+  document.getElementById('met-handles').textContent = `${live} / ${state.handleCap}`
+}
+
+function renderHandles() {
+  const el = document.getElementById('handles')
+  let html = '<table><thead><tr><th>#</th><th>type</th><th>len</th><th>cap</th><th>root(B)</th><th>shards</th></tr></thead><tbody>'
+  for (let i = 0; i < state.handles.length; ++i) {
+    const e = state.handles[i]
+    if (!e) { html += `<tr class="free${selected===i?' sel':''}" data-idx="${i}"><td>${i}</td><td colspan="5" style="color:#444">— free —</td></tr>`; continue }
+    const typeTag = `<span class="htype ht-${T_NAME[e.type]}">${T_NAME[e.type]}</span>`
+    if (e.type === T.string) {
+      const lenUnit = e.length
+      html += `<tr class="${selected===i?'sel':''}" data-idx="${i}"><td>${i}</td><td>${typeTag}</td><td>${lenUnit}</td><td>${e.capacity}</td><td>C${e.stringAddr - cfg.total}</td><td>—</td></tr>`
+    } else {
+      const unit = e.type === T.dict ? e.length/2 : e.length
+      const capUnit = e.type === T.dict ? e.capacity/2 : e.capacity
+      html += `<tr class="${selected===i?'sel':''}" data-idx="${i}"><td>${i}</td><td>${typeTag}</td><td>${unit}</td><td>${capUnit}</td><td>${e.rootShard ?? '—'}</td><td>${e.shards.map(s=>s).join(',')||'—'}</td></tr>`
+    }
+  }
+  html += '</tbody></table>'
+  el.innerHTML = html
+  el.querySelectorAll('tr[data-idx]').forEach(tr => tr.addEventListener('click', () => {
+    const i = +tr.dataset.idx
+    if (state.handles[i]) { selectHandle(i); render() }
+  }))
+}
+
+const MAP_COLS = 32
+function renderMap() {
+  const el = document.getElementById('map')
+  el.style.setProperty('--cols', MAP_COLS)
+  const total = cfg.total
+  const rows = Math.ceil(total / MAP_COLS)
+
+  // build a per-byte classification
+  const kind = new Array(total).fill('gap')
+  // flags
+  for (let i = 0; i < state.A && i < total; ++i) kind[i] = 'flags'
+  // handles
+  for (let h = 0; h < state.handleCap; ++h) {
+    const base = state.A + h * HANDLE_SIZE
+    const free = !(state.handles[h] && state.handles[h].used)
+    for (let b = 0; b < HANDLE_SIZE; ++b) kind[base + b] = free ? 'hfree' : 'handle'
+  }
+  // shards: live and holes (B-relative → absolute = B + off)
+  const b0 = B()
+  for (const off of state.liveShards.keys()) for (let b = 0; b < shardBytes(); ++b) kind[b0 + off + b] = 'shard'
+  for (const off of state.freeShards)          for (let b = 0; b < shardBytes(); ++b) kind[b0 + off + b] = 'hole'
+  // strings: the whole string-region span is dead space, with live strings on top.
+  // Dead bytes (released strings not yet compacted) show as holes, matching shards.
+  for (let i = state.stringBottom; i < total; ++i) kind[i] = 'hole'
+  for (const s of state.strings) for (let b = 0; b < s.size; ++b) kind[s.addr + b] = 'string'
+
+  // selected object's bytes
+  const selBytes = new Set()
+  if (selected >= 0 && state.handles[selected]) {
+    const e = state.handles[selected]
+    if (e.type === T.string) { for (let b = 0; b < e.capacity; ++b) selBytes.add(e.stringAddr + b) }
+    else for (const off of e.shards) for (let b = 0; b < shardBytes(); ++b) selBytes.add(b0 + off + b)
+  }
+
+  let html = ''
+  for (let row = 0; row < rows; ++row) {
+    html += `<div class="row-addr">${(row * MAP_COLS).toString(16).padStart(4, '0')}</div>`
+    for (let col = 0; col < MAP_COLS; ++col) {
+      const off = row * MAP_COLS + col
+      if (off >= total) { html += '<div></div>'; continue }
+      const k = kind[off]
+      const sel = selBytes.has(off) ? ' sel' : ''
+      html += `<div class="cell ${k}${sel}" title="+${off} (${k})"></div>`
+    }
+  }
+  el.innerHTML = html
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+//  Wiring
+// ════════════════════════════════════════════════════════════════════════════
+function clampInt(id, lo, hi, dflt) {
+  let v = parseInt(document.getElementById(id).value, 10)
+  if (isNaN(v)) v = dflt
+  return Math.max(lo, Math.min(hi, v))
+}
+
+let logSeq = 0
+function log(msg, cls = '') {
+  const el = document.getElementById('log')
+  const d = document.createElement('div')
+  d.className = 'entry' + (cls ? ' ' + cls : '')
+  d.textContent = `${logSeq++}· ${msg}`
+  el.prepend(d)
+}
+
+document.getElementById('btn-init').onclick    = initState
+document.getElementById('btn-array').onclick   = () => createArray(clampInt('a-size', 0, 256, 3))
+document.getElementById('btn-dict').onclick    = () => createDict(clampInt('d-size', 0, 128, 2))
+document.getElementById('btn-string').onclick  = () => createString(document.getElementById('s-text').value || 'x')
+document.getElementById('btn-grow').onclick    = () => { if (selected>=0) growObject(selected, clampInt('m-count',1,256,1)); else log('select a handle first','err') }
+document.getElementById('btn-shrink').onclick  = () => { if (selected>=0) shrinkObject(selected, clampInt('m-count',1,256,1)); else log('select a handle first','err') }
+document.getElementById('btn-release').onclick = () => { if (selected>=0) releaseObject(selected); else log('select a handle first','err') }
+document.getElementById('btn-compact').onclick = compact
+
+initState()
+</script>
+</body>
+</html>
