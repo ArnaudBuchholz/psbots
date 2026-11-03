@@ -122,5 +122,40 @@ The target for the eventual algorithm is speed and efficiency.
 
 ## Open questions
 
+* How to load the engine with instructions
+
+> Proposal would be to surface two areas in the memory/state : input and output
+> Output would be used to transmit some state flags (idle / error / memory / a custom set of flags owned by the program)
+> Input would be used for "loading" instructions + custom set of flags (one byte each)
+> To load the engine, a parser would tokenize the program and generate a sequence of value
+> These values are loaded one by one to the engine, only when the engine is idle
+
+> Particular case for string : in order to load strings in the engine memory, provided the input area is small (minimum to be defined) a special sequence must be defined to :
+> 1) allocate the string length
+> 2) transmit characters
+> 3) Finalize the transmission
+
+> This could be controlled using JavaScript
+
+* "Standard" strings should be hardcoded in the engine (at least all known instructions) to avoid filling the memory with useless strings
+
 * How to link values back to source for debugging?
+
+> Proposal would be that the parser associates two numbers to each token : 1 identify the source, the other the offset in the source
+
 * Exact flags layout (handle-growth chunk size, shard options, compaction thresholds, …).
+
+### Input area
+
+* Minimum 8 bytes (fits number and names)
+* halt (force stop)
+* Configurable area ()
+  * input <offset> get
+
+### Output area
+
+* tick
+* idle
+* error
+* Configurable area ()
+  * output <offset> <value> put
