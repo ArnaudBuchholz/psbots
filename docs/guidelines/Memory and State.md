@@ -120,6 +120,72 @@ The algorithm is deferred, but the model is fixed. A single compaction sweep rec
 
 The target for the eventual algorithm is speed and efficiency.
 
+## JavaScript ↔ Wasm interop model
+
+### The hard asymmetry
+
+JS and the Wasm engine share memory, but only in one direction:
+
+* **JS can read and write** the engine's linear memory — `memory.buffer` is a plain `ArrayBuffer` fully accessible to JS.
+* **The engine cannot read** JS-allocated memory — Wasm load/store instructions only address bytes inside its own linear memory. There is no Wasm instruction that can reach a JS `ArrayBuffer` or any JS heap object.
+
+The practical consequence: **the engine must own all allocations**. JS writes input data into engine-owned regions (by calling an exported `alloc` first and writing into `memory.buffer` at the returned offset), and reads results back out. JS produces and consumes data; it never allocates.
+
+### Multiple states in one memory
+
+One engine instance = one linear memory = one `ArrayBuffer`. Every state the engine allocates is a region within that single buffer, identified by a pointer (an offset from byte `0`). With N states:
+
+```
+WebAssembly.Memory (one ArrayBuffer)
+┌────────────────────────────────────────────────────────┐
+│ static data │ engine bookkeeping │ State A │ State B │ … │
+└────────────────────────────────────────────────────────┘
+                                    ptr_A     ptr_B
+```
+
+States are not isolated from each other — there is no hardware boundary between them inside the module. Isolation is the allocator's responsibility.
+
+### Memory growth does not move existing data
+
+`memory.grow` **appends** pages; existing bytes keep their offsets. `ptr_A` and `ptr_B` are numerically stable across any number of grows. This is a hard Wasm spec guarantee: grow either appends and preserves everything, or returns -1 and changes nothing.
+
+What does change: `memory.buffer` returns a **new** `ArrayBuffer` object after growth. Any `Uint8Array` or `DataView` created over the old buffer is detached (zero-length / throws). JS pointers (offsets) are stable; JS buffer handles are not.
+
+### The JS bridge pattern
+
+Centralising all memory access behind a bridge module is the right approach. It is the single place that:
+
+1. Always re-derives the view from `memory.buffer` — absorbs the buffer-replacement churn on growth.
+2. Records the layout (offsets, sizes, endianness) — changes to the engine's memory layout stay in one file.
+3. Can add bounds checks and liveness assertions.
+
+```js
+function makeBridge(instance) {
+  const memory = instance.exports.memory;
+  const dv = () => new DataView(memory.buffer); // re-derived every call
+
+  return {
+    readI32(ptr)     { return dv().getInt32(ptr, true); },
+    writeI32(ptr, v) { dv().setInt32(ptr, v, true); },
+    readBytes(ptr, n){ return new Uint8Array(memory.buffer).slice(ptr, ptr + n); },
+  };
+}
+```
+
+### ABI — the binary contract
+
+The bridge also defines the **ABI** (Application Binary Interface) between JS and the engine: the rules both sides must agree on so that bytes written by one are interpreted correctly by the other — data type sizes, endianness (Wasm is always little-endian), struct field offsets, and encoding conventions (e.g. how a string is length-prefixed). API tells you what to call; ABI tells you what the bytes mean.
+
+### Initialization ordering
+
+The engine's AS runtime initialises its heap in a `start` function executed during `WebAssembly.instantiate`. The allocator's bookkeeping is not valid until after this completes. Calling `alloc` or any allocation-dependent export before `start` finishes is unsafe. Concretely:
+
+1. `WebAssembly.instantiate(...)` — module and memory exist, `start` runs.
+2. Engine is now safe to call. JS may call exported allocators, setters, or a deserialise entry point.
+3. JS writes state data into engine-owned regions.
+
+For a fresh session: call engine exports to build up state. For a restored session: write the saved bytes into an engine-allocated region and call a deserialise entry point.
+
 ## Open questions
 
 * How to load the engine with instructions
