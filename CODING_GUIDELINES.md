@@ -1,0 +1,409 @@
+# Coding Guidelines
+
+## Project overview
+
+`ui5-test-runner` is a standalone Node.js CLI that drives browsers to execute UI5 (Fiori/SAPUI5/OpenUI5) test pages and produces CTRF JSON reports.
+
+## Scope
+
+Applies to all implemented modules. Not to tooling config files (`vite.config.ts`, `vitest.config.ts`, `eslint.config.ts`).
+
+## Repository layout
+
+```
+src/
+  agent/          # Browser-side code injected into test pages (QUnit/OPA)
+  browsers/       # Browser abstraction
+  configuration/  # CLI argument parsing, options, validators
+  modes/          # Execution modes (test, batch, help, version…)
+  platform/       # Node.js abstraction layer (Exit, Process, FileSystem, logger…)
+  reports/        # Report generation
+  types/          # Shared TypeScript types, interfaces, type utilities
+  ui/             # Browser UIs
+  utils/          # Utilities split by environment: node/, shared/, ui/
+```
+
+`agent/` and `ui/` run in a browser context — Node.js-specific rules do not apply there.
+
+### Agent / Runner boundary
+
+The agent runs in the browser and has direct access to `QUnit.config`, `window.sap`, and the URL; the runner has none of that. Rules:
+
+- Decisions that depend on browser-side state must be made in the agent, not threaded through `AgentState` to the runner.
+- Before designing new agent→runner communication, read `AgentState` and `pageTask.ts` — an existing state type may already express the intent.
+- When agent behaviour must be conditional on a runner option, mark it `browserExposed: yes` in its doc file; this seeds `window['ui5-test-runner'].config` automatically.
+
+## Execution pipeline
+
+`src/cli.ts` → `CommandLine` parses args → `ConfigurationValidator` validates and resolves the mode → `modes/execute.ts` dispatches to a mode function → mode uses browsers, platform, reports.
+
+## File structure
+
+- One concept per file, named after it; small related helpers may be grouped (`constants.ts`, `types.ts`)
+- Test files co-located: `Exit.ts` → `Exit.spec.ts`; shared test helpers use `.test.ts`
+- **Barrel files (`index.ts`)**: only where a stable public API is needed, not for tidiness
+- **File size**: max **200 lines** (signal only, 25% tolerance). The limit is a prompt to question cohesion — not a hard rule. Ask: *does this file do one thing?* If yes, keep it together even if it exceeds 250 lines. Split only when the file clearly mixes distinct concerns that can be separated without introducing circular dependencies or artificial indirection. Never split solely to hit a line count. `src/types/CommonTestReportFormat.ts` is exempt as a self-contained type definition file that cannot be split meaningfully. Generated files (`src/configuration/options.ts`, `src/configuration/validations.ts`, `src/ui/**`) are also exempt.
+- **File naming**: `camelCase` for non-class modules; `PascalCase` for class/factory modules
+- **Splitting**: move to a subfolder named after the concept; no catch-all helpers (avoid `fooHelpers.ts`)
+- **Exports**: named exports only; default exports forbidden in implemented modules
+
+## TypeScript
+
+### Strict mode
+
+`tsconfig.base.json` enables `strict: true` — never disable any sub-flag.
+
+### Naming
+
+| Concept | Convention | Example |
+|---|---|---|
+| Class | PascalCase | `ConfigurationValidator` |
+| Interface | `I` + PascalCase | `IBrowser`, `IAsyncTask` |
+| Type alias | PascalCase | `OptionType`, `BrowserSettings` |
+| Function / variable | camelCase | `registerAsyncTask`, `memoize` |
+| Private class field | `_` prefix | `_asyncTasks`, `_configuration` |
+| Constant / enum-like | PascalCase `as const` | `Modes`, `LogLevel` |
+
+### `as const` — enums are forbidden
+
+```typescript
+export const Modes = { batch: 'batch', help: 'help' } as const;
+export type Mode = (typeof Modes)[keyof typeof Modes];
+```
+
+### Type utilities
+
+`src/types/typeUtilities.ts` provides `Equal`, `Expect`, `Writable`, `DeepPartial`. Use them; don't reimplement.
+
+### Type safety
+
+- Prefer `unknown` over `any`
+- No type assertions (`as`) in implemented modules — use typeguard functions instead. Before adding a typeguard, first check whether restructuring the consumption can let TypeScript narrow naturally (e.g. consuming a discriminated union on the full item before destructuring, rather than casting the spread result).
+- Type assertions acceptable in test files; prefer `as T` over `as unknown as T` unless TypeScript rejects the direct cast
+
+### Interfaces and types
+
+- `interface` for object shapes/contracts; `type` for aliases, unions, intersections, mapped types
+- `readonly` on properties that don't change after construction
+- Rely on type inference; don't annotate already-inferred types
+- Always specify explicit return types on exported and public functions
+
+### Factory functions
+
+Prefer factory functions returning a typed interface for DI. Max **3 parameters** — don't pass dependencies as extra parameters.
+
+## Design patterns
+
+| Pattern | Description | Example |
+|---|---|---|
+| Static manager | Static-only class for global lifecycle state, never instantiated | `Exit`, `Thread` |
+| Factory | Object with `build` method returning the correct `I`-prefixed implementation | `BrowserFactory` |
+| Interface + adapter | Platform implementations hidden behind `I`-prefixed interface | `IBrowser.ts` |
+| Builder | Accumulates state then returns result | `AgentTestResultsBuilder` |
+| Memoization | `memoize` from `src/utils/shared/` for expensive, side-effect-free computations | |
+
+Do not introduce new module-level singletons. The `logger` export in `src/platform/logger.ts` is the only known exception — it predates this rule and is too widely used to refactor safely.
+
+A module-level constant that is **built once at load time from static data and never mutated after that** is acceptable (e.g. `indexedOptions.ts` which indexes the generated options list). The smell is a module-level object that accumulates or changes runtime state.
+
+## UI Controller pattern
+
+Strict MVC split:
+
+- **Controller** (`src/reports/ui/ReportController.ts`): holds all state and logic, exposes `IUserInterfaceController<Settings, State, Actions>`.
+- **View** (`src/ui/report/`): wires DOM ↔ controller. No business logic. Calls `controller.connect(update)` on load; uses `controller.interaction({ changedField })` for user events; applies `update(changed)` patches only for present fields.
+
+
+## Platform abstraction (`src/platform/`)
+
+All `node:*` access goes through `src/platform/`. Never import `node:*` directly outside that folder. `platform/mock.ts` is the centralised Vitest mock — use it via `vi.mock`; never mock `node:*` directly.
+
+## Graceful shutdown — `Exit` and `IAsyncTask`
+
+Every long-running resource must be registered with `Exit`:
+
+```typescript
+using _server = Exit.registerAsyncTask({
+  name: 'http-server',
+  stop: () => server.close()  // must be idempotent
+});
+```
+
+- Every resource with a cleanup step must be registered — no exceptions
+- `stop` must be idempotent
+- `registerAsyncTask` throws `ExitShutdownError` if shutdown has started — treat as abort signal
+- Tasks stop in LIFO order
+- Never call `process.exit()` — use `Exit.shutdown()`
+
+## Logger
+
+The platform logger relies on worker threads and writes structured log files — it is designed for long-running processes.
+
+**Short-lived, immediate-exit modes** (`help`, `version`, `dumpConfig`, and any future mode that exits without starting a browser or server) **must use `console.*`** for their output. The logger is too heavy for these modes: spawning a worker thread and producing a log file would be wasteful noise.
+
+**All other code** — long-running modes (`test`, `batch`, `log`…), browsers, platform utilities, and shared modules — **must use the platform logger** and must never call `console.*` directly.
+
+> A mode is short-lived if it exits without starting a browser or server. If in doubt, use the platform logger.
+
+Import via `'../platform/index.js'`.
+
+| Level | When |
+|---|---|
+| `debug` | Internal events, metrics, lifecycle noise |
+| `info` | Normal user-visible progress |
+| `warn` | Unexpected but recoverable |
+| `error` | Failure in one operation; execution continues |
+| `fatal` | Unrecoverable — `logger.fatal` **stops the command**: it calls `Exit.shutdown()` (on the main thread; posts a shutdown message from worker threads) and throws `ExitShutdownError`. It never returns (`fatal(): never`) |
+
+Every call requires `source` and `message`. Pass errors in the `error` field — never interpolate into `message`. `logger.error` auto-downgrades to `debug` for `ExitShutdownError`.
+
+Because `logger.fatal` stops the command, only call it for genuinely unrecoverable conditions. For an external operation that failed but should propagate through the normal error flow, `throw new Error` instead (see **Assertion**).
+
+## Configuration system (`src/configuration/`)
+
+| File | Role |
+|---|---|
+| `options.ts` | All CLI options — **generated, never edit by hand** |
+| `indexedOptions.ts` | Indexed lookup by name / short flag |
+| `Option.ts` | `Option<T>`, `OptionType`, `InferOptionType<T>` |
+| `CommandLine.ts` | Parses raw CLI args (no validation logic here) |
+| `ConfigurationValidator.ts` | Validates, merges defaults, resolves mode |
+| `Configuration.ts` | Fully-typed `Configuration` object |
+| `validators/` | One file per `OptionType` |
+
+To add/change an option: edit `docs/options/` → `npm run build:options` → add validator if new type.
+
+### Referring to options in prose
+
+An option has two forms, and they are not interchangeable:
+
+- **`--kebab-case`** (`--page-filter`) is the CLI flag. Use it whenever prose documents a command-line invocation. The canonical `docs/options.md` table is authoritative for the exact spelling.
+- **`camelCase`** (`pageFilter`) is the canonical name — the config-file key, the config property, and the KB graph id (`options/pageFilter`). Use it only in those contexts. Kebab-case is rejected as a config-file key at runtime.
+
+The camelCase name is also the option's doc filename (`docs/options/pageFilter.md`), so markdown links keep the camelCase form even when the surrounding prose names the flag as `--page-filter`.
+
+## Assertion
+
+Two distinct mechanisms exist for signalling failure — pick based on the nature of the failure:
+
+**Internal invariants** — use `assert` from `src/platform/` (Node.js code only; not available in `src/agent/` or `src/ui/`):
+
+```typescript
+// ✅ Invariant: this should never happen if the code is correct
+assert(_browserConfigScript !== undefined, 'browserConfig not initialized');
+```
+
+An invariant is a condition that *must* be true given correct internal code. If it fails, it indicates a programming error, not a runtime condition.
+
+**Runtime operation failures** — use `throw new Error`:
+
+```typescript
+// ✅ Runtime failure: external operation failed, this is an expected failure mode
+throw new Error(`nyc merge failed with code ${mergeProc.code}`);
+throw new Error(`Timeout while waiting for ${url}`);
+```
+
+A runtime failure is an outcome that depends on external state (subprocess exit codes, network, filesystem) and can legitimately occur on a correct codebase.
+
+When wrapping a caught error, always pass `cause`:
+
+```typescript
+throw new Error(`Unable to fetch latest version of ${moduleName}`, { cause: error });
+```
+
+**Never use** `console.assert` or bare `throw new Error` for invariants — `assert` provides consistent formatting and integrates with the platform shutdown flow: a failed `assert` calls `logger.fatal` (which **stops the command** via `Exit.shutdown()` and throws — see **Logger**). This is why `assert` is reserved for invariants: it terminates the process, so it must not be used for runtime failures that should propagate through normal error handling.
+
+## Comments
+
+No comments by default. Add one only when the **why** is non-obvious.
+
+`eslint-disable` at file or block level is **forbidden**. `eslint-disable-next-line` as last resort — reason must follow `--`:
+
+```typescript
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- No official type for Node.js handle
+```
+
+`/* v8 ignore next -- @preserve */` only for genuinely unreachable branches.
+
+## Testing
+
+Framework: Vitest. `Foo.spec.ts` co-located with source; `Foo.test.ts` for shared helpers.
+
+- Only **logic** is unit tested; UI rendering is not tested
+- Tests must be small and fast with a **single clear expectation** — split if more needed
+- Cover happy path and all edge cases; **coverage: 100 %**
+- Platform exports are auto-mocked by `src/platform/mock.ts` (a global Vitest `setupFiles` entry) — never `vi.mock` it in a spec, and never mock `node:*` directly
+- Validator tests use `checkValidator` from `src/configuration/validators/checkValidator.test.ts`
+
+### Test projects and the platform mock
+
+`vitest.config.ts` defines three projects, and which one a spec runs in decides whether platform exports are mocked:
+
+- **`cli`** (`environment: node`) — every spec **except** those under `src/agent/**`, `src/ui/**`, `src/**/ui/**`. It loads `src/platform/mock.ts` as a global `setupFiles` entry, so all platform exports (`FileSystem`, `Http`, `Process`, `logger`, `Path`, …) are already `vi.fn()` — never `vi.mock` `mock.ts` and never `vi.spyOn` a platform member in these specs.
+- **`agent`** (`src/agent/**`, jsdom) and **UIs** (`src/ui/**`, `src/**/ui/**`, jsdom) — these run in a browser-like environment **without** the global platform mock. Specs here mock what they need themselves (browser globals, `node:*` where unavoidable); a `vi.mock`/`vi.spyOn` that would be redundant in a `cli` spec is legitimate here.
+
+Console output is suppressed in tests by default via `onConsoleLog` (see `vitest.config.ts`); set `VITEST_CONSOLE_LOG=1` (or `true`/`on`) to see it.
+
+### What tests should express
+
+A test is a **claim about what the code should do**, not a record of what it currently does. This distinction matters when tests fail:
+
+- **Behavioral test**: failure points to what broke and why it matters
+- **Coverage test**: failure only reports that an output changed
+
+Concrete rules that follow from this:
+
+- **Group by scenario, not by API surface**: a `describe` block should describe a situation (`'when --if condition is false'`), not a function name (`'isIfEvaluatedAsTrue'`)
+- **Infrastructure concerns belong in scenario tests**: do not create a standalone `describe('Exit.shutdown')` block — assert that shutdown was called inside the test that describes the scenario where it should happen (happy path, error path)
+- **Avoid subset duplication**: if test B covers everything test A covers plus more, test A adds nothing — remove it
+- **Inline single-use constants**: a named constant used in exactly one test adds no clarity; inline the value. Extract constants only when the same value appears in multiple tests or when the name explains a non-obvious constraint
+- **Do not assert call counts as a proxy for behavior**: `expect(logger.info).toHaveBeenCalledTimes(3)` breaks on refactoring even when behavior is correct; assert the observable outcome instead
+
+### Test naming — affirmative style
+
+```typescript
+it('returns the filtered list when status is failed')
+it('throws when the input is missing')
+```
+
+### `describe` nesting
+
+Not required at top level. Nest when tests share setup or are logically grouped. Max **5 levels**. Scope `beforeEach` inside the relevant `describe` rather than repeating setup in every test.
+
+Exception: a setup helper that takes per-test arguments or returns a value the test uses (e.g. `setupHappyPath(overrides)` returning the builder it created) is intentionally called per-test — do not hoist it into `beforeEach`. Hoist only helpers that take no arguments and whose return value is unused; tests can still override individual mocks afterward.
+
+### Mocking
+
+- Prefer DI via factory functions over module-level mocking. Use `vi.mock()` at module level when DI isn't applicable.
+- `src/platform/mock.ts` is a global Vitest `setupFiles` entry (for the `cli` project) that mocks all platform exports as `vi.fn()`. Never `vi.mock` it in a spec, and never add `vi.spyOn()` for a platform module — the mock is already in place.
+- Setup: `vi.mocked(method).mockResolvedValue(...)`. Assertions: `expect(method).toHaveBeenCalledWith(...)` — no `vi.mocked()` wrapper in `expect`.
+- For non-platform static methods, use `vi.spyOn(Class, 'method')` rather than a full `vi.mock()` of the module.
+- Stub spawned processes as `IProcess` (from `platform/index.js`), not `InstanceType<typeof Process>`.
+- A `console.*` spy needs no `.mockImplementation(() => {})` to silence output — `onConsoleLog` already suppresses it (see *Test projects and the platform mock* above). Spy with a bare `vi.spyOn(console, 'log')` so it only records calls. (Only short-lived modes — `help`, `version`, `dumpConfig` — write to `console.*`; everything else uses the platform logger.)
+
+### Spy declarations
+
+Declare spies as `const` at module or `describe` scope with their initial mock implementation. Re-apply return values in `beforeEach` after `vi.clearAllMocks()` (which resets implementations):
+
+```typescript
+const folderRecreateSpy = vi.spyOn(Folder, 'recreate').mockResolvedValue(undefined);
+
+beforeEach(() => {
+  vi.clearAllMocks();
+  folderRecreateSpy.mockResolvedValue(undefined);
+});
+```
+
+- Never use `let spy: ReturnType<typeof vi.spyOn>` — it resolves to `any` and triggers lint errors (`@typescript-eslint/no-unsafe-call`, `no-unsafe-member-access`)
+- Never add `afterEach(() => spy.mockRestore())` or `afterAll(() => spy.mockRestore())` — each spec file runs in its own Vitest worker process, so spy state never bleeds across files
+- `afterEach` restores are needed when a spy is set up inline inside a test body and subsequent tests in the same file must not see it — but the preferred solution is to move the spy to module scope as above
+- If the spy variable is never read (only used to register the spy), call `vi.spyOn(...)` bare with no assignment
+
+### Mutating `Host.env` in tests
+
+`vi.clearAllMocks()` does not restore plain object properties. When a test mutates `Host.env`, clean up in `afterEach`:
+
+```typescript
+afterEach(() => {
+  delete (Host.env as Record<string, string | undefined>)['MY_KEY'];
+});
+```
+
+
+
+When a module has mutable module-level state or uses `memoize`, call `vi.resetModules()` before each import to get a fresh module instance. Split the import into two lines — inline destructuring on import is hard to read:
+
+```typescript
+// ✅
+vi.resetModules();
+const agentModule = await import('./agent.js');
+const { getAgentSource } = agentModule;
+
+// ✗ — hard to read
+({ getAgentSource } = await import('./agent.js'));
+```
+
+Name the intermediate variable `<moduleName>Module` (e.g. `agentModule`, `reportModule`).
+
+Do not add `vi.resetModules()` mechanically — verify that the module actually has mutable state or memoization that requires isolation. If not, a top-level `import` is sufficient.
+
+### Asserting no-op paths
+
+Set a sentinel value before calling and assert it is unchanged. Use a value that cannot pass accidentally (`999` for an exit code, not `0`). Assert `Exit.code` directly — never `process.exitCode`.
+
+### Controllable promises
+
+Use `Promise.withResolvers()` — not a manually-captured resolver variable.
+
+### Named constants for repeated values
+
+Extract any repeated or cast value into a `UPPER_SNAKE_CASE` constant at the top of the file:
+
+```typescript
+const NO_CONFIGURATION = {} as Configuration;
+Npm.import(NO_CONFIGURATION, 'node:path')
+```
+
+## Commands
+
+```bash
+npm run lint              # ESLint + Prettier + tsc --build --noEmit + circular import check
+npm run test:unit         # Vitest with coverage
+npm run test:unit:watch   # Vitest watch mode
+npx vitest run src/path/to/Foo.spec.ts
+
+npm run build:agent       # Bundles src/agent/
+npm run build:ui:report   # → dist/ui5-test-runner-html-report.js
+npm run build:ui:log      # → dist/ui5-test-runner-log-viewer.js
+npm run start:ui:report   # Vite dev server for HTML report viewer
+npm run start:ui:log      # Vite dev server for log viewer
+npm run build:options     # Regenerate options.ts from docs/options/
+npm run ts-run -- src/cli.ts [args]  # Run CLI directly (no pre-build)
+```
+
+`npm run lint` must pass with zero errors before every commit. Circular imports are forbidden. `src/platform/logger/proxy.ts` breaks one unavoidable internal loop — do not replicate. Verify new source files are included in the correct `tsconfig` project.
+
+Verify types with `npm run lint`, not an ad-hoc `tsc` call: it runs `tsc --build --noEmit`, which walks every `tsconfig.*` project reference. A bare `tsc --noEmit` resolves to the root `tsconfig.json` (`"files": []`, references only) and type-checks **nothing** — it passes vacuously.
+
+## UI5 Web Components
+
+Use UI5 Web Components over plain HTML for style consistency. Avoid complex or deeply nested component compositions.
+
+## Change Scope
+
+Each change has a **single purpose**: **Fix** (correct behavior), **Feature** (new behavior), or **Refactor** (structure only). Never mix purposes in one change.
+
+## Implementation discipline
+
+- **"Implemented" ≠ "enforced"**: an option being parsed, validated, and forwarded is not the same as being acted on. Grep for the option name in non-config, non-test `src/` files to verify it actually changes behaviour.
+- **Prefer existing shared state**: before adding a new variable, check whether an already-initialised shared object holds what you need.
+- **Factorize shared logic**: if writing a second function that is identical to the first except for one parameter, extract a private core and expose named wrappers.
+- **Default parameters over `?? 0` at call sites**: for numeric helpers that treat `undefined` as zero, put the default in the function signature.
+
+## Anti-patterns
+
+| Anti-pattern | Preferred alternative |
+|---|---|
+| Circular imports | Restructure or introduce an abstraction |
+| `node:*` outside `src/platform/` | Import through `src/platform/` |
+| Module-level singleton | Static manager class or DI |
+| `throw new Error` for invariants | `assert(condition, message)` |
+| Depending on concrete class | Depend on `I`-prefixed interface |
+| `any` without justified `eslint-disable` | Narrow or use `unknown` |
+| `enum` | `as const` + derived union type |
+| Parsing logic in `CommandLine.ts` | Validator in `configuration/validators/` |
+| Global variable for shared state | `Exit.registerAsyncTask` |
+| `let spy: ReturnType<typeof vi.spyOn>` | `const spy = vi.spyOn(...)` at module/describe scope |
+| `afterEach/afterAll(() => spy.mockRestore())` | Not needed — each spec file runs in its own process |
+| `resolvePackageDirSpy` (abbreviated spy name) | Use full word: `resolvePackageDirectorySpy` — `unicorn/name-replacements` rejects abbreviations |
+
+| Standalone `describe('Exit.shutdown')` | Assert shutdown inside the relevant scenario test |
+
+## Dependencies
+
+Production dependencies must meet **both** criteria:
+
+- **Zero transitive dependencies**
+- **MIT licensed**
+
+Prefer implementing functionality inline over adding a dependency that doesn't qualify. `devDependencies` are not subject to these constraints.

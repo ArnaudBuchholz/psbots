@@ -1,26 +1,15 @@
 import eslint from '@eslint/js';
 import tseslint from 'typescript-eslint';
-import prettier from 'eslint-plugin-prettier';
+import prettierConfig from 'eslint-config-prettier';
 import security from 'eslint-plugin-security';
 import noOnlyTests from 'eslint-plugin-no-only-tests';
-import importPlugin from 'eslint-plugin-import';
+import { flatConfigs } from 'eslint-plugin-import-x';
 import stylistic from '@stylistic/eslint-plugin';
 import eslintPluginUnicorn from 'eslint-plugin-unicorn';
 import sonarjs from 'eslint-plugin-sonarjs';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { FlatCompat } from '@eslint/eslintrc';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-  recommendedConfig: eslint.configs.recommended,
-  allConfig: eslint.configs.all
-});
 
 export default [
-  ...tseslint.config(eslint.configs.recommended, tseslint.configs.recommended, importPlugin.flatConfigs.recommended),
+  ...tseslint.config(eslint.configs.recommended, tseslint.configs.recommended, flatConfigs.recommended),
   ...tseslint.configs.recommendedTypeCheckedOnly.map((config) => ({
     ...config,
     ignores: ['**/*.spec.ts', '**/*.[cm]js', '**/*.js'],
@@ -31,12 +20,11 @@ export default [
       }
     }
   })),
-  ...compat.extends('plugin:prettier/recommended', 'prettier'),
+  prettierConfig,
   eslintPluginUnicorn.configs.recommended,
   sonarjs.configs.recommended,
   {
     plugins: {
-      prettier,
       security,
       'no-only-tests': noOnlyTests,
       stylistic
@@ -47,21 +35,16 @@ export default [
       }
     },
     rules: {
-      // prettier
-      'prettier/prettier': [
-        'error',
-        {
-          semi: true,
-          singleQuote: true,
-          tabWidth: 2,
-          useTabs: false,
-          printWidth: 120,
-          trailingComma: 'none'
-        }
-      ],
       'no-unused-vars': 'off',
       'comma-dangle': ['error', 'never'],
-      '@typescript-eslint/no-unused-vars': 'error',
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          destructuredArrayIgnorePattern: '^_'
+        }
+      ],
       '@typescript-eslint/no-empty-object-type': 'error',
       '@typescript-eslint/no-unsafe-function-type': 'error',
       '@typescript-eslint/no-wrapper-object-types': 'error',
@@ -73,15 +56,15 @@ export default [
           fixStyle: 'separate-type-imports'
         }
       ],
-      'import/consistent-type-specifier-style': ['error', 'prefer-top-level'],
-      'import/extensions': [
+      'import-x/consistent-type-specifier-style': ['error', 'prefer-top-level'],
+      'import-x/extensions': [
         'error',
         'ignorePackages',
         {
           ts: 'never'
         }
       ],
-      'import/no-unresolved': 'off',
+      'import-x/no-unresolved': 'off',
       '@typescript-eslint/no-import-type-side-effects': 'error',
       '@typescript-eslint/no-explicit-any': 'error',
       'security/detect-unsafe-regex': 'error',
@@ -112,7 +95,19 @@ export default [
           checkInfinity: true
         }
       ],
-      'sonarjs/todo-tag': 'warn'
+      'unicorn/prefer-global-number-constants': 'off',
+      'unicorn/prefer-add-event-listener': 'off',
+      'unicorn/prefer-top-level-await': 'off',
+      'unicorn/consistent-class-member-order': 'off',
+      'unicorn/no-nonstandard-builtin-properties': 'off',
+      'unicorn/no-top-level-assignment-in-function': 'off',
+      'unicorn/no-top-level-side-effects': 'off',
+      'unicorn/no-computed-property-existence-check': 'off',
+      'unicorn/single-line-block-comment-style': 'off',
+      'sonarjs/todo-tag': 'warn',
+      'sonarjs/no-skipped-tests': 'warn',
+      'sonarjs/no-unused-vars': 'off',
+      'sonarjs/aws-restricted-ip-admin-access': 'off'
     }
   },
   {

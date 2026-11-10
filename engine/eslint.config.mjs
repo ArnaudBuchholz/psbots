@@ -5,7 +5,7 @@ export default [
   ...baseConfig,
   {
     rules: {
-      'unicorn/prevent-abbreviations': [
+      'unicorn/name-replacements': [
         'error',
         {
           checkFilenames: false
