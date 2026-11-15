@@ -1,0 +1,12 @@
+{
+  "extends": ["../tsconfig.base.json"],
+  "include": ["src/"],
+  "exclude": ["src/**/*.spec.ts", "src/**/*.mock.ts", "src/**/*.test.ts", "src/agent/**", "src/ui/**", "src/**/ui/**", "src/utils/ui"],
+  "compilerOptions": {
+    "tsBuildInfoFile": "./node_modules/.tmp/state/tsconfig.tsbuildinfo",
+    "rootDir": ".",
+    "types": ["node"],
+    "noEmit": false,
+    "declaration": false
+  }
+}
