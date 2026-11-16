@@ -1,3 +1,15 @@
+import type { IValuePermissions } from './IValuePermissions.js';
+import type { ValueType } from './values/ValueType.js';
+
+interface IOperatorTypeCheck<Type = ValueType> {
+  /**
+   * * 'null' indicates any value
+   * * ValutType.mark indicates mark should be found on the operand stack
+   */
+  type: Type;
+  permissions?: Partial<IValuePermissions>;
+}
+
 export type OperatorDefinition<Input = IOperatorTypeCheck[]> = {
   name: string;
   aliases?: string[];
@@ -24,7 +36,7 @@ export type OperatorDefinition<Input = IOperatorTypeCheck[]> = {
   )[];
   signature?: {
     input?: Input;
-    output?: [...IOperatorTypeCheck];
+    output?: [...IOperatorTypeCheck[]];
     exceptions?: [string];
   };
   samples: {

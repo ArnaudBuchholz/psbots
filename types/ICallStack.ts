@@ -1,6 +1,6 @@
-import type { IReadOnlyArray } from '@api/interfaces/IReadOnlyArray.js';
+import type { IArray } from './IArray.js';
 
-export interface IReadOnlyCallStack extends IReadOnlyArray {
+export interface ICallStack extends IArray {
   readonly topOperatorState: number;
 
   /** Number.POSITIVE_INFINITY if index is out of range */
