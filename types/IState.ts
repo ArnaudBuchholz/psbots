@@ -1,11 +1,11 @@
-import type { IArray } from './IArray.js';
+import type { IStack } from './IStack.js';
 import type { ICallStack } from './ICallStack.js';
 
 /** Public version of the engine state */
 export interface IState {
   readonly idle: boolean;
-  readonly operands: IArray;
-  readonly dictionaries: IArray;
+  readonly operands: IStack;
+  readonly dictionaries: IStack;
   readonly calls: ICallStack;
   readonly callEnabled: boolean;
   /** Set when an exception is raised */

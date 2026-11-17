@@ -1,8 +1,12 @@
-export const abs = [
+import { toIntegerValue } from '@sdk/index.js';
+import { buildFunctionOperator } from '@core/operators/operators.js';
+
+buildFunctionOperator(
   {
-    ref: 'https://hepunx.rl.ac.uk/~adye/psdocs/ref/PSL2a.html#abs',
-    tags: ['integer', 'math'],
+    name: 'abs',
     description: 'returns the absolute value of an integer',
+    ref: 'https://hepunx.rl.ac.uk/~adye/psdocs/ref/PSL2a.html#abs',
+    labels: ['integer', 'math'],
     signature: {
       input: [{ type: 'integer' }],
       output: [{ type: 'integer' }]
@@ -18,11 +22,15 @@ export const abs = [
       }
     ]
   },
-  (state) => {
-    const { operands } = state.operands;
-    const value = operands.at(0).integer;
+  (state, { integer: value }) => {
+    const { operands } = state;
     if (value < 0) {
-      operands.popush(1, integer(-value));
+      const integerResult = toIntegerValue(-value);
+      if (!integerResult.success) {
+        return integerResult;
+      }
+      return operands.popush(1, integerResult.value);
     }
+    return { success: true, value: undefined };
   }
-] as const;
+);

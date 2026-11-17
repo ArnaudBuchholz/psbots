@@ -1,17 +1,8 @@
-import type { IValuePermissions } from './IValuePermissions.js';
-import type { ValueType } from './values/ValueType.js';
-
-interface IOperatorTypeCheck<Type = ValueType> {
-  /**
-   * * 'null' indicates any value
-   * * ValutType.mark indicates mark should be found on the operand stack
-   */
-  type: Type;
-  permissions?: Partial<IValuePermissions>;
-}
+import type { IOperatorTypeCheck } from './IOperatorTypeCheck.js';
 
 export type OperatorDefinition<Input = IOperatorTypeCheck[]> = {
   name: string;
+  ref: string;
   aliases?: string[];
   description: string;
   postScriptDeviation?: string;
