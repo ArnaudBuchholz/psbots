@@ -5,7 +5,7 @@
   "scripts": {
     "clean": "rm -rf **/node_modules **/dist **/coverage",
     "lint": "dpdm src/index.ts --circular --tree false --warning false --skip-dynamic-imports circular && npm run eslint -- --fix --cache --cache-strategy content && npm run prettier && tsc --build --noEmit",
-    "eslint": "eslint \"**/*.mjs\" \"./src/**/*.ts\" \"./test/mcp/*.ts\" --concurrency=auto",
+    "eslint": "eslint \"./src/**/*.ts\" --concurrency=auto",
     "test": "vitest run --coverage",
     "build": "npx tsc --project tsconfig.src.json"
   },
