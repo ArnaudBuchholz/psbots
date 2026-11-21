@@ -1,0 +1,7 @@
+{
+  "extends": ["./tsconfig.src.json"],
+  "exclude": [],
+  "compilerOptions": {
+    "tsBuildInfoFile": "./node_modules/.tmp/tokenizer/tsconfig.vitest.tsbuildinfo"
+  }
+}

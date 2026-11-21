@@ -12,6 +12,7 @@
     "node": ">=26.13.0"
   },
   "workspaces": [
+    "./types",
     "./state"
   ],
   "keywords": [
