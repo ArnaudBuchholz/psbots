@@ -9,3 +9,11 @@ export interface IReadOnlyArray {
   /** @throws rangecheckerror */
   at: (index: number) => Value;
 }
+
+/** Enumerate IReadOnlyArray values */
+export function* enumIArrayValues(array: IReadOnlyArray): Generator<Value> {
+  const { length } = array;
+  for (let index = 0; index < length; ++index) {
+    yield array.at(index);
+  }
+}

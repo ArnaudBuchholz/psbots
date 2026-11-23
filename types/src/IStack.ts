@@ -8,7 +8,7 @@ export interface IStack extends IArray {
    */
   swap: (indexA: number, indexB: number) => void;
   /** Atomic pop then push to reduce memory fragmentation */
-  popush: ((count: number) => void &
+  popush: ((count: number) => void) &
     ((count: number, valueArray: Value[], ...values: Value[]) => void) &
-    ((count: number, ...values: Value[]) => void));
+    ((count: number, ...values: Value[]) => void);
 }

@@ -26,13 +26,12 @@ export type Value<T = unknown> = T extends 'null'
                 ? ArrayValue
                 : T extends 'dictionary'
                   ? DictionaryValue
-                  :
-                      | NullValue
-                      | BooleanValue
-                      | IntegerValue
-                      | StringValue
-                      | NameValue
-                      | MarkValue
-                      | OperatorValue
-                      | ArrayValue
-                      | DictionaryValue;
+                  : | NullValue
+                    | BooleanValue
+                    | IntegerValue
+                    | StringValue
+                    | NameValue
+                    | MarkValue
+                    | OperatorValue
+                    | ArrayValue
+                    | DictionaryValue;
