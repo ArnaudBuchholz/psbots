@@ -14,6 +14,7 @@
   "workspaces": [
     "./sdk",
     "./types",
+    "./tokenizer",
     "./state"
   ],
   "keywords": [

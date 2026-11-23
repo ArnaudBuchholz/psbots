@@ -1,6 +1,6 @@
 import type { Value } from '@psbots/types';
 import { nullValue } from '@psbots/types';
-import { assert } from '@sdk/assert.js';
+import { assert } from '@psbots/sdk';
 
 type ParseOptions = {
   pos?: number;
@@ -83,19 +83,12 @@ function parseName(source: string, pos: number): Parsed {
     return {
       endPos: pos + 1,
       value:
-        first === '/'
-          ? {
+        ({
               type: 'name',
               isReadOnly: true,
               isExecutable: true,
-              name: ''
-            }
-          : {
-              type: 'name',
-              isReadOnly: true,
-              isExecutable: true,
-              name: first
-            }
+              name: first === '/' ? '' : first
+            })
     };
   }
   let endPos = pos + 1;
@@ -143,7 +136,7 @@ const FORMATTING_CHARS = new Set(' \t\r\n');
 
 /** Returns nullValue if a syntax error is detected */
 export function* parse(source: string, options?: ParseOptions): Generator<Value> {
-  options = options ?? {};
+  options ??= {};
   const { filename } = options;
   let { pos = 0 } = options;
   const { length } = source;
