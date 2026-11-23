@@ -4,7 +4,7 @@
   "description": "psbots language tokenizer",
   "scripts": {
     "clean": "rm -rf **/node_modules **/dist **/coverage",
-    "lint": "dpdm src/tokenizer.ts --circular --tree false --warning false --skip-dynamic-imports circular && npm run eslint -- --fix --cache --cache-strategy content && npm run prettier && tsc --build --noEmit",
+    "lint": "dpdm -T src/tokenizer.ts --circular --tree false --warning false --skip-dynamic-imports circular && npm run eslint -- --fix --cache --cache-strategy content && npm run prettier && tsc --build --noEmit",
     "eslint": "eslint \"**/*.mjs\" \"./src/**/*.ts\" \"./test/mcp/*.ts\" --concurrency=auto",
     "test": "vitest run --coverage",
     "build": "npx tsc --project tsconfig.cli.json"

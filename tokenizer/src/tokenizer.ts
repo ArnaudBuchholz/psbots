@@ -1,5 +1,5 @@
-import type { Value } from './values/Value.js';
-import { nullValue } from './values/NullValue.js';
+import type { Value } from '@psbots/types';
+import { nullValue } from '@psbots/types';
 import { assert } from '@sdk/assert.js';
 
 type ParseOptions = {
