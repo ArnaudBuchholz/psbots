@@ -1,7 +1,4 @@
-import { toIntegerValue } from '@sdk/index.js';
-import { buildFunctionOperator } from '@core/operators/operators.js';
-
-buildFunctionOperator(
+operator(
   {
     name: 'abs',
     description: 'returns the absolute value of an integer',
@@ -22,14 +19,9 @@ buildFunctionOperator(
       }
     ]
   },
-  (state, { integer: value }) => {
-    const { operands } = state;
+  ({ operands }, { integer: value }) => {
     if (value < 0) {
-      const integerResult = toIntegerValue(-value);
-      if (!integerResult.success) {
-        return integerResult;
-      }
-      return operands.popush(1, integerResult.value);
+      return operands.popush(1, toIntegerValue(-value));
     }
     return { success: true, value: undefined };
   }
