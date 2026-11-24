@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import type { Value } from './index.js';
 import { enumIArrayValues } from './index.js';
-import { toValue } from './toValue.js';
+import { toValue } from '@psbots/sdk';
 
 describe('enumIArrayValues', () => {
   const readOnlyArray = toValue([1, 2, '3'], { isReadOnly: true }).array;
