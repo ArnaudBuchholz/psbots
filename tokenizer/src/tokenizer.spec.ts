@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
-import { parse } from '@api/parser.js';
-import type { Value } from '@api/values/Value.js';
-import { nullValue } from '@api/values/NullValue.js';
-import { toValue } from '@test/index.js';
+import { parse } from './tokenizer.js';
+import type { Value } from '@psbots/types';
+import { nullValue } from '@psbots/types';
+import { toValue } from '@psbots/sdk';
 
 it('handles an empty string', () => {
   expect([...parse('')]).toStrictEqual<Value[]>([]);
