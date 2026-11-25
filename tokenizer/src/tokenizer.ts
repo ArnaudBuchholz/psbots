@@ -4,15 +4,14 @@ import { assert } from '@psbots/sdk';
 
 type ParseOptions = {
   pos?: number;
-  filename?: string;
 };
 
-type Parsed = {
+type EndPosAndValue = {
   endPos: number;
   value: Value;
 };
 
-function parseString(source: string, pos: number): Parsed {
+function parseString(source: string, pos: number): EndPosAndValue {
   const endPos = source.indexOf('"', pos + 1);
   if (endPos === -1) {
     // TODO: that should be an error
@@ -29,7 +28,7 @@ function parseString(source: string, pos: number): Parsed {
   };
 }
 
-function parseNumber(source: string, pos: number): Parsed {
+function parseNumber(source: string, pos: number): EndPosAndValue {
   const first = source[pos];
   assert(first !== undefined);
   let endPos = pos + 1;
@@ -64,7 +63,7 @@ function parseNumber(source: string, pos: number): Parsed {
 const ONE_CHAR_OLNY_NAMES = new Set('[]{}«»');
 const NAME_DELIMITERS = new Set(' \t\r\n%[]{}«»<>');
 
-function parseName(source: string, pos: number): Parsed {
+function parseName(source: string, pos: number): EndPosAndValue {
   const { length } = source;
   const first = source[pos];
   assert(first !== undefined);
@@ -133,11 +132,17 @@ function parseName(source: string, pos: number): Parsed {
 }
 
 const FORMATTING_CHARS = new Set(' \t\r\n');
+const NUMBER_CHARS = new Set('+-1234567890');
+
+export type Parsed = {
+  value: Value;
+  offset: number;
+  length: number;
+};
 
 /** Returns nullValue if a syntax error is detected */
-export function* parse(source: string, options?: ParseOptions): Generator<Value> {
+export function* parse(source: string, options?: ParseOptions): Generator<Parsed> {
   options ??= {};
-  const { filename } = options;
   let { pos = 0 } = options;
   const { length } = source;
   while (pos < length) {
@@ -155,26 +160,16 @@ export function* parse(source: string, options?: ParseOptions): Generator<Value>
       ++pos;
       continue;
     }
-    let parsed: Parsed;
+    let parsed: EndPosAndValue;
     if (char === '"') {
       parsed = parseString(source, pos);
-    } else if ((char >= '0' && char <= '9') || char === '-' || char === '+') {
+    } else if (NUMBER_CHARS.has(char)) {
       parsed = parseNumber(source, pos);
     } else {
       parsed = parseName(source, pos);
     }
     const length = parsed.endPos - pos;
-    yield filename === undefined
-      ? parsed.value
-      : Object.assign({
-          debugSource: {
-            source,
-            filename,
-            pos,
-            length
-          },
-          ...parsed.value
-        });
+    yield { value: parsed.value, offset: pos, length };
     pos = parsed.endPos;
   }
 }
