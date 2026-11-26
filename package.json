@@ -5,8 +5,9 @@
   "scripts": {
     "clean": "rm -rf **/node_modules **/dist **/coverage",
     "update": "ncu --deep -i --format group --reject @psbots/*",
-    "test": "npm run test --workspaces --if-present",
-    "build": "npm run build --workspaces  --if-present"
+    "lint": "npm run lint --workspaces  --if-present",
+    "build": "npm run build --workspaces  --if-present",
+    "test": "npm run test --workspaces --if-present"
   },
   "engines": {
     "node": ">=26.13.0"
