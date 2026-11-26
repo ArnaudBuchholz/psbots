@@ -6,8 +6,6 @@
     "tsBuildInfoFile": "./node_modules/.tmp/types/tsconfig.src.tsbuildinfo",
     "rootDir": "src",
     "outDir": "dist",
-    "types": [],
-    "noEmit": false,
-    "declaration": true
+    "types": []
   }
 }

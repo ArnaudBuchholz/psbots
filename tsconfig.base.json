@@ -30,6 +30,6 @@
     "target": "ESNext",
     "module": "esnext",
     "useDefineForClassFields": true,
-    "noEmit": true
+    "noEmit": false
   }
 }
