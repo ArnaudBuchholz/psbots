@@ -11,11 +11,25 @@ type EndPosAndValue = {
   value: Value;
 };
 
+export class ParserError extends Error {
+  static override name = 'ParserError';
+
+  #offset: number;
+
+  get offset(): number {
+    return this.#offset;
+  }
+
+  constructor(pos: number) {
+    super(`Unable to parse source @${pos}`);
+    this.#offset = pos;
+  }
+}
+
 function parseString(source: string, pos: number): EndPosAndValue {
   const endPos = source.indexOf('"', pos + 1);
   if (endPos === -1) {
-    // TODO: that should be an error
-    return { endPos: source.length, value: nullValue };
+    throw new ParserError(pos);
   }
   return {
     endPos: endPos + 1,
@@ -81,13 +95,12 @@ function parseName(source: string, pos: number): EndPosAndValue {
   if (pos === length - 1) {
     return {
       endPos: pos + 1,
-      value:
-        ({
-              type: 'name',
-              isReadOnly: true,
-              isExecutable: true,
-              name: first === '/' ? '' : first
-            })
+      value: {
+        type: 'name',
+        isReadOnly: true,
+        isExecutable: true,
+        name: first === '/' ? '' : first
+      }
     };
   }
   let endPos = pos + 1;
