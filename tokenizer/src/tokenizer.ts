@@ -1,5 +1,4 @@
 import type { Value } from '@psbots/types';
-import { nullValue } from '@psbots/types';
 import { assert } from '@psbots/sdk';
 
 type ParseOptions = {
