@@ -1,0 +1,25 @@
+{
+  "name": "@psbots/<templates>",
+  "version": "1.0.0",
+  "description": "<description>",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "clean": "rm -rf **/node_modules **/dist **/coverage",
+    "lint": "dpdm -T src/index.ts --circular --tree false --warning false --skip-dynamic-imports circular && npm run eslint -- --fix --cache --cache-strategy content && npm run prettier && tsc --build --noEmit",
+    "prettier": "prettier --write --log-level warn \"./src/**/*.ts\"",    
+    "eslint": "eslint \"./src/**/*.ts\" --concurrency=auto",
+    "test": "vitest run --coverage",
+    "build": "npx tsc --project tsconfig.src.json"
+  },
+  "engines": {
+    "node": ">=26.13.0"
+  },
+  "keywords": [
+    "postscript",
+    "robots",
+    "programming"
+  ],
+  "author": "Arnaud Buchholz <arnaud.buchholz@free.fr>",
+  "license": "MIT"
+}
