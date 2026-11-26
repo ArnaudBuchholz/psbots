@@ -1,8 +1,12 @@
 {
   "files": [],
-  "references": [
-    {
-      "path": "state/tsconfig.json"
-    }
- ]
+  "references": [{
+    "path": "sdk/tsconfig.json"
+  }, {
+    "path": "types/tsconfig.json"
+  }, {
+    "path": "types/tokenizer.json"
+  }, {
+    "path": "state/tsconfig.json"
+  }]
 }

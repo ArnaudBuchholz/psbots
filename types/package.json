@@ -7,8 +7,8 @@
   "scripts": {
     "clean": "rm -rf **/node_modules **/dist **/coverage",
     "lint": "dpdm -T src/index.ts --circular --tree false --warning false --skip-dynamic-imports circular && npm run eslint -- --fix --cache --cache-strategy content && npm run prettier && tsc --build --noEmit",
-    "prettier": "prettier --write --log-level warn \"./src/**/*.ts\"",    
     "eslint": "eslint \"./src/**/*.ts\" --concurrency=auto",
+    "prettier": "prettier --write --log-level warn \"./src/**/*.ts\"",
     "test": "vitest run --coverage",
     "build": "npx tsc --project tsconfig.src.json"
   },
