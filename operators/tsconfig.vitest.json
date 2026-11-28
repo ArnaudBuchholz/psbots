@@ -1,0 +1,8 @@
+{
+  "extends": ["./tsconfig.src.json"],
+  "exclude": [],
+  "compilerOptions": {
+    "tsBuildInfoFile": "./node_modules/.tmp/<template>/tsconfig.vitest.tsbuildinfo",
+    "types": ["node"]
+  }
+}

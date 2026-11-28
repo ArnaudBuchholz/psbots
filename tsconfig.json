@@ -5,8 +5,10 @@
   }, {
     "path": "types/tsconfig.json"
   }, {
-    "path": "types/tokenizer.json"
+    "path": "tokenizer/tsconfig.json"
   }, {
     "path": "state/tsconfig.json"
+  }, {
+    "path": "operators/tsconfig.json"
   }]
 }

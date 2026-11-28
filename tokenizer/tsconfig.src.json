@@ -1,11 +1,10 @@
 {
   "extends": ["../tsconfig.base.json"],
+  "include": ["src/**/*.ts"],
   "exclude": ["dist/**", "**/*.spec.ts"],
   "compilerOptions": {
     "tsBuildInfoFile": "./node_modules/.tmp/tokenizer/tsconfig.src.tsbuildinfo",
     "rootDir": "src",
-    "types": [],
-    "noEmit": false,
-    "declaration": false
+    "outDir": "dist"
   }
 }
