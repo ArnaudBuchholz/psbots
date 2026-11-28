@@ -10,8 +10,7 @@
     "lint": "dpdm -T src/index.ts --circular --tree false --warning false --skip-dynamic-imports circular && npm run eslint -- --fix --cache --cache-strategy content && npm run prettier && tsc --build --noEmit",
     "prettier": "prettier --write --log-level warn \"./src/**/*.ts\"",    
     "eslint": "eslint \"./src/**/*.ts\" --concurrency=auto",
-    "test": "vitest run --coverage",
-    "build": "npx tsc --project tsconfig.src.json"
+    "test": "vitest run --coverage"
   },
   "engines": {
     "node": ">=26.13.0"
